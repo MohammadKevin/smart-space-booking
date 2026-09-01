@@ -64,9 +64,9 @@ export default function OwnerOverviewPage() {
       ]);
 
       setSummary(sumData);
-      setMonthlyRevenue(revData);
-      setDistribution(distData);
-      setRecentTransactions(transData);
+      setMonthlyRevenue(Array.isArray(revData) ? revData : []);
+      setDistribution(Array.isArray(distData) ? distData : []);
+      setRecentTransactions(Array.isArray(transData) ? transData : []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -80,8 +80,16 @@ export default function OwnerOverviewPage() {
 
   const coworkingName = user?.spaceOwner?.namaCoworking || "Coworking Hub";
 
+  // Defensive array access
+  const safeMonthlyRevenue = Array.isArray(monthlyRevenue) ? monthlyRevenue : [];
+  const safeDistribution = Array.isArray(distribution) ? distribution : [];
+  const safeTransactions = Array.isArray(recentTransactions) ? recentTransactions : [];
+
   // Calculate highest revenue for bar chart scaling
-  const maxRevenue = Math.max(...monthlyRevenue.map((m) => m.revenue), 100000);
+  const maxRevenue = Math.max(
+    ...safeMonthlyRevenue.map((m) => Number(m?.revenue) || 0),
+    100000
+  );
 
   return (
     <div className="space-y-8">
@@ -233,18 +241,18 @@ export default function OwnerOverviewPage() {
             <div className="py-16 text-center">
               <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
             </div>
-          ) : monthlyRevenue.length > 0 ? (
+          ) : safeMonthlyRevenue.length > 0 ? (
             <div className="space-y-4 pt-2">
               {/* Visual Horizontal Bar Chart */}
               <div className="space-y-3">
-                {monthlyRevenue.map((m, idx) => {
-                  const percent = Math.min(100, Math.round((m.revenue / maxRevenue) * 100));
+                {safeMonthlyRevenue.map((m, idx) => {
+                  const percent = Math.min(100, Math.round(((m.revenue || 0) / maxRevenue) * 100));
                   return (
                     <div key={idx} className="space-y-1.5">
                       <div className="flex justify-between text-xs font-semibold">
                         <span className="text-slate-700">{m.month}</span>
                         <span className="font-mono text-slate-900 font-bold">
-                          {formatRupiah(m.revenue)}
+                          {formatRupiah(m.revenue || 0)}
                         </span>
                       </div>
                       <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
@@ -283,9 +291,9 @@ export default function OwnerOverviewPage() {
             <div className="py-16 text-center">
               <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
             </div>
-          ) : distribution.length > 0 ? (
+          ) : safeDistribution.length > 0 ? (
             <div className="space-y-4 pt-1">
-              {distribution.map((d, idx) => {
+              {safeDistribution.map((d, idx) => {
                 const typeLabel =
                   d.tipe === "desk"
                     ? "Hot Desk & Workstation"
@@ -352,7 +360,7 @@ export default function OwnerOverviewPage() {
               <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
               <p className="text-xs text-slate-500 mt-2">Memuat transaksi...</p>
             </div>
-          ) : recentTransactions.length > 0 ? (
+          ) : safeTransactions.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
@@ -365,7 +373,7 @@ export default function OwnerOverviewPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {recentTransactions.map((t) => {
+                  {safeTransactions.map((t) => {
                     const rawDate = t.tanggalReservasi ? t.tanggalReservasi.split("T")[0] : "-";
                     const spaceName = t.detailReservasi?.space?.namaSpace || `Space #${t.id}`;
                     const memberName = t.member?.namaMember || `Member #${t.memberId}`;

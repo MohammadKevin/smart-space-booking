@@ -307,31 +307,80 @@ export async function getDiscounts(): Promise<Discount[]> {
 }
 
 // ---------------------------------------------------------------------------
-// 7. Reports & Analytics API (Space Owner)
+// 7. Reports & Financial Analytics API (Space Owner)
 // ---------------------------------------------------------------------------
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
-  const { data } = await api.get<DashboardSummary>("/reports/summary");
-  return data;
+  const { data } = await api.get<any>("/reports/summary");
+  if (data && typeof data === "object") {
+    return {
+      totalRevenue: data.totalRevenue || 0,
+      totalSpaces: data.totalSpaces || 0,
+      totalStaffs: data.totalStaffs || 0,
+      totalReservations:
+        data.bookingCounts?.total ??
+        data.totalReservations ??
+        0,
+      statusCounts: data.bookingCounts || data.statusCounts || undefined,
+    };
+  }
+  return {
+    totalRevenue: 0,
+    totalSpaces: 0,
+    totalStaffs: 0,
+    totalReservations: 0,
+  };
 }
 
 export async function getMonthlyRevenue(year?: number): Promise<MonthlyRevenueItem[]> {
-  const { data } = await api.get<MonthlyRevenueItem[]>("/reports/monthly-revenue", {
+  const { data } = await api.get<any>("/reports/monthly-revenue", {
     params: { year: year || new Date().getFullYear() },
   });
-  return data;
+  if (data && Array.isArray(data.months)) {
+    return data.months.map((m: any) => ({
+      month: m.monthName || m.month || `Bulan ${m.monthIndex || 1}`,
+      monthNumber: m.monthIndex || m.monthNumber || 1,
+      revenue: Number(m.revenue) || 0,
+      totalBookings: Number(m.totalBookings) || 0,
+    }));
+  }
+  if (Array.isArray(data)) {
+    return data.map((m: any) => ({
+      month: m.monthName || m.month || `Bulan ${m.monthNumber || m.monthIndex || 1}`,
+      monthNumber: m.monthNumber || m.monthIndex || 1,
+      revenue: Number(m.revenue) || 0,
+      totalBookings: Number(m.totalBookings) || 0,
+    }));
+  }
+  return [];
 }
 
 export async function getSpaceTypeDistribution(): Promise<SpaceTypeDistributionItem[]> {
-  const { data } = await api.get<SpaceTypeDistributionItem[]>("/reports/space-distribution");
-  return data;
+  const { data } = await api.get<any>("/reports/space-distribution");
+  if (Array.isArray(data)) {
+    const totalCount = data.reduce((acc, curr) => acc + (Number(curr.count) || 0), 0) || 1;
+    return data.map((d: any) => ({
+      tipe: (d.type || d.tipe || "desk") as SpaceType,
+      label: d.label || d.tipe || "Space",
+      count: Number(d.count) || 0,
+      totalRevenue: Number(d.revenue || d.totalRevenue) || 0,
+      percentage: Math.round(((Number(d.count) || 0) / totalCount) * 100),
+    }));
+  }
+  return [];
 }
 
 export async function getRecentTransactions(limit: number = 10): Promise<Reservation[]> {
-  const { data } = await api.get<Reservation[]>("/reports/recent-transactions", {
+  const { data } = await api.get<any>("/reports/recent-transactions", {
     params: { limit },
   });
-  return data;
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  return [];
 }
 
 export default api;
