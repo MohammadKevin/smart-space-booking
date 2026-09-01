@@ -1,0 +1,49 @@
+name: Deploy Backend to cPanel
+
+on:
+  push:
+    branches:
+      - main # ganti ke master jika branch utamamu bernama master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Build Project
+        run: |
+          npm ci
+          npx prisma generate
+          npm run build
+
+      - name: 🚀 Sync Dist to cPanel
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "dist/"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: "/home/budayaki/backend_ukk/dist"
+
+      - name: 🔄 Auto Restart Node.js
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/budayaki/backend_ukk
+            mkdir -p tmp
+            touch tmp/restart.txt
