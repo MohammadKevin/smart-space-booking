@@ -65,16 +65,36 @@ export interface AuthResponse {
 
 export interface MemberUser {
   id: number;
-  username: string;
-  role: UserRole;
-  member: MemberProfile;
+  username?: string;
+  role?: UserRole;
+  member?: MemberProfile;
+  namaMember?: string;
+  instansi?: string;
+  alamat?: string;
+  telp?: string;
+  user?: {
+    id: number;
+    username: string;
+    role: UserRole;
+    createdAt?: string;
+  };
 }
 
 export interface StaffUser {
   id: number;
-  username: string;
-  role: UserRole;
-  staff: StaffProfile;
+  username?: string;
+  role?: UserRole;
+  staff?: StaffProfile;
+  namaStaff?: string;
+  telp?: string;
+  ownerId?: number;
+  userId?: number;
+  user?: {
+    id: number;
+    username: string;
+    role: UserRole;
+    createdAt?: string;
+  };
 }
 
 // ---------------------------------------------------------------------------

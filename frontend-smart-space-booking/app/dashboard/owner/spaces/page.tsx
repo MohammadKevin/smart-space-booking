@@ -14,6 +14,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
+import { ImageUploader } from "@/components/ImageUploader";
 import {
   Building,
   Plus,
@@ -121,7 +122,7 @@ export default function OwnerSpacesPage() {
           tipe,
           kapasitas: Number(kapasitas),
           hargaPerJam: Number(hargaPerJam),
-          deskripsi: deskripsi.trim(),
+          deskripsi: deskripsi.trim() || undefined,
           foto: foto.trim() || undefined,
         };
         await updateSpace(editingSpace.id, dto);
@@ -132,7 +133,7 @@ export default function OwnerSpacesPage() {
           tipe,
           kapasitas: Number(kapasitas),
           hargaPerJam: Number(hargaPerJam),
-          deskripsi: deskripsi.trim(),
+          deskripsi: deskripsi.trim() || undefined,
           foto: foto.trim() || undefined,
         };
         await createSpace(dto);
@@ -428,16 +429,12 @@ export default function OwnerSpacesPage() {
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-700">
-                  URL Foto Ruangan (Opsional)
-                </label>
-                <input
-                  type="url"
+              <div>
+                <ImageUploader
                   value={foto}
-                  onChange={(e) => setFoto(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 focus:outline-none"
+                  onChange={(val) => setFoto(val || "")}
+                  label="Upload Foto Ruangan (File Lokal)"
+                  helperText="Pilih file gambar dari komputer (PNG, JPG, WebP). File akan dienkode dan disimpan di database."
                 />
               </div>
 

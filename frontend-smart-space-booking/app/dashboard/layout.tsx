@@ -18,6 +18,7 @@ import {
   X,
   ShieldCheck,
   Loader2,
+  Activity,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -30,6 +31,35 @@ export default function DashboardLayout({
   const { user, isAuthenticated, isLoading, logoutUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const getNormalizedRole = () => {
+    if (!user) return "";
+    const r = user.role?.toLowerCase();
+    if (r === "admin_space" || r === "owner") return "owner";
+    if (r === "staff") return "staff";
+    return "member";
+  };
+
+  const role = getNormalizedRole();
+
+  // Strict Client-Side Route Guard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user) {
+      if (role === "member") {
+        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/staff")) {
+          router.replace("/dashboard/member");
+        }
+      } else if (role === "staff") {
+        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/member")) {
+          router.replace("/dashboard/staff");
+        }
+      } else if (role === "owner") {
+        if (pathname === "/dashboard/member") {
+          router.replace("/dashboard/owner");
+        }
+      }
+    }
+  }, [isLoading, isAuthenticated, user, role, pathname, router]);
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
@@ -38,7 +68,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6 bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div className="flex flex-col items-center gap-2 text-slate-500">
           <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
           <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
@@ -51,22 +81,14 @@ export default function DashboardLayout({
     return null;
   }
 
-  const getNormalizedRole = () => {
-    const r = user.role?.toLowerCase();
-    if (r === "admin_space" || r === "owner") return "owner";
-    if (r === "staff") return "staff";
-    return "member";
-  };
-
   const getDisplayName = () => {
+    if (!user) return "Pengguna";
     if (user.member?.namaMember) return user.member.namaMember;
     if (user.spaceOwner?.namaPemilik) return user.spaceOwner.namaPemilik;
     if (user.spaceOwner?.namaCoworking) return user.spaceOwner.namaCoworking;
     if (user.staff?.namaStaff) return user.staff.namaStaff;
-    return user.username;
+    return user.username || "Pengguna";
   };
-
-  const role = getNormalizedRole();
 
   const getRoleBadge = () => {
     if (role === "owner") {
@@ -96,13 +118,11 @@ export default function DashboardLayout({
         { label: "Overview KPI", href: "/dashboard/owner", icon: LayoutDashboard },
         { label: "Inventory Ruangan", href: "/dashboard/owner/spaces", icon: Building },
         { label: "Manajemen Staff", href: "/dashboard/owner/staff", icon: UserCheck },
-        { label: "Katalog Publik", href: "/spaces", icon: Compass },
       ];
     }
     if (role === "staff") {
       return [
         { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
-        { label: "Katalog Publik", href: "/spaces", icon: Compass },
       ];
     }
     return [
@@ -118,11 +138,39 @@ export default function DashboardLayout({
     router.push("/login");
   };
 
+  const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/dashboard/owner/spaces")) return "Inventory Ruangan";
+    if (pathname.startsWith("/dashboard/owner/staff")) return "Manajemen Staff";
+    if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";
+    if (pathname.startsWith("/dashboard/staff")) return "Terminal Check-In";
+    if (pathname.startsWith("/dashboard/member")) return "Tiket & Jadwal Saya";
+    return "Dashboard";
+  };
+
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex bg-slate-50">
+    <div className="min-h-screen flex bg-slate-50 text-slate-900">
       {/* Desktop Left Sidebar */}
-      <aside className="hidden md:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0">
-        <div className="p-4 space-y-6">
+      <aside className="hidden md:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0 sticky top-0 h-screen">
+        <div className="p-4 space-y-5 overflow-y-auto">
+          {/* Logo Header */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 px-1 py-1 group focus:outline-none"
+          >
+            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-xs">
+              <Building2 className="w-4 h-4" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-900 text-base tracking-tight">
+                SmartSpace
+              </span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
+            </div>
+          </Link>
+
           {/* User Role Card */}
           <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
             <div className="flex items-center justify-between">
@@ -166,7 +214,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-200">
+        <div className="p-4 border-t border-slate-200 bg-white">
           <button
             type="button"
             onClick={handleLogout}
@@ -180,31 +228,69 @@ export default function DashboardLayout({
 
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile Subheader */}
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between">
+        {/* Top Header Bar inside Dashboard */}
+        <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${roleBadge.className}`}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-1.5 rounded-md text-slate-600 hover:bg-slate-100"
             >
-              {roleBadge.label}
-            </span>
-            <span className="text-xs font-bold text-slate-900 truncate max-w-[140px]">
-              {getDisplayName()}
-            </span>
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
+
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-400 hidden sm:inline">SmartSpace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-300 hidden sm:inline" />
+              <span className="text-slate-500 hidden sm:inline">{roleBadge.label}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-300 hidden sm:inline" />
+              <span className="font-bold text-slate-900">{getBreadcrumbTitle()}</span>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-md text-slate-600 hover:bg-slate-100"
-          >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-          </button>
-        </div>
+          <div className="flex items-center gap-3">
+            {role === "owner" ? (
+              <Link
+                href="/dashboard/owner/spaces"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-md transition-colors"
+              >
+                <Building className="w-3.5 h-3.5 text-sky-600" />
+                <span>Inventory Ruangan</span>
+              </Link>
+            ) : role === "member" ? (
+              <Link
+                href="/spaces"
+                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+              >
+                <Compass className="w-3.5 h-3.5 text-slate-400" />
+                <span>Katalog Ruangan</span>
+              </Link>
+            ) : null}
+
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
+                {(getDisplayName() || "U").charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-xs font-semibold text-slate-900 leading-none">
+                  {getDisplayName()}
+                </p>
+                <p className="text-[10px] text-slate-400 leading-none mt-0.5">
+                  {roleBadge.label}
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
 
         {/* Mobile Navigation Drawer */}
         {sidebarOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3">
+          <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-sm">
+            <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+              <p className="text-xs font-bold text-slate-900">{getDisplayName()}</p>
+              <p className="text-[10px] text-slate-500">Role: {roleBadge.label}</p>
+            </div>
+
             <nav className="space-y-1">
               {links.map((link) => {
                 const Icon = link.icon;

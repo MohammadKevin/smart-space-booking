@@ -26,6 +26,11 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
+  // When inside dashboard, use sidebar exclusively (no duplicate top navbar)
+  if (pathname.startsWith("/dashboard")) {
+    return null;
+  }
+
   const handleLogout = () => {
     logoutUser();
     setUserDropdownOpen(false);
@@ -34,12 +39,12 @@ export function Navbar() {
   };
 
   const getDisplayName = () => {
-    if (!user) return "";
+    if (!user) return "Pengguna";
     if (user.member?.namaMember) return user.member.namaMember;
     if (user.spaceOwner?.namaPemilik) return user.spaceOwner.namaPemilik;
     if (user.spaceOwner?.namaCoworking) return user.spaceOwner.namaCoworking;
     if (user.staff?.namaStaff) return user.staff.namaStaff;
-    return user.username;
+    return user.username || "Pengguna";
   };
 
   const getNormalizedRole = () => {
@@ -59,34 +64,30 @@ export function Navbar() {
 
   const currentRole = getNormalizedRole();
 
-  // Dynamic Navigation based on Role
+  // Dynamic Navigation based on Role for Public Pages
   const getNavLinks = () => {
     if (!isAuthenticated || !user) {
-      return [
-        { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
-      ];
+      return [{ label: "Katalog Ruangan", href: "/spaces", icon: Compass }];
     }
 
     if (currentRole === "owner") {
       return [
-        { label: "Overview KPI", href: "/dashboard/owner", icon: LayoutDashboard },
-        { label: "Inventory Ruangan", href: "/dashboard/owner/spaces", icon: Building },
-        { label: "Tim Staff", href: "/dashboard/owner/staff", icon: UserCheck },
-        { label: "Katalog", href: "/spaces", icon: Compass },
+        { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
+        { label: "Dashboard Space Owner", href: "/dashboard/owner", icon: LayoutDashboard },
       ];
     }
 
     if (currentRole === "staff") {
       return [
-        { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
         { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
+        { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
       ];
     }
 
     // Default Member
     return [
-      { label: "Dashboard Member", href: "/dashboard/member", icon: LayoutDashboard },
       { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
+      { label: "Dashboard Member", href: "/dashboard/member", icon: CalendarCheck },
     ];
   };
 
@@ -148,7 +149,7 @@ export function Navbar() {
                   className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none"
                 >
                   <div className="w-6 h-6 rounded-md bg-slate-800 text-white font-bold text-xs flex items-center justify-center">
-                    {getDisplayName().charAt(0).toUpperCase()}
+                    {(getDisplayName() || "U").charAt(0).toUpperCase()}
                   </div>
                   <div className="text-left">
                     <p className="text-xs font-semibold text-slate-900 leading-none">

@@ -1,8 +1,17 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Building2, Compass, QrCode, ShieldCheck } from "lucide-react";
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer inside dashboard
+  if (pathname.startsWith("/dashboard")) {
+    return null;
+  }
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

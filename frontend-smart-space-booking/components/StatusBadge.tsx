@@ -8,7 +8,7 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
-  const normalized = status.toLowerCase();
+  const normalized = (status || "").toLowerCase();
 
   switch (normalized) {
     case "pending":

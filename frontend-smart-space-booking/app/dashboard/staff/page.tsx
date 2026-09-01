@@ -42,8 +42,8 @@ export default function StaffTerminalPage() {
     setLoadingActive(true);
     try {
       const all = await getAllBookings();
-      const activeOnly = all.filter(
-        (r) => r.status.toLowerCase() === "aktif" || r.status.toLowerCase() === "disetujui"
+      const activeOnly = (all || []).filter(
+        (r: Reservation) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui"
       );
       setActiveReservations(activeOnly);
     } catch {
@@ -255,7 +255,7 @@ export default function StaffTerminalPage() {
           ) : activeReservations.length > 0 ? (
             <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
               {activeReservations.map((res) => {
-                const isSessionActive = res.status.toLowerCase() === "aktif";
+                const isSessionActive = res.status?.toLowerCase() === "aktif";
                 const memberName = res.member?.namaMember || `Member #${res.memberId}`;
                 const spaceName = res.detailReservasi?.space?.namaSpace || `Space #${res.id}`;
                 const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";

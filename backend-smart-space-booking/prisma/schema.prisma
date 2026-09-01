@@ -83,7 +83,7 @@ model Member {
   instansi  String
   alamat    String
   telp      String
-  foto      String?
+  foto      String?     @db.LongText
   userId    Int         @unique
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime    @default(now())
@@ -100,7 +100,7 @@ model Space {
   tipe        SpaceTipe
   hargaPerJam Float
   kapasitas   Int
-  foto        String?
+  foto        String?           @db.LongText
   deskripsi   String?           @db.Text
   ownerId     Int
   owner       SpaceOwner        @relation(fields: [ownerId], references: [id], onDelete: Cascade)

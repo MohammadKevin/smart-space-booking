@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { getSpaces, Space, getApiErrorMessage } from "@/lib/api";
 import { SpaceCard } from "@/components/SpaceCard";
+import { useAuth } from "@/lib/auth-context";
 import {
   Search,
   Building2,
@@ -14,6 +16,9 @@ import {
   Loader2,
   AlertCircle,
   X,
+  SlidersHorizontal,
+  Plus,
+  ArrowRight,
 } from "lucide-react";
 
 function SpacesContent() {
@@ -21,6 +26,9 @@ function SpacesContent() {
   const initialType = searchParams.get("tipe") || "";
   const initialSearch = searchParams.get("search") || "";
   const initialCapacity = searchParams.get("kapasitas") || "";
+
+  const { user } = useAuth();
+  const isOwner = user?.role?.toLowerCase() === "admin_space" || user?.role?.toLowerCase() === "owner";
 
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,10 +90,10 @@ function SpacesContent() {
   const hasActiveFilters = Boolean(searchQuery || selectedType || minCapacity);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
       {/* Catalog Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6">
+        <div className="space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
             <Compass className="w-3.5 h-3.5 text-sky-600" />
             <span>Katalog Inventaris Ruangan</span>
@@ -93,34 +101,46 @@ function SpacesContent() {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Pencarian & Ketersediaan Ruang Kerja
           </h1>
-          <p className="text-xs text-slate-500">
-            Eksplorasi ruang kerja berstandar profesional sesuai kebutuhan jumlah orang dan durasi jam kerja.
+          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
+            Eksplorasi ruang kerja berstandar profesional sesuai kebutuhan kapasitas dan durasi jam pemakaian.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={fetchSpacesData}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold self-start md:self-auto transition-colors"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-400"}`} />
-          <span>Segarkan Data</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {isOwner && (
+            <Link
+              href="/dashboard/owner/spaces"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Kelola Ruangan</span>
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={fetchSpacesData}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-400"}`} />
+            <span>Segarkan Data</span>
+          </button>
+        </div>
       </div>
 
-      {/* Command-Bar Filter Box */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+      {/* Responsive Command-Bar Filter Box */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs">
+        {/* Top Controls Row */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           {/* Keyword Search */}
-          <div className="sm:col-span-6 relative">
+          <div className="md:col-span-6 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama ruangan, coworking space, atau fasilitas..."
-              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -134,39 +154,41 @@ function SpacesContent() {
           </div>
 
           {/* Type Filter */}
-          <div className="sm:col-span-3">
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer"
-            >
-              <option value="">Semua Tipe Ruangan</option>
-              <option value="desk">Hot Desk / Workstation</option>
-              <option value="meeting_room">Meeting Room</option>
-              <option value="private_office">Private Office</option>
-            </select>
-          </div>
+          <div className="grid grid-cols-2 md:col-span-6 gap-2 sm:gap-3">
+            <div>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+              >
+                <option value="">Semua Tipe</option>
+                <option value="desk">Hot Desk / Workstation</option>
+                <option value="meeting_room">Meeting Room</option>
+                <option value="private_office">Private Office</option>
+              </select>
+            </div>
 
-          {/* Min Capacity Filter */}
-          <div className="sm:col-span-3">
-            <select
-              value={minCapacity}
-              onChange={(e) => setMinCapacity(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer"
-            >
-              <option value="">Semua Kapasitas</option>
-              <option value="1">Min. 1 Orang</option>
-              <option value="4">Min. 4 Orang</option>
-              <option value="8">Min. 8 Orang</option>
-              <option value="12">Min. 12+ Orang</option>
-            </select>
+            {/* Min Capacity Filter */}
+            <div>
+              <select
+                value={minCapacity}
+                onChange={(e) => setMinCapacity(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+              >
+                <option value="">Semua Kapasitas</option>
+                <option value="1">Min. 1 Orang</option>
+                <option value="4">Min. 4 Orang</option>
+                <option value="8">Min. 8 Orang</option>
+                <option value="12">Min. 12+ Orang</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Quick Type Filter Pills & Counter */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
+        {/* Quick Type Filter Pills & Counter Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-slate-400 font-semibold mr-1">Filter Tipe:</span>
+            <span className="text-slate-400 font-semibold mr-1 hidden sm:inline">Kategori:</span>
             {[
               { id: "", label: "Semua" },
               { id: "desk", label: "Hot Desk" },
@@ -188,15 +210,15 @@ function SpacesContent() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-slate-500 font-medium">
+          <div className="flex items-center justify-between sm:justify-end gap-3 text-slate-500 text-xs">
+            <span>
               Menampilkan <strong>{filteredSpaces.length}</strong> dari <strong>{spaces.length}</strong> ruangan
             </span>
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                className="font-semibold text-rose-600 hover:text-rose-700 hover:underline"
               >
                 Reset Filter
               </button>
@@ -218,36 +240,63 @@ function SpacesContent() {
 
       {/* Grid of Space Cards */}
       {loading ? (
-        <div className="p-16 text-center space-y-2">
-          <Loader2 className="w-8 h-8 text-sky-600 animate-spin mx-auto" />
-          <p className="text-xs text-slate-500 font-medium">Memuat katalog ruangan...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse"
+            >
+              <div className="aspect-[16/10] bg-slate-100" />
+              <div className="p-4 space-y-3">
+                <div className="h-4 bg-slate-100 rounded w-3/4" />
+                <div className="h-3 bg-slate-100 rounded w-1/2" />
+                <div className="h-8 bg-slate-100 rounded w-full mt-4" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredSpaces.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSpaces.map((space) => (
             <SpaceCard key={space.id} space={space} />
           ))}
         </div>
       ) : (
-        <div className="p-12 text-center bg-white rounded-xl border border-slate-200 space-y-3">
-          <Building2 className="w-10 h-10 text-slate-400 mx-auto" />
+        <div className="p-10 sm:p-14 text-center bg-white rounded-xl border border-slate-200 space-y-4 max-w-md mx-auto shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <Building2 className="w-6 h-6" />
+          </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-slate-900">
-              Tidak Ada Ruangan yang Sesuai
+            <h3 className="text-base font-bold text-slate-900">
+              {spaces.length === 0 ? "Belum Ada Ruangan Terdaftar" : "Tidak Ada Ruangan yang Sesuai"}
             </h3>
-            <p className="text-xs text-slate-500">
-              Coba sesuaikan kata kunci pencarian atau ubah kriteria filter kapasitas/tipe.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              {spaces.length === 0
+                ? "Saat ini belum ada data ruangan yang aktif di sistem. Space Owner dapat menambahkan unit inventaris melalui Dashboard."
+                : "Coba sesuaikan kata kunci pencarian atau ubah kriteria filter kapasitas/tipe."}
             </p>
           </div>
-          {hasActiveFilters && (
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors"
-            >
-              Hapus Semua Filter
-            </button>
-          )}
+
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors"
+              >
+                Hapus Semua Filter
+              </button>
+            )}
+            {isOwner && spaces.length === 0 && (
+              <Link
+                href="/dashboard/owner/spaces"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tambah Ruangan Pertama</span>
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </div>

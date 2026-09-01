@@ -40,6 +40,8 @@ function RegisterForm() {
   // Member Specific
   const [namaMember, setNamaMember] = useState("");
   const [memberTelp, setMemberTelp] = useState("");
+  const [instansi, setInstansi] = useState("");
+  const [memberAlamat, setMemberAlamat] = useState("");
 
   // Owner Specific
   const [namaCoworking, setNamaCoworking] = useState("");
@@ -85,6 +87,8 @@ function RegisterForm() {
           username: username.trim(),
           password,
           namaMember: namaMember.trim(),
+          instansi: instansi.trim() || "Umum / Personal",
+          alamat: memberAlamat.trim() || "Indonesia",
           telp: memberTelp.trim(),
         };
 
@@ -309,18 +313,49 @@ function RegisterForm() {
                     />
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        Nomor Telepon / WhatsApp
+                      </label>
+                      <div className="relative">
+                        <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                        <input
+                          type="tel"
+                          required
+                          value={memberTelp}
+                          onChange={(e) => setMemberTelp(e.target.value)}
+                          placeholder="081234567890"
+                          className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        Instansi / Perusahaan
+                      </label>
+                      <input
+                        type="text"
+                        value={instansi}
+                        onChange={(e) => setInstansi(e.target.value)}
+                        placeholder="Personal / Nama Perusahaan"
+                        className="w-full px-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-slate-700">
-                      Nomor Telepon / WhatsApp
+                      Alamat Domisili
                     </label>
                     <div className="relative">
-                      <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                      <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                       <input
-                        type="tel"
-                        required
-                        value={memberTelp}
-                        onChange={(e) => setMemberTelp(e.target.value)}
-                        placeholder="Contoh: 081234567890"
+                        type="text"
+                        value={memberAlamat}
+                        onChange={(e) => setMemberAlamat(e.target.value)}
+                        placeholder="Kota atau alamat domisili"
                         className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
                       />
                     </div>

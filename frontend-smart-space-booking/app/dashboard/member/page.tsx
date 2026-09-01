@@ -59,7 +59,7 @@ export default function MemberDashboardPage() {
 
   // Active / Upcoming Bookings
   const activeOrPendingBookings = reservations.filter((r) => {
-    const s = r.status.toLowerCase();
+    const s = r.status?.toLowerCase() || "";
     return s === "disetujui" || s === "aktif" || s === "pending";
   });
 
@@ -166,7 +166,7 @@ export default function MemberDashboardPage() {
               const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
               const spaceName = res.detailReservasi?.space?.namaSpace || `Space #${res.id}`;
               const coworkingName = res.detailReservasi?.space?.owner?.namaCoworking;
-              const canCancel = res.status.toLowerCase() === "pending" || res.status.toLowerCase() === "disetujui";
+              const canCancel = res.status?.toLowerCase() === "pending" || res.status?.toLowerCase() === "disetujui";
 
               return (
                 <div
