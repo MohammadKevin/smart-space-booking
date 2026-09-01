@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    # Workflow hanya akan jalan jika ada perubahan di folder backend
     paths:
       - 'backend-smart-space-booking/**'
       - '.github/workflows/deploy.yml'
@@ -26,6 +25,8 @@ jobs:
 
       - name: 📦 Build Project
         working-directory: backend-smart-space-booking
+        env:
+          DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy_db"
         run: |
           npm ci
           npx prisma generate
