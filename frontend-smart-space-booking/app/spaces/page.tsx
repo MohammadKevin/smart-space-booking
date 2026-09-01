@@ -64,7 +64,7 @@ function SpacesContent() {
         return false;
       }
       // Capacity Filter
-      if (minCapacity && space.kapasitas < parseInt(minCapacity, 10)) {
+      if (minCapacity && (space.kapasitas || 0) < parseInt(minCapacity, 10)) {
         return false;
       }
       // Search Query

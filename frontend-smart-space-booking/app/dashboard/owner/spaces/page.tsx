@@ -382,6 +382,9 @@ export default function OwnerSpacesPage() {
                       src={sp.foto || "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80"}
                       alt={sp.namaSpace}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80";
+                      }}
                     />
                     <div className="absolute top-3 left-3">
                       <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold border shadow-xs ${getTypeBadge(sp.tipe)}`}>

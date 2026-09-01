@@ -334,9 +334,16 @@ export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile>
 // 6. Discounts & Promo Codes API
 // ---------------------------------------------------------------------------
 
-export async function checkDiscount(code: string): Promise<DiscountCheckResponse> {
-  const { data } = await api.get<DiscountCheckResponse>(`/discounts/check/${encodeURIComponent(code)}`);
-  return data;
+export async function checkDiscount(code: string): Promise<any> {
+  const { data } = await api.get<any>(`/discounts/check/${encodeURIComponent(code)}`);
+  const diskonObj = data?.diskon || data?.data || data;
+  return {
+    isValid: !!(data?.isValid || data?.valid || diskonObj?.id),
+    valid: !!(data?.isValid || data?.valid || diskonObj?.id),
+    message: data?.message || "Kode promo aktif dan valid.",
+    diskon: diskonObj,
+    data: diskonObj,
+  };
 }
 
 export async function getDiscounts(): Promise<Discount[]> {

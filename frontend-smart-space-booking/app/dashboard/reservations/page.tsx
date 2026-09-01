@@ -11,7 +11,7 @@ export default function DashboardReservationsRedirect() {
   useEffect(() => {
     const role = user?.role?.toLowerCase();
     if (role === "admin_space" || role === "owner") {
-      router.replace("/dashboard/owner");
+      router.replace("/dashboard/owner/reservations");
     } else if (role === "staff") {
       router.replace("/dashboard/staff");
     } else {

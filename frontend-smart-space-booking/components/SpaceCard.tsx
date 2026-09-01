@@ -59,7 +59,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
           <img
             src={space.foto || fallbackImage}
             alt={space.namaSpace}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {
               (e.target as HTMLImageElement).src = fallbackImage;
             }}

@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
+import { QrCodeCard } from "@/components/QrCodeCard";
 import {
   Calendar,
   Clock,
@@ -90,11 +91,12 @@ export default function BookingPage({ params }: BookingPageProps) {
     setPromoMessage(null);
     try {
       const res = await checkDiscount(promoInput.trim());
-      if (res.valid && res.data) {
-        setAppliedDiscount(res.data);
+      const validDiscount = res.data || res.diskon;
+      if (res.isValid && validDiscount) {
+        setAppliedDiscount(validDiscount);
         setPromoMessage({
           type: "success",
-          text: `Kupon "${res.data.kodeDiskon}" berhasil diterapkan (${res.data.persentaseDiskon}% OFF)`,
+          text: `Kupon "${validDiscount.kodeDiskon || validDiscount.namaDiskon}" berhasil diterapkan (${validDiscount.persentaseDiskon}% OFF)`,
         });
       } else {
         setAppliedDiscount(null);
@@ -513,15 +515,10 @@ export default function BookingPage({ params }: BookingPageProps) {
               </p>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                Kode Tiket Check-In
-              </span>
-              <p className="font-mono text-base font-bold text-slate-900 tracking-wider">
-                {bookingSuccessData.qrCode}
-              </p>
-              <p className="text-[11px] text-slate-500">
-                Tunjukkan kode ini kepada staff operasional saat tiba di lokasi.
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center space-y-2">
+              <QrCodeCard value={bookingSuccessData.qrCode} size={150} label="Tiket Digital Siap Pakai" />
+              <p className="text-[11px] text-slate-500 pt-1">
+                Tunjukkan kode QR ini kepada resepsionis saat tiba di lokasi untuk check-in.
               </p>
             </div>
 

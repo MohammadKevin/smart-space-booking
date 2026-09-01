@@ -17,6 +17,9 @@ import {
   LayoutDashboard,
   Menu,
   X,
+  User,
+  TicketPercent,
+  CalendarClock,
 } from "lucide-react";
 
 export function Navbar() {
@@ -139,12 +142,28 @@ export function Navbar() {
                           <span>Dashboard Overview</span>
                         </Link>
                         <Link
+                          href="/dashboard/owner/reservations"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <CalendarClock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Manajemen Reservasi</span>
+                        </Link>
+                        <Link
                           href="/dashboard/owner/spaces"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                         >
                           <Building className="w-3.5 h-3.5 text-slate-400" />
                           <span>Inventory Ruangan</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/discounts"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <TicketPercent className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Kode Promo Diskon</span>
                         </Link>
                         <Link
                           href="/dashboard/owner/staff"
@@ -169,14 +188,24 @@ export function Navbar() {
                     )}
 
                     {currentRole === "member" && (
-                      <Link
-                        href="/dashboard/member"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        <CalendarCheck className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Tiket & Reservasi Saya</span>
-                      </Link>
+                      <>
+                        <Link
+                          href="/dashboard/member"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <CalendarCheck className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Tiket & Reservasi Saya</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/member/profile"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <User className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Profil Member</span>
+                        </Link>
+                      </>
                     )}
 
                     <div className="border-t border-slate-100 my-1" />
@@ -235,14 +264,32 @@ export function Navbar() {
               </div>
 
               {currentRole === "owner" && (
-                <Link
-                  href="/dashboard/owner"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
-                >
-                  <LayoutDashboard className="w-4 h-4 text-slate-500" />
-                  <span>Dashboard Owner</span>
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard/owner"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                    <span>Dashboard Owner</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/owner/reservations"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <CalendarClock className="w-4 h-4 text-slate-500" />
+                    <span>Manajemen Reservasi</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/owner/spaces"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <Building className="w-4 h-4 text-slate-500" />
+                    <span>Inventory Ruangan</span>
+                  </Link>
+                </>
               )}
 
               {currentRole === "staff" && (
@@ -257,14 +304,24 @@ export function Navbar() {
               )}
 
               {currentRole === "member" && (
-                <Link
-                  href="/dashboard/member"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
-                >
-                  <CalendarCheck className="w-4 h-4 text-slate-500" />
-                  <span>Dashboard Member</span>
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard/member"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <CalendarCheck className="w-4 h-4 text-slate-500" />
+                    <span>Dashboard Member</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/member/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <User className="w-4 h-4 text-slate-500" />
+                    <span>Profil Saya</span>
+                  </Link>
+                </>
               )}
 
               <button
