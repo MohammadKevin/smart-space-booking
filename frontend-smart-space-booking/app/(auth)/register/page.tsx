@@ -17,6 +17,7 @@ import {
   Phone,
   MapPin,
   ArrowRight,
+  ArrowLeft,
   Eye,
   EyeOff,
   AlertCircle,
@@ -147,6 +148,15 @@ function RegisterForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
+      {/* Top-Left Back to Home Button */}
+      <Link
+        href="/"
+        className="absolute top-5 left-5 sm:top-7 sm:left-8 z-30 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/95 hover:bg-white text-slate-700 hover:text-cyan-700 font-semibold text-xs border border-slate-200 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all group"
+      >
+        <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-cyan-600 transition-transform group-hover:-translate-x-0.5" />
+        <span>Kembali ke Beranda</span>
+      </Link>
+
       {/* Ambient Decorative Background Elements */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
