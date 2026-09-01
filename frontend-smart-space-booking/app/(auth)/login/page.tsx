@@ -181,7 +181,7 @@ function LoginForm() {
                   href="/register"
                   className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
                 >
-                  Daftar Gratis
+                  Daftar Sekarang
                 </Link>
               </p>
             </div>
@@ -272,13 +272,6 @@ function LoginForm() {
                   />
                   <span>Ingat perangkat ini</span>
                 </label>
-
-                <Link
-                  href="/"
-                  className="text-slate-400 hover:text-slate-600 text-[11px]"
-                >
-                  Kembali ke Beranda
-                </Link>
               </div>
             </form>
           </div>

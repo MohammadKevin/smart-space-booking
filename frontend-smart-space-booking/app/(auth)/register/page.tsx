@@ -511,7 +511,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100">
+        <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6 bg-slate-100">
           <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
         </div>
       }

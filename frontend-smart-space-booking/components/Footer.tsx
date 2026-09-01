@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Compass, QrCode, ShieldCheck } from "lucide-react";
+import { QrCode } from "lucide-react";
 
 export function Footer() {
   const pathname = usePathname();
@@ -17,6 +17,7 @@ export function Footer() {
   ) {
     return null;
   }
+
   return (
     <footer className="bg-white border-t border-slate-200 mt-auto w-full">
       <div className="w-full px-4 sm:px-6 lg:px-10 py-10">
@@ -42,17 +43,17 @@ export function Footer() {
             <p className="text-xs font-bold text-slate-900">Katalog Ruangan</p>
             <ul className="space-y-1.5 text-xs text-slate-600">
               <li>
-                <Link href="/spaces?tipe=desk" className="hover:text-sky-600 transition-colors">
+                <Link href="/spaces?tipe=desk" className="hover:text-cyan-600 transition-colors">
                   Hot Desk & Workstation
                 </Link>
               </li>
               <li>
-                <Link href="/spaces?tipe=meeting_room" className="hover:text-sky-600 transition-colors">
+                <Link href="/spaces?tipe=meeting_room" className="hover:text-cyan-600 transition-colors">
                   Meeting Room & Soundproof
                 </Link>
               </li>
               <li>
-                <Link href="/spaces?tipe=private_office" className="hover:text-sky-600 transition-colors">
+                <Link href="/spaces?tipe=private_office" className="hover:text-cyan-600 transition-colors">
                   Dedicated Private Office
                 </Link>
               </li>
@@ -64,17 +65,17 @@ export function Footer() {
             <p className="text-xs font-bold text-slate-900">Akses Platform</p>
             <ul className="space-y-1.5 text-xs text-slate-600">
               <li>
-                <Link href="/login" className="hover:text-sky-600 transition-colors">
+                <Link href="/login" className="hover:text-cyan-600 transition-colors">
                   Portal Member
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="hover:text-sky-600 transition-colors">
+                <Link href="/login" className="hover:text-cyan-600 transition-colors">
                   Portal Space Owner
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="hover:text-sky-600 transition-colors">
+                <Link href="/login" className="hover:text-cyan-600 transition-colors">
                   Terminal Staff Resepsionis
                 </Link>
               </li>
@@ -86,7 +87,7 @@ export function Footer() {
             <p className="text-xs font-bold text-slate-900">Operasional</p>
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
               <p className="font-semibold text-slate-800 flex items-center gap-1">
-                <QrCode className="w-3.5 h-3.5 text-sky-600" />
+                <QrCode className="w-3.5 h-3.5 text-cyan-600" />
                 <span>Verifikasi QR Mandiri</span>
               </p>
               <p className="text-[11px] text-slate-500">
