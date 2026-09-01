@@ -19,6 +19,9 @@ import {
   ShieldCheck,
   Loader2,
   Activity,
+  TicketPercent,
+  CalendarClock,
+  ClipboardList,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -70,7 +73,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div className="flex flex-col items-center gap-2 text-slate-500">
-          <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
           <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
         </div>
       </div>
@@ -94,7 +97,7 @@ export default function DashboardLayout({
     if (role === "owner") {
       return {
         label: "Space Owner",
-        className: "bg-indigo-50 text-indigo-800 border-indigo-200",
+        className: "bg-cyan-50 text-cyan-800 border-cyan-200",
       };
     }
     if (role === "staff") {
@@ -116,7 +119,9 @@ export default function DashboardLayout({
     if (role === "owner") {
       return [
         { label: "Overview KPI", href: "/dashboard/owner", icon: LayoutDashboard },
+        { label: "Manajemen Reservasi", href: "/dashboard/owner/reservations", icon: CalendarClock },
         { label: "Inventory Ruangan", href: "/dashboard/owner/spaces", icon: Building },
+        { label: "Kode Promo Diskon", href: "/dashboard/owner/discounts", icon: TicketPercent },
         { label: "Manajemen Staff", href: "/dashboard/owner/staff", icon: UserCheck },
       ];
     }
@@ -139,6 +144,8 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/dashboard/owner/reservations")) return "Manajemen Reservasi";
+    if (pathname.startsWith("/dashboard/owner/discounts")) return "Kode Promo Diskon";
     if (pathname.startsWith("/dashboard/owner/spaces")) return "Inventory Ruangan";
     if (pathname.startsWith("/dashboard/owner/staff")) return "Manajemen Staff";
     if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";

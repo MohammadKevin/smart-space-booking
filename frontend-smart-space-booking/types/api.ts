@@ -203,6 +203,22 @@ export interface Discount {
   updatedAt?: string;
 }
 
+export interface CreateDiscountDto {
+  namaDiskon: string;
+  kodeDiskon?: string;
+  persentaseDiskon: number;
+  tanggalAwal: string;
+  tanggalAkhir: string;
+}
+
+export interface UpdateDiscountDto {
+  namaDiskon?: string;
+  kodeDiskon?: string;
+  persentaseDiskon?: number;
+  tanggalAwal?: string;
+  tanggalAkhir?: string;
+}
+
 export interface DiscountCheckResponse {
   valid: boolean;
   message?: string;

@@ -20,6 +20,8 @@ import {
   UpdateSpaceDto,
   FilterSpaceDto,
   Discount,
+  CreateDiscountDto,
+  UpdateDiscountDto,
   DiscountCheckResponse,
   DetailReservasi,
   Reservation,
@@ -303,6 +305,21 @@ export async function checkDiscount(code: string): Promise<DiscountCheckResponse
 
 export async function getDiscounts(): Promise<Discount[]> {
   const { data } = await api.get<Discount[]>("/discounts");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function createDiscount(dto: CreateDiscountDto): Promise<Discount> {
+  const { data } = await api.post<Discount>("/discounts", dto);
+  return data;
+}
+
+export async function updateDiscount(id: number | string, dto: UpdateDiscountDto): Promise<Discount> {
+  const { data } = await api.put<Discount>(`/discounts/${id}`, dto);
+  return data;
+}
+
+export async function deleteDiscount(id: number | string): Promise<{ message: string }> {
+  const { data } = await api.delete<{ message: string }>(`/discounts/${id}`);
   return data;
 }
 
