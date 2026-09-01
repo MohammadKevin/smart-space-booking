@@ -1,6 +1,6 @@
 import React from "react";
 import { ReservationStatus } from "@/lib/api";
-import { Clock, CheckCircle2, Zap, CheckCheck, XCircle } from "lucide-react";
+import { Clock, CheckCircle2, CheckCheck, XCircle, Activity } from "lucide-react";
 
 interface StatusBadgeProps {
   status: ReservationStatus | string;
@@ -14,54 +14,54 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
     case "pending":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 ${className}`}
         >
-          <Clock className="w-3.5 h-3.5 text-amber-500" />
-          Menunggu Konfirmasi
+          <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+          <span>Menunggu Konfirmasi</span>
         </span>
       );
     case "disetujui":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200 ${className}`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-sky-500" />
-          Disetujui
+          <CheckCircle2 className="w-3 h-3 text-sky-600 shrink-0" />
+          <span>Disetujui</span>
         </span>
       );
     case "aktif":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 ${className}`}
         >
-          <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500 animate-pulse" />
-          Sesi Aktif
+          <Activity className="w-3 h-3 text-emerald-600 shrink-0" />
+          <span>Sesi Aktif</span>
         </span>
       );
     case "selesai":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${className}`}
         >
-          <CheckCheck className="w-3.5 h-3.5 text-slate-500" />
-          Selesai
+          <CheckCheck className="w-3 h-3 text-slate-500 shrink-0" />
+          <span>Selesai</span>
         </span>
       );
     case "dibatalkan":
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200 ${className}`}
         >
-          <XCircle className="w-3.5 h-3.5 text-rose-500" />
-          Dibatalkan
+          <XCircle className="w-3 h-3 text-rose-600 shrink-0" />
+          <span>Dibatalkan</span>
         </span>
       );
     default:
       return (
         <span
-          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 ${className}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 ${className}`}
         >
-          {status}
+          <span>{status}</span>
         </span>
       );
   }

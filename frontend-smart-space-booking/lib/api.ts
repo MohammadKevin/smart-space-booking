@@ -37,7 +37,8 @@ import {
 
 export * from "@/types/api";
 
-export const API_BASE_URL = "https://api-ukk.budayakita.com/api";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api-ukk.budayakita.com/api";
 
 // ---------------------------------------------------------------------------
 // Central Axios Instance & Interceptors
@@ -105,6 +106,12 @@ export function getApiErrorMessage(error: unknown): string {
       if (typeof data.error === "string") {
         return data.error;
       }
+    }
+    if (error.response?.status === 500) {
+      return "Server backend sedang mengalami kendala (HTTP 500). Mohon periksa status server atau coba beberapa saat lagi.";
+    }
+    if (error.message === "Network Error" || error.code === "ERR_NETWORK") {
+      return `Koneksi ke backend API (${API_BASE_URL}) gagal atau server sedang offline/restarting.`;
     }
     if (error.message) {
       return error.message;

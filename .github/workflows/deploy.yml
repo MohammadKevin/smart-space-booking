@@ -32,7 +32,7 @@ jobs:
           npx prisma generate
           npm run build
 
-      - name: 🚀 Sync Dist to cPanel
+      - name: 🚀 Sync Dist & Schema to cPanel
         uses: easingthemes/ssh-deploy@v5.0.3
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
@@ -43,7 +43,7 @@ jobs:
           REMOTE_USER: ${{ secrets.SSH_USER }}
           TARGET: "/home/budayaki/backend_ukk/dist"
 
-      - name: 🔄 Auto Restart Node.js
+      - name: 🔄 Generate Prisma on Server & Restart Passenger
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -51,6 +51,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            source /home/budayaki/nodevenv/backend_ukk/20/bin/activate
             cd /home/budayaki/backend_ukk
+            npx prisma generate
             mkdir -p tmp
             touch tmp/restart.txt

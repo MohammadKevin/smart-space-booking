@@ -90,8 +90,8 @@ export interface RegisterMemberDto {
   username: string;
   password: string;
   namaMember: string;
-  instansi: string;
-  alamat: string;
+  instansi?: string;
+  alamat?: string;
   telp: string;
   foto?: string;
 }

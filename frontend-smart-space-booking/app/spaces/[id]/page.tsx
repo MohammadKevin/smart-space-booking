@@ -1,16 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  getSpaceDetail,
-  Space,
-  getApiErrorMessage,
-} from "@/lib/api";
+import { getSpaceDetail, Space, getApiErrorMessage } from "@/lib/api";
 import { formatRupiah } from "@/components/SpaceCard";
 import {
-  Building,
+  Building2,
   Users,
   Clock,
   ArrowRight,
@@ -18,13 +13,12 @@ import {
   Loader2,
   AlertCircle,
   ShieldCheck,
-  Sparkles,
   Wifi,
   MonitorCheck,
   Armchair,
   Coffee,
   CheckCircle2,
-  Calendar,
+  MapPin,
 } from "lucide-react";
 
 interface SpaceDetailPageProps {
@@ -34,7 +28,6 @@ interface SpaceDetailPageProps {
 export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   const resolvedParams = use(params);
   const spaceId = parseInt(resolvedParams.id, 10);
-  const router = useRouter();
 
   const [space, setSpace] = useState<Space | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,9 +53,9 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3 text-slate-500">
-          <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
+      <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-2 text-slate-500">
+          <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
           <p className="text-xs font-semibold">Memuat rincian ruangan...</p>
         </div>
       </div>
@@ -72,14 +65,14 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   if (error || !space) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+        <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
           <AlertCircle className="w-6 h-6" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
+        <h2 className="text-lg font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
         <p className="text-xs text-slate-500">{error || "Ruangan ini tidak tersedia atau telah dihapus."}</p>
         <Link
           href="/spaces"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-xs font-semibold rounded-xl hover:bg-sky-700 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-600 text-white text-xs font-semibold rounded-lg hover:bg-sky-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Katalog</span>
@@ -102,25 +95,24 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
-      {/* Breadcrumb */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Navigation Breadcrumb */}
       <div>
         <Link
           href="/spaces"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-sky-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Kembali ke Katalog Ruangan</span>
         </Link>
       </div>
 
-      {/* Main Grid */}
+      {/* Main Detail Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Image & Highlights */}
+        {/* Left Column: Photo & Specifications */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Main Photo Banner */}
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="relative aspect-[16/9] bg-slate-100 w-full">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="relative aspect-[16/9] bg-slate-100 w-full border-b border-slate-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={space.foto || fallbackImage}
@@ -130,36 +122,40 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                   (e.target as HTMLImageElement).src = fallbackImage;
                 }}
               />
-              <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-sky-700 border border-sky-200 shadow-sm">
+              <div className="absolute top-3 left-3">
+                <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/95 backdrop-blur-xs text-sky-800 border border-sky-200">
                   {getTypeLabel(space.tipe)}
                 </span>
               </div>
             </div>
 
-            <div className="p-6 sm:p-8 space-y-6">
+            <div className="p-6 space-y-6">
               <div className="space-y-2">
                 {space.owner?.namaCoworking && (
-                  <p className="text-xs font-bold text-sky-600 flex items-center gap-1.5">
-                    <Building className="w-4 h-4" />
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
                     <span>{space.owner.namaCoworking}</span>
-                  </p>
+                  </div>
                 )}
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                   {space.namaSpace}
                 </h1>
                 {space.owner?.alamat && (
-                  <p className="text-xs text-slate-500">{space.owner.alamat}</p>
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{space.owner.alamat}</span>
+                  </div>
                 )}
               </div>
 
               {/* Description */}
               <div className="space-y-2 pt-4 border-t border-slate-100">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Deskripsi & Fasilitas Ruangan
+                  Deskripsi Ruangan
                 </h3>
-                <p className="text-sm text-slate-700 leading-relaxed font-normal">
-                  {space.deskripsi || "Ruangan kerja berstandar profesional yang dirancang untuk mendukung produktivitas optimal Anda. Dilengkapi pencahayaan yang nyaman, konektivitas internet prima, serta kursi ergonomis."}
+                <p className="text-xs text-slate-700 leading-relaxed font-normal">
+                  {space.deskripsi ||
+                    "Ruangan kerja berstandar profesional yang dirancang untuk mendukung produktivitas optimal. Dilengkapi pencahayaan yang nyaman, konektivitas internet prima, serta kursi ergonomis."}
                 </p>
               </div>
 
@@ -168,30 +164,30 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Fasilitas Termasuk
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <Wifi className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">High-Speed WiFi</span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <Wifi className="w-3.5 h-3.5 text-sky-600" />
+                    <span>High-Speed WiFi</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <Armchair className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">Kursi Ergonomis</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <Armchair className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Kursi Ergonomis</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <Coffee className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">Free Flow Coffee</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <Coffee className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Free Flow Coffee</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <ShieldCheck className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">Akses QR Terintegrasi</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Akses Tiket QR Mandiri</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <MonitorCheck className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">Port Daya Dedicated</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <MonitorCheck className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Port Daya Dedicated</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5 text-xs text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-sky-600" />
-                    <span className="font-semibold">AC & Pencahayaan Sehat</span>
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-xs text-slate-700">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-sky-600" />
+                    <span>AC & Ruang Tenang</span>
                   </div>
                 </div>
               </div>
@@ -199,46 +195,46 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           </div>
         </div>
 
-        {/* Right Column: Pricing & Booking Action Card */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 sticky top-24">
+        {/* Right Column: Pricing & Booking Action */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 sticky top-20">
             <div className="space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Tarif Pemakaian
               </span>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-black text-slate-900">
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-slate-900 font-mono">
                   {formatRupiah(space.hargaPerJam)}
                 </span>
-                <span className="text-xs text-slate-500 font-semibold">/ jam</span>
+                <span className="text-xs text-slate-500 font-normal">/ jam</span>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs text-slate-700">
+            <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2 text-xs text-slate-700">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Kapasitas Maksimal:</span>
-                <span className="font-bold text-slate-900">{space.kapasitas} Orang</span>
+                <span className="font-semibold text-slate-900">{space.kapasitas} Orang</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">Tipe Ruangan:</span>
-                <span className="font-bold text-slate-900">{getTypeLabel(space.tipe)}</span>
+                <span className="font-semibold text-slate-900">{getTypeLabel(space.tipe)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-500">Metode Check-In:</span>
-                <span className="font-bold text-sky-600">Tiket QR Code Mandiri</span>
+                <span className="text-slate-500">Akses Masuk:</span>
+                <span className="font-semibold text-sky-700">Validasi Kode QR</span>
               </div>
             </div>
 
             <Link
               href={`/booking/${space.id}`}
-              className="w-full py-3.5 px-6 rounded-2xl font-bold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 shadow-lg shadow-sky-600/25 transition-all flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 rounded-lg font-semibold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
             >
               <span>Lanjut ke Formulir Reservasi</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
 
-            <div className="p-3 bg-sky-50 rounded-xl border border-sky-100 text-[11px] text-sky-800 text-center">
-              Dapat dibatalkan gratis hingga 1 jam sebelum jam mulai pemesanan.
+            <div className="p-2.5 bg-slate-50 rounded-md border border-slate-100 text-[11px] text-slate-600 text-center">
+              Pemesanan instan terhubung langsung ke database live.
             </div>
           </div>
         </div>

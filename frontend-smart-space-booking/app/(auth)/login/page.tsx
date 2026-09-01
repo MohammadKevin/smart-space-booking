@@ -15,10 +15,9 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
-  ShieldCheck,
-  Building,
+  QrCode,
+  Activity,
   Users,
-  UserCheck,
 } from "lucide-react";
 
 function LoginForm() {
@@ -39,13 +38,12 @@ function LoginForm() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    // Client-side validation
     if (!username.trim()) {
-      setErrorMessage("Username tidak boleh kosong");
+      setErrorMessage("Masukkan username Anda");
       return;
     }
     if (!password) {
-      setErrorMessage("Password tidak boleh kosong");
+      setErrorMessage("Masukkan password Anda");
       return;
     }
     if (password.length < 6) {
@@ -58,13 +56,12 @@ function LoginForm() {
     try {
       const response = await login({
         username: username.trim(),
-        password: password,
+        password,
       });
 
       loginUser(response.access_token, response.user);
-      setSuccessMessage("Login berhasil! Mengalihkan ke dashboard...");
+      setSuccessMessage("Login berhasil. Mengarahkan ke dashboard...");
 
-      // Role-based routing scaffolding
       setTimeout(() => {
         if (redirectParam) {
           router.push(redirectParam);
@@ -77,10 +74,9 @@ function LoginForm() {
         } else if (role === "staff") {
           router.push("/dashboard/staff");
         } else {
-          // member
           router.push("/dashboard/member");
         }
-      }, 700);
+      }, 600);
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err));
     } finally {
@@ -89,151 +85,168 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex p-3.5 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 shadow-sm">
-          <Building2 className="w-7 h-7" />
-        </div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Selamat Datang Kembali
-        </h1>
-        <p className="text-xs text-slate-500">
-          Masuk ke akun SmartSpace Anda (Member, Space Owner, atau Staff).
-        </p>
-      </div>
-
-      {/* Alerts */}
-      {errorMessage && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs animate-in fade-in duration-200">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
-          <div className="leading-snug font-medium">{errorMessage}</div>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-700 text-xs animate-in fade-in duration-200">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
-          <div className="leading-snug font-medium">{successMessage}</div>
-        </div>
-      )}
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Username Field */}
-        <div className="space-y-1.5">
-          <label
-            htmlFor="username"
-            className="block text-xs font-bold text-slate-700 uppercase tracking-wider"
-          >
-            Username
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-              <User className="w-4 h-4" />
+    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-slate-50">
+      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        {/* Left Side: Live Operational Workspace Snapshot */}
+        <div className="lg:col-span-5 bg-slate-900 text-white p-8 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+          <div className="space-y-6 relative z-10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-base tracking-tight text-white">SmartSpace</span>
             </div>
-            <input
-              id="username"
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Masukkan username Anda"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-            />
-          </div>
-        </div>
 
-        {/* Password Field */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="block text-xs font-bold text-slate-700 uppercase tracking-wider"
-            >
-              Password
-            </label>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-              <Lock className="w-4 h-4" />
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                Sistem Reservasi & Okupansi Ruang Kerja
+              </h2>
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+                Akses digital terpadu untuk Member, Pengelola Ruangan (Owner), dan Staff Operasional di lokasi.
+              </p>
             </div>
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimal 6 karakter"
-              className="w-full pl-10 pr-10 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
-            >
-              {showPassword ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-            </button>
+
+            {/* Live Operational Status Strip */}
+            <div className="space-y-2 pt-4 border-t border-slate-800">
+              <p className="text-[11px] font-semibold text-slate-400">
+                Alur Akses Sistem:
+              </p>
+              <div className="space-y-2 text-xs">
+                <div className="p-2.5 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+                  <span className="text-slate-300">Member</span>
+                  <span className="font-mono font-semibold text-sky-400">Pesan & Tiket QR</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+                  <span className="text-slate-300">Space Owner</span>
+                  <span className="font-mono font-semibold text-sky-400">Inventory & Finansial</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-between">
+                  <span className="text-slate-300">Staff Resepsionis</span>
+                  <span className="font-mono font-semibold text-emerald-400">Validasi Check-In</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-6 relative z-10 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Live REST API Hub</span>
+            <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+              <Activity className="w-3 h-3" />
+              Sistem Aktif
+            </span>
           </div>
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 mt-2"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Memverifikasi Kredensial...</span>
-            </>
-          ) : (
-            <>
-              <span>Masuk Sekarang</span>
-              <ArrowRight className="w-4 h-4" />
-            </>
-          )}
-        </button>
-      </form>
+        {/* Right Side: Clean Login Form */}
+        <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-6">
+          <div className="space-y-6">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                Masuk ke Akun
+              </h1>
+              <p className="text-xs text-slate-500">
+                Gunakan kredensial akun terdaftar Anda untuk melanjutkan.
+              </p>
+            </div>
 
-      {/* Role Routing Scaffolding Hint */}
-      <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 text-xs text-slate-600">
-        <div className="flex items-center gap-1.5 font-bold text-slate-800">
-          <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
-          <span>Pengalihan Otomatis Sesuai Role:</span>
-        </div>
-        <div className="grid grid-cols-3 gap-1.5 text-[11px] text-center">
-          <div className="p-2 rounded-xl bg-white border border-slate-200">
-            <span className="font-bold text-sky-700 block">Member</span>
-            <span className="text-slate-400 text-[10px]">/dashboard/member</span>
-          </div>
-          <div className="p-2 rounded-xl bg-white border border-slate-200">
-            <span className="font-bold text-sky-700 block">Space Owner</span>
-            <span className="text-slate-400 text-[10px]">/dashboard/owner</span>
-          </div>
-          <div className="p-2 rounded-xl bg-white border border-slate-200">
-            <span className="font-bold text-sky-700 block">Staff</span>
-            <span className="text-slate-400 text-[10px]">/dashboard/staff</span>
-          </div>
-        </div>
-      </div>
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                <span className="font-medium leading-relaxed">{errorMessage}</span>
+              </div>
+            )}
 
-      {/* Footer link */}
-      <div className="text-center pt-2 border-t border-slate-100">
-        <p className="text-xs text-slate-600">
-          Belum memiliki akun?{" "}
-          <Link
-            href="/register"
-            className="font-bold text-sky-600 hover:text-sky-700 hover:underline"
-          >
-            Daftar Sekarang (Member & Space Owner)
-          </Link>
-        </p>
+            {/* Success Message */}
+            {successMessage && (
+              <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+                <span className="font-medium leading-relaxed">{successMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="username"
+                  className="block text-xs font-semibold text-slate-700"
+                >
+                  Username
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                  <input
+                    id="username"
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Masukkan username"
+                    className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-semibold text-slate-700"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimal 6 karakter"
+                    className="w-full pl-9 pr-9 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 px-4 rounded-lg font-semibold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Memverifikasi Akun...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Masuk</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-600">
+              Belum memiliki akun?{" "}
+              <Link
+                href="/register"
+                className="font-semibold text-sky-600 hover:text-sky-700 hover:underline"
+              >
+                Daftar (Member atau Space Owner)
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -241,16 +254,14 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-12 bg-slate-50">
-      <Suspense
-        fallback={
-          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-          </div>
-        }
-      >
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6 bg-slate-50">
+          <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -1,58 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { registerMember, registerOwner, getApiErrorMessage } from "@/lib/api";
+import {
+  registerMember,
+  registerOwner,
+  RegisterMemberDto,
+  RegisterOwnerDto,
+  getApiErrorMessage,
+} from "@/lib/api";
 import {
   Building2,
   Lock,
   User,
+  Phone,
+  MapPin,
   ArrowRight,
   Eye,
   EyeOff,
   AlertCircle,
   Loader2,
   CheckCircle2,
-  Building,
-  Phone,
-  MapPin,
-  Briefcase,
-  Users,
   ShieldCheck,
+  Building,
 } from "lucide-react";
 
-export default function RegisterPage() {
-  const router = useRouter();
+type RegisterRole = "member" | "owner";
 
-  // Strict 2-Option Toggle Only (Member vs Space Owner)
-  const [roleTab, setRoleTab] = useState<"member" | "owner">("member");
+function RegisterForm() {
+  const router = useRouter();
+  const [role, setRole] = useState<RegisterRole>("member");
+
+  // Common Fields
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Member Specific
+  const [namaMember, setNamaMember] = useState("");
+  const [memberTelp, setMemberTelp] = useState("");
+
+  // Owner Specific
+  const [namaCoworking, setNamaCoworking] = useState("");
+  const [namaPemilik, setNamaPemilik] = useState("");
+  const [ownerTelp, setOwnerTelp] = useState("");
+  const [alamat, setAlamat] = useState("");
+
+  // State
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Common Form States
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Member Specific States
-  const [namaMember, setNamaMember] = useState("");
-  const [instansi, setInstansi] = useState("");
-  const [alamatMember, setAlamatMember] = useState("");
-  const [telpMember, setTelpMember] = useState("");
-
-  // Space Owner Specific States
-  const [namaCoworking, setNamaCoworking] = useState("");
-  const [namaPemilik, setNamaPemilik] = useState("");
-  const [alamatOwner, setAlamatOwner] = useState("");
-  const [telpOwner, setTelpOwner] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    if (!username.trim()) {
+      setErrorMessage("Username tidak boleh kosong");
+      return;
+    }
     if (password.length < 6) {
       setErrorMessage("Password minimal 6 karakter");
       return;
@@ -61,35 +69,69 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      if (roleTab === "member") {
-        await registerMember({
+      if (role === "member") {
+        if (!namaMember.trim()) {
+          setErrorMessage("Nama lengkap member wajib diisi");
+          setLoading(false);
+          return;
+        }
+        if (!memberTelp.trim()) {
+          setErrorMessage("Nomor telepon member wajib diisi");
+          setLoading(false);
+          return;
+        }
+
+        const dto: RegisterMemberDto = {
           username: username.trim(),
           password,
           namaMember: namaMember.trim(),
-          instansi: instansi.trim(),
-          alamat: alamatMember.trim(),
-          telp: telpMember.trim(),
-        });
+          telp: memberTelp.trim(),
+        };
 
-        setSuccessMessage("Pendaftaran Akun Member berhasil! Mengalihkan ke halaman masuk...");
-        setTimeout(() => {
-          router.push("/login");
-        }, 900);
+        const res = await registerMember(dto);
+        setSuccessMessage(
+          res.message || "Pendaftaran akun Member berhasil! Mengarahkan ke halaman login..."
+        );
       } else {
-        await registerOwner({
+        if (!namaCoworking.trim()) {
+          setErrorMessage("Nama coworking space / brand wajib diisi");
+          setLoading(false);
+          return;
+        }
+        if (!namaPemilik.trim()) {
+          setErrorMessage("Nama pemilik / penanggung jawab wajib diisi");
+          setLoading(false);
+          return;
+        }
+        if (!ownerTelp.trim()) {
+          setErrorMessage("Nomor telepon coworking wajib diisi");
+          setLoading(false);
+          return;
+        }
+        if (!alamat.trim()) {
+          setErrorMessage("Alamat lengkap coworking wajib diisi");
+          setLoading(false);
+          return;
+        }
+
+        const dto: RegisterOwnerDto = {
           username: username.trim(),
           password,
           namaCoworking: namaCoworking.trim(),
           namaPemilik: namaPemilik.trim(),
-          alamat: alamatOwner.trim(),
-          telp: telpOwner.trim(),
-        });
+          telp: ownerTelp.trim(),
+          alamat: alamat.trim(),
+        };
 
-        setSuccessMessage("Pendaftaran Akun Space Owner berhasil! Mengalihkan ke halaman masuk...");
-        setTimeout(() => {
-          router.push("/login");
-        }, 900);
+        const res = await registerOwner(dto);
+        setSuccessMessage(
+          res.message || "Pendaftaran akun Space Owner berhasil! Mengarahkan ke halaman login..."
+        );
       }
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1200);
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err));
     } finally {
@@ -98,301 +140,304 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-12 bg-slate-50">
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex p-3.5 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 shadow-sm">
-            <Building2 className="w-7 h-7" />
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Pendaftaran Akun Baru
-          </h1>
-          <p className="text-xs text-slate-500">
-            Pilih jenis akun Anda untuk mulai memesan atau mendaftarkan coworking space.
-          </p>
-        </div>
+    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-slate-50">
+      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        {/* Left Side: Operational Info & Staff Provisioning Notice */}
+        <div className="lg:col-span-5 bg-slate-900 text-white p-8 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
+          <div className="space-y-6 relative z-10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-base tracking-tight text-white">SmartSpace</span>
+            </div>
 
-        {/* Strict 2-Option Toggle Only (Member vs Space Owner) */}
-        <div className="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 gap-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              setRoleTab("member");
-              setErrorMessage(null);
-            }}
-            className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
-              roleTab === "member"
-                ? "bg-white text-sky-700 shadow-md shadow-slate-200 border border-slate-200/60"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Users className="w-4 h-4 text-sky-600 shrink-0" />
-            <span>1. Akun Member</span>
-          </button>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                Pendaftaran Akun Baru
+              </h2>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Pilih peran Anda untuk mulai memesan workstation atau mendaftarkan inventaris coworking space Anda.
+              </p>
+            </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setRoleTab("owner");
-              setErrorMessage(null);
-            }}
-            className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
-              roleTab === "owner"
-                ? "bg-white text-sky-700 shadow-md shadow-slate-200 border border-slate-200/60"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Building className="w-4 h-4 text-sky-600 shrink-0" />
-            <span>2. Akun Space Owner</span>
-          </button>
-        </div>
+            {/* Role Explanations */}
+            <div className="space-y-2.5 pt-4 border-t border-slate-800 text-xs">
+              <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1">
+                <p className="font-semibold text-white">1. Akun Member</p>
+                <p className="text-[11px] text-slate-400">
+                  Untuk individu, pekerja remote, atau tim yang ingin menyewa ruang kerja dengan tiket QR mandiri.
+                </p>
+              </div>
 
-        {/* Alerts */}
-        {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs animate-in fade-in duration-200">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
-            <div className="leading-snug font-medium">{errorMessage}</div>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-700 text-xs animate-in fade-in duration-200">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
-            <div className="leading-snug font-medium">{successMessage}</div>
-          </div>
-        )}
-
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Username */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Username
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="e.g. kevinsanjaya"
-                  className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                />
+              <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/60 space-y-1">
+                <p className="font-semibold text-white">2. Akun Space Owner</p>
+                <p className="text-[11px] text-slate-400">
+                  Untuk pemilik atau pengelola coworking space yang mengelola inventaris ruangan dan analitik finansial.
+                </p>
               </div>
             </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 6 karakter"
-                  className="w-full pl-10 pr-9 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            {/* Staff Policy Box */}
+            <div className="p-3 rounded-lg bg-sky-950/60 border border-sky-800/50 text-[11px] text-sky-200 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-semibold text-white">Ketentuan Akun Staff:</p>
+                <p className="text-sky-300 text-[10px] leading-relaxed">
+                  Akun Staff tidak dapat didaftarkan secara mandiri. Staff ditambahkan secara internal melalui Dashboard Space Owner.
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Role specific inputs */}
-          {roleTab === "member" ? (
-            <>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Nama Lengkap Member
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={namaMember}
-                  onChange={(e) => setNamaMember(e.target.value)}
-                  placeholder="e.g. Kevin Sanjaya"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                />
-              </div>
+          <div className="pt-6 relative z-10 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <span>Direct Live API</span>
+            <span className="text-slate-300 font-mono">UKK 2026</span>
+          </div>
+        </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Instansi / Universitas / Perusahaan
+        {/* Right Side: Clean 2-Option Form */}
+        <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-6">
+          <div className="space-y-5">
+            {/* Plain Pill Toggle - Strict 2 Options */}
+            <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-lg border border-slate-200 gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setRole("member");
+                  setErrorMessage(null);
+                }}
+                className={`py-2 rounded-md text-xs font-semibold transition-colors ${
+                  role === "member"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                1. Akun Member
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRole("owner");
+                  setErrorMessage(null);
+                }}
+                className={`py-2 rounded-md text-xs font-semibold transition-colors ${
+                  role === "owner"
+                    ? "bg-white text-slate-900 shadow-xs border border-slate-200"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                2. Akun Space Owner
+              </button>
+            </div>
+
+            {/* Error Alert */}
+            {errorMessage && (
+              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                <span className="font-medium leading-relaxed">{errorMessage}</span>
+              </div>
+            )}
+
+            {/* Success Alert */}
+            {successMessage && (
+              <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+                <span className="font-medium leading-relaxed">{successMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Common Fields: Username & Password */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Username Akun
                   </label>
                   <div className="relative">
-                    <Briefcase className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                    <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                     <input
                       type="text"
                       required
-                      value={instansi}
-                      onChange={(e) => setInstansi(e.target.value)}
-                      placeholder="e.g. Freelancer / Tech Corp"
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Username unik"
+                      className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    No. Telepon / WhatsApp
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Password
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                    <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                     <input
-                      type="tel"
+                      type={showPassword ? "text" : "password"}
                       required
-                      value={telpMember}
-                      onChange={(e) => setTelpMember(e.target.value)}
-                      placeholder="081234567890"
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Min. 6 karakter"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Alamat Domisili
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={alamatMember}
-                    onChange={(e) => setAlamatMember(e.target.value)}
-                    placeholder="Jl. Sudirman No. 10, Jakarta"
-                    className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Nama Coworking Space / Brand
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={namaCoworking}
-                  onChange={(e) => setNamaCoworking(e.target.value)}
-                  placeholder="e.g. SmartSpace Innovation Hub"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Nama Pemilik / Penanggung Jawab
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={namaPemilik}
-                    onChange={(e) => setNamaPemilik(e.target.value)}
-                    placeholder="e.g. Budi Santoso"
-                    className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    No. Telepon Coworking
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+              {/* Conditional Fields based on Role */}
+              {role === "member" ? (
+                <div className="space-y-3.5 pt-1">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Nama Lengkap Member
+                    </label>
                     <input
-                      type="tel"
+                      type="text"
                       required
-                      value={telpOwner}
-                      onChange={(e) => setTelpOwner(e.target.value)}
-                      placeholder="081987654321"
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
+                      value={namaMember}
+                      onChange={(e) => setNamaMember(e.target.value)}
+                      placeholder="Nama lengkap sesuai identitas"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
                     />
                   </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Nomor Telepon / WhatsApp
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                      <input
+                        type="tel"
+                        required
+                        value={memberTelp}
+                        onChange={(e) => setMemberTelp(e.target.value)}
+                        placeholder="Contoh: 081234567890"
+                        className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Nama Coworking Space / Brand
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={namaCoworking}
+                      onChange={(e) => setNamaCoworking(e.target.value)}
+                      placeholder="Contoh: Kuncie Hub Malang"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Alamat Lengkap Coworking Space
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-                  <input
-                    type="text"
-                    required
-                    value={alamatOwner}
-                    onChange={(e) => setAlamatOwner(e.target.value)}
-                    placeholder="Jl. Gatot Subroto No. 45, Jakarta Selatan"
-                    className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        Nama Pemilik / PIC
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={namaPemilik}
+                        onChange={(e) => setNamaPemilik(e.target.value)}
+                        placeholder="Nama penanggung jawab"
+                        className="w-full px-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        No. Telepon Coworking
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={ownerTelp}
+                        onChange={(e) => setOwnerTelp(e.target.value)}
+                        placeholder="081234567890"
+                        className="w-full px-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Alamat Lengkap Coworking
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        required
+                        value={alamat}
+                        onChange={(e) => setAlamat(e.target.value)}
+                        placeholder="Alamat jalan, gedung, atau nomor lokasi"
+                        className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sky-600"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 mt-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Mendaftarkan Akun...</span>
-              </>
-            ) : (
-              <>
-                <span>
-                  Daftar Sebagai {roleTab === "member" ? "Member" : "Space Owner"}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-2.5 px-4 rounded-lg font-semibold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Mendaftarkan Akun...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Daftar sebagai {role === "member" ? "Member" : "Space Owner"}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
 
-        {/* Staff Provisioning Notice */}
-        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5 text-xs text-slate-600">
-          <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-          <div className="space-y-0.5">
-            <span className="font-bold text-slate-800">Catatan Akun Staff:</span>
-            <p className="text-slate-500 leading-relaxed text-[11px]">
-              Akun Staff tidak dapat didaftarkan secara publik. Space Owner dapat menambahkan akun Staff operasional melalui Dashboard Space Owner.
+          <div className="pt-4 border-t border-slate-100 text-center">
+            <p className="text-xs text-slate-600">
+              Sudah memiliki akun terdaftar?{" "}
+              <Link
+                href="/login"
+                className="font-semibold text-sky-600 hover:text-sky-700 hover:underline"
+              >
+                Masuk di sini
+              </Link>
             </p>
           </div>
         </div>
-
-        <div className="text-center pt-2 border-t border-slate-100">
-          <p className="text-xs text-slate-600">
-            Sudah memiliki akun?{" "}
-            <Link
-              href="/login"
-              className="font-bold text-sky-600 hover:text-sky-700 hover:underline"
-            >
-              Masuk di sini
-            </Link>
-          </p>
-        </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6 bg-slate-50">
+          <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }
