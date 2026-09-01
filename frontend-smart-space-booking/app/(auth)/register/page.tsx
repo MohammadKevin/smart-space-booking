@@ -146,7 +146,7 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-slate-100/80 relative overflow-hidden">
+    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
       {/* Ambient Decorative Background Elements */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
@@ -161,13 +161,13 @@ function RegisterForm() {
         </div>
       </div>
 
-      {/* Center 2-Column Pop-up Modal Card */}
-      <div className="w-full max-w-4xl bg-white rounded-xl shadow-2xl shadow-slate-400/20 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10">
+      {/* Center 2-Column Pop-up Modal Card (Enlarged max-w-5xl / max-w-6xl) */}
+      <div className="w-full max-w-5xl lg:max-w-6xl bg-white rounded-xl shadow-2xl shadow-slate-400/25 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 min-h-[580px]">
         {/* Left Side: 3D Illustration & Headline */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-6 sm:p-8 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90">
+        <div className="lg:col-span-5 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-8 sm:p-10 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90">
           {/* Top Catchy Headline with Highlighted Accent Words */}
-          <div className="space-y-1.5 max-w-xs">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-800 leading-snug">
+          <div className="space-y-2 max-w-sm">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
               Solusi lengkap untuk{" "}
               <span className="text-cyan-600 font-extrabold">Member</span> dan{" "}
               <span className="text-sky-600 font-extrabold">Pengelola Coworking</span> secara instan!
@@ -175,8 +175,8 @@ function RegisterForm() {
           </div>
 
           {/* Center 3D Illustration Graphic with Floating Badges */}
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-xl overflow-hidden shadow-lg shadow-cyan-900/10 border-2 border-white bg-white">
+          <div className="relative my-6 flex items-center justify-center">
+            <div className="w-68 h-68 sm:w-76 sm:h-76 rounded-xl overflow-hidden shadow-xl shadow-cyan-900/10 border-2 border-white bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/auth-register-illustration.jpg"
@@ -186,44 +186,44 @@ function RegisterForm() {
             </div>
 
             {/* Floating Top Left Badge */}
-            <div className="absolute -top-2 -left-2 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-cyan-200 shadow-sm flex items-center gap-1.5 text-[11px] font-semibold text-slate-800">
-              <Building className="w-3.5 h-3.5 text-cyan-600" />
+            <div className="absolute -top-3 -left-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+              <Building className="w-4 h-4 text-cyan-600" />
               <span>Smart Space</span>
             </div>
 
             {/* Floating Bottom Right Badge */}
-            <div className="absolute -bottom-2 -right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-cyan-200 shadow-sm flex items-center gap-1.5 text-[11px] font-semibold text-slate-800">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <div className="absolute -bottom-3 -right-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Registrasi Cepat</span>
             </div>
           </div>
 
           {/* Bottom Live Subtitle */}
-          <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+          <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 pt-2">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
             <span>Mulai Reservasi & Kelola Ruangan Kerja</span>
           </div>
         </div>
 
         {/* Right Side: Clean Form */}
-        <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-4 max-h-[85vh] overflow-y-auto">
-          <div className="space-y-4">
+        <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-center space-y-4 max-h-[88vh] overflow-y-auto">
+          <div className="space-y-4 max-w-lg mx-auto w-full">
             {/* Top Brand Logo */}
-            <div className="text-center space-y-1">
-              <div className="inline-flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
+            <div className="text-center space-y-1.5">
+              <div className="inline-flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
                 </div>
-                <span className="font-extrabold text-slate-900 text-lg tracking-tight">
+                <span className="font-extrabold text-slate-900 text-xl tracking-tight">
                   SmartSpace
                 </span>
               </div>
 
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight pt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight pt-0.5">
                 Buat Akun Baru
               </h1>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs sm:text-sm text-slate-500">
                 Sudah memiliki akun?{" "}
                 <Link
                   href="/login"
