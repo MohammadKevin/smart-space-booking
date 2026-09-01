@@ -1,0 +1,306 @@
+export type UserRole = "admin_space" | "staff" | "member";
+
+export type SpaceType = "desk" | "meeting_room" | "private_office";
+
+export type ReservationStatus =
+  | "pending"
+  | "disetujui"
+  | "aktif"
+  | "selesai"
+  | "dibatalkan";
+
+// ---------------------------------------------------------------------------
+// User & Auth Profiles
+// ---------------------------------------------------------------------------
+
+export interface MemberProfile {
+  id: number;
+  namaMember: string;
+  instansi: string;
+  alamat: string;
+  telp: string;
+  foto?: string | null;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SpaceOwnerProfile {
+  id: number;
+  namaCoworking: string;
+  namaPemilik: string;
+  alamat: string;
+  telp: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StaffProfile {
+  id: number;
+  namaStaff: string;
+  telp: string;
+  ownerId: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+  member?: MemberProfile | null;
+  spaceOwner?: SpaceOwnerProfile | null;
+  staff?: StaffProfile | null;
+}
+
+export interface AuthResponse {
+  message: string;
+  access_token: string;
+  user: UserProfile;
+}
+
+export interface MemberUser {
+  id: number;
+  username: string;
+  role: UserRole;
+  member: MemberProfile;
+}
+
+export interface StaffUser {
+  id: number;
+  username: string;
+  role: UserRole;
+  staff: StaffProfile;
+}
+
+// ---------------------------------------------------------------------------
+// Auth DTOs
+// ---------------------------------------------------------------------------
+
+export interface LoginDto {
+  username: string;
+  password: string;
+}
+
+export interface RegisterMemberDto {
+  username: string;
+  password: string;
+  namaMember: string;
+  instansi: string;
+  alamat: string;
+  telp: string;
+  foto?: string;
+}
+
+export interface RegisterOwnerDto {
+  username: string;
+  password: string;
+  namaCoworking: string;
+  namaPemilik: string;
+  alamat: string;
+  telp: string;
+}
+
+export interface CreateStaffDto {
+  username: string;
+  password: string;
+  namaStaff: string;
+  telp: string;
+}
+
+export interface UpdateProfileDto {
+  nama?: string;
+  instansi?: string;
+  alamat?: string;
+  telp?: string;
+  foto?: string;
+  namaCoworking?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Space Interfaces & DTOs
+// ---------------------------------------------------------------------------
+
+export interface Space {
+  id: number;
+  namaSpace: string;
+  tipe: SpaceType;
+  hargaPerJam: number;
+  kapasitas: number;
+  foto?: string | null;
+  deskripsi?: string | null;
+  ownerId: number;
+  createdAt: string;
+  updatedAt: string;
+  owner?: SpaceOwnerProfile;
+}
+
+export interface CreateSpaceDto {
+  namaSpace: string;
+  tipe: SpaceType;
+  hargaPerJam: number;
+  kapasitas: number;
+  foto?: string;
+  deskripsi?: string;
+}
+
+export interface UpdateSpaceDto {
+  namaSpace?: string;
+  tipe?: SpaceType;
+  hargaPerJam?: number;
+  kapasitas?: number;
+  foto?: string;
+  deskripsi?: string;
+}
+
+export interface FilterSpaceDto {
+  search?: string;
+  tipe?: SpaceType;
+  minKapasitas?: number;
+  maxKapasitas?: number;
+  ownerId?: number;
+  tanggal?: string;
+  jamMulai?: string;
+  durasiJam?: number;
+}
+
+// ---------------------------------------------------------------------------
+// Discount Interfaces & DTOs
+// ---------------------------------------------------------------------------
+
+export interface Discount {
+  id: number;
+  namaDiskon: string;
+  kodeDiskon: string | null;
+  persentaseDiskon: number;
+  tanggalAwal: string;
+  tanggalAkhir: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DiscountCheckResponse {
+  valid: boolean;
+  message?: string;
+  data?: Discount;
+}
+
+// ---------------------------------------------------------------------------
+// Reservation Interfaces & DTOs
+// ---------------------------------------------------------------------------
+
+export interface DetailReservasi {
+  id: number;
+  reservasiId: number;
+  spaceId: number;
+  diskonId?: number | null;
+  totalHarga: number;
+  createdAt: string;
+  updatedAt: string;
+  space?: Space;
+  diskon?: Discount | null;
+}
+
+export interface Reservation {
+  id: number;
+  tanggalReservasi: string;
+  jamMulai: string;
+  durasiJam: number;
+  status: ReservationStatus;
+  qrCode: string;
+  ownerId: number;
+  memberId: number;
+  createdAt: string;
+  updatedAt: string;
+  jamSelesai?: string;
+  member?: MemberProfile;
+  owner?: SpaceOwnerProfile;
+  detailReservasi?: DetailReservasi;
+}
+
+export interface CreateReservationDto {
+  spaceId: number;
+  tanggalReservasi: string;
+  jamMulai: string;
+  durasiJam: number;
+  diskonId?: number;
+  kodeDiskon?: string;
+}
+
+export interface FilterReservationDto {
+  status?: ReservationStatus;
+  tanggal?: string;
+  spaceId?: number;
+}
+
+export interface ReservationResponse {
+  message: string;
+  data: Reservation;
+}
+
+export interface ReservationCancelResponse {
+  message: string;
+  data: Reservation;
+}
+
+// ---------------------------------------------------------------------------
+// QR Check-in & Verification
+// ---------------------------------------------------------------------------
+
+export interface VerifyQrDto {
+  qrCode: string;
+}
+
+export interface ProcessCheckinDto {
+  qrCode: string;
+  action?: "auto" | "checkin" | "checkout";
+}
+
+export interface CheckinResponse {
+  message: string;
+  data?: {
+    id: number;
+    reservasiId: number;
+    waktuCheckin?: string;
+    waktuCheckout?: string;
+    status: string;
+    reservasi?: Reservation;
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Reports & Financial Analytics
+// ---------------------------------------------------------------------------
+
+export interface DashboardSummary {
+  totalRevenue: number;
+  totalSpaces: number;
+  totalStaffs: number;
+  totalReservations: number;
+  statusCounts?: {
+    pending: number;
+    disetujui: number;
+    aktif: number;
+    selesai: number;
+    dibatalkan: number;
+  };
+}
+
+export interface MonthlyRevenueItem {
+  month: string;
+  monthNumber: number;
+  revenue: number;
+  totalBookings: number;
+}
+
+export interface SpaceTypeDistributionItem {
+  tipe: SpaceType;
+  label: string;
+  count: number;
+  totalRevenue: number;
+  percentage: number;
+}

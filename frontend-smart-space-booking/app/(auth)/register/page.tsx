@@ -20,7 +20,6 @@ import {
   Briefcase,
   Users,
   ShieldCheck,
-  Mail,
 } from "lucide-react";
 
 export default function RegisterPage() {
@@ -43,7 +42,7 @@ export default function RegisterPage() {
   const [alamatMember, setAlamatMember] = useState("");
   const [telpMember, setTelpMember] = useState("");
 
-  // Owner Specific States
+  // Space Owner Specific States
   const [namaCoworking, setNamaCoworking] = useState("");
   const [namaPemilik, setNamaPemilik] = useState("");
   const [alamatOwner, setAlamatOwner] = useState("");
@@ -72,11 +71,10 @@ export default function RegisterPage() {
           telp: telpMember.trim(),
         });
 
-        setSuccessMessage("Registrasi Member berhasil! Mengalihkan ke verifikasi...");
-        // Transition to verification flow post-registration
+        setSuccessMessage("Pendaftaran Akun Member berhasil! Mengalihkan ke halaman masuk...");
         setTimeout(() => {
-          router.push(`/verify-email?email=${encodeURIComponent(username.trim())}&role=member`);
-        }, 800);
+          router.push("/login");
+        }, 900);
       } else {
         await registerOwner({
           username: username.trim(),
@@ -87,11 +85,10 @@ export default function RegisterPage() {
           telp: telpOwner.trim(),
         });
 
-        setSuccessMessage("Registrasi Space Owner berhasil! Mengalihkan ke verifikasi...");
-        // Transition to verification flow post-registration
+        setSuccessMessage("Pendaftaran Akun Space Owner berhasil! Mengalihkan ke halaman masuk...");
         setTimeout(() => {
-          router.push(`/verify-email?email=${encodeURIComponent(username.trim())}&role=admin_space`);
-        }, 800);
+          router.push("/login");
+        }, 900);
       }
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err));
@@ -112,7 +109,7 @@ export default function RegisterPage() {
             Pendaftaran Akun Baru
           </h1>
           <p className="text-xs text-slate-500">
-            Pilih jenis akun untuk mulai menyewa atau mengelola coworking space.
+            Pilih jenis akun Anda untuk mulai memesan atau mendaftarkan coworking space.
           </p>
         </div>
 
@@ -120,10 +117,13 @@ export default function RegisterPage() {
         <div className="grid grid-cols-2 p-1.5 bg-slate-100 rounded-2xl border border-slate-200 gap-1.5">
           <button
             type="button"
-            onClick={() => setRoleTab("member")}
+            onClick={() => {
+              setRoleTab("member");
+              setErrorMessage(null);
+            }}
             className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
               roleTab === "member"
-                ? "bg-white text-sky-700 shadow-md shadow-slate-200"
+                ? "bg-white text-sky-700 shadow-md shadow-slate-200 border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -133,10 +133,13 @@ export default function RegisterPage() {
 
           <button
             type="button"
-            onClick={() => setRoleTab("owner")}
+            onClick={() => {
+              setRoleTab("owner");
+              setErrorMessage(null);
+            }}
             className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs font-bold transition-all ${
               roleTab === "owner"
-                ? "bg-white text-sky-700 shadow-md shadow-slate-200"
+                ? "bg-white text-sky-700 shadow-md shadow-slate-200 border border-slate-200/60"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
@@ -149,24 +152,24 @@ export default function RegisterPage() {
         {errorMessage && (
           <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
-            <div className="leading-snug">{errorMessage}</div>
+            <div className="leading-snug font-medium">{errorMessage}</div>
           </div>
         )}
 
         {successMessage && (
           <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-700 text-xs animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
-            <div className="leading-snug">{successMessage}</div>
+            <div className="leading-snug font-medium">{successMessage}</div>
           </div>
         )}
 
-        {/* Form */}
+        {/* Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Username / Email */}
+            {/* Username */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Username / Email
+                Username
               </label>
               <div className="relative">
                 <User className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -175,7 +178,7 @@ export default function RegisterPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="e.g. johndoe"
+                  placeholder="e.g. kevinsanjaya"
                   className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
                 />
               </div>
@@ -227,7 +230,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Instansi / Perusahaan
+                    Instansi / Universitas / Perusahaan
                   </label>
                   <div className="relative">
                     <Briefcase className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -236,7 +239,7 @@ export default function RegisterPage() {
                       required
                       value={instansi}
                       onChange={(e) => setInstansi(e.target.value)}
-                      placeholder="e.g. Universitas Airlangga"
+                      placeholder="e.g. Freelancer / Tech Corp"
                       className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
                     />
                   </div>
@@ -271,7 +274,7 @@ export default function RegisterPage() {
                     required
                     value={alamatMember}
                     onChange={(e) => setAlamatMember(e.target.value)}
-                    placeholder="Jl. Pemuda No. 45, Surabaya"
+                    placeholder="Jl. Sudirman No. 10, Jakarta"
                     className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
                   />
                 </div>
@@ -281,14 +284,14 @@ export default function RegisterPage() {
             <>
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Nama Bisnis / Coworking Space
+                  Nama Coworking Space / Brand
                 </label>
                 <input
                   type="text"
                   required
                   value={namaCoworking}
                   onChange={(e) => setNamaCoworking(e.target.value)}
-                  placeholder="e.g. SpaceWorks Innovation Center"
+                  placeholder="e.g. SmartSpace Innovation Hub"
                   className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
                 />
               </div>
@@ -296,7 +299,7 @@ export default function RegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Nama Pemilik / Pengelola
+                    Nama Pemilik / Penanggung Jawab
                   </label>
                   <input
                     type="text"
@@ -328,7 +331,7 @@ export default function RegisterPage() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Alamat Lengkap Coworking
+                  Alamat Lengkap Coworking Space
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -337,7 +340,7 @@ export default function RegisterPage() {
                     required
                     value={alamatOwner}
                     onChange={(e) => setAlamatOwner(e.target.value)}
-                    placeholder="Jl. Basuki Rahmat No. 12-14, Surabaya"
+                    placeholder="Jl. Gatot Subroto No. 45, Jakarta Selatan"
                     className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 transition-all"
                   />
                 </div>
@@ -354,7 +357,7 @@ export default function RegisterPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Memproses Pendaftaran...</span>
+                <span>Mendaftarkan Akun...</span>
               </>
             ) : (
               <>
@@ -367,10 +370,15 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Security Note */}
-        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-2 text-xs text-slate-500">
-          <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
-          <span>Verifikasi email OTP akan dikirimkan otomatis setelah pendaftaran.</span>
+        {/* Staff Provisioning Notice */}
+        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-start gap-2.5 text-xs text-slate-600">
+          <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
+            <span className="font-bold text-slate-800">Catatan Akun Staff:</span>
+            <p className="text-slate-500 leading-relaxed text-[11px]">
+              Akun Staff tidak dapat didaftarkan secara publik. Space Owner dapat menambahkan akun Staff operasional melalui Dashboard Space Owner.
+            </p>
+          </div>
         </div>
 
         <div className="text-center pt-2 border-t border-slate-100">

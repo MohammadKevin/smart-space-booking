@@ -4,7 +4,7 @@ import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  getSpaceById,
+  getSpaceDetail,
   createReservation,
   checkDiscount,
   Space,
@@ -70,7 +70,7 @@ export default function BookingPage({ params }: BookingPageProps) {
       setLoadingSpace(true);
       setSpaceError(null);
       try {
-        const data = await getSpaceById(spaceId);
+        const data = await getSpaceDetail(spaceId);
         setSpace(data);
       } catch (err: unknown) {
         setSpaceError(getApiErrorMessage(err));
@@ -180,7 +180,7 @@ export default function BookingPage({ params }: BookingPageProps) {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3 text-slate-500">
           <Loader2 className="w-8 h-8 text-sky-600 animate-spin" />
-          <p className="text-sm font-medium">Memuat rincian ruangan...</p>
+          <p className="text-xs font-semibold">Memuat rincian ruangan...</p>
         </div>
       </div>
     );
@@ -193,19 +193,18 @@ export default function BookingPage({ params }: BookingPageProps) {
           <AlertCircle className="w-6 h-6" />
         </div>
         <h2 className="text-xl font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
-        <p className="text-sm text-slate-500">{spaceError || "Ruangan ini tidak tersedia atau telah dihapus."}</p>
+        <p className="text-xs text-slate-500">{spaceError || "Ruangan ini tidak tersedia atau telah dihapus."}</p>
         <Link
           href="/spaces"
           className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 text-white text-xs font-semibold rounded-xl hover:bg-sky-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Kembali ke Katalog
+          <span>Kembali ke Katalog</span>
         </Link>
       </div>
     );
   }
 
-  // Fallback image
   const fallbackImage =
     space.tipe === "meeting_room"
       ? "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80"
@@ -218,18 +217,18 @@ export default function BookingPage({ params }: BookingPageProps) {
       {/* Navigation Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/spaces"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors"
+          href={`/spaces/${space.id}`}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-sky-600 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kembali ke Katalog Ruangan</span>
+          <span>Kembali ke Rincian Ruangan</span>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Space Summary Card */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="relative aspect-[16/10] bg-slate-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -241,7 +240,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                 }}
               />
               <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-md text-sky-700 border border-sky-200">
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-sky-700 border border-sky-200">
                   {space.tipe === "desk"
                     ? "Hot Desk"
                     : space.tipe === "meeting_room"
@@ -254,33 +253,33 @@ export default function BookingPage({ params }: BookingPageProps) {
             <div className="p-6 space-y-4">
               <div>
                 {space.owner?.namaCoworking && (
-                  <p className="text-xs font-medium text-slate-500 flex items-center gap-1.5 mb-1">
-                    <Building className="w-3.5 h-3.5 text-sky-500" />
-                    {space.owner.namaCoworking}
+                  <p className="text-xs font-bold text-sky-600 flex items-center gap-1 mb-1">
+                    <Building className="w-3.5 h-3.5" />
+                    <span>{space.owner.namaCoworking}</span>
                   </p>
                 )}
-                <h1 className="text-2xl font-bold text-slate-900">
+                <h1 className="text-2xl font-black text-slate-900">
                   {space.namaSpace}
                 </h1>
               </div>
 
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 {space.deskripsi || "Ruangan representatif dengan fasilitas lengkap dan kenyamanan maksimal."}
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 text-xs">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-                  <Users className="w-4 h-4 text-sky-500" />
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
+                  <Users className="w-4 h-4 text-sky-600" />
                   <div>
-                    <p className="text-slate-400 font-medium text-[10px] uppercase">Kapasitas</p>
+                    <p className="text-slate-400 font-bold text-[10px] uppercase">Kapasitas</p>
                     <p className="font-bold text-slate-800">{space.kapasitas} Orang</p>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-                  <Clock className="w-4 h-4 text-sky-500" />
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
+                  <Clock className="w-4 h-4 text-sky-600" />
                   <div>
-                    <p className="text-slate-400 font-medium text-[10px] uppercase">Tarif</p>
+                    <p className="text-slate-400 font-bold text-[10px] uppercase">Tarif</p>
                     <p className="font-bold text-slate-800">{formatRupiah(space.hargaPerJam)}/jam</p>
                   </div>
                 </div>
@@ -288,12 +287,12 @@ export default function BookingPage({ params }: BookingPageProps) {
             </div>
           </div>
 
-          <div className="p-4 bg-sky-50/60 border border-sky-100 rounded-2xl flex items-start gap-3 text-xs text-sky-900">
+          <div className="p-4 bg-sky-50/70 border border-sky-100 rounded-3xl flex items-start gap-3 text-xs text-sky-900">
             <ShieldCheck className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <p className="font-bold">Konfirmasi & Check-In Mandiri Instan</p>
-              <p className="text-sky-700 leading-relaxed">
-                Setelah reservasi dikonfirmasi, Anda akan memperoleh QR Code tiket untuk proses check-in cepat di lokasi.
+              <p className="text-sky-700 leading-relaxed text-[11px]">
+                Setelah pemesanan dikonfirmasi, Anda akan memperoleh kode QR tiket untuk proses check-in cepat di lokasi.
               </p>
             </div>
           </div>
@@ -301,20 +300,20 @@ export default function BookingPage({ params }: BookingPageProps) {
 
         {/* Right Column: Dynamic Booking Form & Calculator */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-black text-slate-900">
                 Konfigurasi Jadwal & Durasi
               </h2>
               <p className="text-xs text-slate-500">
-                Pilih tanggal, jam mulai, dan durasi pemakaian yang Anda butuhkan.
+                Pilih tanggal, jam mulai, dan durasi sewa yang Anda butuhkan.
               </p>
             </div>
 
             {submitError && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-sm">
-                <AlertCircle className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
-                <div className="leading-snug">{submitError}</div>
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs animate-in fade-in">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+                <div className="leading-snug font-medium">{submitError}</div>
               </div>
             )}
 
@@ -334,7 +333,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                       min={todayStr}
                       value={tanggalReservasi}
                       onChange={(e) => setTanggalReservasi(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10"
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10"
                     />
                   </div>
                 </div>
@@ -349,7 +348,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                     <select
                       value={jamMulai}
                       onChange={(e) => setJamMulai(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 cursor-pointer"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 cursor-pointer"
                     >
                       {[
                         "08:00",
@@ -367,7 +366,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                         "20:00",
                       ].map((time) => (
                         <option key={time} value={time}>
-                          Pukul {time}
+                          Pukul {time} WIB
                         </option>
                       ))}
                     </select>
@@ -381,7 +380,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Durasi Sewa: <span className="text-sky-600">{durasiJam} Jam</span>
                   </label>
-                  <span className="text-xs text-slate-400">Min. 1 Jam - Max. 12 Jam</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Min. 1 Jam - Max. 12 Jam</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -415,7 +414,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                       disabled={!!appliedDiscount || checkingPromo}
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                      placeholder="Masukkan kode promo (e.g. PROMO2026)"
+                      placeholder="Masukkan kode kupon"
                       className="w-full pl-10 pr-3 py-2 bg-slate-50 uppercase border border-slate-200 focus:border-sky-500 rounded-xl text-sm font-semibold tracking-wider text-slate-900 focus:outline-none focus:ring-4 focus:ring-sky-500/10 disabled:opacity-60"
                     />
                   </div>
@@ -467,7 +466,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   Rincian Biaya Real-Time
                 </h3>
 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs">
                   <div className="flex justify-between text-slate-600">
                     <span>
                       Tarif Dasar ({durasiJam} jam × {formatRupiah(hourlyRate)})
@@ -488,14 +487,14 @@ export default function BookingPage({ params }: BookingPageProps) {
                   )}
 
                   <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                    <span className="font-bold text-slate-900 text-base">
+                    <span className="font-bold text-slate-900 text-sm">
                       Total Tagihan
                     </span>
                     <div className="text-right">
                       <span className="text-2xl font-black text-sky-600">
                         {formatRupiah(finalTotal)}
                       </span>
-                      <p className="text-[10px] text-slate-400">Termasuk pajak & fasilitas</p>
+                      <p className="text-[10px] text-slate-400">Termasuk fasilitas lengkap</p>
                     </div>
                   </div>
                 </div>
@@ -505,7 +504,7 @@ export default function BookingPage({ params }: BookingPageProps) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 px-6 rounded-xl font-bold text-sm text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-sky-600/25 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-xl font-bold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-sky-600/25 transition-all flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
@@ -514,7 +513,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </>
                 ) : (
                   <>
-                    <span>Konfirmasi & Buat Reservasi</span>
+                    <span>Konfirmasi & Terbitkan Tiket Reservasi</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -533,7 +532,7 @@ export default function BookingPage({ params }: BookingPageProps) {
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-xl font-extrabold text-slate-900">
+              <h3 className="text-xl font-black text-slate-900">
                 Reservasi Berhasil Dibuat!
               </h3>
               <p className="text-xs text-slate-500">
@@ -553,7 +552,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                 </p>
               </div>
               <p className="text-[11px] text-slate-500">
-                Tunjukkan kode ini kepada staff operasional untuk verifikasi check-in.
+                Tunjukkan kode ini kepada staff operasional saat check-in di lokasi.
               </p>
             </div>
 
@@ -566,12 +565,12 @@ export default function BookingPage({ params }: BookingPageProps) {
               <div className="flex justify-between">
                 <span className="text-slate-500">Jadwal:</span>
                 <span className="font-bold text-slate-800">
-                  {bookingSuccessData.tanggalReservasi?.split("T")[0] || tanggalReservasi} ({bookingSuccessData.jamMulai} - {bookingSuccessData.jamSelesai || "Selesai"})
+                  {bookingSuccessData.tanggalReservasi?.split("T")[0] || tanggalReservasi} ({bookingSuccessData.jamMulai})
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Total Biaya:</span>
-                <span className="font-extrabold text-sky-600">
+                <span className="font-black text-sky-600">
                   {formatRupiah(bookingSuccessData.detailReservasi?.totalHarga || finalTotal)}
                 </span>
               </div>
@@ -580,10 +579,10 @@ export default function BookingPage({ params }: BookingPageProps) {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => router.push("/dashboard/reservations")}
+                onClick={() => router.push("/dashboard/member")}
                 className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors"
               >
-                Lihat Reservasi
+                Dashboard Member
               </button>
               <button
                 type="button"

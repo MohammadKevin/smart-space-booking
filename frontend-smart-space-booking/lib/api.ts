@@ -1,176 +1,43 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import {
   UserRole,
+  SpaceType,
+  ReservationStatus,
   MemberProfile,
   SpaceOwnerProfile,
   StaffProfile,
   UserProfile,
+  AuthResponse,
+  MemberUser,
+  StaffUser,
   LoginDto,
   RegisterMemberDto,
   RegisterOwnerDto,
   CreateStaffDto,
   UpdateProfileDto,
-  VerifyEmailDto,
-  VerifyEmailResponse,
-  ResendOtpDto,
-  ResendOtpResponse,
-  AuthResponse,
-  MemberUser,
-  StaffUser,
-} from "@/types/auth";
+  Space,
+  CreateSpaceDto,
+  UpdateSpaceDto,
+  FilterSpaceDto,
+  Discount,
+  DiscountCheckResponse,
+  DetailReservasi,
+  Reservation,
+  CreateReservationDto,
+  FilterReservationDto,
+  ReservationResponse,
+  ReservationCancelResponse,
+  VerifyQrDto,
+  ProcessCheckinDto,
+  CheckinResponse,
+  DashboardSummary,
+  MonthlyRevenueItem,
+  SpaceTypeDistributionItem,
+} from "@/types/api";
 
-export * from "@/types/auth";
+export * from "@/types/api";
 
 export const API_BASE_URL = "https://api-ukk.budayakita.com/api";
-
-// ---------------------------------------------------------------------------
-// Space & Reservation TypeScript Interfaces & DTOs
-// ---------------------------------------------------------------------------
-
-export type SpaceType = "desk" | "meeting_room" | "private_office";
-
-export interface Space {
-  id: number;
-  namaSpace: string;
-  tipe: SpaceType;
-  hargaPerJam: number;
-  kapasitas: number;
-  foto?: string;
-  deskripsi?: string;
-  ownerId: number;
-  createdAt: string;
-  updatedAt: string;
-  owner?: SpaceOwnerProfile;
-}
-
-export interface CreateSpaceDto {
-  namaSpace: string;
-  tipe: SpaceType;
-  hargaPerJam: number;
-  kapasitas: number;
-  foto?: string;
-  deskripsi?: string;
-}
-
-export interface UpdateSpaceDto {
-  namaSpace?: string;
-  tipe?: SpaceType;
-  hargaPerJam?: number;
-  kapasitas?: number;
-  foto?: string;
-  deskripsi?: string;
-}
-
-export interface SpaceQuery {
-  search?: string;
-  tipe?: SpaceType;
-  minKapasitas?: number;
-  maxKapasitas?: number;
-  ownerId?: number;
-  tanggal?: string;
-  jamMulai?: string;
-  durasiJam?: number;
-}
-
-export type ReservationStatus =
-  | "pending"
-  | "disetujui"
-  | "aktif"
-  | "selesai"
-  | "dibatalkan";
-
-export interface ReservationDetail {
-  id: number;
-  reservasiId: number;
-  spaceId: number;
-  diskonId?: number | null;
-  totalHarga: number;
-  createdAt: string;
-  updatedAt: string;
-  space?: Space;
-  diskon?: Discount | null;
-}
-
-export interface Reservation {
-  id: number;
-  tanggalReservasi: string;
-  jamMulai: string;
-  durasiJam: number;
-  status: ReservationStatus;
-  qrCode: string;
-  ownerId: number;
-  memberId: number;
-  createdAt: string;
-  updatedAt: string;
-  jamSelesai?: string;
-  member?: MemberProfile;
-  owner?: SpaceOwnerProfile;
-  detailReservasi?: ReservationDetail;
-}
-
-export interface CreateReservationDto {
-  spaceId: number;
-  tanggalReservasi: string;
-  jamMulai: string;
-  durasiJam: number;
-  diskonId?: number;
-  kodeDiskon?: string;
-}
-
-export interface ReservationQuery {
-  status?: ReservationStatus;
-  tanggal?: string;
-  spaceId?: number;
-}
-
-export interface ReservationResponse {
-  message: string;
-  data: Reservation;
-}
-
-export interface ReservationCancelResponse {
-  message: string;
-  data: Reservation;
-}
-
-export interface Discount {
-  id: number;
-  namaDiskon: string;
-  kodeDiskon: string;
-  persentaseDiskon: number;
-  tanggalAwal: string;
-  tanggalAkhir: string;
-  ownerId?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface DiscountCheckResponse {
-  valid: boolean;
-  message?: string;
-  data?: Discount;
-}
-
-export interface ProcessCheckinDto {
-  qrCode: string;
-  action?: "auto" | "checkin" | "checkout";
-}
-
-export interface VerifyQrDto {
-  qrCode: string;
-}
-
-export interface CheckinResponse {
-  message: string;
-  data?: {
-    id: number;
-    reservasiId: number;
-    waktuCheckin?: string;
-    waktuCheckout?: string;
-    status: string;
-    reservasi?: Reservation;
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Central Axios Instance & Interceptors
@@ -184,7 +51,7 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Request Interceptor: Attach Authorization Token
+// Request Interceptor: Attach Authorization Bearer Token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -201,7 +68,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle 401 Unauthorized
+// Response Interceptor: Handle 401 Unauthorized redirect
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -210,8 +77,7 @@ api.interceptors.response.use(
         const currentPath = window.location.pathname;
         if (
           !currentPath.includes("/login") &&
-          !currentPath.includes("/register") &&
-          !currentPath.includes("/verify-email")
+          !currentPath.includes("/register")
         ) {
           localStorage.removeItem("token");
           localStorage.removeItem("access_token");
@@ -248,10 +114,9 @@ export function getApiErrorMessage(error: unknown): string {
 }
 
 // ---------------------------------------------------------------------------
-// Typed API Functions
+// 1. Authentication & User Provisioning API
 // ---------------------------------------------------------------------------
 
-// --- Auth ---
 export async function login(dto: LoginDto): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>("/auth/login", dto);
   if (typeof window !== "undefined" && data.access_token) {
@@ -272,36 +137,6 @@ export async function registerOwner(dto: RegisterOwnerDto): Promise<AuthResponse
   return data;
 }
 
-export async function verifyEmail(dto: VerifyEmailDto): Promise<VerifyEmailResponse> {
-  try {
-    const { data } = await api.post<VerifyEmailResponse>("/auth/verify-email", dto);
-    return data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return {
-        message: "Email berhasil diverifikasi.",
-        success: true,
-      };
-    }
-    throw error;
-  }
-}
-
-export async function resendVerificationOtp(email: string): Promise<ResendOtpResponse> {
-  try {
-    const { data } = await api.post<ResendOtpResponse>("/auth/resend-otp", { email });
-    return data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return {
-        message: "Kode OTP baru telah dikirimkan ke email Anda.",
-        success: true,
-      };
-    }
-    throw error;
-  }
-}
-
 export async function getProfile(): Promise<UserProfile> {
   const { data } = await api.get<UserProfile>("/auth/profile");
   if (typeof window !== "undefined" && data) {
@@ -310,21 +145,26 @@ export async function getProfile(): Promise<UserProfile> {
   return data;
 }
 
-export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile> {
-  const { data } = await api.put<UserProfile>("/users/profile", dto);
+export async function createStaff(dto: CreateStaffDto): Promise<any> {
+  const { data } = await api.post("/auth/staff", dto);
   return data;
 }
 
-// --- Spaces ---
-export async function getSpaces(query?: SpaceQuery): Promise<Space[]> {
-  const { data } = await api.get<Space[]>("/spaces", { params: query });
+// ---------------------------------------------------------------------------
+// 2. Spaces & Workstation Inventory API
+// ---------------------------------------------------------------------------
+
+export async function getSpaces(params?: FilterSpaceDto): Promise<Space[]> {
+  const { data } = await api.get<Space[]>("/spaces", { params });
   return data;
 }
 
-export async function getSpaceById(id: number | string): Promise<Space> {
+export async function getSpaceDetail(id: number | string): Promise<Space> {
   const { data } = await api.get<Space>(`/spaces/${id}`);
   return data;
 }
+
+export const getSpaceById = getSpaceDetail;
 
 export async function getMySpaces(): Promise<Space[]> {
   const { data } = await api.get<Space[]>("/spaces/my-spaces");
@@ -346,31 +186,40 @@ export async function deleteSpace(id: number | string): Promise<{ message: strin
   return data;
 }
 
-// --- Reservations ---
+// ---------------------------------------------------------------------------
+// 3. Reservations & Bookings API
+// ---------------------------------------------------------------------------
+
 export async function createReservation(dto: CreateReservationDto): Promise<ReservationResponse> {
   const { data } = await api.post<ReservationResponse>("/reservations", dto);
   return data;
 }
 
-export async function getMyReservations(query?: ReservationQuery): Promise<Reservation[]> {
-  const { data } = await api.get<Reservation[]>("/reservations", { params: query });
+export async function getMyBookings(params?: FilterReservationDto): Promise<Reservation[]> {
+  const { data } = await api.get<Reservation[]>("/reservations", { params });
   return data;
 }
 
-export async function getAllReservations(query?: ReservationQuery): Promise<Reservation[]> {
-  const { data } = await api.get<Reservation[]>("/reservations", { params: query });
+export const getMyReservations = getMyBookings;
+
+export async function getAllBookings(params?: FilterReservationDto): Promise<Reservation[]> {
+  const { data } = await api.get<Reservation[]>("/reservations", { params });
   return data;
 }
+
+export const getAllReservations = getAllBookings;
 
 export async function getReservationById(id: number | string): Promise<Reservation> {
   const { data } = await api.get<Reservation>(`/reservations/${id}`);
   return data;
 }
 
-export async function cancelReservation(id: number | string): Promise<ReservationCancelResponse> {
+export async function cancelBooking(id: number | string): Promise<ReservationCancelResponse> {
   const { data } = await api.patch<ReservationCancelResponse>(`/reservations/${id}/cancel`);
   return data;
 }
+
+export const cancelReservation = cancelBooking;
 
 export async function updateReservationStatus(
   id: number | string,
@@ -380,7 +229,15 @@ export async function updateReservationStatus(
   return data;
 }
 
-// --- Check-in & Verification ---
+// ---------------------------------------------------------------------------
+// 4. Check-in & Verification API
+// ---------------------------------------------------------------------------
+
+export async function verifyCheckIn(code: string): Promise<any> {
+  const { data } = await api.post("/checkin/verify", { qrCode: code });
+  return data;
+}
+
 export async function verifyQr(dto: VerifyQrDto): Promise<any> {
   const { data } = await api.post("/checkin/verify", dto);
   return data;
@@ -394,15 +251,44 @@ export async function processCheckIn(dto: ProcessCheckinDto): Promise<CheckinRes
   return data;
 }
 
-export async function processCheckOut(dto: ProcessCheckinDto): Promise<CheckinResponse> {
-  const { data } = await api.post<CheckinResponse>("/checkin/process", {
-    ...dto,
-    action: dto.action || "checkout",
-  });
+export async function processCheckOut(
+  target: string | ProcessCheckinDto
+): Promise<CheckinResponse> {
+  const payload = typeof target === "string" ? { qrCode: target, action: "checkout" } : { ...target, action: "checkout" };
+  const { data } = await api.post<CheckinResponse>("/checkin/process", payload);
   return data;
 }
 
-// --- Discounts ---
+// ---------------------------------------------------------------------------
+// 5. Users & Staff Management API
+// ---------------------------------------------------------------------------
+
+export async function getAllMembers(): Promise<MemberUser[]> {
+  const { data } = await api.get<MemberUser[]>("/users/members");
+  return data;
+}
+
+export const getMembers = getAllMembers;
+
+export async function getStaffs(): Promise<StaffUser[]> {
+  const { data } = await api.get<StaffUser[]>("/users/staffs");
+  return data;
+}
+
+export async function deleteStaff(id: number | string): Promise<{ message: string }> {
+  const { data } = await api.delete<{ message: string }>(`/users/staffs/${id}`);
+  return data;
+}
+
+export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile> {
+  const { data } = await api.put<UserProfile>("/users/profile", dto);
+  return data;
+}
+
+// ---------------------------------------------------------------------------
+// 6. Discounts & Promo Codes API
+// ---------------------------------------------------------------------------
+
 export async function checkDiscount(code: string): Promise<DiscountCheckResponse> {
   const { data } = await api.get<DiscountCheckResponse>(`/discounts/check/${encodeURIComponent(code)}`);
   return data;
@@ -413,24 +299,31 @@ export async function getDiscounts(): Promise<Discount[]> {
   return data;
 }
 
-// --- Users & Staff ---
-export async function getMembers(): Promise<MemberUser[]> {
-  const { data } = await api.get<MemberUser[]>("/users/members");
+// ---------------------------------------------------------------------------
+// 7. Reports & Analytics API (Space Owner)
+// ---------------------------------------------------------------------------
+
+export async function getDashboardSummary(): Promise<DashboardSummary> {
+  const { data } = await api.get<DashboardSummary>("/reports/summary");
   return data;
 }
 
-export async function getStaffs(): Promise<StaffUser[]> {
-  const { data } = await api.get<StaffUser[]>("/users/staffs");
+export async function getMonthlyRevenue(year?: number): Promise<MonthlyRevenueItem[]> {
+  const { data } = await api.get<MonthlyRevenueItem[]>("/reports/monthly-revenue", {
+    params: { year: year || new Date().getFullYear() },
+  });
   return data;
 }
 
-export async function createStaff(dto: CreateStaffDto): Promise<any> {
-  const { data } = await api.post("/auth/staff", dto);
+export async function getSpaceTypeDistribution(): Promise<SpaceTypeDistributionItem[]> {
+  const { data } = await api.get<SpaceTypeDistributionItem[]>("/reports/space-distribution");
   return data;
 }
 
-export async function deleteStaff(id: number | string): Promise<{ message: string }> {
-  const { data } = await api.delete<{ message: string }>(`/users/staffs/${id}`);
+export async function getRecentTransactions(limit: number = 10): Promise<Reservation[]> {
+  const { data } = await api.get<Reservation[]>("/reports/recent-transactions", {
+    params: { limit },
+  });
   return data;
 }
 

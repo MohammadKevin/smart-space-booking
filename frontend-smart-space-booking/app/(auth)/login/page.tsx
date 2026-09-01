@@ -19,7 +19,6 @@ import {
   Building,
   Users,
   UserCheck,
-  Sparkles,
 } from "lucide-react";
 
 function LoginForm() {
@@ -63,23 +62,23 @@ function LoginForm() {
       });
 
       loginUser(response.access_token, response.user);
-      setSuccessMessage("Login berhasil! Mengalihkan...");
+      setSuccessMessage("Login berhasil! Mengalihkan ke dashboard...");
 
-      // Role-based routing
+      // Role-based routing scaffolding
       setTimeout(() => {
         if (redirectParam) {
           router.push(redirectParam);
           return;
         }
 
-        const role = response.user.role.toLowerCase();
+        const role = response.user.role?.toLowerCase();
         if (role === "admin_space" || role === "owner") {
-          router.push("/dashboard/spaces");
+          router.push("/dashboard/owner");
         } else if (role === "staff") {
-          router.push("/dashboard/checkin");
+          router.push("/dashboard/staff");
         } else {
           // member
-          router.push("/spaces");
+          router.push("/dashboard/member");
         }
       }, 700);
     } catch (err: unknown) {
@@ -90,32 +89,32 @@ function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 space-y-6">
+    <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex p-3 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 shadow-sm">
+        <div className="inline-flex p-3.5 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 shadow-sm">
           <Building2 className="w-7 h-7" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
           Selamat Datang Kembali
         </h1>
-        <p className="text-sm text-slate-500">
-          Masuk ke akun SmartSpace Anda (Member, Owner, atau Staff).
+        <p className="text-xs text-slate-500">
+          Masuk ke akun SmartSpace Anda (Member, Space Owner, atau Staff).
         </p>
       </div>
 
       {/* Alerts */}
       {errorMessage && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-sm animate-in fade-in duration-200">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
-          <div className="leading-snug">{errorMessage}</div>
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-700 text-xs animate-in fade-in duration-200">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+          <div className="leading-snug font-medium">{errorMessage}</div>
         </div>
       )}
 
       {successMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-700 text-sm animate-in fade-in duration-200">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" />
-          <div className="leading-snug">{successMessage}</div>
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-700 text-xs animate-in fade-in duration-200">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
+          <div className="leading-snug font-medium">{successMessage}</div>
         </div>
       )}
 
@@ -186,12 +185,12 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl font-semibold text-sm text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 mt-2"
+          className="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 mt-2"
         >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Memverifikasi Akun...</span>
+              <span>Memverifikasi Kredensial...</span>
             </>
           ) : (
             <>
@@ -202,24 +201,24 @@ function LoginForm() {
         </button>
       </form>
 
-      {/* Role Routing Info */}
-      <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-1.5 text-xs text-slate-600">
+      {/* Role Routing Scaffolding Hint */}
+      <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 text-xs text-slate-600">
         <div className="flex items-center gap-1.5 font-bold text-slate-800">
-          <ShieldCheck className="w-4 h-4 text-sky-500 shrink-0" />
-          <span>Sistem Otomatis Mendeteksi 3 Role:</span>
+          <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0" />
+          <span>Pengalihan Otomatis Sesuai Role:</span>
         </div>
-        <div className="grid grid-cols-3 gap-1 pt-1 text-[11px] text-center">
-          <div className="p-1.5 rounded-lg bg-white border border-slate-200">
+        <div className="grid grid-cols-3 gap-1.5 text-[11px] text-center">
+          <div className="p-2 rounded-xl bg-white border border-slate-200">
             <span className="font-bold text-sky-700 block">Member</span>
-            <span className="text-slate-400 text-[10px]">Booking</span>
+            <span className="text-slate-400 text-[10px]">/dashboard/member</span>
           </div>
-          <div className="p-1.5 rounded-lg bg-white border border-slate-200">
-            <span className="font-bold text-sky-700 block">Owner</span>
-            <span className="text-slate-400 text-[10px]">Kelola Space</span>
+          <div className="p-2 rounded-xl bg-white border border-slate-200">
+            <span className="font-bold text-sky-700 block">Space Owner</span>
+            <span className="text-slate-400 text-[10px]">/dashboard/owner</span>
           </div>
-          <div className="p-1.5 rounded-lg bg-white border border-slate-200">
+          <div className="p-2 rounded-xl bg-white border border-slate-200">
             <span className="font-bold text-sky-700 block">Staff</span>
-            <span className="text-slate-400 text-[10px]">Scan QR</span>
+            <span className="text-slate-400 text-[10px]">/dashboard/staff</span>
           </div>
         </div>
       </div>
@@ -232,7 +231,7 @@ function LoginForm() {
             href="/register"
             className="font-bold text-sky-600 hover:text-sky-700 hover:underline"
           >
-            Daftar Sekarang (Member & Owner)
+            Daftar Sekarang (Member & Space Owner)
           </Link>
         </p>
       </div>
