@@ -193,14 +193,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-200 bg-white space-y-2">
-          <Link
-            href="/"
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-cyan-700 hover:bg-cyan-50 rounded-lg transition-colors"
-          >
-            <Compass className="w-4 h-4 text-slate-400" />
-            <span>Lihat Landing Page</span>
-          </Link>
+        <div className="p-4 border-t border-slate-200 bg-white">
           <button
             type="button"
             onClick={handleLogout}
