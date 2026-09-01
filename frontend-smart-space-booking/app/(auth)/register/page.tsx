@@ -145,13 +145,14 @@ function RegisterForm() {
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4 sm:p-6 lg:p-10 bg-slate-50">
-      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+      <div className="w-full max-w-4xl bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
         {/* Left Side: Operational Info & Staff Provisioning Notice */}
         <div className="lg:col-span-5 bg-slate-900 text-white p-8 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
           <div className="space-y-6 relative z-10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white">
-                <Building2 className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-700 shadow-xs flex items-center justify-center bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-base tracking-tight text-white">SmartSpace</span>
             </div>

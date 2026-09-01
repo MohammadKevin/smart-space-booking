@@ -157,8 +157,9 @@ export default function DashboardLayout({
             href="/"
             className="flex items-center gap-2.5 px-1 py-1 group focus:outline-none"
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0 shadow-xs">
-              <Building2 className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-900 text-base tracking-tight">

@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Smart Space Booking | Coworking & Meeting Space Platform",
   description:
     "Reservasi instan coworking space, meeting room, dan private office dengan QR Code check-in cerdas dan harga transparan.",
+  icons: {
+    icon: "/icon-web.png",
+    shortcut: "/icon-web.png",
+    apple: "/icon-web.png",
+  },
 };
 
 export default function RootLayout({
@@ -16,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="h-full bg-slate-50 antialiased">
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-sky-500 selection:text-white">
+    <html lang="id" className="h-full bg-white antialiased">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white">
         <AuthProvider>
           <Navbar />
           <main className="flex-1 flex flex-col">{children}</main>

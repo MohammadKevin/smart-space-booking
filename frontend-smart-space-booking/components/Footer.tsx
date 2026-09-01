@@ -19,8 +19,9 @@ export function Footer() {
           {/* Brand Info */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shrink-0">
-                <Building2 className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-md overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-slate-900 text-sm tracking-tight">
                 SmartSpace
