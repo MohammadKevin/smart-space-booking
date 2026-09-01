@@ -22,6 +22,7 @@ import {
   TicketPercent,
   CalendarClock,
   ClipboardList,
+  User,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -133,6 +134,7 @@ export default function DashboardLayout({
     return [
       { label: "Tiket & Jadwal Saya", href: "/dashboard/member", icon: CalendarCheck },
       { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
+      { label: "Profil Member", href: "/dashboard/member/profile", icon: User },
     ];
   };
 
@@ -150,6 +152,7 @@ export default function DashboardLayout({
     if (pathname.startsWith("/dashboard/owner/staff")) return "Manajemen Staff";
     if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";
     if (pathname.startsWith("/dashboard/staff")) return "Terminal Check-In";
+    if (pathname.startsWith("/dashboard/member/profile")) return "Profil Member";
     if (pathname.startsWith("/dashboard/member")) return "Tiket & Jadwal Saya";
     return "Dashboard";
   };
