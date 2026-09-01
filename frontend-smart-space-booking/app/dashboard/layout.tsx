@@ -234,37 +234,17 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {role === "owner" ? (
-              <Link
-                href="/dashboard/owner/spaces"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-800 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 rounded-lg transition-colors"
-              >
-                <Building className="w-3.5 h-3.5 text-cyan-600" />
-                <span>Inventory Ruangan</span>
-              </Link>
-            ) : role === "member" ? (
-              <Link
-                href="/spaces"
-                className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-cyan-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                <Compass className="w-3.5 h-3.5 text-cyan-600" />
-                <span>Katalog Ruangan</span>
-              </Link>
-            ) : null}
-
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-cyan-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                {(getDisplayName() || "U").charAt(0).toUpperCase()}
-              </div>
-              <div className="hidden md:block text-left">
-                <p className="text-xs font-bold text-slate-900 leading-none">
-                  {getDisplayName()}
-                </p>
-                <p className="text-[10px] text-cyan-700 font-medium leading-none mt-0.5">
-                  {roleBadge.label}
-                </p>
-              </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-cyan-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+              {(getDisplayName() || "U").charAt(0).toUpperCase()}
+            </div>
+            <div className="hidden md:block text-left">
+              <p className="text-xs font-bold text-slate-900 leading-none">
+                {getDisplayName()}
+              </p>
+              <p className="text-[10px] text-cyan-700 font-medium leading-none mt-0.5">
+                {roleBadge.label}
+              </p>
             </div>
           </div>
         </header>
