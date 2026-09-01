@@ -65,8 +65,8 @@ export function Navbar() {
   const currentRole = getNormalizedRole();
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-14">
           {/* Brand Logo & Live Signal */}
           <Link
@@ -92,7 +92,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none"
+                  className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
                 >
                   <div className="w-6 h-6 rounded-md bg-slate-800 text-white font-bold text-xs flex items-center justify-center">
                     {(getDisplayName() || "U").charAt(0).toUpperCase()}
@@ -179,7 +179,7 @@ export function Navbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 text-left"
+                      className="w-full flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 text-left cursor-pointer"
                     >
                       <LogOut className="w-3.5 h-3.5 text-rose-500" />
                       <span>Keluar (Logout)</span>
@@ -197,7 +197,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-md transition-colors shadow-xs"
+                  className="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 rounded-md transition-colors shadow-sm shadow-cyan-600/30"
                 >
                   <span>Daftar</span>
                   <ArrowRight className="w-3 h-3" />
