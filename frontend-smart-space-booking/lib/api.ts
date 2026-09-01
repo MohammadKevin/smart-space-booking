@@ -66,6 +66,9 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
       }
     }
+    if (config.data instanceof FormData && config.headers) {
+      delete config.headers["Content-Type"];
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -198,12 +201,34 @@ export async function deleteSpace(id: number | string): Promise<{ message: strin
 export async function uploadSpaceImage(file: File): Promise<{ url: string; publicId?: string }> {
   const formData = new FormData();
   formData.append("file", file);
-  const { data } = await api.post<{ url: string; publicId?: string }>("/spaces/upload", formData, {
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") ||
+        localStorage.getItem("access_token") ||
+        sessionStorage.getItem("token")
+      : null;
+
+  const res = await fetch(`${API_BASE_URL}/spaces/upload`, {
+    method: "POST",
     headers: {
-      "Content-Type": "multipart/form-data",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
+    body: formData,
   });
-  return data;
+
+  if (!res.ok) {
+    let errMsg = `Upload gagal (Status ${res.status})`;
+    try {
+      const errJson = await res.json();
+      errMsg = errJson.message || errMsg;
+    } catch {
+      // ignore
+    }
+    throw new Error(errMsg);
+  }
+
+  return res.json();
 }
 
 // ---------------------------------------------------------------------------
