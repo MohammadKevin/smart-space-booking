@@ -9,12 +9,17 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { SpaceService } from './space.service';
 import { CreateSpaceDto } from './dto/create-space.dto';
@@ -24,12 +29,45 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { CloudinaryService } from '../common/cloudinary/cloudinary.service';
 import { Role } from '@prisma/client';
 
 @ApiTags('Spaces & Workstations')
 @Controller('spaces')
 export class SpaceController {
-  constructor(private readonly spaceService: SpaceService) {}
+  constructor(
+    private readonly spaceService: SpaceService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
+
+  @Post('upload')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.admin_space)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload Foto Ruangan ke Cloudinary',
+    description: 'Mengunggah file gambar ruangan dan mengembalikan URL publik Cloudinary.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    const result = await this.cloudinaryService.uploadImage(file, 'smartspace/spaces');
+    return {
+      url: (result as any).secure_url || (result as any).url,
+      publicId: (result as any).public_id,
+    };
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

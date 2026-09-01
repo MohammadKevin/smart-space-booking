@@ -195,6 +195,17 @@ export async function deleteSpace(id: number | string): Promise<{ message: strin
   return data;
 }
 
+export async function uploadSpaceImage(file: File): Promise<{ url: string; publicId?: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<{ url: string; publicId?: string }>("/spaces/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+}
+
 // ---------------------------------------------------------------------------
 // 3. Reservations & Bookings API
 // ---------------------------------------------------------------------------

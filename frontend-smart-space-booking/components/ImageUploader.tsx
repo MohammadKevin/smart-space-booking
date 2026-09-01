@@ -43,8 +43,8 @@ export function ImageUploader({
     }
   }, [value]);
 
-  // Client-side image compressor using Canvas
-  const processAndCompressFile = (file: File) => {
+  // Image processor with Cloudinary upload + Client Canvas fallback
+  const processAndCompressFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       alert("File harus berupa gambar (JPG, PNG, WebP).");
       return;
@@ -53,6 +53,22 @@ export function ImageUploader({
     setProcessing(true);
     setFileName(file.name);
 
+    try {
+      // 1. Try uploading directly to backend Cloudinary endpoint
+      const { uploadSpaceImage } = await import("@/lib/api");
+      const res = await uploadSpaceImage(file);
+      if (res && res.url) {
+        setPreview(res.url);
+        setFileSize(`${Math.round(file.size / 1024)} KB (Cloudinary CDN)`);
+        onChange(res.url);
+        setProcessing(false);
+        return;
+      }
+    } catch (uploadErr) {
+      console.warn("Cloudinary upload fallback to canvas:", uploadErr);
+    }
+
+    // 2. Fallback to client-side compressed base64 DataURL
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
