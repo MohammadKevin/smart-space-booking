@@ -3,7 +3,11 @@ name: Deploy Backend to cPanel
 on:
   push:
     branches:
-      - main # ganti ke master jika branch utamamu bernama master
+      - main
+    # Workflow hanya akan jalan jika ada perubahan di folder backend
+    paths:
+      - 'backend-smart-space-booking/**'
+      - '.github/workflows/deploy.yml'
 
 jobs:
   build-and-deploy:
@@ -18,8 +22,10 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: backend-smart-space-booking/package-lock.json
 
       - name: 📦 Build Project
+        working-directory: backend-smart-space-booking
         run: |
           npm ci
           npx prisma generate
@@ -30,7 +36,7 @@ jobs:
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "dist/"
+          SOURCE: "backend-smart-space-booking/dist/"
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
