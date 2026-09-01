@@ -54,8 +54,8 @@ export function ImageUploader({
     setFileName(file.name);
 
     try {
-      const { uploadSpaceImage } = await import("@/lib/api");
-      const res = await uploadSpaceImage(file);
+      const { uploadDirectToCloudinary } = await import("@/lib/cloudinary");
+      const res = await uploadDirectToCloudinary(file);
       if (res && res.url) {
         setPreview(res.url);
         setFileSize(`${Math.round(file.size / 1024)} KB (Cloudinary CDN)`);
@@ -64,9 +64,10 @@ export function ImageUploader({
         return;
       }
     } catch (uploadErr: unknown) {
-      const msg = uploadErr instanceof Error ? uploadErr.message : "Terjadi kesalahan saat upload gambar.";
+      const msg =
+        uploadErr instanceof Error ? uploadErr.message : "Terjadi kesalahan saat upload gambar.";
       console.error("Gagal upload foto ke Cloudinary:", uploadErr);
-      alert(`Gagal mengunggah foto: ${msg}`);
+      alert(`Gagal mengunggah foto ke Cloudinary: ${msg}`);
       setProcessing(false);
     }
   };

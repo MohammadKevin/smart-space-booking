@@ -10,7 +10,7 @@ export const CloudinaryProvider = {
       cloud_name:
         configService.get<string>('CLOUDINARY_CLOUD_NAME') ||
         process.env.CLOUDINARY_CLOUD_NAME ||
-        'n2q3f6ux',
+        'n2q3f6uz',
       api_key:
         configService.get<string>('CLOUDINARY_API_KEY') ||
         process.env.CLOUDINARY_API_KEY ||
