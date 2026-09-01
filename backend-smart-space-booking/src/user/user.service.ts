@@ -7,9 +7,6 @@ import { Role } from '@prisma/client';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Update data profil pengguna berdasarkan role
-   */
   async updateProfile(userId: number, role: Role, dto: UpdateProfileDto) {
     if (role === Role.member) {
       const member = await this.prisma.member.findUnique({
@@ -70,9 +67,6 @@ export class UserService {
     throw new ForbiddenException('Role tidak dikenali.');
   }
 
-  /**
-   * Mendapatkan seluruh data Member (Untuk Admin Space & Staff)
-   */
   async getAllMembers() {
     return this.prisma.member.findMany({
       include: {
@@ -94,9 +88,6 @@ export class UserService {
     });
   }
 
-  /**
-   * Mendapatkan daftar Staff milik Space Owner tertentu
-   */
   async getOwnerStaffs(ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -122,9 +113,6 @@ export class UserService {
     });
   }
 
-  /**
-   * Menghapus Staff oleh Space Owner
-   */
   async deleteStaff(staffId: number, ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -142,7 +130,6 @@ export class UserService {
       throw new NotFoundException('Staff tidak ditemukan atau bukan milik coworking space Anda.');
     }
 
-    // Hapus akun user yang berelasi (cascade akan menghapus staff)
     await this.prisma.user.delete({
       where: { id: staff.userId },
     });

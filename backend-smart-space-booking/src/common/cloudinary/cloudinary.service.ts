@@ -12,7 +12,6 @@ export class CloudinaryService {
       throw new BadRequestException('File gambar tidak boleh kosong');
     }
 
-    // Validate mime type
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException('Format file harus berupa gambar (JPEG, PNG, WEBP)');

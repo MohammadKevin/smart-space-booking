@@ -41,7 +41,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException('Sesi tidak valid atau pengguna tidak ditemukan.');
     }
 
-    // Hilangkan password dari request user
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }

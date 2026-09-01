@@ -19,9 +19,6 @@ import { Prisma, ReservasiStatus } from '@prisma/client';
 export class SpaceService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Membuat Workstation / Coworking Space baru
-   */
   async create(dto: CreateSpaceDto, ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -47,9 +44,6 @@ export class SpaceService {
     });
   }
 
-  /**
-   * Menampilkan semua space dengan opsi filter (tipe, kapasitas, pencarian, dan cek ketersediaan waktu)
-   */
   async findAll(filter: FilterSpaceDto) {
     const where: Prisma.SpaceWhereInput = {};
 
@@ -91,19 +85,16 @@ export class SpaceService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Jika parameter tanggal, jamMulai, dan durasiJam disediakan, lakukan filter availability
     if (filter.tanggal && filter.jamMulai && filter.durasiJam) {
       const targetDate = normalizeDateToStartOfDay(filter.tanggal);
       const newStartMinutes = timeStringToMinutes(filter.jamMulai);
       const newEndMinutes = newStartMinutes + filter.durasiJam * 60;
 
       return spaces.map((space) => {
-        // Cari apakah ada bentrokan reservasi aktif pada space ini
         const hasConflict = space.detailReservasi.some((detail) => {
           const res = detail.reservasi;
           if (!res) return false;
 
-          // Status yang dianggap menyita slot
           const isActiveStatus = (
             [
               ReservasiStatus.pending,
@@ -131,16 +122,12 @@ export class SpaceService {
       });
     }
 
-    // Bersihkan field detailReservasi dari response publik untuk keringanan payload
     return spaces.map((space) => {
       const { detailReservasi, ...spaceData } = space;
       return spaceData;
     });
   }
 
-  /**
-   * Detail satu space berdasarkan ID
-   */
   async findOne(id: number) {
     const space = await this.prisma.space.findUnique({
       where: { id },
@@ -156,9 +143,6 @@ export class SpaceService {
     return space;
   }
 
-  /**
-   * Mendapatkan daftar space milik pengelola (admin_space) yang sedang login
-   */
   async getMySpaces(ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -177,9 +161,6 @@ export class SpaceService {
     });
   }
 
-  /**
-   * Memperbarui data space (Hanya owner pemilik space)
-   */
   async update(id: number, dto: UpdateSpaceDto, ownerUserId: number) {
     const space = await this.findOne(id);
     const owner = await this.prisma.spaceOwner.findUnique({
@@ -206,9 +187,6 @@ export class SpaceService {
     });
   }
 
-  /**
-   * Menghapus space (Hanya owner pemilik space)
-   */
   async remove(id: number, ownerUserId: number) {
     const space = await this.findOne(id);
     const owner = await this.prisma.spaceOwner.findUnique({

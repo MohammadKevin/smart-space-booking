@@ -6,9 +6,6 @@ import { ReservasiStatus, SpaceTipe } from '@prisma/client';
 export class ReportService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Helper untuk mengambil data SpaceOwner berdasarkan userId
-   */
   private async getOwner(ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -21,13 +18,9 @@ export class ReportService {
     return owner;
   }
 
-  /**
-   * Ringkasan Metrik Dashboard untuk Admin Space
-   */
   async getDashboardSummary(ownerUserId: number) {
     const owner = await this.getOwner(ownerUserId);
 
-    // 1. Ambil seluruh reservasi pada space milik owner
     const reservations = await this.prisma.reservasi.findMany({
       where: { ownerId: owner.id },
       include: {
@@ -35,7 +28,6 @@ export class ReportService {
       },
     });
 
-    // 2. Hitung total revenue dari reservasi yang valid/sukses (disetujui, aktif, selesai)
     let totalRevenue = 0;
     const bookingCounts = {
       total: reservations.length,
@@ -60,7 +52,6 @@ export class ReportService {
       }
     }
 
-    // 3. Hitung jumlah spaces dan staffs
     const totalSpaces = await this.prisma.space.count({
       where: { ownerId: owner.id },
     });
@@ -82,9 +73,6 @@ export class ReportService {
     };
   }
 
-  /**
-   * Laporan Pendapatan Bulanan (Januari - Desember) untuk Tahun Tertentu
-   */
   async getMonthlyRevenue(ownerUserId: number, year: number = new Date().getFullYear()) {
     const owner = await this.getOwner(ownerUserId);
 
@@ -154,9 +142,6 @@ export class ReportService {
     };
   }
 
-  /**
-   * Distribusi Pendapatan dan Booking Berdasarkan Tipe Space (Desk, Meeting Room, Private Office)
-   */
   async getSpaceTypeDistribution(ownerUserId: number) {
     const owner = await this.getOwner(ownerUserId);
 
@@ -214,9 +199,6 @@ export class ReportService {
     return Object.values(distribution);
   }
 
-  /**
-   * Mengambil daftar transaksi reservasi terbaru
-   */
   async getRecentTransactions(ownerUserId: number, limit: number = 10) {
     const owner = await this.getOwner(ownerUserId);
 

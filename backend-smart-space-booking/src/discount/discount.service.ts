@@ -12,9 +12,6 @@ import { UpdateDiscountDto } from './dto/update-discount.dto';
 export class DiscountService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Membuat program promo / diskon baru
-   */
   async create(dto: CreateDiscountDto) {
     const tglAwal = new Date(dto.tanggalAwal);
     const tglAkhir = new Date(dto.tanggalAkhir);
@@ -43,9 +40,6 @@ export class DiscountService {
     });
   }
 
-  /**
-   * Menampilkan semua data promo / diskon
-   */
   async findAll() {
     return this.prisma.diskon.findMany({
       orderBy: { createdAt: 'desc' },
@@ -59,9 +53,6 @@ export class DiscountService {
     });
   }
 
-  /**
-   * Mendapatkan satu diskon berdasarkan ID
-   */
   async findOne(id: number) {
     const diskon = await this.prisma.diskon.findUnique({
       where: { id },
@@ -74,9 +65,6 @@ export class DiscountService {
     return diskon;
   }
 
-  /**
-   * Cek validitas promo berdasarkan kode atau ID
-   */
   async checkValidity(codeOrId: string | number) {
     let diskon: any = null;
 
@@ -110,9 +98,6 @@ export class DiscountService {
     };
   }
 
-  /**
-   * Memperbarui data diskon
-   */
   async update(id: number, dto: UpdateDiscountDto) {
     await this.findOne(id);
 
@@ -140,9 +125,6 @@ export class DiscountService {
     });
   }
 
-  /**
-   * Menghapus diskon
-   */
   async remove(id: number) {
     await this.findOne(id);
 

@@ -7,14 +7,11 @@ import { json, urlencoded } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 0. Support Local File & Image Base64 Uploads up to 10MB
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
-  // 1. Global Prefix API
   app.setGlobalPrefix('api');
 
-  // 2. Setup CORS Fleksibel (Localhost, Production Domain, Postman, Swagger)
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -33,7 +30,6 @@ async function bootstrap() {
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
   });
 
-  // 3. Global Validation Pipe (Validasi DTO otomatis)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -42,7 +38,6 @@ async function bootstrap() {
     }),
   );
 
-  // 4. Setup Dokumentasi API (Swagger)
   const config = new DocumentBuilder()
     .setTitle('Smart Space Booking API')
     .setDescription(
@@ -55,10 +50,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // 5. Dynamic Port Binding untuk Phusion Passenger cPanel
   const port = process.env.PORT || 8000;
   await app.listen(port);
   console.log(`\n🚀 Backend Server berjalan di: http://localhost:${port}/api`);
   console.log(`📑 Swagger Documentation: http://localhost:${port}/api/docs\n`);
 }
-bootstrap();
+bootstrap();

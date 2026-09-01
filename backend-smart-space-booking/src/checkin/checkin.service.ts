@@ -13,9 +13,6 @@ import { timeStringToMinutes, minutesToTimeString } from '../common/utils/time.u
 export class CheckinService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Helper untuk validasi bahwa reservasi berada di bawah coworking space staf/admin yang login
-   */
   private validateStaffOrOwnerPermission(reservationOwnerId: number, user: any) {
     if (user.role === Role.admin_space) {
       if (user.spaceOwner?.id !== reservationOwnerId) {
@@ -30,9 +27,6 @@ export class CheckinService {
     }
   }
 
-  /**
-   * Verifikasi QR code dan membaca detail status reservasi
-   */
   async verifyQr(qrCode: string, user: any) {
     const reservation = await this.prisma.reservasi.findUnique({
       where: { qrCode },
@@ -81,9 +75,6 @@ export class CheckinService {
     };
   }
 
-  /**
-   * Proses transisi status otomatis: disetujui -> aktif (Check-In) -> selesai (Check-Out)
-   */
   async processCheckin(dto: ProcessCheckinDto, user: any) {
     const reservation = await this.prisma.reservasi.findUnique({
       where: { qrCode: dto.qrCode },
@@ -106,7 +97,6 @@ export class CheckinService {
 
     const requestedAction = dto.action || CheckinAction.AUTO;
 
-    // Transisi 1: Check-in (disetujui -> aktif)
     if (
       reservation.status === ReservasiStatus.disetujui &&
       (requestedAction === CheckinAction.AUTO || requestedAction === CheckinAction.CHECKIN)
@@ -128,7 +118,6 @@ export class CheckinService {
       };
     }
 
-    // Transisi 2: Check-out (aktif -> selesai)
     if (
       reservation.status === ReservasiStatus.aktif &&
       (requestedAction === CheckinAction.AUTO || requestedAction === CheckinAction.CHECKOUT)
@@ -150,7 +139,6 @@ export class CheckinService {
       };
     }
 
-    // Validasi penanganan error status tidak sesuai
     if (reservation.status === ReservasiStatus.pending) {
       throw new BadRequestException(
         'Reservasi masih berstatus "pending". Harap setujui reservasi terlebih dahulu sebelum check-in.',

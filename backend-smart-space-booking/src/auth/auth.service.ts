@@ -21,9 +21,6 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  /**
-   * Login untuk semua role (admin_space, staff, member)
-   */
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { username: dto.username },
@@ -64,9 +61,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Registrasi Member
-   */
   async registerMember(dto: RegisterMemberDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { username: dto.username },
@@ -120,9 +114,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Registrasi Space Owner (admin_space)
-   */
   async registerOwner(dto: RegisterOwnerDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { username: dto.username },
@@ -175,9 +166,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Pembuatan Akun Staff oleh Space Owner (admin_space)
-   */
   async createStaff(dto: CreateStaffDto, ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
@@ -232,9 +220,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Mendapatkan profile pengguna yang sedang login
-   */
   async getProfile(userId: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

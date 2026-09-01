@@ -21,9 +21,6 @@ import { Prisma, ReservasiStatus, Role } from '@prisma/client';
 export class ReservationService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Membuat transaksi reservasi baru dengan validasi anti-collision dan kalkulasi harga/diskon
-   */
   async create(dto: CreateReservationDto, memberUserId: number) {
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
@@ -42,13 +39,11 @@ export class ReservationService {
       throw new NotFoundException(`Space dengan ID ${dto.spaceId} tidak ditemukan.`);
     }
 
-    // 1. Parsing dan validasi waktu
     const targetDate = normalizeDateToStartOfDay(dto.tanggalReservasi);
     const newStartMinutes = timeStringToMinutes(dto.jamMulai);
     const newEndMinutes = newStartMinutes + dto.durasiJam * 60;
     const jamSelesaiStr = minutesToTimeString(newEndMinutes);
 
-    // 2. Anti-Collision Booking Engine (Mengecek bentrokan slot)
     const existingReservations = await this.prisma.reservasi.findMany({
       where: {
         detailReservasi: {
@@ -82,7 +77,6 @@ export class ReservationService {
       }
     }
 
-    // 3. Kalkulasi Harga dan Diskon
     const basePrice = space.hargaPerJam * dto.durasiJam;
     let selectedDiskon: any = null;
     let totalHarga = basePrice;
@@ -115,10 +109,8 @@ export class ReservationService {
       }
     }
 
-    // 4. Generate Unique QR Code String
     const qrCode = generateQrCode();
 
-    // 5. Simpan transaksi ke Database
     const reservation = await this.prisma.$transaction(async (tx) => {
       const res = await tx.reservasi.create({
         data: {
@@ -158,9 +150,6 @@ export class ReservationService {
     };
   }
 
-  /**
-   * Menampilkan daftar reservasi berdasarkan role pengguna yang login
-   */
   async findAll(filter: FilterReservationDto, user: any) {
     const where: Prisma.ReservasiWhereInput = {};
 
@@ -227,9 +216,6 @@ export class ReservationService {
     });
   }
 
-  /**
-   * Detail satu reservasi berdasarkan ID
-   */
   async findOne(id: number, user: any) {
     const res = await this.prisma.reservasi.findUnique({
       where: { id },
@@ -249,7 +235,6 @@ export class ReservationService {
       throw new NotFoundException(`Reservasi dengan ID ${id} tidak ditemukan.`);
     }
 
-    // Validasi otorisasi akses
     if (user.role === Role.member && user.member?.id !== res.memberId) {
       throw new ForbiddenException('Anda tidak memiliki izin untuk melihat reservasi ini.');
     }
@@ -269,9 +254,6 @@ export class ReservationService {
     };
   }
 
-  /**
-   * Mengubah status reservasi (Disetujui, Aktif, Selesai, Dibatalkan) oleh Admin Space / Staff
-   */
   async updateStatus(id: number, dto: UpdateReservationStatusDto, user: any) {
     const res = await this.findOne(id, user);
 
@@ -299,9 +281,6 @@ export class ReservationService {
     };
   }
 
-  /**
-   * Pembatalan reservasi oleh Member (hanya jika status masih pending atau disetujui)
-   */
   async cancelMyReservation(id: number, memberUserId: number) {
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
