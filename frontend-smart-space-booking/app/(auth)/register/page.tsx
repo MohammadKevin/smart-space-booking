@@ -171,12 +171,12 @@ function RegisterForm() {
         </div>
       </div>
 
-      {/* Center 2-Column Pop-up Modal Card (Enlarged max-w-5xl / max-w-6xl) */}
+      {/* Center 2-Column Pop-up Modal Card (Identical 50/50 split and max-w-6xl) */}
       <div className="w-full max-w-5xl lg:max-w-6xl bg-white rounded-xl shadow-2xl shadow-slate-400/25 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 min-h-[580px]">
         {/* Left Side: 3D Illustration & Headline */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-8 sm:p-10 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90">
+        <div className="lg:col-span-6 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-8 sm:p-10 lg:p-12 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90">
           {/* Top Catchy Headline with Highlighted Accent Words */}
-          <div className="space-y-2 max-w-sm">
+          <div className="space-y-2 max-w-md">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
               Solusi lengkap untuk{" "}
               <span className="text-cyan-600 font-extrabold">Member</span> dan{" "}
@@ -186,7 +186,7 @@ function RegisterForm() {
 
           {/* Center 3D Illustration Graphic with Floating Badges */}
           <div className="relative my-6 flex items-center justify-center">
-            <div className="w-68 h-68 sm:w-76 sm:h-76 rounded-xl overflow-hidden shadow-xl shadow-cyan-900/10 border-2 border-white bg-white">
+            <div className="w-72 h-72 sm:w-80 sm:h-80 rounded-xl overflow-hidden shadow-xl shadow-cyan-900/10 border-2 border-white bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/auth-register-illustration.jpg"
@@ -216,8 +216,8 @@ function RegisterForm() {
         </div>
 
         {/* Right Side: Clean Form */}
-        <div className="lg:col-span-7 p-8 sm:p-10 lg:p-12 flex flex-col justify-center space-y-4 max-h-[88vh] overflow-y-auto">
-          <div className="space-y-4 max-w-lg mx-auto w-full">
+        <div className="lg:col-span-6 p-8 sm:p-10 lg:p-12 flex flex-col justify-center space-y-4 max-h-[88vh] overflow-y-auto">
+          <div className="space-y-4 max-w-md mx-auto w-full">
             {/* Top Brand Logo */}
             <div className="text-center space-y-1.5">
               <div className="inline-flex items-center gap-2.5">
