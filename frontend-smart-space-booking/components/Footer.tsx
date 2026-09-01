@@ -8,8 +8,13 @@ import { Building2, Compass, QrCode, ShieldCheck } from "lucide-react";
 export function Footer() {
   const pathname = usePathname();
 
-  // Hide footer inside dashboard
-  if (pathname.startsWith("/dashboard")) {
+  // Hide footer inside dashboard and auth pages
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/verify-email"
+  ) {
     return null;
   }
   return (

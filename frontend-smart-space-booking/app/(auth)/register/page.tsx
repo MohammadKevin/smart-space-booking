@@ -146,7 +146,7 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
       {/* Ambient Decorative Background Elements */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
@@ -501,7 +501,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-6 bg-slate-100">
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100">
           <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
         </div>
       }

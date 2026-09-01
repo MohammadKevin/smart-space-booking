@@ -26,8 +26,13 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  // When inside dashboard, use sidebar exclusively (no duplicate top navbar)
-  if (pathname.startsWith("/dashboard")) {
+  // Hide on dashboard and auth pages (login, register, verify-email)
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/verify-email"
+  ) {
     return null;
   }
 
