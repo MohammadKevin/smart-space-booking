@@ -151,7 +151,7 @@ export default function DashboardLayout({
     <div className="min-h-screen flex bg-slate-50/70 text-slate-900">
       {/* Desktop Left Sidebar */}
       <aside className="hidden md:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0 sticky top-0 h-screen">
-        <div className="p-4 space-y-5 overflow-y-auto">
+        <div className="p-4 space-y-6 overflow-y-auto">
           {/* Logo Header */}
           <Link
             href="/"
@@ -161,42 +161,14 @@ export default function DashboardLayout({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-slate-900 text-base tracking-tight">
-                SmartSpace
-              </span>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live
-              </span>
-            </div>
+            <span className="font-extrabold text-slate-900 text-lg tracking-tight">
+              SmartSpace
+            </span>
           </Link>
-
-          {/* User Role Card */}
-          <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-50/60 to-slate-50 border border-cyan-100 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Hak Akses
-              </span>
-              <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
-                  role === "owner"
-                    ? "bg-cyan-50 text-cyan-800 border-cyan-200"
-                    : role === "staff"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : "bg-sky-50 text-sky-800 border-sky-200"
-                }`}
-              >
-                {roleBadge.label}
-              </span>
-            </div>
-            <p className="text-xs font-bold text-slate-900 truncate">{getDisplayName()}</p>
-            <p className="text-[11px] font-mono text-cyan-700 truncate">@{user.username}</p>
-          </div>
 
           {/* Navigation Links */}
           <nav className="space-y-1">
-            <p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Navigasi Utama
             </p>
             {links.map((link) => {
@@ -300,11 +272,6 @@ export default function DashboardLayout({
         {/* Mobile Navigation Drawer */}
         {sidebarOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-md">
-            <div className="p-2.5 rounded-lg bg-cyan-50/60 border border-cyan-100">
-              <p className="text-xs font-bold text-slate-900">{getDisplayName()}</p>
-              <p className="text-[10px] text-cyan-700 font-medium">Role: {roleBadge.label}</p>
-            </div>
-
             <nav className="space-y-1">
               {links.map((link) => {
                 const Icon = link.icon;
