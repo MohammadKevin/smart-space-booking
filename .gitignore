@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json.bak
+
+# Build outputs
+dist/
+*/dist/
+build/
+*/build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+*/.env
+*/.env.*
+!*/.env.example
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+*/coverage/
+
+# Prisma generated (if outside node_modules)
+/generated/
+*/generated/

@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin_space
+  staff
+  member
+}
+
+enum SpaceTipe {
+  desk
+  meeting_room
+  private_office
+}
+
+enum ReservasiStatus {
+  pending
+  disetujui
+  aktif
+  selesai
+  dibatalkan
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  username  String      @unique
+  password  String
+  role      Role        @default(member)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  spaceOwner SpaceOwner?
+  staff      Staff?
+  member     Member?
+
+  @@map("users")
+}
+
+model SpaceOwner {
+  id           Int          @id @default(autoincrement())
+  namaCoworking String
+  namaPemilik  String
+  alamat       String
+  telp         String
+  userId       Int          @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  staffs       Staff[]
+  spaces       Space[]
+  reservasi    Reservasi[]
+
+  @@map("space_owners")
+}
+
+model Staff {
+  id        Int        @id @default(autoincrement())
+  namaStaff String
+  telp      String
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ownerId   Int
+  owner     SpaceOwner @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("staffs")
+}
+
+model Member {
+  id        Int         @id @default(autoincrement())
+  namaMember String
+  instansi  String
+  alamat    String
+  telp      String
+  foto      String?
+  userId    Int         @unique
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  reservasi Reservasi[]
+
+  @@map("members")
+}
+
+model Space {
+  id          Int               @id @default(autoincrement())
+  namaSpace   String
+  tipe        SpaceTipe
+  hargaPerJam Float
+  kapasitas   Int
+  foto        String?
+  deskripsi   String?           @db.Text
+  ownerId     Int
+  owner       SpaceOwner        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  detailReservasi DetailReservasi[]
+
+  @@map("spaces")
+}
+
+model Diskon {
+  id               Int               @id @default(autoincrement())
+  namaDiskon       String
+  kodeDiskon       String?           @unique
+  persentaseDiskon Float
+  tanggalAwal      DateTime
+  tanggalAkhir     DateTime
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  detailReservasi  DetailReservasi[]
+
+  @@map("diskon")
+}
+
+model Reservasi {
+  id               Int              @id @default(autoincrement())
+  tanggalReservasi DateTime
+  jamMulai         String           // Format "HH:mm"
+  durasiJam        Int
+  status           ReservasiStatus  @default(pending)
+  qrCode           String           @unique
+  ownerId          Int
+  owner            SpaceOwner       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  memberId         Int
+  member           Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  detailReservasi  DetailReservasi?
+
+  @@map("reservasi")
+}
+
+model DetailReservasi {
+  id          Int        @id @default(autoincrement())
+  reservasiId Int        @unique
+  reservasi   Reservasi  @relation(fields: [reservasiId], references: [id], onDelete: Cascade)
+  spaceId     Int
+  space       Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  diskonId    Int?
+  diskon      Diskon?    @relation(fields: [diskonId], references: [id], onDelete: SetNull)
+  totalHarga  Float
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("detail_reservasi")
+}
