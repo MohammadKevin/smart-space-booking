@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -25,6 +25,7 @@ import {
   User,
   ReceiptText,
   Wallet,
+  AlertCircle,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -36,6 +37,22 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, isAuthenticated, isLoading, logoutUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      timerRef.current = setTimeout(() => {
+        setLoadingTimedOut(true);
+      }, 8000);
+    } else {
+      setLoadingTimedOut(false);
+      if (timerRef.current) clearTimeout(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [isLoading]);
 
   const getNormalizedRole = () => {
     if (!user) return "";
@@ -85,9 +102,40 @@ export default function DashboardLayout({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-        <div className="flex flex-col items-center gap-2 text-slate-500">
-          <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
-          <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
+        <div className="flex flex-col items-center gap-3 text-slate-500 max-w-xs text-center">
+          {loadingTimedOut ? (
+            <>
+              <AlertCircle className="w-7 h-7 text-amber-500" />
+              <p className="text-sm font-semibold text-slate-800">Sesi Tidak Dapat Diverifikasi</p>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Server terlalu lama merespons. Silakan login ulang atau coba lagi.
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    logoutUser();
+                    router.push("/login");
+                  }}
+                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors"
+                >
+                  Login Ulang
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                >
+                  Muat Ulang
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
+              <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
+            </>
+          )}
         </div>
       </div>
     );

@@ -43,7 +43,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Initial check from localStorage
     const storedToken = localStorage.getItem("token") || localStorage.getItem("access_token");
     const storedUser = localStorage.getItem("user");
 
@@ -56,7 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Ignore json parse error
         }
       }
-      refreshUser();
+
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+      }, 10000);
+
+      refreshUser().finally(() => clearTimeout(timeout));
     } else {
       setIsLoading(false);
     }

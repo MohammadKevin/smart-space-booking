@@ -29,6 +29,7 @@ export default function HomePage() {
   const router = useRouter();
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Command bar filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,11 +39,12 @@ export default function HomePage() {
   useEffect(() => {
     async function loadFeaturedSpaces() {
       setLoading(true);
+      setError(false);
       try {
         const data = await getSpaces();
         setSpaces(data.slice(0, 6));
       } catch {
-        // Handled gracefully with fallback
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -364,6 +366,29 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        ) : error ? (
+          <div className="p-10 text-center bg-white rounded-xl border border-rose-200 space-y-3">
+            <Building2 className="w-8 h-8 text-rose-400 mx-auto" />
+            <p className="text-sm font-semibold text-slate-800">Gagal Memuat Data Ruangan</p>
+            <p className="text-xs text-slate-500">
+              Server API sedang tidak merespons atau koneksi terputus. Silakan coba lagi.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setError(false);
+                setLoading(true);
+                getSpaces()
+                  .then((data) => setSpaces(data.slice(0, 6)))
+                  .catch(() => setError(true))
+                  .finally(() => setLoading(false));
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors"
+            >
+              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Coba Lagi</span>
+            </button>
           </div>
         ) : spaces.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
