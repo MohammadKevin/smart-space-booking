@@ -67,9 +67,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(
-        `Email '${dto.email}' sudah terdaftar.`,
-      );
+      throw new ConflictException(`Email '${dto.email}' sudah terdaftar.`);
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -122,9 +120,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(
-        `Email '${dto.email}' sudah terdaftar.`,
-      );
+      throw new ConflictException(`Email '${dto.email}' sudah terdaftar.`);
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -186,9 +182,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(
-        `Email '${dto.email}' sudah terdaftar.`,
-      );
+      throw new ConflictException(`Email '${dto.email}' sudah terdaftar.`);
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
