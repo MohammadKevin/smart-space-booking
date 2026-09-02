@@ -469,9 +469,10 @@ export async function startPayment(
   return data;
 }
 
-// List transactions, scoped by role (member/owner/staff)
-export async function getTransactions(): Promise<Transaksi[]> {
-  const { data } = await api.get<any>("/transactions");
+// List transactions, scoped by role (member/owner/staff), optionally filtered by spaceId
+export async function getTransactions(spaceId?: number | string): Promise<Transaksi[]> {
+  const url = spaceId ? `/transactions?spaceId=${spaceId}` : "/transactions";
+  const { data } = await api.get<any>(url);
   if (Array.isArray(data)) {
     return data;
   }

@@ -4,6 +4,7 @@ import {
   Post,
   Patch,
   Param,
+  Query,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { TransactionService } from './transaction.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -46,10 +48,32 @@ export class TransactionController {
   @ApiOperation({
     summary: 'Daftar Transaksi Sesuai Role',
     description:
-      'Member melihat transaksinya sendiri; Admin Space & Staff melihat seluruh transaksi pada coworking space mereka.',
+      'Member melihat transaksinya sendiri; Admin Space & Staff melihat seluruh transaksi pada coworking space mereka (dapat difilter per spaceId).',
   })
-  findAll(@GetUser() user: any) {
-    return this.transactionService.findAll(user);
+  @ApiQuery({
+    name: 'spaceId',
+    required: false,
+    type: Number,
+    description: 'Filter transaksi berdasarkan ID Ruangan / Space',
+  })
+  findAll(@GetUser() user: any, @Query('spaceId') spaceId?: string) {
+    return this.transactionService.findAll(
+      user,
+      spaceId ? Number(spaceId) : undefined,
+    );
+  }
+
+  @Get('space/:spaceId')
+  @ApiOperation({
+    summary: 'Daftar Transaksi Berdasarkan ID Ruangan (Space)',
+    description:
+      'Mengambil riwayat transaksi yang terkait dengan ruangan tertentu.',
+  })
+  findBySpace(
+    @Param('spaceId', ParseIntPipe) spaceId: number,
+    @GetUser() user: any,
+  ) {
+    return this.transactionService.findAll(user, spaceId);
   }
 
   @Get(':id')

@@ -280,7 +280,11 @@ export class TransactionService {
   }
 
   /** List transactions scoped by role (member sees own, owner/staff sees space's). */
-  async findAll(user: any) {
+  async findAll(user: any, spaceId?: number) {
+    if (!this.prisma.transaksi) {
+      return [];
+    }
+
     const where: any = {};
 
     if (user.role === Role.member) {
@@ -300,6 +304,15 @@ export class TransactionService {
       where.reservasi = { ownerId: user.staff.ownerId };
     } else {
       throw new ForbiddenException('Role tidak dikenali.');
+    }
+
+    if (spaceId) {
+      where.reservasi = {
+        ...where.reservasi,
+        detailReservasi: {
+          spaceId: spaceId,
+        },
+      };
     }
 
     return this.prisma.transaksi.findMany({
