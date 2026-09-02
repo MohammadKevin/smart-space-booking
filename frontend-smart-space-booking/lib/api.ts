@@ -44,10 +44,6 @@ export * from "@/types/api";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api-ukk.budayakita.com/api";
 
-// ---------------------------------------------------------------------------
-// Central Axios Instance & Interceptors
-// ---------------------------------------------------------------------------
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -56,7 +52,6 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Request Interceptor: Attach Authorization Bearer Token & Multi-Tenancy Header (x-maker-key / x-app-key)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -86,7 +81,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle 401 Unauthorized redirect
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
@@ -109,7 +103,6 @@ api.interceptors.response.use(
   }
 );
 
-// Helper for extracting readable error messages from Axios responses
 export function getApiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data;
@@ -136,10 +129,6 @@ export function getApiErrorMessage(error: unknown): string {
   }
   return "Terjadi kesalahan pada sistem. Silakan coba lagi.";
 }
-
-// ---------------------------------------------------------------------------
-// 1. Authentication & User Provisioning API
-// ---------------------------------------------------------------------------
 
 export async function login(dto: LoginDto): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>("/auth/login", dto);
@@ -173,10 +162,6 @@ export async function createStaff(dto: CreateStaffDto): Promise<any> {
   const { data } = await api.post("/auth/staff", dto);
   return data;
 }
-
-// ---------------------------------------------------------------------------
-// 2. Spaces & Workstation Inventory API
-// ---------------------------------------------------------------------------
 
 export async function getSpaces(params?: FilterSpaceDto): Promise<Space[]> {
   const { data } = await api.get<Space[]>("/spaces", { params });
@@ -235,17 +220,12 @@ export async function uploadSpaceImage(file: File): Promise<{ url: string; publi
       const errJson = await res.json();
       errMsg = errJson.message || errMsg;
     } catch {
-      // ignore
     }
     throw new Error(errMsg);
   }
 
   return res.json();
 }
-
-// ---------------------------------------------------------------------------
-// 3. Reservations & Bookings API
-// ---------------------------------------------------------------------------
 
 export async function createReservation(dto: CreateReservationDto): Promise<ReservationResponse> {
   const { data } = await api.post<ReservationResponse>("/reservations", dto);
@@ -286,10 +266,6 @@ export async function updateReservationStatus(
   return data;
 }
 
-// ---------------------------------------------------------------------------
-// 4. Check-in & Verification API
-// ---------------------------------------------------------------------------
-
 export async function verifyCheckIn(code: string): Promise<any> {
   const { data } = await api.post("/checkin/verify", { qrCode: code });
   return data;
@@ -316,10 +292,6 @@ export async function processCheckOut(
   return data;
 }
 
-// ---------------------------------------------------------------------------
-// 5. Users & Staff Management API
-// ---------------------------------------------------------------------------
-
 export async function getAllMembers(): Promise<MemberUser[]> {
   const { data } = await api.get<MemberUser[]>("/users/members");
   return data;
@@ -344,10 +316,6 @@ export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile>
   }
   return data;
 }
-
-// ---------------------------------------------------------------------------
-// 6. Discounts & Promo Codes API
-// ---------------------------------------------------------------------------
 
 export async function checkDiscount(code: string): Promise<any> {
   const { data } = await api.get<any>(`/discounts/check/${encodeURIComponent(code)}`);
@@ -380,10 +348,6 @@ export async function deleteDiscount(id: number | string): Promise<{ message: st
   const { data } = await api.delete<{ message: string }>(`/discounts/${id}`);
   return data;
 }
-
-// ---------------------------------------------------------------------------
-// 7. Reports & Financial Analytics API (Space Owner)
-// ---------------------------------------------------------------------------
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const { data } = await api.get<any>("/reports/summary");
@@ -458,11 +422,6 @@ export async function getRecentTransactions(limit: number = 10): Promise<Reserva
   return [];
 }
 
-// ---------------------------------------------------------------------------
-// Transactions & Payments API
-// ---------------------------------------------------------------------------
-
-// Start a Midtrans Snap payment for an approved reservation (member)
 export async function startPayment(
   reservationId: number
 ): Promise<StartPaymentResponse> {
@@ -472,7 +431,6 @@ export async function startPayment(
   return data;
 }
 
-// List transactions, scoped by role (member/owner/staff), optionally filtered by spaceId
 export async function getTransactions(spaceId?: number | string): Promise<Transaksi[]> {
   const url = spaceId ? `/transactions?spaceId=${spaceId}` : "/transactions";
   const { data } = await api.get<any>(url);
@@ -485,7 +443,6 @@ export async function getTransactions(spaceId?: number | string): Promise<Transa
   return [];
 }
 
-// Fetch a single transaction / invoice by id
 export async function getTransaction(id: number): Promise<Transaksi> {
   const { data } = await api.get<any>(`/transactions/${id}`);
   if (data && data.data) {
@@ -494,13 +451,11 @@ export async function getTransaction(id: number): Promise<Transaksi> {
   return data;
 }
 
-// Reconcile payment status with Midtrans (member/owner/staff)
 export async function syncPayment(id: number): Promise<any> {
   const { data } = await api.post<any>(`/transactions/${id}/sync`);
   return data;
 }
 
-// Owner/Staff marks a paid transaction as refund
 export async function markRefund(id: number): Promise<any> {
   const { data } = await api.patch<any>(`/transactions/${id}/refund`);
   return data;

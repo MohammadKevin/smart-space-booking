@@ -34,7 +34,6 @@ function SpacesContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter States
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedType, setSelectedType] = useState(initialType);
   const [minCapacity, setMinCapacity] = useState(initialCapacity);
@@ -56,18 +55,14 @@ function SpacesContent() {
     fetchSpacesData();
   }, []);
 
-  // Filter Logic
   const filteredSpaces = useMemo(() => {
     return spaces.filter((space) => {
-      // Type Filter
       if (selectedType && space.tipe !== selectedType) {
         return false;
       }
-      // Capacity Filter
       if (minCapacity && (space.kapasitas || 0) < parseInt(minCapacity, 10)) {
         return false;
       }
-      // Search Query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = space.namaSpace?.toLowerCase().includes(query);
@@ -91,7 +86,6 @@ function SpacesContent() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-      {/* Catalog Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
@@ -128,11 +122,8 @@ function SpacesContent() {
         </div>
       </div>
 
-      {/* Responsive Command-Bar Filter Box */}
       <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs">
-        {/* Top Controls Row */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          {/* Keyword Search */}
           <div className="md:col-span-6 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
             <input
@@ -153,7 +144,6 @@ function SpacesContent() {
             )}
           </div>
 
-          {/* Type Filter */}
           <div className="grid grid-cols-2 md:col-span-6 gap-2 sm:gap-3">
             <div>
               <select
@@ -168,7 +158,6 @@ function SpacesContent() {
               </select>
             </div>
 
-            {/* Min Capacity Filter */}
             <div>
               <select
                 value={minCapacity}
@@ -185,7 +174,6 @@ function SpacesContent() {
           </div>
         </div>
 
-        {/* Quick Type Filter Pills & Counter Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-slate-400 font-semibold mr-1 hidden sm:inline">Kategori:</span>
@@ -227,7 +215,6 @@ function SpacesContent() {
         </div>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -238,7 +225,6 @@ function SpacesContent() {
         </div>
       )}
 
-      {/* Grid of Space Cards */}
       {loading ? (
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2.5 py-3.5 px-5 bg-gradient-to-r from-cyan-50/80 via-white to-sky-50/80 rounded-xl border border-cyan-200/80 text-cyan-800 text-xs font-bold shadow-2xs">

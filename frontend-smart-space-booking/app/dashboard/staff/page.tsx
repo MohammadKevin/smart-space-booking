@@ -41,7 +41,6 @@ export default function StaffTerminalPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckinResponse | null>(null);
 
-  // Active Occupancy List
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loadingActive, setLoadingActive] = useState(true);
 
@@ -51,7 +50,6 @@ export default function StaffTerminalPage() {
       const all = await getAllBookings();
       setReservations(all || []);
     } catch {
-      // Handled silently
     } finally {
       setLoadingActive(false);
     }
@@ -66,7 +64,6 @@ export default function StaffTerminalPage() {
   );
   const checkedInNow = reservations.filter((r) => r.status?.toLowerCase() === "aktif");
 
-  // Core processor for both Camera Scan & Manual Submit
   const executeCheckinProcess = async (codeToProcess: string) => {
     if (!codeToProcess.trim()) {
       setError("Masukkan atau scan kode tiket QR.");
@@ -118,7 +115,6 @@ export default function StaffTerminalPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
@@ -144,7 +140,6 @@ export default function StaffTerminalPage() {
         </button>
       </div>
 
-      {/* KPI Overview Pills */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
@@ -181,11 +176,8 @@ export default function StaffTerminalPage() {
         </div>
       </div>
 
-      {/* Main Terminal Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Scanner & Input */}
         <div className="lg:col-span-7 space-y-5">
-          {/* Mode Switcher */}
           <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-xs flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
               <button
@@ -214,7 +206,6 @@ export default function StaffTerminalPage() {
               </button>
             </div>
 
-            {/* Action Mode Pills */}
             <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 text-[11px]">
               {(["auto", "checkin", "checkout"] as const).map((mode) => (
                 <button
@@ -233,7 +224,6 @@ export default function StaffTerminalPage() {
             </div>
           </div>
 
-          {/* Scanner or Manual Form */}
           {inputMode === "camera" ? (
             <LiveQrScanner
               onScanSuccess={(code) => executeCheckinProcess(code)}
@@ -282,7 +272,6 @@ export default function StaffTerminalPage() {
             </div>
           )}
 
-          {/* Feedback & Result Alerts */}
           {error && (
             <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs shadow-xs animate-shake">
               <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
@@ -325,7 +314,6 @@ export default function StaffTerminalPage() {
           )}
         </div>
 
-        {/* Right Column: Active Occupancy Table */}
         <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-xs">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>

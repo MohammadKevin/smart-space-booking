@@ -36,24 +36,20 @@ function RegisterForm() {
   const router = useRouter();
   const [role, setRole] = useState<RegisterRole>("member");
 
-  // Common Fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Member Specific
   const [namaMember, setNamaMember] = useState("");
   const [memberTelp, setMemberTelp] = useState("");
   const [instansi, setInstansi] = useState("");
   const [memberAlamat, setMemberAlamat] = useState("");
 
-  // Owner Specific
   const [namaCoworking, setNamaCoworking] = useState("");
   const [namaPemilik, setNamaPemilik] = useState("");
   const [ownerTelp, setOwnerTelp] = useState("");
   const [alamat, setAlamat] = useState("");
 
-  // State
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -149,7 +145,6 @@ function RegisterForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
-      {/* Top-Left Back to Home Button */}
       <Link
         href="/"
         className="absolute top-5 left-5 sm:top-7 sm:left-8 z-30 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/95 hover:bg-white text-slate-700 hover:text-cyan-700 font-semibold text-xs border border-slate-200 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all group"
@@ -158,11 +153,9 @@ function RegisterForm() {
         <span>Kembali ke Beranda</span>
       </Link>
 
-      {/* Ambient Decorative Background Elements */}
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Decorative Diagonal Stripes Pattern in Top Right */}
       <div className="absolute top-6 right-8 opacity-20 pointer-events-none hidden sm:block">
         <div className="flex gap-2 transform -rotate-45">
           <div className="w-1.5 h-16 bg-cyan-600 rounded-full" />
@@ -172,11 +165,8 @@ function RegisterForm() {
         </div>
       </div>
 
-      {/* Center 2-Column Pop-up Modal Card (Exact lg:h-[640px] and max-w-6xl) */}
       <div className="w-full max-w-5xl lg:max-w-6xl bg-white rounded-xl shadow-2xl shadow-slate-400/25 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 lg:h-[640px]">
-        {/* Left Side: 3D Illustration & Headline */}
         <div className="lg:col-span-6 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-8 sm:p-10 lg:p-12 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90 h-full">
-          {/* Top Catchy Headline with Highlighted Accent Words */}
           <div className="space-y-2 max-w-md">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
               Solusi lengkap untuk{" "}
@@ -185,10 +175,8 @@ function RegisterForm() {
             </h2>
           </div>
 
-          {/* Center 3D Illustration Graphic with Floating Badges */}
           <div className="relative my-4 flex items-center justify-center">
             <div className="w-68 h-68 sm:w-76 sm:h-76 rounded-xl overflow-hidden shadow-xl shadow-cyan-900/10 border-2 border-white bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/auth-register-illustration.jpg"
                 alt="SmartSpace Onboarding Illustration"
@@ -196,34 +184,28 @@ function RegisterForm() {
               />
             </div>
 
-            {/* Floating Top Left Badge */}
             <div className="absolute -top-3 -left-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
               <Building className="w-4 h-4 text-cyan-600" />
               <span>WorkNest</span>
             </div>
 
-            {/* Floating Bottom Right Badge */}
             <div className="absolute -bottom-3 -right-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Registrasi Cepat</span>
             </div>
           </div>
 
-          {/* Bottom Live Subtitle */}
           <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 pt-1">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
             <span>Mulai Reservasi & Kelola Ruangan Kerja</span>
           </div>
         </div>
 
-        {/* Right Side: Clean Form */}
         <div className="lg:col-span-6 p-8 sm:p-10 lg:p-12 flex flex-col justify-between h-full overflow-y-auto">
           <div className="space-y-3.5 max-w-md mx-auto w-full my-auto">
-            {/* Top Brand Logo */}
             <div className="text-center space-y-1.5">
               <div className="inline-flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-extrabold text-slate-900 text-xl tracking-tight">
@@ -245,7 +227,6 @@ function RegisterForm() {
               </p>
             </div>
 
-            {/* Segmented Tab Role Selector */}
             <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-lg border border-slate-200 gap-1">
               <button
                 type="button"
@@ -279,7 +260,6 @@ function RegisterForm() {
               </button>
             </div>
 
-            {/* Error Alert */}
             {errorMessage && (
               <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2 text-rose-800 text-xs">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -287,7 +267,6 @@ function RegisterForm() {
               </div>
             )}
 
-            {/* Success Alert */}
             {successMessage && (
               <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2 text-emerald-800 text-xs">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
@@ -296,7 +275,6 @@ function RegisterForm() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Common Fields: Email & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-slate-700">
@@ -340,7 +318,6 @@ function RegisterForm() {
                 </div>
               </div>
 
-              {/* Conditional Fields based on Role */}
               {role === "member" ? (
                 <div className="space-y-2.5 pt-0.5">
                   <div className="space-y-1">
@@ -470,7 +447,6 @@ function RegisterForm() {
                 </div>
               )}
 
-              {/* Staff notice mini banner */}
               <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-[10px] text-slate-500 flex items-start gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-cyan-600 shrink-0 mt-0.5" />
                 <span>Akun Staff ditambahkan via Dashboard Space Owner (tidak lewat registrasi mandiri).</span>

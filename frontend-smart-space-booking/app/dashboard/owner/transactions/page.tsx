@@ -143,7 +143,6 @@ export default function OwnerTransactionsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="space-y-1.5 relative z-10">
@@ -171,7 +170,6 @@ export default function OwnerTransactionsPage() {
         </div>
       </div>
 
-      {/* Alerts */}
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
@@ -194,7 +192,6 @@ export default function OwnerTransactionsPage() {
         </div>
       )}
 
-      {/* Filter Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg w-full lg:w-auto overflow-x-auto">
           {tabs.map((tab) => (
@@ -225,7 +222,6 @@ export default function OwnerTransactionsPage() {
         </div>
       </div>
 
-      {/* KPI Mini Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center shrink-0">
@@ -265,7 +261,6 @@ export default function OwnerTransactionsPage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
         {loading ? (
           <div className="p-16 text-center">
@@ -376,7 +371,6 @@ export default function OwnerTransactionsPage() {
         )}
       </div>
 
-      {/* Detail Modal */}
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8">
@@ -463,7 +457,6 @@ export default function OwnerTransactionsPage() {
         </div>
       )}
 
-      {/* Refund Modal */}
       {refundTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

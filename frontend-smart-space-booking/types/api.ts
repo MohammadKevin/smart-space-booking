@@ -9,10 +9,6 @@ export type ReservationStatus =
   | "selesai"
   | "dibatalkan";
 
-// ---------------------------------------------------------------------------
-// User & Auth Profiles
-// ---------------------------------------------------------------------------
-
 export interface MemberProfile {
   id: number;
   namaMember: string;
@@ -97,10 +93,6 @@ export interface StaffUser {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Auth DTOs
-// ---------------------------------------------------------------------------
-
 export interface LoginDto {
   email: string;
   password: string;
@@ -143,10 +135,6 @@ export interface UpdateProfileDto {
   foto?: string;
   namaCoworking?: string;
 }
-
-// ---------------------------------------------------------------------------
-// Space Interfaces & DTOs
-// ---------------------------------------------------------------------------
 
 export interface Space {
   id: number;
@@ -192,10 +180,6 @@ export interface FilterSpaceDto {
   durasiJam?: number;
 }
 
-// ---------------------------------------------------------------------------
-// Discount Interfaces & DTOs
-// ---------------------------------------------------------------------------
-
 export interface Discount {
   id: number;
   namaDiskon: string;
@@ -228,10 +212,6 @@ export interface DiscountCheckResponse {
   message?: string;
   data?: Discount;
 }
-
-// ---------------------------------------------------------------------------
-// Reservation Interfaces & DTOs
-// ---------------------------------------------------------------------------
 
 export interface DetailReservasi {
   id: number;
@@ -287,10 +267,6 @@ export interface ReservationCancelResponse {
   data: Reservation;
 }
 
-// ---------------------------------------------------------------------------
-// Transactions, Payments & Midtrans
-// ---------------------------------------------------------------------------
-
 export type PaymentStatus =
   | "belum_bayar"
   | "menunggu_pembayaran"
@@ -339,10 +315,6 @@ export interface TransaksiDetailResponse {
   data: Transaksi;
 }
 
-// ---------------------------------------------------------------------------
-// QR Check-in & Verification
-// ---------------------------------------------------------------------------
-
 export interface VerifyQrDto {
   qrCode: string;
 }
@@ -363,10 +335,6 @@ export interface CheckinResponse {
     reservasi?: Reservation;
   };
 }
-
-// ---------------------------------------------------------------------------
-// Reports & Financial Analytics
-// ---------------------------------------------------------------------------
 
 export interface DashboardSummary {
   totalRevenue: number;

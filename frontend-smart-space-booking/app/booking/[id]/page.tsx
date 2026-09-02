@@ -44,15 +44,13 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [loadingSpace, setLoadingSpace] = useState(true);
   const [spaceError, setSpaceError] = useState<string | null>(null);
 
-  // Form State
   const todayStr = new Date().toISOString().split("T")[0];
   const [tanggalReservasi, setTanggalReservasi] = useState(todayStr);
   const [jamMulai, setJamMulai] = useState("09:00");
   const [durasiJam, setDurasiJam] = useState(2);
 
-  // Availability State (per start-hour slot for the selected date)
-  const SERVICE_START = 8; // 08:00 WIB
-  const SERVICE_END = 20; // 20:00 WIB
+  const SERVICE_START = 8;
+  const SERVICE_END = 20;
   const SLOT_HOURS = Array.from(
     { length: SERVICE_END - SERVICE_START + 1 },
     (_, i) => SERVICE_START + i,
@@ -60,7 +58,6 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [availability, setAvailability] = useState<Record<string, boolean>>({});
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
-  // Promo State
   const [promoInput, setPromoInput] = useState("");
   const [checkingPromo, setCheckingPromo] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
@@ -69,7 +66,6 @@ export default function BookingPage({ params }: BookingPageProps) {
     text: string;
   } | null>(null);
 
-  // Submit State
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [bookingSuccessData, setBookingSuccessData] = useState<any | null>(null);
@@ -92,9 +88,6 @@ export default function BookingPage({ params }: BookingPageProps) {
     }
   }, [spaceId]);
 
-  // Refresh slot availability whenever the selected date (or start time) changes.
-  // We probe the list API per candidate start-hour to learn which slots the API
-  // considers bookable (the backend's anti-collision engine drives the answer).
   useEffect(() => {
     if (!tanggalReservasi) return;
     let cancelled = false;
@@ -124,7 +117,6 @@ export default function BookingPage({ params }: BookingPageProps) {
           result[start] = available;
         }
       } catch {
-        // leave all slots unknown; the grid will fall back to enabled
       } finally {
         if (!cancelled) {
           setAvailability(result);
@@ -139,7 +131,6 @@ export default function BookingPage({ params }: BookingPageProps) {
     };
   }, [tanggalReservasi, spaceId]);
 
-  // Handle Promo Verification
   const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!promoInput.trim()) return;
@@ -179,13 +170,9 @@ export default function BookingPage({ params }: BookingPageProps) {
     setPromoMessage(null);
   };
 
-  // Live Price Calculation
-  // Slot grid helpers
   const isTodayIso = (d: string) => d === todayStr;
   const nowHour = new Date().getHours();
 
-  // A start hour is usable if it fits within the service window for the duration
-  // AND (when booking today) it hasn't passed already.
   const slotCanFit = (h: number) => h + durasiJam <= SERVICE_END;
   const slotIsPast = (h: number) => isTodayIso(tanggalReservasi) && h <= nowHour;
 
@@ -199,7 +186,6 @@ export default function BookingPage({ params }: BookingPageProps) {
   const discountAmount = Math.round((subtotal * discountPercent) / 100);
   const finalTotal = Math.max(0, subtotal - discountAmount);
 
-  // Submit Handler
   const handleCreateReservation = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
@@ -288,7 +274,6 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Breadcrumb */}
       <div>
         <Link
           href={`/spaces/${space.id}`}
@@ -300,11 +285,9 @@ export default function BookingPage({ params }: BookingPageProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Room Summary Card */}
         <div className="lg:col-span-5 space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="relative aspect-[16/10] bg-slate-100 border-b border-slate-200">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={space.foto || fallbackImage}
                 alt={space.namaSpace}
@@ -361,7 +344,6 @@ export default function BookingPage({ params }: BookingPageProps) {
           </div>
         </div>
 
-        {/* Right Column: Dynamic Form & Line-Item Calculator */}
         <div className="lg:col-span-7">
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
             <div className="border-b border-slate-100 pb-3">
@@ -393,7 +375,6 @@ export default function BookingPage({ params }: BookingPageProps) {
             )}
 
             <form onSubmit={handleCreateReservation} className="space-y-5">
-              {/* Date & Start Time */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-slate-700">
@@ -493,7 +474,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                 </div>
               </div>
 
-              {/* Duration Buttons */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
                   <label className="font-semibold text-slate-700">
@@ -520,7 +500,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                 </div>
               </div>
 
-              {/* Promo Input */}
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-semibold text-slate-700">
                   Kode Promo Diskon (Opsional)
@@ -579,7 +558,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                 )}
               </div>
 
-              {/* Transparent Line-Item Breakdown */}
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-2 text-xs">
                 <p className="font-bold text-slate-900 uppercase tracking-wide text-[10px]">
                   Rincian Biaya Pemakaian
@@ -607,7 +585,6 @@ export default function BookingPage({ params }: BookingPageProps) {
                 </div>
               </div>
 
-              {/* Submit CTA */}
               <button
                 type="submit"
                 disabled={submitting}
@@ -630,7 +607,6 @@ export default function BookingPage({ params }: BookingPageProps) {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
       {bookingSuccessData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 text-center border border-slate-200 shadow-xl">
@@ -647,7 +623,6 @@ export default function BookingPage({ params }: BookingPageProps) {
               </p>
             </div>
 
-            {/* Stepper */}
             <div className="w-full space-y-2 text-left">
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold flex items-center justify-center">1</div>

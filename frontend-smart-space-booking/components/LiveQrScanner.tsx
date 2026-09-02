@@ -20,7 +20,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
   const lastScannedTimeRef = useRef<number>(0);
   const scannerElementId = "interactive-qr-reader";
 
-  // Play audio chime using Web Audio API
   const playBeep = () => {
     try {
       const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -30,8 +29,8 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
       const gain = ctx.createGain();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
-      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15); // A6 note
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
 
       gain.gain.setValueAtTime(0.3, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
@@ -42,11 +41,9 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
       osc.start();
       osc.stop(ctx.currentTime + 0.15);
     } catch {
-      // Audio fallback
     }
   };
 
-  // Get available camera devices
   useEffect(() => {
     Html5Qrcode.getCameras()
       .then((devices) => {
@@ -56,7 +53,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             label: d.label || `Kamera ${d.id.slice(0, 5)}`,
           }));
           setCameras(list);
-          // Prefer back / environment camera if available
           const backCam = list.find((c) =>
             c.label.toLowerCase().includes("back") ||
             c.label.toLowerCase().includes("rear") ||
@@ -83,7 +79,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
   const handleScan = useCallback(
     (decodedText: string) => {
       const now = Date.now();
-      // Cooldown 3 seconds for duplicate scan
       if (decodedText === lastScannedCode && now - lastScannedTimeRef.current < 3000) {
         return;
       }
@@ -122,7 +117,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
           handleScan(decodedText);
         },
         () => {
-          // Frame error (silenced while searching)
         }
       );
 
@@ -148,7 +142,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
 
   return (
     <div className="bg-slate-900 text-white rounded-xl overflow-hidden border border-slate-800 shadow-md">
-      {/* Header Bar */}
       <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className={`w-2.5 h-2.5 rounded-full ${isScanning ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
@@ -157,7 +150,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
           </span>
         </div>
 
-        {/* Camera Selector & Action Buttons */}
         <div className="flex items-center gap-2">
           {cameras.length > 1 && (
             <select
@@ -196,7 +188,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         </div>
       </div>
 
-      {/* Video Viewport Container */}
       <div className="relative bg-black min-h-[300px] flex items-center justify-center overflow-hidden">
         <div id={scannerElementId} className="w-full max-w-[420px]" />
 
@@ -222,23 +213,19 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
           </div>
         )}
 
-        {/* Scanning Target Overlay */}
         {isScanning && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
             <div className="w-56 h-56 border-2 border-cyan-400/80 rounded-2xl relative shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-              {/* Corner Accents */}
               <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-cyan-400 rounded-tl-md" />
               <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-cyan-400 rounded-tr-md" />
               <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-cyan-400 rounded-bl-md" />
               <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-cyan-400 rounded-br-md" />
 
-              {/* Animated Laser Scan Bar */}
               <div className="w-full h-0.5 bg-cyan-400/90 shadow-[0_0_8px_#22d3ee] animate-pulse" />
             </div>
           </div>
         )}
 
-        {/* Processing Indicator */}
         {isProcessing && (
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-10 space-y-2">
             <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl flex items-center gap-3 shadow-xl">
@@ -249,7 +236,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         )}
       </div>
 
-      {/* Footer Info */}
       <div className="p-3 bg-slate-950 text-slate-400 text-[11px] flex items-center justify-between border-t border-slate-800">
         <div className="flex items-center gap-1.5">
           <Volume2 className="w-3.5 h-3.5 text-slate-500" />
@@ -262,7 +248,6 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         )}
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="p-3 bg-rose-950/80 border-t border-rose-800 text-rose-300 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />

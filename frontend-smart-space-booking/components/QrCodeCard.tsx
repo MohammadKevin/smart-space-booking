@@ -29,7 +29,6 @@ export function QrCodeCard({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
     }
   };
 
@@ -74,7 +73,6 @@ export function QrCodeCard({
         </div>
       )}
 
-      {/* QR Code Container */}
       <div className="p-3 bg-white rounded-lg border border-slate-100 shadow-inner flex items-center justify-center">
         <QRCodeSVG
           id={`qr-svg-${value}`}
@@ -86,7 +84,6 @@ export function QrCodeCard({
         />
       </div>
 
-      {/* Value Monospace String */}
       <div className="space-y-1 w-full">
         <div className="flex items-center justify-center gap-2 bg-slate-50 py-1.5 px-3 rounded-lg border border-slate-200 text-xs font-mono font-bold text-slate-800">
           <span className="truncate max-w-[200px]">{value}</span>
@@ -107,7 +104,6 @@ export function QrCodeCard({
         </div>
       </div>
 
-      {/* Optional Download Button */}
       {showDownload && (
         <button
           type="button"

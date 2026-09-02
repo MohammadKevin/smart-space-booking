@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -140,7 +137,7 @@ model Diskon {
 model Reservasi {
   id               Int              @id @default(autoincrement())
   tanggalReservasi DateTime
-  jamMulai         String           // Format "HH:mm"
+  jamMulai         String
   durasiJam        Int
   status           ReservasiStatus  @default(pending)
   qrCode           String           @unique
@@ -194,7 +191,7 @@ model DetailReservasi {
 
 model Review {
   id          Int       @id @default(autoincrement())
-  rating      Int       // 1-5
+  rating      Int
   komentar    String?   @db.Text
   reservasiId Int       @unique
   reservasi   Reservasi @relation(fields: [reservasiId], references: [id], onDelete: Cascade)
@@ -213,7 +210,7 @@ model Waitlist {
   tanggal     DateTime
   jamMulai    String
   durasiJam   Int
-  status      String    @default("pending") // pending, notify, fulfilled, expired
+  status      String    @default("pending")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

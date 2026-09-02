@@ -52,7 +52,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password: _password, ...sanitizedUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { password: _, ...sanitizedUser } = user;
 
     return {
       message: 'Login berhasil',
@@ -245,7 +245,7 @@ export class AuthService {
       throw new NotFoundException('Pengguna tidak ditemukan.');
     }
 
-    const { password: _password, ...sanitizedUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
+    const { password: _, ...sanitizedUser } = user;
     return sanitizedUser;
   }
 }

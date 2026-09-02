@@ -31,7 +31,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Command bar filters
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [minCapacity, setMinCapacity] = useState<string>("");
@@ -67,10 +66,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12 pb-20 bg-white min-h-screen">
-      {/* 1. HERO + SEARCH COMMAND BAR (Full White + Subtle Cyan Gradient Glow) */}
       <section className="relative bg-gradient-to-b from-cyan-50/70 via-sky-50/30 to-white border-b border-cyan-100/80 pt-10 pb-14 lg:pt-14 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          {/* Header & Status Indicator */}
           <div className="max-w-3xl mx-auto text-center space-y-3.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md text-xs font-semibold bg-white border border-cyan-200 text-cyan-800 shadow-xs">
               <span className="flex h-2 w-2 relative">
@@ -92,13 +89,11 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Integrated Search Command Bar (White Card + Cyan Accent) */}
           <div className="max-w-4xl mx-auto">
             <form
               onSubmit={handleSearchSubmit}
               className="bg-white rounded-xl p-3 sm:p-4 border border-cyan-200/90 shadow-xl shadow-cyan-950/5 text-slate-900 grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 items-center"
             >
-              {/* Keyword / Room Name */}
               <div className="sm:col-span-5 relative">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1 ml-0.5">
                   Nama ruangan atau coworking
@@ -115,7 +110,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Space Type */}
               <div className="sm:col-span-3">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1 ml-0.5">
                   Tipe ruangan
@@ -132,7 +126,6 @@ export default function HomePage() {
                 </select>
               </div>
 
-              {/* Capacity */}
               <div className="sm:col-span-2">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1 ml-0.5">
                   Kapasitas
@@ -150,7 +143,6 @@ export default function HomePage() {
                 </select>
               </div>
 
-              {/* Submit CTA */}
               <div className="sm:col-span-2 sm:self-end">
                 <button
                   type="submit"
@@ -162,7 +154,6 @@ export default function HomePage() {
               </div>
             </form>
 
-            {/* Quick Category Buttons (Cyan Pills) */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-3.5 text-xs">
               <span className="text-slate-500 font-medium text-[11px]">Kategori cepat:</span>
               <button
@@ -192,7 +183,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Micro-Stats (White Cards + Cyan Icons) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-5 border-t border-cyan-100 text-xs">
             <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white border border-cyan-100 shadow-2xs">
               <div className="w-7 h-7 rounded-md bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0">
@@ -237,7 +227,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. THREE PHYSICAL WORKSPACE CATEGORIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
         <div className="max-w-2xl space-y-1">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
@@ -249,7 +238,6 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Category 1: Hot Desk */}
           <div
             onClick={() => handleCategoryClick("desk")}
             className="group bg-white rounded-xl border border-slate-200 p-5 space-y-3.5 hover:border-cyan-400 hover:shadow-md hover:shadow-cyan-500/5 transition-all cursor-pointer flex flex-col justify-between"
@@ -272,7 +260,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Category 2: Meeting Room */}
           <div
             onClick={() => handleCategoryClick("meeting_room")}
             className="group bg-white rounded-xl border border-slate-200 p-5 space-y-3.5 hover:border-cyan-400 hover:shadow-md hover:shadow-cyan-500/5 transition-all cursor-pointer flex flex-col justify-between"
@@ -295,7 +282,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Category 3: Private Office */}
           <div
             onClick={() => handleCategoryClick("private_office")}
             className="group bg-white rounded-xl border border-slate-200 p-5 space-y-3.5 hover:border-cyan-400 hover:shadow-md hover:shadow-cyan-500/5 transition-all cursor-pointer flex flex-col justify-between"
@@ -320,7 +306,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. FEATURED LIVE INVENTORY GRID */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-200 pb-3.5">
           <div className="space-y-1">
@@ -406,7 +391,6 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 4. BOOKING FLOW (4 Steps on Light Cyan Tinted Box) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-br from-cyan-50/70 via-sky-50/40 to-white rounded-xl border border-cyan-200/80 p-6 sm:p-8 space-y-6">
           <div className="max-w-2xl space-y-1">
@@ -462,7 +446,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. INCLUDED AMENITIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <div className="max-w-2xl space-y-1">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
@@ -524,7 +507,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. FAQ */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <h2 className="text-xl font-bold text-slate-900 tracking-tight text-center">
           Pertanyaan Umum Seputar Pemesanan
@@ -563,7 +545,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. BOTTOM CTA (Vibrant Cyan Gradient Banner) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-xl p-7 sm:p-10 text-white border border-cyan-500 shadow-xl shadow-cyan-900/10 text-center space-y-5">
           <div className="max-w-2xl mx-auto space-y-2">

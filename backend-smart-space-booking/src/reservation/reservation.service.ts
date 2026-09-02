@@ -79,7 +79,6 @@ export class ReservationService {
     const newEndMinutes = newStartMinutes + durasiJam * 60;
     const jamSelesaiStr = minutesToTimeString(newEndMinutes);
 
-    // Calculate today's date in WIB (UTC+7)
     const now = new Date();
     const wibNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
     const todayWibStr = wibNow.toISOString().split('T')[0];
@@ -336,7 +335,7 @@ export class ReservationService {
   }
 
   async updateStatus(id: number, dto: UpdateReservationStatusDto, user: any) {
-    const _res = await this.findOne(id, user); // eslint-disable-line @typescript-eslint/no-unused-vars
+    await this.findOne(id, user);
 
     if (user.role !== Role.admin_space && user.role !== Role.staff) {
       throw new ForbiddenException(

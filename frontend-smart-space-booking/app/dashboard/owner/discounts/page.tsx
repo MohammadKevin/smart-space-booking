@@ -39,27 +39,22 @@ export default function OwnerDiscountsPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Search
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Form Fields
   const [namaDiskon, setNamaDiskon] = useState("");
   const [kodeDiskon, setKodeDiskon] = useState("");
   const [persentaseDiskon, setPersentaseDiskon] = useState<number>(20);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
 
-  // Delete Modal
   const [deleteTarget, setDeleteTarget] = useState<Discount | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Copied state
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const fetchDiscounts = useCallback(async () => {
@@ -183,7 +178,6 @@ export default function OwnerDiscountsPage() {
     }
   };
 
-  // Check promo validity
   const getValidityStatus = (startStr: string, endStr: string) => {
     const now = new Date();
     const start = new Date(startStr);
@@ -207,7 +201,6 @@ export default function OwnerDiscountsPage() {
     };
   };
 
-  // Filtered discounts
   const filteredDiscounts = useMemo(() => {
     return discounts.filter((d) => {
       const q = searchQuery.toLowerCase();
@@ -219,7 +212,6 @@ export default function OwnerDiscountsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -253,7 +245,6 @@ export default function OwnerDiscountsPage() {
         </div>
       </div>
 
-      {/* Success Alert */}
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
@@ -270,7 +261,6 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -281,7 +271,6 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
-      {/* Search Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -298,7 +287,6 @@ export default function OwnerDiscountsPage() {
         </div>
       </div>
 
-      {/* Main Grid View */}
       {loading ? (
         <div className="p-16 bg-white rounded-xl border border-slate-200 text-center shadow-xs">
           <Loader2 className="w-8 h-8 text-cyan-600 animate-spin mx-auto" />
@@ -317,7 +305,6 @@ export default function OwnerDiscountsPage() {
                 className="bg-white rounded-xl border border-slate-200 hover:border-cyan-300 transition-all shadow-xs hover:shadow-md p-5 flex flex-col justify-between space-y-4 relative group"
               >
                 <div className="space-y-3">
-                  {/* Top Status & Discount Percentage */}
                   <div className="flex items-center justify-between">
                     <span
                       className={`px-2 py-0.5 rounded text-[11px] font-bold border ${validity.className}`}
@@ -329,14 +316,12 @@ export default function OwnerDiscountsPage() {
                     </div>
                   </div>
 
-                  {/* Promo Name */}
                   <div>
                     <h3 className="font-bold text-slate-900 text-base leading-snug">
                       {d.namaDiskon}
                     </h3>
                   </div>
 
-                  {/* Coupon Code Pill with Copy Action */}
                   <div className="p-2.5 rounded-lg bg-slate-50 border border-dashed border-slate-300 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Tag className="w-3.5 h-3.5 text-cyan-600" />
@@ -360,14 +345,12 @@ export default function OwnerDiscountsPage() {
                     )}
                   </div>
 
-                  {/* Date Period */}
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 pt-1">
                     <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{startDate} s/d {endDate}</span>
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                   <button
                     type="button"
@@ -411,7 +394,6 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
-      {/* Add / Edit Form Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-md w-full p-6 sm:p-7 space-y-5 border border-slate-200 shadow-2xl">
@@ -539,7 +521,6 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

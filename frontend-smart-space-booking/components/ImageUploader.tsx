@@ -43,7 +43,6 @@ export function ImageUploader({
     }
   }, [value]);
 
-  // Image processor with Cloudinary upload + Client Canvas fallback
   const processAndCompressFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       alert("File harus berupa gambar (JPG, PNG, WebP).");
@@ -123,7 +122,6 @@ export function ImageUploader({
       {preview ? (
         <div className="relative group rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
           <div className="relative aspect-[16/9] w-full max-h-44 bg-slate-900/5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
               alt="Preview Foto"

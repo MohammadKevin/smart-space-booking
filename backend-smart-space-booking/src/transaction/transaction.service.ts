@@ -68,7 +68,6 @@ export class TransactionService {
     return tx;
   }
 
-  /** Ensure a Transaksi record exists for a reservation (created lazily). */
   private async ensureTransaction(reservationId: number, jumlah: number) {
     let tx = await this.prisma.transaksi.findUnique({
       where: { reservasiId: reservationId },
@@ -88,10 +87,6 @@ export class TransactionService {
     return tx;
   }
 
-  /**
-   * Member starts payment via Midtrans Snap.
-   * Returns the snap token + redirect URL + client metadata for the frontend.
-   */
   async startPayment(reservationId: number, memberUserId: number) {
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
@@ -117,7 +112,6 @@ export class TransactionService {
       throw new ForbiddenException('Reservasi ini bukan milik Anda.');
     }
 
-    // Payment is only allowed once the owner/staff approve the booking.
     if (reservation.status !== ReservasiStatus.disetujui) {
       throw new BadRequestException(
         'Pembayaran hanya dapat dilakukan setelah reservasi disetujui. Saat ini status: ' +
@@ -177,7 +171,6 @@ export class TransactionService {
     };
   }
 
-  /** Public webhook receiver called by Midtrans on payment status changes. */
   async handleNotification(
     payload: Record<string, any>,
   ): Promise<{ success: boolean }> {
@@ -218,7 +211,6 @@ export class TransactionService {
     } else if (transactionStatus === 'pending') {
       status = PembayaranStatus.menunggu_pembayaran;
     } else {
-      // 'expire', 'cancel', 'deny', 'failure'
       status = PembayaranStatus.gagal;
     }
 
@@ -236,7 +228,6 @@ export class TransactionService {
     return { success: true };
   }
 
-  /** Member/owner/staff reconcile payment status against Midtrans by order id. */
   async syncPayment(id: number, user: any) {
     const tx = await this.findScoped(id, user);
     if (!tx.midtransOrderId) {
@@ -279,7 +270,6 @@ export class TransactionService {
     return { message: 'Status pembayaran diperbarui.', data: updated };
   }
 
-  /** List transactions scoped by role (member sees own, owner/staff sees space's). */
   async findAll(user: any, spaceId?: number) {
     if (!this.prisma.transaksi) {
       return [];
@@ -329,15 +319,11 @@ export class TransactionService {
     });
   }
 
-  /** Role-scoped detail lookup. */
   async findOne(id: number, user: any) {
     const tx = await this.findScoped(id, user);
     return tx;
   }
 
-  /**
-   * Owner/Staff mark a paid transaction as refunded (e.g. after cancel before check-in).
-   */
   async markRefund(id: number, user: any) {
     if (user.role !== Role.admin_space && user.role !== Role.staff) {
       throw new ForbiddenException(

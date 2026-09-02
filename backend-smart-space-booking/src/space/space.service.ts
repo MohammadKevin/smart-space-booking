@@ -121,7 +121,7 @@ export class SpaceService {
           );
         });
 
-        const { detailReservasi: _detailReservasi, ...spaceData } = space; // eslint-disable-line @typescript-eslint/no-unused-vars
+        const { detailReservasi: _, ...spaceData } = space;
         return {
           ...spaceData,
           isAvailable: !hasConflict,
@@ -130,7 +130,7 @@ export class SpaceService {
     }
 
     return spaces.map((space) => {
-      const { detailReservasi: _detailReservasi, ...spaceData } = space; // eslint-disable-line @typescript-eslint/no-unused-vars
+      const { detailReservasi: _, ...spaceData } = space;
       return spaceData;
     });
   }

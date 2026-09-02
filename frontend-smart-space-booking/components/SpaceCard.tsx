@@ -52,10 +52,8 @@ export function SpaceCard({ space }: SpaceCardProps) {
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-cyan-300 hover:shadow-md hover:shadow-cyan-500/5 transition-all">
-      {/* Space Photo & Overlay Badges */}
       <div>
         <div className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden border-b border-slate-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={space.foto || fallbackImage}
             alt={space.namaSpace}
@@ -81,7 +79,6 @@ export function SpaceCard({ space }: SpaceCardProps) {
           </div>
         </div>
 
-        {/* Content Body */}
         <div className="p-4 space-y-2">
           {space.owner?.namaCoworking && (
             <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
@@ -100,7 +97,6 @@ export function SpaceCard({ space }: SpaceCardProps) {
         </div>
       </div>
 
-      {/* Pricing Footer & CTA */}
       <div className="p-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/50">
         <div>
           <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wide">

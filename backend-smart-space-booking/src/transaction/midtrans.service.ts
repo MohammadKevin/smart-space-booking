@@ -7,10 +7,6 @@ export interface SnapTokenResult {
   redirect_url: string;
 }
 
-/**
- * Thin HTTP client for the Midtrans Snap API (Sandbox / Production).
- * Uses Node's native `fetch` (Node >= 18) so no extra dependency is required.
- */
 @Injectable()
 export class MidtransService {
   private readonly isProduction: boolean;
@@ -40,7 +36,6 @@ export class MidtransService {
   }
 
   private authHeader(): string {
-    // Basic Auth: username = server key, password = empty
     return `Basic ${Buffer.from(`${this.serverKey}:`).toString('base64')}`;
   }
 
@@ -48,10 +43,6 @@ export class MidtransService {
     return !!value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  /**
-   * Acquire a Snap transaction token from the backend.
-   * See: https://docs.midtrans.com/reference/backend-integration
-   */
   async createSnapToken(params: {
     orderId: string;
     grossAmount: number;
@@ -107,10 +98,6 @@ export class MidtransService {
     };
   }
 
-  /**
-   * Query the status of a transaction by order id.
-   * Used to verify (defense-in-depth) the webhook / frontend callback.
-   */
   async getTransactionStatus(orderId: string): Promise<Record<string, any>> {
     const res = await fetch(`${this.baseUrl}/v2/${orderId}/status`, {
       method: 'GET',
@@ -127,10 +114,6 @@ export class MidtransService {
     return (await res.json()) as Record<string, any>;
   }
 
-  /**
-   * Verify the SHA-512 signature sent by Midtrans in HTTP(S) notifications.
-   * Ref: https://docs.midtrans.com/reference/json-interfaces-content-type
-   */
   verifySignature(
     orderId: string,
     statusCode: string,

@@ -41,14 +41,11 @@ export default function OwnerReservationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Filter & Search
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Detail Modal State
   const [selectedBooking, setSelectedBooking] = useState<Reservation | null>(null);
 
-  // Status Action Loading
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
 
   const fetchReservations = useCallback(async () => {
@@ -94,7 +91,6 @@ export default function OwnerReservationsPage() {
     }
   };
 
-  // Filtered reservations
   const filteredBookings = useMemo(() => {
     return reservations.filter((r) => {
       const matchTab = activeTab === "all" || r.status === activeTab;
@@ -113,7 +109,6 @@ export default function OwnerReservationsPage() {
     });
   }, [reservations, activeTab, searchQuery]);
 
-  // Status Counts
   const counts = useMemo(() => {
     const res = {
       all: reservations.length,
@@ -133,7 +128,6 @@ export default function OwnerReservationsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -159,7 +153,6 @@ export default function OwnerReservationsPage() {
         </div>
       </div>
 
-      {/* Success Alert */}
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
@@ -176,7 +169,6 @@ export default function OwnerReservationsPage() {
         </div>
       )}
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -187,9 +179,7 @@ export default function OwnerReservationsPage() {
         </div>
       )}
 
-      {/* Filters and Search Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-3">
-        {/* Status Tabs */}
         <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg w-full lg:w-auto overflow-x-auto">
           <button
             type="button"
@@ -264,7 +254,6 @@ export default function OwnerReservationsPage() {
           </button>
         </div>
 
-        {/* Search */}
         <div className="relative w-full lg:w-72">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
           <input
@@ -277,7 +266,6 @@ export default function OwnerReservationsPage() {
         </div>
       </div>
 
-      {/* Table Data View */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
         {loading ? (
           <div className="p-16 text-center">
@@ -308,7 +296,6 @@ export default function OwnerReservationsPage() {
 
                   return (
                     <tr key={b.id} className="hover:bg-cyan-50/20 transition-colors">
-                      {/* Member Column */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-lg bg-cyan-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
@@ -323,7 +310,6 @@ export default function OwnerReservationsPage() {
                         </div>
                       </td>
 
-                      {/* Space Column */}
                       <td className="py-3.5 px-4">
                         <p className="font-semibold text-slate-800">{spaceName}</p>
                         <p className="text-[10px] text-slate-400 capitalize">
@@ -331,7 +317,6 @@ export default function OwnerReservationsPage() {
                         </p>
                       </td>
 
-                      {/* Schedule Column */}
                       <td className="py-3.5 px-4 text-slate-700">
                         <div className="flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
@@ -342,7 +327,6 @@ export default function OwnerReservationsPage() {
                         </p>
                       </td>
 
-                      {/* Cost Column */}
                       <td className="py-3.5 px-4">
                         <p className="font-mono font-bold text-slate-900">
                           {formatRupiah(cost)}
@@ -355,12 +339,10 @@ export default function OwnerReservationsPage() {
                         )}
                       </td>
 
-                      {/* Status Badge */}
                       <td className="py-3.5 px-4">
                         <StatusBadge status={b.status} />
                       </td>
 
-                      {/* Actions Column */}
                       <td className="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
                         <button
                           type="button"
@@ -456,7 +438,6 @@ export default function OwnerReservationsPage() {
         )}
       </div>
 
-      {/* Detail Booking Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 sm:p-7 space-y-5 border border-slate-200 shadow-2xl relative my-8">
@@ -483,9 +464,7 @@ export default function OwnerReservationsPage() {
               </button>
             </div>
 
-            {/* Content Details */}
             <div className="space-y-4 text-xs">
-              {/* Member Info Card */}
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   Informasi Pemesan
@@ -513,7 +492,6 @@ export default function OwnerReservationsPage() {
                 </div>
               </div>
 
-              {/* Space & Booking Info */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -540,7 +518,6 @@ export default function OwnerReservationsPage() {
                 </div>
               </div>
 
-              {/* Financial & Status */}
               <div className="p-3.5 rounded-xl bg-cyan-50/60 border border-cyan-100 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-800">
@@ -555,7 +532,6 @@ export default function OwnerReservationsPage() {
                 </div>
               </div>
 
-              {/* Action Buttons in Modal */}
               <div className="pt-2 flex items-center justify-end gap-2">
                 {selectedBooking.status === "pending" && (
                   <>

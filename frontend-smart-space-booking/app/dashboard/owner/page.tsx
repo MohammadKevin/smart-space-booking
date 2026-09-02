@@ -78,16 +78,13 @@ export default function OwnerOverviewPage() {
 
   const coworkingName = user?.spaceOwner?.namaCoworking || "Coworking Hub";
 
-  // Defensive array access
   const safeMonthlyRevenue = Array.isArray(monthlyRevenue) ? monthlyRevenue : [];
   const safeDistribution = Array.isArray(distribution) ? distribution : [];
   const safeTransactions = Array.isArray(recentTransactions) ? recentTransactions : [];
 
-  // Calculate highest revenue for chart scaling (rounded up to clean number)
   const rawMax = Math.max(...safeMonthlyRevenue.map((m) => Number(m?.revenue) || 0), 100000);
   const maxRevenue = Math.ceil(rawMax / 100000) * 100000;
 
-  // Chart SVG Coordinates Calculation
   const chartHeight = 180;
   const chartWidth = 500;
   const paddingX = 35;
@@ -122,7 +119,6 @@ export default function OwnerOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -156,7 +152,6 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -167,9 +162,7 @@ export default function OwnerOverviewPage() {
         </div>
       )}
 
-      {/* Metrics Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Total Revenue */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-cyan-300 transition-all shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Total Pendapatan</span>
@@ -188,7 +181,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 2: Total Reservations */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-cyan-300 transition-all shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Total Reservasi</span>
@@ -206,7 +198,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 3: Active Spaces */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-cyan-300 transition-all shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Ruangan Aktif</span>
@@ -224,7 +215,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Metric 4: Staff Accounts */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 hover:border-cyan-300 transition-all shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Petugas Staff</span>
@@ -243,9 +233,7 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      {/* Distribution & Performance Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Monthly Revenue Chart (Grafik Batang & Garis) */}
         <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
@@ -268,7 +256,6 @@ export default function OwnerOverviewPage() {
             </div>
           ) : safeMonthlyRevenue.length > 0 ? (
             <div className="space-y-4 pt-1">
-              {/* Visual SVG Bar + Trend Line Combo Chart */}
               <div className="relative w-full">
                 <svg
                   viewBox={`0 0 ${chartWidth} ${chartHeight}`}
@@ -285,7 +272,6 @@ export default function OwnerOverviewPage() {
                     </linearGradient>
                   </defs>
 
-                  {/* Horizontal Grid lines */}
                   {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
                     const y = paddingY + usableHeight * (1 - ratio);
                     return (
@@ -313,7 +299,6 @@ export default function OwnerOverviewPage() {
                     );
                   })}
 
-                  {/* Vertical Column Bars */}
                   {points.map((pt, idx) => {
                     const barW = Math.min(32, usableWidth / (points.length * 2));
                     const barH = paddingY + usableHeight - pt.y;
@@ -340,7 +325,6 @@ export default function OwnerOverviewPage() {
                     );
                   })}
 
-                  {/* Area fill under trend line */}
                   {areaPath && (
                     <path
                       d={areaPath}
@@ -349,7 +333,6 @@ export default function OwnerOverviewPage() {
                     />
                   )}
 
-                  {/* Trend line */}
                   {linePath && (
                     <path
                       d={linePath}
@@ -362,7 +345,6 @@ export default function OwnerOverviewPage() {
                     />
                   )}
 
-                  {/* Data Point Dots & Labels */}
                   {points.map((pt, idx) => {
                     const isHovered = hoveredIndex === idx;
                     return (
@@ -372,7 +354,6 @@ export default function OwnerOverviewPage() {
                         onMouseEnter={() => setHoveredIndex(idx)}
                         onMouseLeave={() => setHoveredIndex(null)}
                       >
-                        {/* Dot outer circle */}
                         <circle
                           cx={pt.x}
                           cy={pt.y}
@@ -383,7 +364,6 @@ export default function OwnerOverviewPage() {
                           className="transition-all duration-200"
                         />
 
-                        {/* Month text label on X-axis */}
                         <text
                           x={pt.x}
                           y={chartHeight - 2}
@@ -400,7 +380,6 @@ export default function OwnerOverviewPage() {
                   })}
                 </svg>
 
-                {/* Hover Tooltip Float */}
                 {hoveredIndex !== null && points[hoveredIndex] && (
                   <div
                     className="absolute top-1 bg-slate-900/95 text-white text-[11px] rounded-lg px-3 py-1.5 shadow-lg border border-slate-700 pointer-events-none transition-all flex items-center gap-2 -translate-x-1/2"
@@ -418,7 +397,6 @@ export default function OwnerOverviewPage() {
                 )}
               </div>
 
-              {/* Legend Strip */}
               <div className="flex items-center justify-between text-[11px] text-slate-500 pt-3 border-t border-slate-100">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
@@ -442,7 +420,6 @@ export default function OwnerOverviewPage() {
           )}
         </div>
 
-        {/* Right: Space Type Distribution */}
         <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
@@ -503,7 +480,6 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      {/* Section 3: Recent Activity Table */}
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div>

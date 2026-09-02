@@ -31,7 +31,6 @@ interface ProfileSettingsFormProps {
 export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
   const { user, refreshUser } = useAuth();
 
-  // Basic Info Fields
   const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
   const [telp, setTelp] = useState("");
@@ -40,14 +39,12 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
   const [instansi, setInstansi] = useState("");
   const [namaCoworking, setNamaCoworking] = useState("");
 
-  // Security / Password Fields
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-  // States
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,7 +75,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
     setSuccessMessage(null);
     setErrorMessage(null);
 
-    // Validate Passwords if entered
     if (newPassword || confirmPassword || oldPassword) {
       if (!oldPassword) {
         setErrorMessage("Masukkan kata sandi lama untuk mengubah kata sandi.");
@@ -133,7 +129,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -154,7 +149,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
         </div>
       </div>
 
-      {/* Alerts */}
       {successMessage && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-semibold">
@@ -175,7 +169,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Section 1: Informasi Diri & Profil */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
           <div className="border-b border-slate-100 pb-3.5 flex items-center justify-between">
             <div>
@@ -185,7 +178,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
             <User className="w-4 h-4 text-cyan-600" />
           </div>
 
-          {/* Photo Upload (Especially for Member & Branding) */}
           {role === "member" && (
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-slate-700">Foto Profil / Avatar</label>
@@ -199,7 +191,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Nama Field */}
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-slate-700">
                 {role === "owner"
@@ -221,7 +212,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               </div>
             </div>
 
-            {/* Role Specific: Nama Coworking for Owner */}
             {role === "owner" && (
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
@@ -241,7 +231,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               </div>
             )}
 
-            {/* Role Specific: Instansi for Member */}
             {role === "member" && (
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
@@ -260,7 +249,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               </div>
             )}
 
-            {/* Nomor Telepon */}
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-slate-700">
                 Nomor Telepon / WhatsApp
@@ -278,7 +266,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               </div>
             </div>
 
-            {/* Alamat (for Owner & Member) */}
             {role !== "staff" && (
               <div className="space-y-1 sm:col-span-2">
                 <label className="block text-xs font-semibold text-slate-700">
@@ -299,7 +286,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
         </div>
 
-        {/* Section 2: Kredensial Login & Keamanan Akun */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
           <div className="border-b border-slate-100 pb-3.5 flex items-center justify-between">
             <div>
@@ -310,7 +296,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
 
           <div className="space-y-4">
-            {/* Email Field */}
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-slate-700">
                 Alamat Email Login
@@ -328,14 +313,12 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               </div>
             </div>
 
-            {/* Password Change Sub-section */}
             <div className="pt-3 border-t border-slate-100 space-y-3">
               <p className="text-xs font-bold text-slate-800">
                 Ubah Kata Sandi <span className="text-[11px] font-normal text-slate-400">(Kosongkan jika tidak ingin mengubah)</span>
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Old Password */}
                 <div className="space-y-1">
                   <label className="block text-[11px] font-semibold text-slate-600">Kata Sandi Saat Ini</label>
                   <div className="relative">
@@ -357,7 +340,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   </div>
                 </div>
 
-                {/* New Password */}
                 <div className="space-y-1">
                   <label className="block text-[11px] font-semibold text-slate-600">Kata Sandi Baru</label>
                   <div className="relative">
@@ -379,7 +361,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   </div>
                 </div>
 
-                {/* Confirm New Password */}
                 <div className="space-y-1">
                   <label className="block text-[11px] font-semibold text-slate-600">Konfirmasi Sandi Baru</label>
                   <div className="relative">
@@ -398,7 +379,6 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
         </div>
 
-        {/* Action Button */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="submit"

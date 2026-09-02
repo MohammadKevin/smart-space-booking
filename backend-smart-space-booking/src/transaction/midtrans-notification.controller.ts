@@ -2,10 +2,6 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TransactionService } from './transaction.service';
 
-/**
- * Public endpoint that receives Midtrans HTTP(S) notifications.
- * Must remain unauthenticated so Midtrans can reach it without custom headers.
- */
 @ApiTags('Transactions & Payments')
 @Controller('transactions')
 export class MidtransNotificationController {

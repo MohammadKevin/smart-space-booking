@@ -14,7 +14,7 @@ async function request(path, options = {}) {
 
 async function runQATests() {
   console.log('====================================================');
-  console.log('🧪 SMART SPACE BOOKING - FULL QA/QC VERIFICATION 🧪');
+  console.log('WORKNEST - FULL QA/QC VERIFICATION');
   console.log('====================================================\n');
 
   let passedTests = 0;
@@ -23,14 +23,13 @@ async function runQATests() {
   function assert(condition, testName, extraInfo = '') {
     totalTests++;
     if (condition) {
-      console.log(`✅ [PASS] ${testName}`);
+      console.log(`[PASS] ${testName}`);
       passedTests++;
     } else {
-      console.error(`❌ [FAIL] ${testName} - ${extraInfo}`);
+      console.error(`[FAIL] ${testName} - ${extraInfo}`);
     }
   }
 
-  // 1. Test Authentication for Member, Staff, Owner
   console.log('--- TEST 1: AUTENTIKASI SEMUA ROLE ---');
   const memberLogin = await request('/auth/login', {
     method: 'POST',
@@ -66,16 +65,13 @@ async function runQATests() {
   const staffToken = staffLogin.data?.access_token;
   const ownerToken = ownerLogin.data?.access_token;
 
-  // 2. Fetch Spaces to get a valid Space ID
   console.log('\n--- TEST 2: KATALOG RUANGAN & INVENTARIS ---');
   const spacesRes = await request('/spaces');
   assert(spacesRes.ok && Array.isArray(spacesRes.data) && spacesRes.data.length > 0, 'Katalog Ruangan tersedia');
   const targetSpace = spacesRes.data[0];
   console.log(`Ruangan Pengujian: ${targetSpace.namaSpace} (ID: ${targetSpace.id})`);
 
-  // 3. Test Order Creation by Member
   console.log('\n--- TEST 3: ORDER PEMESANAN RUANGAN OLEH MEMBER ---');
-  // Set date for tomorrow or future date to avoid same-day past time collision
   const bookingDate = new Date();
   bookingDate.setDate(bookingDate.getDate() + 7);
   const bookingDateStr = bookingDate.toISOString().split('T')[0];
@@ -100,13 +96,12 @@ async function runQATests() {
 
   const newReservation = orderRes.data?.data;
   const qrCode = newReservation?.qrCode;
-  console.log(`🎫 Tiket QR Terbit: ${qrCode} (Reservasi #${newReservation?.id})`);
+  console.log(`Tiket QR Terbit: ${qrCode} (Reservasi #${newReservation?.id})`);
   assert(
     newReservation?.transaksi?.nomorInvoice && newReservation?.transaksi?.statusPembayaran === 'belum_bayar',
     'Invoice Transaksi Otomatis Terbuat'
   );
 
-  // 4. Test Anti-Collision (Jadwal Bentrok)
   console.log('\n--- TEST 4: ANTI-COLLISION / DETEKSI JADWAL BENTROK ---');
   const collisionRes = await request('/reservations', {
     method: 'POST',
@@ -114,7 +109,7 @@ async function runQATests() {
     body: JSON.stringify({
       spaceId: targetSpace.id,
       tanggalReservasi: bookingDateStr,
-      jamMulai: '11:00', // Overlaps with 10:00 - 12:00
+      jamMulai: '11:00',
       durasiJam: 2,
     }),
   });
@@ -125,7 +120,6 @@ async function runQATests() {
     JSON.stringify(collisionRes.data)
   );
 
-  // 5. Test Owner Approving the Reservation
   console.log('\n--- TEST 5: PERSETUJUAN RESERVASI OLEH OWNER/ADMIN ---');
   const approveRes = await request(`/reservations/${newReservation.id}/status`, {
     method: 'PATCH',
@@ -138,7 +132,6 @@ async function runQATests() {
     JSON.stringify(approveRes.data)
   );
 
-  // 6. Test Staff QR Code Verification
   console.log('\n--- TEST 6: RESEPSIONIS / STAFF VERIFIKASI QR CODE ---');
   const verifyQrRes = await request('/checkin/verify', {
     method: 'POST',
@@ -151,7 +144,6 @@ async function runQATests() {
     JSON.stringify(verifyQrRes.data)
   );
 
-  // 7. Test Staff Processing Check-In
   console.log('\n--- TEST 7: RESEPSIONIS / STAFF EKSEKUSI CHECK-IN ---');
   const checkInRes = await request('/checkin/process', {
     method: 'POST',
@@ -164,7 +156,6 @@ async function runQATests() {
     JSON.stringify(checkInRes.data)
   );
 
-  // 8. Test Staff Processing Check-Out
   console.log('\n--- TEST 8: RESEPSIONIS / STAFF EKSEKUSI CHECK-OUT ---');
   const checkOutRes = await request('/checkin/process', {
     method: 'POST',
@@ -177,7 +168,6 @@ async function runQATests() {
     JSON.stringify(checkOutRes.data)
   );
 
-  // 9. Test Member Access Control to Admin/Staff Endpoints
   console.log('\n--- TEST 9: PROTEKSI RUTE & ROLE PERMISSION BACKEND ---');
   const memberForbiddenAction = await request(`/reservations/${newReservation.id}/status`, {
     method: 'PATCH',
@@ -191,7 +181,7 @@ async function runQATests() {
   );
 
   console.log('\n====================================================');
-  console.log(`📊 HASIL PENGUJIAN QA/QC: ${passedTests}/${totalTests} PASS (${Math.round((passedTests / totalTests) * 100)}%)`);
+  console.log(`HASIL PENGUJIAN QA/QC: ${passedTests}/${totalTests} PASS (${Math.round((passedTests / totalTests) * 100)}%)`);
   console.log('====================================================\n');
 }
 

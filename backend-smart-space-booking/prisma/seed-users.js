@@ -4,11 +4,10 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Memulai provisioning akun Member, Staff, dan Owner...');
+  console.log('Memulai provisioning akun Member, Staff, dan Owner...');
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // 1. Space Owner: kvn4.200581@gmail.com
   let ownerUser = await prisma.user.findUnique({
     where: { email: 'kvn4.200581@gmail.com' },
     include: { spaceOwner: true },
@@ -31,19 +30,17 @@ async function main() {
       },
       include: { spaceOwner: true },
     });
-    console.log('✅ Akun Space Owner dibuat:', ownerUser.email);
+    console.log('Akun Space Owner dibuat:', ownerUser.email);
   } else {
-    // Update password to password123 if needed
     await prisma.user.update({
       where: { id: ownerUser.id },
       data: { password: hashedPassword, role: Role.admin_space },
     });
-    console.log('ℹ️ Akun Space Owner sudah ada, kredensial disinkronkan:', ownerUser.email);
+    console.log('Akun Space Owner sudah ada, kredensial disinkronkan:', ownerUser.email);
   }
 
   const ownerId = ownerUser.spaceOwner.id;
 
-  // 2. Staff: mhmdkevin198@gmail.com
   let staffUser = await prisma.user.findUnique({
     where: { email: 'mhmdkevin198@gmail.com' },
     include: { staff: true },
@@ -65,16 +62,15 @@ async function main() {
       },
       include: { staff: true },
     });
-    console.log('✅ Akun Staff dibuat:', staffUser.email);
+    console.log('Akun Staff dibuat:', staffUser.email);
   } else {
     await prisma.user.update({
       where: { id: staffUser.id },
       data: { password: hashedPassword, role: Role.staff },
     });
-    console.log('ℹ️ Akun Staff sudah ada, kredensial disinkronkan:', staffUser.email);
+    console.log('Akun Staff sudah ada, kredensial disinkronkan:', staffUser.email);
   }
 
-  // 3. Member: kipilpplli@gmail.com
   let memberUser = await prisma.user.findUnique({
     where: { email: 'kipilpplli@gmail.com' },
     include: { member: true },
@@ -97,16 +93,15 @@ async function main() {
       },
       include: { member: true },
     });
-    console.log('✅ Akun Member dibuat:', memberUser.email);
+    console.log('Akun Member dibuat:', memberUser.email);
   } else {
     await prisma.user.update({
       where: { id: memberUser.id },
       data: { password: hashedPassword, role: Role.member },
     });
-    console.log('ℹ️ Akun Member sudah ada, kredensial disinkronkan:', memberUser.email);
+    console.log('Akun Member sudah ada, kredensial disinkronkan:', memberUser.email);
   }
 
-  // Ensure some sample spaces exist under this owner
   const spaceCount = await prisma.space.count({
     where: { ownerId: ownerId },
   });
@@ -143,10 +138,9 @@ async function main() {
         },
       ],
     });
-    console.log('✅ Ruangan inventaris default dibuat.');
+    console.log('Ruangan inventaris default dibuat.');
   }
 
-  // Ensure a sample discount coupon exists
   const discountCount = await prisma.diskon.count();
   if (discountCount === 0) {
     const today = new Date();
@@ -162,15 +156,15 @@ async function main() {
         tanggalAkhir: nextYear,
       },
     });
-    console.log('✅ Kupon promo PROMO2026 dibuat.');
+    console.log('Kupon promo PROMO2026 dibuat.');
   }
 
-  console.log('🎉 Seeding selesai dengan sukses!');
+  console.log('Seeding selesai dengan sukses!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seeding gagal:', e);
+    console.error('Seeding gagal:', e);
     process.exit(1);
   })
   .finally(async () => {

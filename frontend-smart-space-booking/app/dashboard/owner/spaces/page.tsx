@@ -44,18 +44,15 @@ export default function OwnerSpacesPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Search and Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
-  // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSpace, setEditingSpace] = useState<Space | null>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Form Fields
   const [namaSpace, setNamaSpace] = useState("");
   const [tipe, setTipe] = useState<SpaceType>("desk");
   const [kapasitas, setKapasitas] = useState<number>(1);
@@ -63,7 +60,6 @@ export default function OwnerSpacesPage() {
   const [deskripsi, setDeskripsi] = useState("");
   const [foto, setFoto] = useState("");
 
-  // Delete State
   const [deleteTarget, setDeleteTarget] = useState<Space | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -192,7 +188,6 @@ export default function OwnerSpacesPage() {
     return "bg-blue-50 text-blue-800 border-blue-200";
   };
 
-  // Filtered Spaces
   const filteredSpaces = useMemo(() => {
     return spaces.filter((sp) => {
       const matchQuery =
@@ -205,7 +200,6 @@ export default function OwnerSpacesPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -239,7 +233,6 @@ export default function OwnerSpacesPage() {
         </div>
       </div>
 
-      {/* Success Alert */}
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
@@ -256,7 +249,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -267,9 +259,7 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Filters and Search Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        {/* Category Tabs */}
         <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg w-full sm:w-auto overflow-x-auto">
           <button
             type="button"
@@ -317,7 +307,6 @@ export default function OwnerSpacesPage() {
           </button>
         </div>
 
-        {/* Search & View Mode Switcher */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
             <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -355,7 +344,6 @@ export default function OwnerSpacesPage() {
         </div>
       </div>
 
-      {/* Main Content View (Grid vs Table) */}
       {loading ? (
         <div className="space-y-4">
           <div className="p-8 bg-white rounded-xl border border-slate-200 text-center shadow-xs flex flex-col items-center justify-center space-y-2.5">
@@ -378,7 +366,6 @@ export default function OwnerSpacesPage() {
         </div>
       ) : filteredSpaces.length > 0 ? (
         viewMode === "grid" ? (
-          /* Grid View Cards */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredSpaces.map((sp) => (
               <div
@@ -386,9 +373,7 @@ export default function OwnerSpacesPage() {
                 className="bg-white rounded-xl border border-slate-200 hover:border-cyan-300 transition-all shadow-xs hover:shadow-md overflow-hidden flex flex-col justify-between group"
               >
                 <div>
-                  {/* Thumbnail Image Header */}
                   <div className="h-44 w-full bg-slate-100 relative overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={sp.foto || "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80"}
                       alt={sp.namaSpace}
@@ -407,7 +392,6 @@ export default function OwnerSpacesPage() {
                     </div>
                   </div>
 
-                  {/* Body Info */}
                   <div className="p-4 sm:p-5 space-y-2.5">
                     <h3 className="font-bold text-slate-900 text-sm tracking-tight line-clamp-1">
                       {sp.namaSpace}
@@ -427,7 +411,6 @@ export default function OwnerSpacesPage() {
                   </div>
                 </div>
 
-                {/* Footer Action Buttons */}
                 <div className="p-4 pt-0 grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -450,7 +433,6 @@ export default function OwnerSpacesPage() {
             ))}
           </div>
         ) : (
-          /* Table View */
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -469,7 +451,6 @@ export default function OwnerSpacesPage() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={sp.foto || "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=200&q=80"}
                               alt={sp.namaSpace}
@@ -539,7 +520,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Add / Edit Form Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 sm:p-7 space-y-5 border border-slate-200 shadow-2xl relative my-8">
@@ -677,7 +657,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

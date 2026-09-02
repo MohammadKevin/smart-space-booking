@@ -30,7 +30,6 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
-  // Hide on dashboard and auth pages (login, register, verify-email)
   if (
     pathname.startsWith("/dashboard") ||
     pathname === "/login" ||
@@ -77,14 +76,12 @@ export function Navbar() {
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 w-full">
       <div className="w-full px-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-14">
-          {/* Brand Logo & Live Signal */}
           <Link
             href="/"
             className="flex items-center gap-2.5 group focus:outline-none"
             onClick={() => setMobileMenuOpen(false)}
           >
             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-2">
@@ -94,7 +91,6 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Auth Section */}
           <div className="hidden md:flex items-center gap-2.5">
             {isAuthenticated && user ? (
               <div className="relative">
@@ -117,7 +113,6 @@ export function Navbar() {
                   <ChevronDown className="w-3 h-3 text-slate-400" />
                 </button>
 
-                {/* Dropdown Menu */}
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50">
                     <div className="px-3.5 py-2 border-b border-slate-100">
@@ -260,7 +255,6 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="flex md:hidden items-center">
             <button
               type="button"
@@ -273,7 +267,6 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-3">
           {isAuthenticated && user ? (

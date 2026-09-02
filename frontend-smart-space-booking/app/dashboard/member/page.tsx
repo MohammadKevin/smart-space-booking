@@ -52,18 +52,15 @@ export default function MemberDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter & Search States
   const [filterTab, setFilterTab] = useState<"all" | "active" | "pending" | "selesai" | "dibatalkan">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modals State
   const [selectedTicket, setSelectedTicket] = useState<Reservation | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Reservation | null>(null);
   const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
 
-  // Payment (Midtrans) State
   const [transactions, setTransactions] = useState<Record<number, Transaksi>>({});
   const [payingId, setPayingId] = useState<number | null>(null);
   const [payMessage, setPayMessage] = useState<string | null>(null);
@@ -91,7 +88,6 @@ export default function MemberDashboardPage() {
       }
       setTransactions(map);
     } catch {
-      // Non-blocking: payment buttons simply won't render without tx data.
     }
   }, []);
 
@@ -100,13 +96,11 @@ export default function MemberDashboardPage() {
     loadTransactions();
   }, [fetchBookings, loadTransactions]);
 
-  // Derived KPI Stats
   const activeCount = reservations.filter((r) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui").length;
   const pendingCount = reservations.filter((r) => r.status?.toLowerCase() === "pending").length;
   const completedCount = reservations.filter((r) => r.status?.toLowerCase() === "selesai").length;
   const totalHours = reservations.reduce((acc, curr) => acc + (curr.durasiJam || 1), 0);
 
-  // Filtered List
   const filteredReservations = reservations.filter((r) => {
     const status = r.status?.toLowerCase() || "";
     const spaceName = r.detailReservasi?.space?.namaSpace?.toLowerCase() || "";
@@ -157,7 +151,6 @@ export default function MemberDashboardPage() {
             for (const t of tx) map[t.reservasiId] = t;
             setTransactions(map);
           } catch {
-            // silently ignore reconcile failure; webhook will finalize status
           }
           setPayMessage(`Pembayaran invoice ${result.nomorInvoice} telah lunas. Terima kasih!`);
           await fetchBookings();
@@ -193,7 +186,6 @@ export default function MemberDashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
@@ -228,7 +220,6 @@ export default function MemberDashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center shrink-0">
@@ -271,7 +262,6 @@ export default function MemberDashboardPage() {
         </div>
       </div>
 
-      {/* Success / Error Alerts */}
       {cancelSuccessMsg && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-xs animate-fade-in">
           <div className="flex items-center gap-2 font-medium">
@@ -324,9 +314,7 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
-      {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-        {/* Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: "all", label: `Semua (${reservations.length})` },
@@ -349,7 +337,6 @@ export default function MemberDashboardPage() {
           ))}
         </div>
 
-        {/* Search Input */}
         <div className="relative w-full sm:w-64">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
           <input
@@ -362,7 +349,6 @@ export default function MemberDashboardPage() {
         </div>
       </div>
 
-      {/* Main Reservation Cards List */}
       <div className="space-y-4">
         {loading ? (
           <div className="p-16 text-center bg-white rounded-xl border border-slate-200">
@@ -390,7 +376,6 @@ export default function MemberDashboardPage() {
                   key={res.id}
                   className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
                 >
-                  {/* Top Bar with Coworking & Status */}
                   <div className="p-5 space-y-4">
                     <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
                       <div>
@@ -405,9 +390,7 @@ export default function MemberDashboardPage() {
                       <StatusBadge status={res.status} />
                     </div>
 
-                    {/* Middle Section: QR Code & Booking Specs */}
                     <div className="grid grid-cols-12 gap-3.5 items-center">
-                      {/* Visual QR Code Display */}
                       <div className="col-span-4 flex flex-col items-center">
                         <div
                           onClick={() => setSelectedTicket(res)}
@@ -421,7 +404,6 @@ export default function MemberDashboardPage() {
                         </div>
                       </div>
 
-                      {/* Specs & Pricing */}
                       <div className="col-span-8 space-y-2 text-xs text-slate-600 pl-1">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -453,7 +435,6 @@ export default function MemberDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Bottom Action Footer */}
                   <div className="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
                       <button
@@ -543,11 +524,9 @@ export default function MemberDashboardPage() {
         )}
       </div>
 
-      {/* Modal 1: Full E-Ticket Digital Pass */}
       {selectedTicket && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden border border-slate-200 shadow-2xl space-y-0">
-            {/* Ticket Header */}
             <div className="bg-gradient-to-r from-cyan-600 to-sky-700 text-white p-5 space-y-1 relative">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
@@ -570,7 +549,6 @@ export default function MemberDashboardPage() {
               </p>
             </div>
 
-            {/* Ticket Body: Big High Contrast QR Code */}
             <div className="p-6 space-y-5 text-center">
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 inline-block shadow-inner">
                 <QrCodeCard
@@ -581,7 +559,6 @@ export default function MemberDashboardPage() {
                 />
               </div>
 
-              {/* Booking Info Grid */}
               <div className="grid grid-cols-2 gap-3 text-left bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Tanggal Reservasi</span>
@@ -615,7 +592,6 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
-      {/* Modal 2: E-Receipt / Official Invoice */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl space-y-5">
@@ -633,7 +609,6 @@ export default function MemberDashboardPage() {
               </button>
             </div>
 
-            {/* Receipt Summary Box */}
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">Nomor Invoice:</span>
@@ -657,7 +632,6 @@ export default function MemberDashboardPage() {
               </div>
             </div>
 
-            {/* Breakdown Table */}
             <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
               <div className="bg-slate-50 p-3 font-bold text-slate-700 border-b border-slate-200 grid grid-cols-12">
                 <span className="col-span-6">Item Ruangan</span>
@@ -698,7 +672,6 @@ export default function MemberDashboardPage() {
               </div>
             </div>
 
-            {/* Print Action Buttons */}
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
@@ -713,7 +686,6 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
-      {/* Modal 3: Cancellation Confirmation */}
       {cancelTargetId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

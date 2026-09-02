@@ -40,22 +40,18 @@ export default function OwnerStaffPage() {
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  // Search Filter
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modal State
   const [modalOpen, setModalOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Form Fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [namaStaff, setNamaStaff] = useState("");
   const [telp, setTelp] = useState("");
 
-  // Delete State
   const [deleteTarget, setDeleteTarget] = useState<StaffUser | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -136,7 +132,6 @@ export default function OwnerStaffPage() {
     }
   };
 
-  // Filtered Staff
   const filteredStaffs = useMemo(() => {
     return staffs.filter((st) => {
       const name = st.namaStaff || st.staff?.namaStaff || "";
@@ -149,7 +144,6 @@ export default function OwnerStaffPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -183,7 +177,6 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      {/* Policy Box */}
       <div className="p-4 bg-gradient-to-r from-cyan-50/70 via-sky-50/40 to-slate-50 border border-cyan-200/80 rounded-xl flex items-start gap-3 text-xs text-slate-700 shadow-2xs">
         <div className="w-7 h-7 rounded-lg bg-cyan-100/80 text-cyan-700 flex items-center justify-center shrink-0 mt-0.5">
           <ShieldCheck className="w-4 h-4" />
@@ -196,7 +189,6 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      {/* Success Alert */}
       {actionSuccess && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
@@ -213,7 +205,6 @@ export default function OwnerStaffPage() {
         </div>
       )}
 
-      {/* Error Alert */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
@@ -224,7 +215,6 @@ export default function OwnerStaffPage() {
         </div>
       )}
 
-      {/* Search Bar */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -241,7 +231,6 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      {/* Data Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs">
         {loading ? (
           <div className="p-16 text-center">
@@ -348,7 +337,6 @@ export default function OwnerStaffPage() {
         )}
       </div>
 
-      {/* Register Staff Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-md w-full p-6 sm:p-7 space-y-5 border border-slate-200 shadow-2xl">
@@ -476,7 +464,6 @@ export default function OwnerStaffPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

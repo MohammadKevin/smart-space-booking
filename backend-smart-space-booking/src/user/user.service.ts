@@ -30,7 +30,6 @@ export class UserService {
 
     const userDataToUpdate: any = {};
 
-    // 1. Email update with uniqueness check
     if (dto.email && dto.email.trim().toLowerCase() !== user.email.toLowerCase()) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email.trim().toLowerCase() },
@@ -41,7 +40,6 @@ export class UserService {
       userDataToUpdate.email = dto.email.trim().toLowerCase();
     }
 
-    // 2. Password update with old password verification
     if (dto.password) {
       if (dto.oldPassword) {
         const isOldValid = await bcrypt.compare(dto.oldPassword, user.password);
@@ -52,7 +50,6 @@ export class UserService {
       userDataToUpdate.password = await bcrypt.hash(dto.password, 10);
     }
 
-    // Update User table if needed
     if (Object.keys(userDataToUpdate).length > 0) {
       await this.prisma.user.update({
         where: { id: userId },
@@ -60,7 +57,6 @@ export class UserService {
       });
     }
 
-    // 3. Role-specific profile updates
     if (role === Role.member) {
       const member = await this.prisma.member.findUnique({
         where: { userId },
@@ -118,7 +114,6 @@ export class UserService {
       });
     }
 
-    // Return refreshed profile
     const updatedUser = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {

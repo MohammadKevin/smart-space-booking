@@ -65,7 +65,6 @@ export default function DashboardLayout({
 
   const role = getNormalizedRole();
 
-  // Strict Client-Side Route Guard
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
       if (pathname === "/dashboard") {
@@ -176,7 +175,6 @@ export default function DashboardLayout({
 
   const roleBadge = getRoleBadge();
 
-  // Navigation Links
   const getSidebarLinks = () => {
     if (role === "owner") {
       return [
@@ -227,17 +225,14 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen flex bg-slate-50/70 text-slate-900">
-      {/* Desktop Left Sidebar */}
       <aside className="hidden md:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0 sticky top-0 h-screen">
         <div className="flex flex-col h-full overflow-hidden">
-          {/* Logo Header with Bottom Divider Line */}
           <div className="h-14 px-4 flex items-center border-b border-slate-200 shrink-0">
             <Link
               href="/"
               className="flex items-center gap-2.5 group focus:outline-none"
             >
               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
               </div>
               <span className="font-extrabold text-slate-900 text-lg tracking-tight">
@@ -246,7 +241,6 @@ export default function DashboardLayout({
             </Link>
           </div>
 
-          {/* Navigation Links */}
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
             <nav className="space-y-1">
               <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -274,7 +268,6 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        {/* Bottom Actions */}
         <div className="p-4 border-t border-slate-200 bg-white shrink-0">
           <button
             type="button"
@@ -287,9 +280,7 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header Bar inside Dashboard */}
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
@@ -324,7 +315,6 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
         {sidebarOpen && (
           <div className="md:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-md">
             <nav className="space-y-1">
@@ -360,7 +350,6 @@ export default function DashboardLayout({
           </div>
         )}
 
-        {/* Page Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>

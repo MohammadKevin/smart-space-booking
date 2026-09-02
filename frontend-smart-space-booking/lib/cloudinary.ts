@@ -1,7 +1,3 @@
-/**
- * Client-Side Direct Cloudinary Upload Utility with Web Crypto SHA-1
- */
-
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "n2q3f6uz";
 const API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || "998714454127672";
 const API_SECRET = process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET || "znTPktUS-hVwZQGLcZXc_qZ4aoE";

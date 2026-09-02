@@ -96,7 +96,6 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Navigation Breadcrumb */}
       <div>
         <Link
           href="/spaces"
@@ -107,13 +106,10 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
         </Link>
       </div>
 
-      {/* Main Detail Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Photo & Specifications */}
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
             <div className="relative aspect-[16/9] bg-slate-100 w-full border-b border-slate-200">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={space.foto || fallbackImage}
                 alt={space.namaSpace}
@@ -148,7 +144,6 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 )}
               </div>
 
-              {/* Description */}
               <div className="space-y-2 pt-4 border-t border-slate-100">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Deskripsi Ruangan
@@ -159,7 +154,6 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 </p>
               </div>
 
-              {/* Amenities Grid */}
               <div className="pt-4 border-t border-slate-100 space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Fasilitas Termasuk
@@ -195,7 +189,6 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           </div>
         </div>
 
-        {/* Right Column: Pricing & Booking Action */}
         <div className="lg:col-span-4 space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 sticky top-20">
             <div className="space-y-1">

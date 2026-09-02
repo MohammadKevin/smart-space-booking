@@ -8,7 +8,6 @@ import { QrCode } from "lucide-react";
 export function Footer() {
   const pathname = usePathname();
 
-  // Hide footer inside dashboard and auth pages
   if (
     pathname.startsWith("/dashboard") ||
     pathname === "/login" ||
@@ -22,11 +21,9 @@ export function Footer() {
     <footer className="bg-white border-t border-slate-200 mt-auto w-full">
       <div className="w-full px-4 sm:px-6 lg:px-10 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Info */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-md overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-slate-900 text-sm tracking-tight">
@@ -38,7 +35,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div className="space-y-2.5">
             <p className="text-xs font-bold text-slate-900">Katalog Ruangan</p>
             <ul className="space-y-1.5 text-xs text-slate-600">
@@ -60,7 +56,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Access Roles */}
           <div className="space-y-2.5">
             <p className="text-xs font-bold text-slate-900">Akses Platform</p>
             <ul className="space-y-1.5 text-xs text-slate-600">
@@ -82,7 +77,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Verification Protocol */}
           <div className="space-y-2.5">
             <p className="text-xs font-bold text-slate-900">Operasional</p>
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
