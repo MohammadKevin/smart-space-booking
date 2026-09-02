@@ -30,6 +30,14 @@ enum ReservasiStatus {
   dibatalkan
 }
 
+enum PembayaranStatus {
+  belum_bayar
+  menunggu_pembayaran
+  lunas
+  gagal
+  refund
+}
+
 model User {
   id        Int         @id @default(autoincrement())
   username  String      @unique
@@ -142,8 +150,28 @@ model Reservasi {
   updatedAt        DateTime         @updatedAt
 
   detailReservasi  DetailReservasi?
+  transaksi        Transaksi?
 
   @@map("reservasi")
+}
+
+model Transaksi {
+  id               Int              @id @default(autoincrement())
+  nomorInvoice     String           @unique
+  reservasiId      Int              @unique
+  reservasi        Reservasi        @relation(fields: [reservasiId], references: [id], onDelete: Cascade)
+  jumlah           Float
+  metodePembayaran String?
+  snapToken        String?
+  snapRedirectUrl  String?
+  midtransOrderId  String?          @unique
+  midtransTransId  String?
+  statusPembayaran PembayaranStatus @default(belum_bayar)
+  dibayarPada      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@map("transaksi")
 }
 
 model DetailReservasi {

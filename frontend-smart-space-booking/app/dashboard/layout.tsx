@@ -23,6 +23,8 @@ import {
   CalendarClock,
   ClipboardList,
   User,
+  ReceiptText,
+  Wallet,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -121,6 +123,7 @@ export default function DashboardLayout({
       return [
         { label: "Overview KPI", href: "/dashboard/owner", icon: LayoutDashboard },
         { label: "Manajemen Reservasi", href: "/dashboard/owner/reservations", icon: CalendarClock },
+        { label: "Transaksi & Pembayaran", href: "/dashboard/owner/transactions", icon: ReceiptText },
         { label: "Inventory Ruangan", href: "/dashboard/owner/spaces", icon: Building },
         { label: "Kode Promo Diskon", href: "/dashboard/owner/discounts", icon: TicketPercent },
         { label: "Manajemen Staff", href: "/dashboard/owner/staff", icon: UserCheck },
@@ -129,10 +132,12 @@ export default function DashboardLayout({
     if (role === "staff") {
       return [
         { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
+        { label: "Transaksi & Pembayaran", href: "/dashboard/owner/transactions", icon: ReceiptText },
       ];
     }
     return [
       { label: "Tiket & Jadwal Saya", href: "/dashboard/member", icon: CalendarCheck },
+      { label: "Transaksi & Invoice", href: "/dashboard/member/transactions", icon: Wallet },
       { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
       { label: "Profil Member", href: "/dashboard/member/profile", icon: User },
     ];
@@ -146,12 +151,14 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/dashboard/owner/transactions")) return "Transaksi & Pembayaran";
     if (pathname.startsWith("/dashboard/owner/reservations")) return "Manajemen Reservasi";
     if (pathname.startsWith("/dashboard/owner/discounts")) return "Kode Promo Diskon";
     if (pathname.startsWith("/dashboard/owner/spaces")) return "Inventory Ruangan";
     if (pathname.startsWith("/dashboard/owner/staff")) return "Manajemen Staff";
     if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";
     if (pathname.startsWith("/dashboard/staff")) return "Terminal Check-In";
+    if (pathname.startsWith("/dashboard/member/transactions")) return "Transaksi & Invoice";
     if (pathname.startsWith("/dashboard/member/profile")) return "Profil Member";
     if (pathname.startsWith("/dashboard/member")) return "Tiket & Jadwal Saya";
     return "Dashboard";

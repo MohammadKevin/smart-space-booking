@@ -197,6 +197,27 @@ export class SpaceService {
       throw new ForbiddenException('Anda tidak memiliki izin untuk menghapus space ini.');
     }
 
+    const activeReservations = await this.prisma.detailReservasi.count({
+      where: {
+        spaceId: space.id,
+        reservasi: {
+          status: {
+            in: [
+              ReservasiStatus.pending,
+              ReservasiStatus.disetujui,
+              ReservasiStatus.aktif,
+            ],
+          },
+        },
+      },
+    });
+
+    if (activeReservations > 0) {
+      throw new BadRequestException(
+        `Space '${space.namaSpace}' masih memiliki ${activeReservations} reservasi aktif (pending/disetujui/aktif). Selesaikan semua reservasi sebelum menghapus space.`,
+      );
+    }
+
     await this.prisma.space.delete({
       where: { id },
     });

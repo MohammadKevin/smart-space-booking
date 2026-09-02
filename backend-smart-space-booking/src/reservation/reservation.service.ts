@@ -15,11 +15,16 @@ import {
   timeStringToMinutes,
   minutesToTimeString,
 } from '../common/utils/time.util';
-import { Prisma, ReservasiStatus, Role } from '@prisma/client';
+import { Prisma, ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class ReservationService {
   constructor(private prisma: PrismaService) {}
+
+  private generateInvoiceNumber(reservationId: number): string {
+    const stamp = Date.now().toString().slice(-6);
+    return `INV-${reservationId}-${stamp}`;
+  }
 
   async create(dto: CreateReservationDto, memberUserId: number) {
     const member = await this.prisma.member.findUnique({
@@ -43,6 +48,19 @@ export class ReservationService {
     const newStartMinutes = timeStringToMinutes(dto.jamMulai);
     const newEndMinutes = newStartMinutes + dto.durasiJam * 60;
     const jamSelesaiStr = minutesToTimeString(newEndMinutes);
+
+    const todayStart = normalizeDateToStartOfDay(new Date());
+    if (targetDate.getTime() < todayStart.getTime()) {
+      throw new BadRequestException('Tidak dapat membuat reservasi untuk tanggal di masa lalu.');
+    }
+
+    if (targetDate.getTime() === todayStart.getTime()) {
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      if (newStartMinutes <= nowMinutes) {
+        throw new BadRequestException('Jam mulai reservasi harus lebih dari waktu saat ini.');
+      }
+    }
 
     const existingReservations = await this.prisma.reservasi.findMany({
       where: {
@@ -137,10 +155,20 @@ export class ReservationService {
         },
       });
 
+      const transaksi = await tx.transaksi.create({
+        data: {
+          nomorInvoice: this.generateInvoiceNumber(res.id),
+          reservasiId: res.id,
+          jumlah: totalHarga,
+          statusPembayaran: PembayaranStatus.belum_bayar,
+        },
+      });
+
       return {
         ...res,
         jamSelesai: jamSelesaiStr,
         detailReservasi: detail,
+        transaksi,
       };
     });
 

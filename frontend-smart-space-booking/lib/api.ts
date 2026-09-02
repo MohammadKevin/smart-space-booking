@@ -35,6 +35,8 @@ import {
   DashboardSummary,
   MonthlyRevenueItem,
   SpaceTypeDistributionItem,
+  Transaksi,
+  StartPaymentResponse,
 } from "@/types/api";
 
 export * from "@/types/api";
@@ -54,7 +56,7 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Request Interceptor: Attach Authorization Bearer Token
+// Request Interceptor: Attach Authorization Bearer Token & Multi-Tenancy Header (x-maker-key / x-app-key)
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
@@ -64,6 +66,16 @@ api.interceptors.request.use(
         sessionStorage.getItem("token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+
+      const makerKey =
+        localStorage.getItem("x-maker-key") ||
+        localStorage.getItem("maker_key") ||
+        localStorage.getItem("app_key") ||
+        process.env.NEXT_PUBLIC_MAKER_KEY;
+      if (makerKey && config.headers) {
+        config.headers["x-maker-key"] = makerKey;
+        config.headers["x-app-key"] = makerKey;
       }
     }
     if (config.data instanceof FormData && config.headers) {
@@ -441,6 +453,53 @@ export async function getRecentTransactions(limit: number = 10): Promise<Reserva
     return data.data;
   }
   return [];
+}
+
+// ---------------------------------------------------------------------------
+// Transactions & Payments API
+// ---------------------------------------------------------------------------
+
+// Start a Midtrans Snap payment for an approved reservation (member)
+export async function startPayment(
+  reservationId: number
+): Promise<StartPaymentResponse> {
+  const { data } = await api.post<StartPaymentResponse>(
+    `/transactions/${reservationId}/pay`
+  );
+  return data;
+}
+
+// List transactions, scoped by role (member/owner/staff)
+export async function getTransactions(): Promise<Transaksi[]> {
+  const { data } = await api.get<any>("/transactions");
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  return [];
+}
+
+// Fetch a single transaction / invoice by id
+export async function getTransaction(id: number): Promise<Transaksi> {
+  const { data } = await api.get<any>(`/transactions/${id}`);
+  if (data && data.data) {
+    return data.data;
+  }
+  return data;
+}
+
+// Reconcile payment status with Midtrans (member/owner/staff)
+export async function syncPayment(id: number): Promise<any> {
+  const { data } = await api.post<any>(`/transactions/${id}/sync`);
+  return data;
+}
+
+// Owner/Staff marks a paid transaction as refund
+export async function markRefund(id: number): Promise<any> {
+  const { data } = await api.patch<any>(`/transactions/${id}/refund`);
+  return data;
 }
 
 export default api;

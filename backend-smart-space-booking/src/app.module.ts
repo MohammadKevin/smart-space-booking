@@ -10,6 +10,7 @@ import { DiscountModule } from './discount/discount.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { CheckinModule } from './checkin/checkin.module';
 import { ReportModule } from './report/report.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ReportModule } from './report/report.module';
     ReservationModule,
     CheckinModule,
     ReportModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

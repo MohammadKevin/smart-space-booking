@@ -157,6 +157,7 @@ export interface Space {
   createdAt: string;
   updatedAt: string;
   owner?: SpaceOwnerProfile;
+  isAvailable?: boolean;
 }
 
 export interface CreateSpaceDto {
@@ -281,6 +282,58 @@ export interface ReservationResponse {
 export interface ReservationCancelResponse {
   message: string;
   data: Reservation;
+}
+
+// ---------------------------------------------------------------------------
+// Transactions, Payments & Midtrans
+// ---------------------------------------------------------------------------
+
+export type PaymentStatus =
+  | "belum_bayar"
+  | "menunggu_pembayaran"
+  | "lunas"
+  | "gagal"
+  | "refund";
+
+export interface Transaksi {
+  id: number;
+  nomorInvoice: string;
+  reservasiId: number;
+  jumlah: number;
+  metodePembayaran?: string | null;
+  snapToken?: string | null;
+  snapRedirectUrl?: string | null;
+  midtransOrderId?: string | null;
+  midtransTransId?: string | null;
+  statusPembayaran: PaymentStatus;
+  dibayarPada?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reservasi?: Reservation;
+}
+
+export interface StartPaymentResult {
+  transactionId: number;
+  nomorInvoice: string;
+  jumlah: number;
+  snapToken: string;
+  redirectUrl: string;
+  clientKey: string;
+  snapScriptUrl: string;
+}
+
+export interface StartPaymentResponse {
+  message: string;
+  data: StartPaymentResult;
+}
+
+export interface TransaksiListResponse {
+  data: Transaksi[];
+}
+
+export interface TransaksiDetailResponse {
+  message: string;
+  data: Transaksi;
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   getSpaceDetail,
+  getSpaces,
   createReservation,
   checkDiscount,
   Space,
@@ -16,7 +17,6 @@ import { formatRupiah } from "@/components/SpaceCard";
 import { QrCodeCard } from "@/components/QrCodeCard";
 import {
   Calendar,
-  Clock,
   Tag,
   Users,
   Building2,
@@ -50,6 +50,16 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [jamMulai, setJamMulai] = useState("09:00");
   const [durasiJam, setDurasiJam] = useState(2);
 
+  // Availability State (per start-hour slot for the selected date)
+  const SERVICE_START = 8; // 08:00 WIB
+  const SERVICE_END = 20; // 20:00 WIB
+  const SLOT_HOURS = Array.from(
+    { length: SERVICE_END - SERVICE_START + 1 },
+    (_, i) => SERVICE_START + i,
+  );
+  const [availability, setAvailability] = useState<Record<string, boolean>>({});
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+
   // Promo State
   const [promoInput, setPromoInput] = useState("");
   const [checkingPromo, setCheckingPromo] = useState(false);
@@ -81,6 +91,53 @@ export default function BookingPage({ params }: BookingPageProps) {
       loadSpace();
     }
   }, [spaceId]);
+
+  // Refresh slot availability whenever the selected date (or start time) changes.
+  // We probe the list API per candidate start-hour to learn which slots the API
+  // considers bookable (the backend's anti-collision engine drives the answer).
+  useEffect(() => {
+    if (!tanggalReservasi) return;
+    let cancelled = false;
+    setCheckingAvailability(true);
+    setAvailability({});
+
+    async function checkAvailability() {
+      const result: Record<string, boolean> = {};
+      try {
+        const probes = await Promise.all(
+          SLOT_HOURS.map((h) => {
+            const start = `${String(h).padStart(2, "0")}:00`;
+            return getSpaces({
+              tanggal: tanggalReservasi,
+              jamMulai: start,
+              durasiJam: 1,
+            }).then(
+              (list) => {
+                const available = Array.isArray(list) && list.some((s) => s.id === spaceId);
+                return [start, available] as const;
+              },
+              () => [start, false] as const,
+            );
+          }),
+        );
+        for (const [start, available] of probes) {
+          result[start] = available;
+        }
+      } catch {
+        // leave all slots unknown; the grid will fall back to enabled
+      } finally {
+        if (!cancelled) {
+          setAvailability(result);
+          setCheckingAvailability(false);
+        }
+      }
+    }
+
+    checkAvailability();
+    return () => {
+      cancelled = true;
+    };
+  }, [tanggalReservasi, spaceId]);
 
   // Handle Promo Verification
   const handleApplyPromo = async (e: React.FormEvent) => {
@@ -123,6 +180,19 @@ export default function BookingPage({ params }: BookingPageProps) {
   };
 
   // Live Price Calculation
+  // Slot grid helpers
+  const isTodayIso = (d: string) => d === todayStr;
+  const nowHour = new Date().getHours();
+
+  // A start hour is usable if it fits within the service window for the duration
+  // AND (when booking today) it hasn't passed already.
+  const slotCanFit = (h: number) => h + durasiJam <= SERVICE_END;
+  const slotIsPast = (h: number) => isTodayIso(tanggalReservasi) && h <= nowHour;
+
+  const toggleSlot = (start: string) => {
+    setJamMulai((prev) => (prev === start ? "" : start));
+  };
+
   const hourlyRate = space?.hargaPerJam || 0;
   const subtotal = hourlyRate * durasiJam;
   const discountPercent = appliedDiscount ? appliedDiscount.persentaseDiskon : 0;
@@ -326,37 +396,83 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-slate-700">
-                    Jam Mulai (WIB)
-                  </label>
-                  <div className="relative">
-                    <Clock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                    <select
-                      value={jamMulai}
-                      onChange={(e) => setJamMulai(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer"
-                    >
-                      {[
-                        "08:00",
-                        "09:00",
-                        "10:00",
-                        "11:00",
-                        "12:00",
-                        "13:00",
-                        "14:00",
-                        "15:00",
-                        "16:00",
-                        "17:00",
-                        "18:00",
-                        "19:00",
-                        "20:00",
-                      ].map((t) => (
-                        <option key={t} value={t}>
-                          Pukul {t} WIB
-                        </option>
-                      ))}
-                    </select>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Jam Mulai (WIB)
+                    </label>
+                    {checkingAvailability && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Cek ketersediaan...
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                    {SLOT_HOURS.map((h) => {
+                      const start = `${String(h).padStart(2, "0")}:00`;
+                      const confirmedTaken = checkingAvailability
+                        ? false
+                        : availability[start] === false;
+                      const unknown = checkingAvailability || availability[start] === undefined;
+                      const cannotFit = !slotCanFit(h);
+                      const isPast = slotIsPast(h);
+                      const disabled = confirmedTaken || cannotFit || isPast;
+                      const selected = jamMulai === start;
+
+                      return (
+                        <button
+                          key={start}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => toggleSlot(start)}
+                          aria-pressed={selected}
+                          title={
+                            confirmedTaken
+                              ? "Slot ini telah dibooking member lain"
+                              : cannotFit
+                              ? "Durasi melebihi jam operasional (20:00)"
+                              : `Pilih pukul ${start} WIB`
+                          }
+                          className={`relative py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
+                            cannotFit
+                              ? "opacity-35 bg-slate-50 text-slate-400 border-slate-100"
+                              : isPast
+                              ? "opacity-35 bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed"
+                              : selected
+                              ? "bg-sky-600 text-white border-sky-600 shadow-xs"
+                              : confirmedTaken
+                              ? "bg-rose-50 text-rose-400 border-rose-100 cursor-not-allowed"
+                              : unknown
+                              ? "bg-slate-100 text-slate-500 border-slate-200"
+                              : "bg-white text-slate-800 border-slate-300 hover:border-sky-500 hover:text-sky-700"
+                          }`}
+                        >
+                          {start}
+                          {confirmedTaken && (
+                            <span className="absolute -top-1.5 -right-1 px-1 rounded text-[9px] font-bold bg-rose-600 text-white leading-tight">
+                              Penuh
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded bg-sky-600 inline-block" /> Terpilih
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block" /> Terisi
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded bg-slate-200 inline-block" /> Tersedia
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 rounded bg-slate-100 inline-block" /> Melewati operasional
+                    </span>
                   </div>
                 </div>
               </div>
@@ -488,7 +604,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </>
                 ) : (
                   <>
-                    <span>Konfirmasi & Terbitkan Tiket</span>
+                    <span>Ajukan Reservasi</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
@@ -508,17 +624,40 @@ export default function BookingPage({ params }: BookingPageProps) {
 
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-slate-900">
-                Reservasi Berhasil Dikonfirmasi
+                Pemesanan Terkirim & Menunggu Persetujuan
               </h3>
               <p className="text-xs text-slate-500">
-                Tiket digital Anda telah tercatat di sistem operasional.
+                Nomor reservasi <span className="font-bold text-slate-700">#{bookingSuccessData.id}</span> telah tercatat. Pemilik ruangan akan memverifikasi permintaan Anda.
               </p>
             </div>
 
+            {/* Stepper */}
+            <div className="w-full space-y-2 text-left">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold flex items-center justify-center">1</div>
+                <span className="text-xs font-semibold text-slate-900">Menunggu Persetujuan</span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold flex items-center justify-center">2</div>
+                <span className="text-xs font-semibold text-slate-400">Tiket QR Aktif</span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold flex items-center justify-center">3</div>
+                <span className="text-xs font-semibold text-slate-400">Check-In di Lokasi</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              <span>Kode QR Anda baru aktif dan dapat digunakan untuk check-in <span className="font-semibold">setelah pemesanan disetujui</span> oleh pemilik ruangan.</span>
+            </p>
+
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center space-y-2">
-              <QrCodeCard value={bookingSuccessData.qrCode} size={150} label="Tiket Digital Siap Pakai" />
+              <QrCodeCard value={bookingSuccessData.qrCode} size={118} label="Tiket Terbit — Menunggu Persetujuan" />
               <p className="text-[11px] text-slate-500 pt-1">
-                Tunjukkan kode QR ini kepada resepsionis saat tiba di lokasi untuk check-in.
+                Pantau status di "Tiket Saya". Anda akan dapat menunjukkan kode QR ini setelah status berubah menjadi <span className="font-bold">Disetujui</span>.
               </p>
             </div>
 

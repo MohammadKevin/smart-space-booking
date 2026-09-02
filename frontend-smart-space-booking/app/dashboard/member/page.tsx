@@ -5,11 +5,17 @@ import Link from "next/link";
 import {
   getMyBookings,
   cancelBooking,
+  getTransactions,
+  startPayment,
+  syncPayment,
   Reservation,
+  Transaksi,
   getApiErrorMessage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { StatusBadge } from "@/components/StatusBadge";
+import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
+import { snapPay } from "@/lib/midtrans-snap";
 import { formatRupiah } from "@/components/SpaceCard";
 import { QrCodeCard } from "@/components/QrCodeCard";
 import {
@@ -37,6 +43,7 @@ import {
   Sparkles,
   ChevronRight,
   Ticket,
+  Wallet,
 } from "lucide-react";
 
 export default function MemberDashboardPage() {
@@ -56,6 +63,12 @@ export default function MemberDashboardPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
 
+  // Payment (Midtrans) State
+  const [transactions, setTransactions] = useState<Record<number, Transaksi>>({});
+  const [payingId, setPayingId] = useState<number | null>(null);
+  const [payMessage, setPayMessage] = useState<string | null>(null);
+  const [payError, setPayError] = useState<string | null>(null);
+
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -69,9 +82,23 @@ export default function MemberDashboardPage() {
     }
   }, []);
 
+  const loadTransactions = useCallback(async () => {
+    try {
+      const data = await getTransactions();
+      const map: Record<number, Transaksi> = {};
+      for (const t of data || []) {
+        map[t.reservasiId] = t;
+      }
+      setTransactions(map);
+    } catch {
+      // Non-blocking: payment buttons simply won't render without tx data.
+    }
+  }, []);
+
   useEffect(() => {
     fetchBookings();
-  }, [fetchBookings]);
+    loadTransactions();
+  }, [fetchBookings, loadTransactions]);
 
   // Derived KPI Stats
   const activeCount = reservations.filter((r) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui").length;
@@ -111,6 +138,46 @@ export default function MemberDashboardPage() {
       setCancelTargetId(null);
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handlePay = async (res: Reservation) => {
+    setPayingId(res.id);
+    setPayError(null);
+    setPayMessage(null);
+    try {
+      const response = await startPayment(res.id);
+      const result = response.data;
+      await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
+        onSuccess: async () => {
+          setPayMessage(`Pembayaran ${result.nomorInvoice} berhasil. Status sedang diperbarui...`);
+          try {
+            const tx = await getTransactions();
+            const map: Record<number, Transaksi> = {};
+            for (const t of tx) map[t.reservasiId] = t;
+            setTransactions(map);
+          } catch {
+            // silently ignore reconcile failure; webhook will finalize status
+          }
+          setPayMessage(`Pembayaran invoice ${result.nomorInvoice} telah lunas. Terima kasih!`);
+          await fetchBookings();
+          await loadTransactions();
+        },
+        onPending: async () => {
+          setPayMessage("Pembayaran sedang menunggu konfirmasi. Status akan diperbarui otomatis via notifikasi.");
+          await fetchBookings();
+          await loadTransactions();
+        },
+        onError: () => {
+          setPayError("Pembayaran gagal atau dibatalkan oleh sistem pembayaran.");
+        },
+        onClose: () => {
+          setPayingId(null);
+        },
+      });
+    } catch (err: unknown) {
+      setPayError(getApiErrorMessage(err));
+      setPayingId(null);
     }
   };
 
@@ -231,6 +298,32 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
+      {payMessage && (
+        <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-between text-cyan-800 text-xs shadow-xs">
+          <span className="font-medium">{payMessage}</span>
+          <button
+            type="button"
+            onClick={() => setPayMessage(null)}
+            className="font-bold text-cyan-700 hover:text-cyan-900 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {payError && (
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-xs shadow-xs">
+          <span className="font-medium">{payError}</span>
+          <button
+            type="button"
+            onClick={() => setPayError(null)}
+            className="font-bold text-rose-700 hover:text-rose-900 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
         {/* Tabs */}
@@ -284,6 +377,11 @@ export default function MemberDashboardPage() {
               const coworkingName = res.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space";
               const spacePhoto = res.detailReservasi?.space?.foto;
               const totalCost = res.detailReservasi?.totalHarga || 0;
+              const payment = transactions[res.id];
+              const canPay =
+                res.status?.toLowerCase() === "disetujui" &&
+                (!payment || payment.statusPembayaran !== "lunas") &&
+                payment?.statusPembayaran !== "refund";
               const canCancel = res.status?.toLowerCase() === "pending" || res.status?.toLowerCase() === "disetujui";
               const isReadyForScan = res.status?.toLowerCase() === "disetujui" || res.status?.toLowerCase() === "aktif";
 
@@ -339,6 +437,18 @@ export default function MemberDashboardPage() {
                             {formatRupiah(totalCost)}
                           </span>
                         </div>
+                        <div className="flex items-center justify-between pt-1">
+                          {payment ? (
+                            <>
+                              <PaymentStatusBadge status={payment.statusPembayaran} />
+                              <span className="text-[10px] font-mono text-slate-400 truncate max-w-[9rem]">
+                                {payment.nomorInvoice}
+                              </span>
+                            </>
+                          ) : (
+                            <PaymentStatusBadge status="belum_bayar" />
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -377,15 +487,33 @@ export default function MemberDashboardPage() {
                       )}
                     </div>
 
-                    {canCancel && (
-                      <button
-                        type="button"
-                        onClick={() => setCancelTargetId(res.id)}
-                        className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                      >
-                        Batalkan
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {canPay && (
+                        <button
+                          type="button"
+                          disabled={payingId === res.id}
+                          onClick={() => handlePay(res)}
+                          className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {payingId === res.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Wallet className="w-3.5 h-3.5" />
+                          )}
+                          <span>{payingId === res.id ? "Memproses..." : "Bayar"}</span>
+                        </button>
+                      )}
+
+                      {canCancel && (
+                        <button
+                          type="button"
+                          onClick={() => setCancelTargetId(res.id)}
+                          className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                        >
+                          Batalkan
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
