@@ -52,7 +52,7 @@ export function Navbar() {
     if (user.spaceOwner?.namaPemilik) return user.spaceOwner.namaPemilik;
     if (user.spaceOwner?.namaCoworking) return user.spaceOwner.namaCoworking;
     if (user.staff?.namaStaff) return user.staff.namaStaff;
-    return user.username || "Pengguna";
+    return user.email || "Pengguna";
   };
 
   const getNormalizedRole = () => {
@@ -127,7 +127,7 @@ export function Navbar() {
                         {getDisplayName()}
                       </p>
                       <p className="text-[11px] font-mono text-slate-500 truncate">
-                        @{user.username}
+                        {user.email}
                       </p>
                     </div>
 

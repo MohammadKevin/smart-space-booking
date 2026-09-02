@@ -16,6 +16,7 @@ import {
   Trash2,
   Phone,
   User,
+  Mail,
   Lock,
   Eye,
   EyeOff,
@@ -49,7 +50,7 @@ export default function OwnerStaffPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   // Form Fields
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [namaStaff, setNamaStaff] = useState("");
   const [telp, setTelp] = useState("");
@@ -76,7 +77,7 @@ export default function OwnerStaffPage() {
   }, [fetchStaffs]);
 
   const handleOpenCreate = () => {
-    setUsername("");
+    setEmail("");
     setPassword("");
     setNamaStaff("");
     setTelp("");
@@ -96,7 +97,7 @@ export default function OwnerStaffPage() {
     setFormLoading(true);
     try {
       const dto: CreateStaffDto = {
-        username: username.trim(),
+        email: email.trim(),
         password,
         namaStaff: namaStaff.trim(),
         telp: telp.trim(),
@@ -120,8 +121,8 @@ export default function OwnerStaffPage() {
       const staffDisplayName =
         deleteTarget.namaStaff ||
         deleteTarget.staff?.namaStaff ||
-        deleteTarget.user?.username ||
-        deleteTarget.username ||
+        deleteTarget.user?.email ||
+        deleteTarget.email ||
         "Staff";
       await deleteStaff(deleteTarget.id);
       setActionSuccess(`Akun staff "${staffDisplayName}" berhasil dihapus.`);
@@ -139,10 +140,10 @@ export default function OwnerStaffPage() {
   const filteredStaffs = useMemo(() => {
     return staffs.filter((st) => {
       const name = st.namaStaff || st.staff?.namaStaff || "";
-      const uname = st.user?.username || st.username || "";
+      const emailVal = st.user?.email || st.email || "";
       const phone = st.telp || st.staff?.telp || "";
       const q = searchQuery.toLowerCase();
-      return name.toLowerCase().includes(q) || uname.toLowerCase().includes(q) || phone.includes(q);
+      return name.toLowerCase().includes(q) || emailVal.toLowerCase().includes(q) || phone.includes(q);
     });
   }, [staffs, searchQuery]);
 
@@ -235,7 +236,7 @@ export default function OwnerStaffPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama staff, username, atau nomor telepon..."
+            placeholder="Cari nama staff, email, atau nomor telepon..."
             className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
           />
         </div>
@@ -257,7 +258,7 @@ export default function OwnerStaffPage() {
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="py-3 px-4">Nama Petugas</th>
-                  <th className="py-3 px-4">Username Akun</th>
+                  <th className="py-3 px-4">Email Akun</th>
                   <th className="py-3 px-4">Kontak WhatsApp</th>
                   <th className="py-3 px-4">Hak Akses Sistem</th>
                   <th className="py-3 px-4 text-right">Aksi</th>
@@ -268,10 +269,10 @@ export default function OwnerStaffPage() {
                   const staffName =
                     st.namaStaff ||
                     st.staff?.namaStaff ||
-                    st.user?.username ||
-                    st.username ||
+                    st.user?.email ||
+                    st.email ||
                     "Staff Operasional";
-                  const staffUsername = st.user?.username || st.username || "-";
+                  const staffEmail = st.user?.email || st.email || "-";
                   const staffTelp = st.telp || st.staff?.telp || "-";
                   const initialChar = staffName.charAt(0).toUpperCase() || "S";
 
@@ -289,7 +290,7 @@ export default function OwnerStaffPage() {
                         </div>
                       </td>
                       <td className="py-3.5 px-4 font-mono font-bold text-cyan-700">
-                        @{staffUsername}
+                        {staffEmail}
                       </td>
                       <td className="py-3.5 px-4 text-slate-700 font-medium">
                         {staffTelp !== "-" ? (
@@ -402,16 +403,16 @@ export default function OwnerStaffPage() {
 
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Username Akun
+                  Email Akun
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
+                  <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Contoh: staff_ani"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Contoh: staff@example.com"
                     className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                   />
                 </div>
@@ -489,7 +490,7 @@ export default function OwnerStaffPage() {
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-900">Hapus Akun Staff?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Apakah Anda yakin ingin menghapus akun <strong>{deleteTarget.namaStaff || deleteTarget.staff?.namaStaff || deleteTarget.user?.username || deleteTarget.username || "Staff Ini"}</strong>?
+                Apakah Anda yakin ingin menghapus akun <strong>{deleteTarget.namaStaff || deleteTarget.staff?.namaStaff || deleteTarget.user?.email || deleteTarget.email || "Staff Ini"}</strong>?
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2.5 pt-2">

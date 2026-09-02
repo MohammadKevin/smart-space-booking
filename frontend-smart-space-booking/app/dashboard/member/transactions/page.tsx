@@ -377,7 +377,7 @@ export default function MemberTransactionsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-bold text-slate-900 text-sm">
-                      {selected.reservasi?.member?.namaMember || user?.username || "Member"}
+                      {selected.reservasi?.member?.namaMember || user?.email || "Member"}
                     </p>
                     <p className="text-slate-500">{selected.reservasi?.member?.instansi || "Instansi Umum"}</p>
                   </div>

@@ -10,14 +10,14 @@ async function main() {
 
   // 1. Space Owner: kvn4.200581@gmail.com
   let ownerUser = await prisma.user.findUnique({
-    where: { username: 'kvn4.200581@gmail.com' },
+    where: { email: 'kvn4.200581@gmail.com' },
     include: { spaceOwner: true },
   });
 
   if (!ownerUser) {
     ownerUser = await prisma.user.create({
       data: {
-        username: 'kvn4.200581@gmail.com',
+        email: 'kvn4.200581@gmail.com',
         password: hashedPassword,
         role: Role.admin_space,
         spaceOwner: {
@@ -31,28 +31,28 @@ async function main() {
       },
       include: { spaceOwner: true },
     });
-    console.log('✅ Akun Space Owner dibuat:', ownerUser.username);
+    console.log('✅ Akun Space Owner dibuat:', ownerUser.email);
   } else {
     // Update password to password123 if needed
     await prisma.user.update({
       where: { id: ownerUser.id },
       data: { password: hashedPassword, role: Role.admin_space },
     });
-    console.log('ℹ️ Akun Space Owner sudah ada, kredensial disinkronkan:', ownerUser.username);
+    console.log('ℹ️ Akun Space Owner sudah ada, kredensial disinkronkan:', ownerUser.email);
   }
 
   const ownerId = ownerUser.spaceOwner.id;
 
   // 2. Staff: mhmdkevin198@gmail.com
   let staffUser = await prisma.user.findUnique({
-    where: { username: 'mhmdkevin198@gmail.com' },
+    where: { email: 'mhmdkevin198@gmail.com' },
     include: { staff: true },
   });
 
   if (!staffUser) {
     staffUser = await prisma.user.create({
       data: {
-        username: 'mhmdkevin198@gmail.com',
+        email: 'mhmdkevin198@gmail.com',
         password: hashedPassword,
         role: Role.staff,
         staff: {
@@ -65,25 +65,25 @@ async function main() {
       },
       include: { staff: true },
     });
-    console.log('✅ Akun Staff dibuat:', staffUser.username);
+    console.log('✅ Akun Staff dibuat:', staffUser.email);
   } else {
     await prisma.user.update({
       where: { id: staffUser.id },
       data: { password: hashedPassword, role: Role.staff },
     });
-    console.log('ℹ️ Akun Staff sudah ada, kredensial disinkronkan:', staffUser.username);
+    console.log('ℹ️ Akun Staff sudah ada, kredensial disinkronkan:', staffUser.email);
   }
 
   // 3. Member: kipilpplli@gmail.com
   let memberUser = await prisma.user.findUnique({
-    where: { username: 'kipilpplli@gmail.com' },
+    where: { email: 'kipilpplli@gmail.com' },
     include: { member: true },
   });
 
   if (!memberUser) {
     memberUser = await prisma.user.create({
       data: {
-        username: 'kipilpplli@gmail.com',
+        email: 'kipilpplli@gmail.com',
         password: hashedPassword,
         role: Role.member,
         member: {
@@ -97,13 +97,13 @@ async function main() {
       },
       include: { member: true },
     });
-    console.log('✅ Akun Member dibuat:', memberUser.username);
+    console.log('✅ Akun Member dibuat:', memberUser.email);
   } else {
     await prisma.user.update({
       where: { id: memberUser.id },
       data: { password: hashedPassword, role: Role.member },
     });
-    console.log('ℹ️ Akun Member sudah ada, kredensial disinkronkan:', memberUser.username);
+    console.log('ℹ️ Akun Member sudah ada, kredensial disinkronkan:', memberUser.email);
   }
 
   // Ensure some sample spaces exist under this owner

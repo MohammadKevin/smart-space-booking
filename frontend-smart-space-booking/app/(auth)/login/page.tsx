@@ -7,7 +7,7 @@ import { login, getApiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import {
   Lock,
-  User,
+  Mail,
   ArrowRight,
   ArrowLeft,
   Eye,
@@ -29,7 +29,7 @@ function LoginForm() {
   const redirectParam = searchParams.get("redirect");
   const { loginUser } = useAuth();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -42,16 +42,16 @@ function LoginForm() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!username.trim()) {
-      setErrorMessage("Masukkan username Anda");
+    if (!email.trim()) {
+      setErrorMessage("Masukkan email Anda");
       return;
     }
     if (!password) {
-      setErrorMessage("Masukkan kata sandi Anda");
+      setErrorMessage("Masukkan password Anda");
       return;
     }
     if (password.length < 6) {
-      setErrorMessage("Kata sandi minimal 6 karakter");
+      setErrorMessage("Password minimal 6 karakter");
       return;
     }
 
@@ -59,7 +59,7 @@ function LoginForm() {
 
     try {
       const response = await login({
-        username: username.trim(),
+        email: email.trim(),
         password,
       });
 
@@ -219,16 +219,16 @@ function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Username
+                  Email
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Contoh: kevin.member"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@email.com"
                     className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                   />
                 </div>
@@ -236,7 +236,7 @@ function LoginForm() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Kata Sandi
+                  Password
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
@@ -245,7 +245,7 @@ function LoginForm() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan kata sandi kamu"
+                    placeholder="Masukkan password kamu"
                     className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                   />
                   <button

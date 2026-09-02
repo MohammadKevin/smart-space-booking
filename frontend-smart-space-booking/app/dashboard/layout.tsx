@@ -151,7 +151,7 @@ export default function DashboardLayout({
     if (user.spaceOwner?.namaPemilik) return user.spaceOwner.namaPemilik;
     if (user.spaceOwner?.namaCoworking) return user.spaceOwner.namaCoworking;
     if (user.staff?.namaStaff) return user.staff.namaStaff;
-    return user.username || "Pengguna";
+    return user.email || "Pengguna";
   };
 
   const getRoleBadge = () => {

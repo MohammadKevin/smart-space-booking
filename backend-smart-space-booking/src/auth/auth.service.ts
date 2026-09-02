@@ -23,7 +23,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+      where: { email: dto.email },
       include: {
         member: true,
         spaceOwner: true,
@@ -36,17 +36,17 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Username atau password salah.');
+      throw new UnauthorizedException('Email atau password salah.');
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Username atau password salah.');
+      throw new UnauthorizedException('Email atau password salah.');
     }
 
     const payload = {
       sub: user.id,
-      username: user.username,
+      email: user.email,
       role: user.role,
     };
 
@@ -63,12 +63,12 @@ export class AuthService {
 
   async registerMember(dto: RegisterMemberDto) {
     const existingUser = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+      where: { email: dto.email },
     });
 
     if (existingUser) {
       throw new ConflictException(
-        `Username '${dto.username}' sudah terdaftar.`,
+        `Email '${dto.email}' sudah terdaftar.`,
       );
     }
 
@@ -77,7 +77,7 @@ export class AuthService {
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          username: dto.username,
+          email: dto.email,
           password: hashedPassword,
           role: Role.member,
         },
@@ -99,7 +99,7 @@ export class AuthService {
 
     const payload = {
       sub: result.user.id,
-      username: result.user.username,
+      email: result.user.email,
       role: result.user.role,
     };
     const token = this.jwtService.sign(payload);
@@ -109,7 +109,7 @@ export class AuthService {
       access_token: token,
       user: {
         id: result.user.id,
-        username: result.user.username,
+        email: result.user.email,
         role: result.user.role,
         member: result.member,
       },
@@ -118,12 +118,12 @@ export class AuthService {
 
   async registerOwner(dto: RegisterOwnerDto) {
     const existingUser = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+      where: { email: dto.email },
     });
 
     if (existingUser) {
       throw new ConflictException(
-        `Username '${dto.username}' sudah terdaftar.`,
+        `Email '${dto.email}' sudah terdaftar.`,
       );
     }
 
@@ -132,7 +132,7 @@ export class AuthService {
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          username: dto.username,
+          email: dto.email,
           password: hashedPassword,
           role: Role.admin_space,
         },
@@ -153,7 +153,7 @@ export class AuthService {
 
     const payload = {
       sub: result.user.id,
-      username: result.user.username,
+      email: result.user.email,
       role: result.user.role,
     };
     const token = this.jwtService.sign(payload);
@@ -163,7 +163,7 @@ export class AuthService {
       access_token: token,
       user: {
         id: result.user.id,
-        username: result.user.username,
+        email: result.user.email,
         role: result.user.role,
         spaceOwner: result.spaceOwner,
       },
@@ -182,12 +182,12 @@ export class AuthService {
     }
 
     const existingUser = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+      where: { email: dto.email },
     });
 
     if (existingUser) {
       throw new ConflictException(
-        `Username '${dto.username}' sudah terdaftar.`,
+        `Email '${dto.email}' sudah terdaftar.`,
       );
     }
 
@@ -196,7 +196,7 @@ export class AuthService {
     const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          username: dto.username,
+          email: dto.email,
           password: hashedPassword,
           role: Role.staff,
         },
@@ -221,7 +221,7 @@ export class AuthService {
       message: 'Akun staff berhasil dibuat',
       user: {
         id: result.user.id,
-        username: result.user.username,
+        email: result.user.email,
         role: result.user.role,
         staff: result.staff,
       },

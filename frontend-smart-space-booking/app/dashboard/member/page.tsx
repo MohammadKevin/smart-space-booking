@@ -186,7 +186,7 @@ export default function MemberDashboardPage() {
     const cleanPhone = ownerTelp.replace(/\D/g, "");
     const formattedPhone = cleanPhone.startsWith("0") ? `62${cleanPhone.slice(1)}` : cleanPhone;
     const text = encodeURIComponent(
-      `Halo pengelola ${res.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space"}, saya member ${user?.username} ingin menanyakan info reservasi tiket #${res.qrCode} untuk ruangan ${res.detailReservasi?.space?.namaSpace}.`
+      `Halo pengelola ${res.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space"}, saya member ${user?.member?.namaMember || user?.email} ingin menanyakan info reservasi tiket #${res.qrCode} untuk ruangan ${res.detailReservasi?.space?.namaSpace}.`
     );
     return `https://wa.me/${formattedPhone}?text=${text}`;
   };
@@ -597,7 +597,7 @@ export default function MemberDashboardPage() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Nama Pemesan</span>
-                  <span className="font-bold text-slate-900">{user?.username}</span>
+                  <span className="font-bold text-slate-900">{user?.member?.namaMember || user?.email}</span>
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Status Tiket</span>

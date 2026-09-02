@@ -40,7 +40,7 @@ enum PembayaranStatus {
 
 model User {
   id        Int         @id @default(autoincrement())
-  username  String      @unique
+  email     String      @unique
   password  String
   role      Role        @default(member)
   createdAt DateTime    @default(now())

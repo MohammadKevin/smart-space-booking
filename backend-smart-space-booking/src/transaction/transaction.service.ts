@@ -95,7 +95,7 @@ export class TransactionService {
   async startPayment(reservationId: number, memberUserId: number) {
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
-      include: { user: { select: { username: true } } },
+      include: { user: { select: { email: true } } },
     });
     if (!member) {
       throw new ForbiddenException(
@@ -148,7 +148,7 @@ export class TransactionService {
       orderId,
       grossAmount: tx.jumlah,
       firstName: member.namaMember,
-      email: member.user?.username || undefined,
+      email: member.user?.email || undefined,
       phone: member.telp,
     });
 

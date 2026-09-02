@@ -13,6 +13,7 @@ import {
 import {
   Building2,
   Lock,
+  Mail,
   User,
   Phone,
   MapPin,
@@ -36,7 +37,7 @@ function RegisterForm() {
   const [role, setRole] = useState<RegisterRole>("member");
 
   // Common Fields
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -62,12 +63,12 @@ function RegisterForm() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    if (!username.trim()) {
-      setErrorMessage("Username tidak boleh kosong");
+    if (!email.trim()) {
+      setErrorMessage("Email tidak boleh kosong");
       return;
     }
     if (password.length < 6) {
-      setErrorMessage("Kata sandi minimal 6 karakter");
+      setErrorMessage("Password minimal 6 karakter");
       return;
     }
 
@@ -87,7 +88,7 @@ function RegisterForm() {
         }
 
         const dto: RegisterMemberDto = {
-          username: username.trim(),
+          email: email.trim(),
           password,
           namaMember: namaMember.trim(),
           instansi: instansi.trim() || "Umum / Personal",
@@ -122,7 +123,7 @@ function RegisterForm() {
         }
 
         const dto: RegisterOwnerDto = {
-          username: username.trim(),
+          email: email.trim(),
           password,
           namaCoworking: namaCoworking.trim(),
           namaPemilik: namaPemilik.trim(),
@@ -295,20 +296,20 @@ function RegisterForm() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Common Fields: Username & Password */}
+              {/* Common Fields: Email & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-slate-700">
-                    Username
+                    Email
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                    <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Username unik"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="nama@email.com"
                       className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                     />
                   </div>
@@ -316,7 +317,7 @@ function RegisterForm() {
 
                 <div className="space-y-1">
                   <label className="block text-xs font-semibold text-slate-700">
-                    Kata Sandi
+                    Password
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />

@@ -34,7 +34,7 @@ async function runQATests() {
   console.log('--- TEST 1: AUTENTIKASI SEMUA ROLE ---');
   const memberLogin = await request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username: 'kipilpplli@gmail.com', password: 'password123' }),
+    body: JSON.stringify({ email: 'kipilpplli@gmail.com', password: 'password123' }),
   });
   assert(
     memberLogin.ok && memberLogin.data?.user?.role === 'member',
@@ -44,7 +44,7 @@ async function runQATests() {
 
   const staffLogin = await request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username: 'mhmdkevin198@gmail.com', password: 'password123' }),
+    body: JSON.stringify({ email: 'mhmdkevin198@gmail.com', password: 'password123' }),
   });
   assert(
     staffLogin.ok && staffLogin.data?.user?.role === 'staff',
@@ -54,7 +54,7 @@ async function runQATests() {
 
   const ownerLogin = await request('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ username: 'kvn4.200581@gmail.com', password: 'password123' }),
+    body: JSON.stringify({ email: 'kvn4.200581@gmail.com', password: 'password123' }),
   });
   assert(
     ownerLogin.ok && ownerLogin.data?.user?.role === 'admin_space',

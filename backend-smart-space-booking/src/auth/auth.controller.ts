@@ -34,7 +34,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Login Akun',
     description:
-      'Autentikasi untuk semua role (admin_space, staff, member) menggunakan username dan password.',
+      'Autentikasi untuk semua role (admin_space, staff, member) menggunakan email dan password.',
   })
   @ApiResponse({
     status: 200,
@@ -42,7 +42,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Username atau password tidak valid.',
+    description: 'Email atau password tidak valid.',
   })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
@@ -58,7 +58,7 @@ export class AuthController {
     status: 201,
     description: 'Registrasi member berhasil dibuat.',
   })
-  @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
+  @ApiResponse({ status: 409, description: 'Email sudah digunakan.' })
   registerMember(@Body() registerMemberDto: RegisterMemberDto) {
     return this.authService.registerMember(registerMemberDto);
   }
@@ -73,7 +73,7 @@ export class AuthController {
     status: 201,
     description: 'Registrasi admin space berhasil dibuat.',
   })
-  @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
+  @ApiResponse({ status: 409, description: 'Email sudah digunakan.' })
   registerOwner(@Body() registerOwnerDto: RegisterOwnerDto) {
     return this.authService.registerOwner(registerOwnerDto);
   }
@@ -92,7 +92,7 @@ export class AuthController {
     status: 403,
     description: 'Akses ditolak (bukan admin_space).',
   })
-  @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
+  @ApiResponse({ status: 409, description: 'Email sudah digunakan.' })
   createStaff(
     @Body() createStaffDto: CreateStaffDto,
     @GetUser('id') ownerUserId: number,

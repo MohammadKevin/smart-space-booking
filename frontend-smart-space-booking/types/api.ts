@@ -48,7 +48,7 @@ export interface StaffProfile {
 
 export interface UserProfile {
   id: number;
-  username: string;
+  email: string;
   role: UserRole;
   createdAt: string;
   updatedAt: string;
@@ -65,7 +65,7 @@ export interface AuthResponse {
 
 export interface MemberUser {
   id: number;
-  username?: string;
+  email?: string;
   role?: UserRole;
   member?: MemberProfile;
   namaMember?: string;
@@ -74,7 +74,7 @@ export interface MemberUser {
   telp?: string;
   user?: {
     id: number;
-    username: string;
+    email: string;
     role: UserRole;
     createdAt?: string;
   };
@@ -82,7 +82,7 @@ export interface MemberUser {
 
 export interface StaffUser {
   id: number;
-  username?: string;
+  email?: string;
   role?: UserRole;
   staff?: StaffProfile;
   namaStaff?: string;
@@ -91,7 +91,7 @@ export interface StaffUser {
   userId?: number;
   user?: {
     id: number;
-    username: string;
+    email: string;
     role: UserRole;
     createdAt?: string;
   };
@@ -102,12 +102,12 @@ export interface StaffUser {
 // ---------------------------------------------------------------------------
 
 export interface LoginDto {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterMemberDto {
-  username: string;
+  email: string;
   password: string;
   namaMember: string;
   instansi?: string;
@@ -117,7 +117,7 @@ export interface RegisterMemberDto {
 }
 
 export interface RegisterOwnerDto {
-  username: string;
+  email: string;
   password: string;
   namaCoworking: string;
   namaPemilik: string;
@@ -126,7 +126,7 @@ export interface RegisterOwnerDto {
 }
 
 export interface CreateStaffDto {
-  username: string;
+  email: string;
   password: string;
   namaStaff: string;
   telp: string;

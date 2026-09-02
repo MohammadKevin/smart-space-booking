@@ -73,7 +73,7 @@ export default function MemberProfilePage() {
 
               <div className="space-y-0.5">
                 <h2 className="text-xl font-bold text-slate-900">
-                  {member?.namaMember || user?.username}
+                  {member?.namaMember || user?.email}
                 </h2>
                 <p className="text-xs text-slate-500 font-medium">
                   {member?.instansi || "Komunitas / Profesional Mandiri"}
@@ -90,7 +90,7 @@ export default function MemberProfilePage() {
                 <span>Nama Lengkap</span>
               </span>
               <p className="text-sm font-bold text-slate-900">
-                {member?.namaMember || user?.username}
+                {member?.namaMember || user?.email}
               </p>
             </div>
 
