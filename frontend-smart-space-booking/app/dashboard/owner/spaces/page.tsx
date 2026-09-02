@@ -523,11 +523,11 @@ export default function OwnerSpacesPage() {
           </div>
         )
       ) : (
-        <div className="p-16 bg-white rounded-xl border border-slate-200 text-center max-w-md mx-auto space-y-4 shadow-xs">
+        <div className="w-full p-12 sm:p-16 bg-white rounded-xl border border-slate-200 text-center shadow-xs flex flex-col items-center justify-center space-y-4">
           <div className="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto border border-cyan-200">
             <Building className="w-6 h-6" />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 max-w-md mx-auto">
             <h3 className="text-sm font-bold text-slate-900">Tidak Ada Ruangan yang Cocok</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               {searchQuery ? "Tidak ditemukan ruangan sesuai kata kunci pencarian." : "Tambahkan unit workstation atau ruang rapat pertama untuk mulai menerima reservasi."}
