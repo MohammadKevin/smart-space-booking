@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
-const jakarta = Plus_Jakarta_Sans({
+const geist = Geist({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-jakarta",
+  variable: "--font-geist",
 });
 
 export const metadata: Metadata = {
@@ -29,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`h-full bg-white antialiased ${jakarta.className}`}>
-      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white">
+    <html lang="id" className={`h-full bg-white antialiased ${geist.className}`}>
+      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white font-light tracking-tight">
         <AuthProvider>
           <Navbar />
           <main className="flex-1 flex flex-col">{children}</main>
