@@ -240,20 +240,26 @@ function SpacesContent() {
 
       {/* Grid of Space Cards */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse"
-            >
-              <div className="aspect-[16/10] bg-slate-100" />
-              <div className="p-4 space-y-3">
-                <div className="h-4 bg-slate-100 rounded w-3/4" />
-                <div className="h-3 bg-slate-100 rounded w-1/2" />
-                <div className="h-8 bg-slate-100 rounded w-full mt-4" />
+        <div className="space-y-4">
+          <div className="flex items-center justify-center gap-2.5 py-3.5 px-5 bg-gradient-to-r from-cyan-50/80 via-white to-sky-50/80 rounded-xl border border-cyan-200/80 text-cyan-800 text-xs font-bold shadow-2xs">
+            <Loader2 className="w-4 h-4 text-cyan-600 animate-spin shrink-0" />
+            <span>Memuat Katalog & Ketersediaan Ruangan...</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse shadow-xs"
+              >
+                <div className="aspect-[16/10] bg-slate-200/70" />
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded w-1/2" />
+                  <div className="h-8 bg-slate-100 rounded w-full mt-4" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : filteredSpaces.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

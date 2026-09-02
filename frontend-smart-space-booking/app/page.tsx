@@ -340,9 +340,30 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="py-14 text-center space-y-2.5 bg-white rounded-xl border border-cyan-100">
-            <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
-            <p className="text-xs font-semibold text-slate-600">Memuat inventaris ruangan...</p>
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-2.5 py-4 px-6 bg-gradient-to-r from-cyan-50/80 via-white to-sky-50/80 rounded-xl border border-cyan-200/80 text-cyan-800 shadow-2xs">
+              <Loader2 className="w-4 h-4 text-cyan-600 animate-spin shrink-0" />
+              <span className="text-xs font-bold tracking-wide">Sinkronisasi Inventaris Ruangan Terkini...</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
+                >
+                  <div className="aspect-[16/10] bg-slate-200/70" />
+                  <div className="p-4 space-y-2.5">
+                    <div className="h-3.5 bg-slate-200 rounded w-1/3" />
+                    <div className="h-5 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
+                      <div className="h-5 bg-slate-200 rounded w-1/3" />
+                      <div className="h-7 bg-slate-200 rounded w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : spaces.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

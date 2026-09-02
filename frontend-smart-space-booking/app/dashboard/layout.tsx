@@ -50,16 +50,26 @@ export default function DashboardLayout({
   // Strict Client-Side Route Guard
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
+      if (pathname === "/dashboard") {
+        if (role === "owner") router.replace("/dashboard/owner");
+        else if (role === "staff") router.replace("/dashboard/staff");
+        else router.replace("/dashboard/member");
+        return;
+      }
+
       if (role === "member") {
-        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/staff")) {
+        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/staff") || pathname.startsWith("/dashboard/checkin")) {
           router.replace("/dashboard/member");
         }
       } else if (role === "staff") {
-        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/member")) {
+        if (
+          (pathname.startsWith("/dashboard/owner") && !pathname.startsWith("/dashboard/owner/transactions")) ||
+          pathname.startsWith("/dashboard/member")
+        ) {
           router.replace("/dashboard/staff");
         }
       } else if (role === "owner") {
-        if (pathname === "/dashboard/member") {
+        if (pathname.startsWith("/dashboard/member") || pathname === "/dashboard/staff") {
           router.replace("/dashboard/owner");
         }
       }

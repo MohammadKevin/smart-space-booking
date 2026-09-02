@@ -210,36 +210,40 @@ export default function BookingPage({ params }: BookingPageProps) {
     }
 
     if (!tanggalReservasi) {
-      setSubmitError("Pilih tanggal reservasi");
+      setSubmitError("Pilih tanggal reservasi terlebih dahulu.");
       return;
     }
     if (!jamMulai) {
-      setSubmitError("Pilih jam mulai");
+      setSubmitError("Pilih jam mulai reservasi pada slot waktu yang tersedia.");
       return;
     }
-    if (durasiJam < 1) {
-      setSubmitError("Durasi sewa minimal 1 jam");
+    if (!durasiJam || Number(durasiJam) < 1) {
+      setSubmitError("Durasi sewa minimal 1 jam.");
       return;
     }
 
     setSubmitting(true);
     try {
       const payload: any = {
-        spaceId: spaceId,
+        spaceId: Number(spaceId),
         tanggalReservasi: tanggalReservasi,
         jamMulai: jamMulai,
         durasiJam: Number(durasiJam),
       };
 
-      if (appliedDiscount) {
-        payload.diskonId = appliedDiscount.id;
-        payload.kodeDiskon = appliedDiscount.kodeDiskon;
+      if (appliedDiscount?.id) {
+        payload.diskonId = Number(appliedDiscount.id);
+      }
+      if (appliedDiscount?.kodeDiskon) {
+        payload.kodeDiskon = String(appliedDiscount.kodeDiskon).toUpperCase();
       }
 
       const res = await createReservation(payload);
-      setBookingSuccessData(res.data);
+      const reservationData = (res as any)?.data || res;
+      setBookingSuccessData(reservationData);
     } catch (err: unknown) {
-      setSubmitError(getApiErrorMessage(err));
+      const errorMsg = getApiErrorMessage(err);
+      setSubmitError(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -370,9 +374,21 @@ export default function BookingPage({ params }: BookingPageProps) {
             </div>
 
             {submitError && (
-              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 flex items-start gap-2 text-rose-800 text-xs">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-                <span className="font-medium">{submitError}</span>
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-2.5 text-rose-800 text-xs shadow-xs animate-shake">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-rose-900">Reservasi Belum Dapat Diproses</p>
+                    <p className="font-medium leading-relaxed">{submitError}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSubmitError(null)}
+                  className="text-rose-500 hover:text-rose-800 font-bold text-sm cursor-pointer p-0.5"
+                >
+                  ✕
+                </button>
               </div>
             )}
 

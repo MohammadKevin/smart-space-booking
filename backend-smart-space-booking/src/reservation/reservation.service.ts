@@ -32,6 +32,27 @@ export class ReservationService {
   }
 
   async create(dto: CreateReservationDto, memberUserId: number) {
+    const spaceId = dto.spaceId || dto.space_id;
+    const tanggalReservasi =
+      dto.tanggalReservasi || dto.tanggal_reservasi || dto.tanggal;
+    const jamMulai = dto.jamMulai || dto.jam_mulai;
+    const durasiJam = dto.durasiJam || dto.durasi_jam || dto.durasi;
+    const diskonId = dto.diskonId || dto.diskon_id;
+    const kodeDiskon = dto.kodeDiskon || dto.kode_diskon;
+
+    if (!spaceId) {
+      throw new BadRequestException('spaceId / ID ruangan tidak boleh kosong.');
+    }
+    if (!tanggalReservasi) {
+      throw new BadRequestException('Tanggal reservasi tidak boleh kosong.');
+    }
+    if (!jamMulai) {
+      throw new BadRequestException('Jam mulai tidak boleh kosong.');
+    }
+    if (!durasiJam || durasiJam < 1) {
+      throw new BadRequestException('Durasi pemakaian minimal 1 jam.');
+    }
+
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
     });
@@ -43,22 +64,27 @@ export class ReservationService {
     }
 
     const space = await this.prisma.space.findUnique({
-      where: { id: dto.spaceId },
+      where: { id: spaceId },
       include: { owner: true },
     });
 
     if (!space) {
       throw new NotFoundException(
-        `Space dengan ID ${dto.spaceId} tidak ditemukan.`,
+        `Space dengan ID ${spaceId} tidak ditemukan.`,
       );
     }
 
-    const targetDate = normalizeDateToStartOfDay(dto.tanggalReservasi);
-    const newStartMinutes = timeStringToMinutes(dto.jamMulai);
-    const newEndMinutes = newStartMinutes + dto.durasiJam * 60;
+    const targetDate = normalizeDateToStartOfDay(tanggalReservasi);
+    const newStartMinutes = timeStringToMinutes(jamMulai);
+    const newEndMinutes = newStartMinutes + durasiJam * 60;
     const jamSelesaiStr = minutesToTimeString(newEndMinutes);
 
-    const todayStart = normalizeDateToStartOfDay(new Date());
+    // Calculate today's date in WIB (UTC+7)
+    const now = new Date();
+    const wibNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+    const todayWibStr = wibNow.toISOString().split('T')[0];
+    const todayStart = normalizeDateToStartOfDay(todayWibStr);
+
     if (targetDate.getTime() < todayStart.getTime()) {
       throw new BadRequestException(
         'Tidak dapat membuat reservasi untuk tanggal di masa lalu.',
@@ -66,9 +92,8 @@ export class ReservationService {
     }
 
     if (targetDate.getTime() === todayStart.getTime()) {
-      const now = new Date();
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      if (newStartMinutes <= nowMinutes) {
+      const nowWibMinutes = wibNow.getUTCHours() * 60 + wibNow.getUTCMinutes();
+      if (newStartMinutes <= nowWibMinutes) {
         throw new BadRequestException(
           'Jam mulai reservasi harus lebih dari waktu saat ini.',
         );
@@ -115,26 +140,26 @@ export class ReservationService {
       }
     }
 
-    const basePrice = space.hargaPerJam * dto.durasiJam;
+    const basePrice = space.hargaPerJam * durasiJam;
     let selectedDiskon: any = null;
     let totalHarga = basePrice;
 
-    if (dto.diskonId || dto.kodeDiskon) {
-      if (dto.diskonId) {
+    if (diskonId || kodeDiskon) {
+      if (diskonId) {
         selectedDiskon = await this.prisma.diskon.findUnique({
-          where: { id: dto.diskonId },
+          where: { id: diskonId },
         });
-      } else if (dto.kodeDiskon) {
+      } else if (kodeDiskon) {
         selectedDiskon = await this.prisma.diskon.findUnique({
-          where: { kodeDiskon: dto.kodeDiskon.toUpperCase() },
+          where: { kodeDiskon: kodeDiskon.toUpperCase() },
         });
       }
 
       if (selectedDiskon) {
-        const now = new Date();
+        const nowCheck = new Date();
         const isValidDate =
-          now >= selectedDiskon.tanggalAwal &&
-          now <= selectedDiskon.tanggalAkhir;
+          nowCheck >= selectedDiskon.tanggalAwal &&
+          nowCheck <= selectedDiskon.tanggalAkhir;
 
         if (!isValidDate) {
           throw new BadRequestException(
@@ -154,9 +179,9 @@ export class ReservationService {
     const reservation = await this.prisma.$transaction(async (tx) => {
       const res = await tx.reservasi.create({
         data: {
-          tanggalReservasi: new Date(dto.tanggalReservasi),
-          jamMulai: dto.jamMulai,
-          durasiJam: dto.durasiJam,
+          tanggalReservasi: new Date(tanggalReservasi),
+          jamMulai: jamMulai,
+          durasiJam: durasiJam,
           status: ReservasiStatus.pending,
           qrCode,
           ownerId: space.ownerId,

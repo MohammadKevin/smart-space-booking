@@ -361,9 +361,24 @@ export default function OwnerSpacesPage() {
 
       {/* Main Content View (Grid vs Table) */}
       {loading ? (
-        <div className="p-16 bg-white rounded-xl border border-slate-200 text-center shadow-xs">
-          <Loader2 className="w-8 h-8 text-cyan-600 animate-spin mx-auto" />
-          <p className="text-xs text-slate-500 mt-3 font-medium">Memuat inventaris ruangan...</p>
+        <div className="space-y-4">
+          <div className="p-8 bg-white rounded-xl border border-slate-200 text-center shadow-xs flex flex-col items-center justify-center space-y-2.5">
+            <Loader2 className="w-7 h-7 text-cyan-600 animate-spin" />
+            <p className="text-xs font-bold text-slate-800">Menyinkronkan Inventaris Coworking...</p>
+            <p className="text-[11px] text-slate-400">Mengambil data ruangan dan kapasitas unit terbaru.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse shadow-xs">
+                <div className="h-44 bg-slate-200/70" />
+                <div className="p-4 space-y-2.5">
+                  <div className="h-5 bg-slate-200 rounded w-2/3" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
+                  <div className="h-6 bg-slate-200 rounded w-1/2 mt-3" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : filteredSpaces.length > 0 ? (
         viewMode === "grid" ? (

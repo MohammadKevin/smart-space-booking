@@ -42,6 +42,10 @@ export function isTimeOverlapping(
 }
 
 export function normalizeDateToStartOfDay(dateInput: Date | string): Date {
+  if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    const [year, month, day] = dateInput.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+  }
   const d = new Date(dateInput);
   return new Date(
     Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0),

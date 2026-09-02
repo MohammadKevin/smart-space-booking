@@ -67,20 +67,34 @@ function LoginForm() {
       setSuccessMessage("Login berhasil! Mengarahkan ke dashboard...");
 
       setTimeout(() => {
+        const role = response.user.role?.toLowerCase();
+        const isOwner = role === "admin_space" || role === "owner";
+        const isStaff = role === "staff";
+        const defaultDashboard = isOwner
+          ? "/dashboard/owner"
+          : isStaff
+          ? "/dashboard/staff"
+          : "/dashboard/member";
+
         if (redirectParam) {
+          if (!isOwner && redirectParam.startsWith("/dashboard/owner")) {
+            router.push(defaultDashboard);
+            return;
+          }
+          if (!isStaff && redirectParam.startsWith("/dashboard/staff")) {
+            router.push(defaultDashboard);
+            return;
+          }
+          if (role === "member" && redirectParam.startsWith("/dashboard/checkin")) {
+            router.push(defaultDashboard);
+            return;
+          }
           router.push(redirectParam);
           return;
         }
 
-        const role = response.user.role?.toLowerCase();
-        if (role === "admin_space" || role === "owner") {
-          router.push("/dashboard/owner");
-        } else if (role === "staff") {
-          router.push("/dashboard/staff");
-        } else {
-          router.push("/dashboard/member");
-        }
-      }, 600);
+        router.push(defaultDashboard);
+      }, 500);
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err));
     } finally {
