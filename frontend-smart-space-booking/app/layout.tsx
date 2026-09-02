@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-jakarta",
+});
 
 export const metadata: Metadata = {
   title: "Smart Space Booking | Coworking & Meeting Space Platform",
@@ -21,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="h-full bg-white antialiased">
+    <html lang="id" className={`h-full bg-white antialiased ${jakarta.className}`}>
       <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white">
         <AuthProvider>
           <Navbar />

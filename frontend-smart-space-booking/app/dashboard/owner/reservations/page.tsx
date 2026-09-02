@@ -137,11 +137,7 @@ export default function OwnerReservationsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
-        <div className="space-y-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
-            <CalendarClock className="w-3.5 h-3.5 text-cyan-600" />
-            <span>Manajemen Pemesanan & Persetujuan</span>
-          </div>
+        <div className="space-y-1.5 relative z-10">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Persetujuan & Riwayat Reservasi
           </h1>
