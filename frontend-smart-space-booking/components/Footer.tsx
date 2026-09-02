@@ -27,10 +27,10 @@ export function Footer() {
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-md overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
+                <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-slate-900 text-sm tracking-tight">
-                SmartSpace
+                WorkNest
               </span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -98,7 +98,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 mt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>&#169; {new Date().getFullYear()} SmartSpace Platform. All rights reserved.</p>
+          <p>&#169; {new Date().getFullYear()} WorkNest Platform. All rights reserved.</p>
           <div className="flex items-center gap-4 text-[11px]">
             <span>Live REST API Connected</span>
             <span>UKK RPL 2026/2027</span>

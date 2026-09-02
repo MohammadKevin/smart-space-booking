@@ -84,11 +84,11 @@ export function Navbar() {
           >
             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
+              <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-900 text-base tracking-tight">
-                SmartSpace
+                WorkNest
               </span>
             </div>
           </Link>

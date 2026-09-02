@@ -22,7 +22,7 @@ async function main() {
         role: Role.admin_space,
         spaceOwner: {
           create: {
-            namaCoworking: 'SmartSpace Prime Hub',
+            namaCoworking: 'WorkNest Prime Hub',
             namaPemilik: 'Kevin Space Owner',
             alamat: 'Jl. Sudirman Bisnis Park No. 42, Jakarta',
             telp: '081234567890',

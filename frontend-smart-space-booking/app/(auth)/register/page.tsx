@@ -199,7 +199,7 @@ function RegisterForm() {
             {/* Floating Top Left Badge */}
             <div className="absolute -top-3 -left-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
               <Building className="w-4 h-4 text-cyan-600" />
-              <span>Smart Space</span>
+              <span>WorkNest</span>
             </div>
 
             {/* Floating Bottom Right Badge */}
@@ -224,10 +224,10 @@ function RegisterForm() {
               <div className="inline-flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
+                  <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-extrabold text-slate-900 text-xl tracking-tight">
-                  SmartSpace
+                  WorkNest
                 </span>
               </div>
 
@@ -499,7 +499,7 @@ function RegisterForm() {
           <div className="pt-2 border-t border-slate-100 text-center">
             <p className="text-[11px] text-slate-400">
               Dengan mendaftar, kamu menyetujui{" "}
-              <span className="text-cyan-600 font-medium">Syarat & Ketentuan</span> SmartSpace.
+              <span className="text-cyan-600 font-medium">Syarat & Ketentuan</span> WorkNest.
             </p>
           </div>
         </div>

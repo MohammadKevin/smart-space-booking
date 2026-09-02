@@ -13,7 +13,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Space Booking | Coworking & Meeting Space Platform",
+  title: "WorkNest | Coworking & Meeting Space Platform",
   description:
     "Reservasi instan coworking space, meeting room, dan private office dengan QR Code check-in cerdas dan harga transparan.",
   icons: {

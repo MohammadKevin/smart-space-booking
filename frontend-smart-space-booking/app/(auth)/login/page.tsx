@@ -179,10 +179,10 @@ function LoginForm() {
               <div className="inline-flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
+                  <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-extrabold text-slate-900 text-xl tracking-tight">
-                  SmartSpace
+                  WorkNest
                 </span>
               </div>
 
@@ -190,7 +190,7 @@ function LoginForm() {
                 Hai, selamat datang kembali
               </h1>
               <p className="text-xs sm:text-sm text-slate-500">
-                Baru di SmartSpace?{" "}
+                Baru di WorkNest?{" "}
                 <Link
                   href="/register"
                   className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
@@ -295,7 +295,7 @@ function LoginForm() {
             <p className="text-[11px] text-slate-400 leading-relaxed">
               Dengan melanjutkan, kamu menyetujui{" "}
               <span className="text-cyan-600 font-medium">Syarat Penggunaan</span> dan{" "}
-              <span className="text-cyan-600 font-medium">Kebijakan Privasi</span> SmartSpace.
+              <span className="text-cyan-600 font-medium">Kebijakan Privasi</span> WorkNest.
             </p>
           </div>
         </div>

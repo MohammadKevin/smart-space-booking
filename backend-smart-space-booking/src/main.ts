@@ -48,7 +48,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Smart Space Booking API')
+    .setTitle('WorkNest API')
     .setDescription(
       'Dokumentasi RESTful API untuk Sistem Reservasi Coworking Space & Workstation (UKK RPL 2026/2027)',
     )

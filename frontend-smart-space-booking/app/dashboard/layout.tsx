@@ -234,10 +234,10 @@ export default function DashboardLayout({
           >
             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon-web.png" alt="SmartSpace" className="w-full h-full object-cover" />
+              <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
             </div>
             <span className="font-extrabold text-slate-900 text-lg tracking-tight">
-              SmartSpace
+              WorkNest
             </span>
           </Link>
 
@@ -294,7 +294,7 @@ export default function DashboardLayout({
             </button>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400 hidden sm:inline">SmartSpace</span>
+              <span className="text-slate-400 hidden sm:inline">WorkNest</span>
               <ChevronRight className="w-3.5 h-3.5 text-slate-300 hidden sm:inline" />
               <span className="text-cyan-700 font-medium hidden sm:inline">{roleBadge.label}</span>
               <ChevronRight className="w-3.5 h-3.5 text-slate-300 hidden sm:inline" />

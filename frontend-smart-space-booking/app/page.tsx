@@ -537,7 +537,7 @@ export default function HomePage() {
               <span>Apakah saya harus berlangganan bulanan untuk memesan ruangan?</span>
             </p>
             <p className="text-slate-600 pl-5.5 leading-relaxed">
-              Tidak. Smart Space Booking menganut model <em>pay-as-you-go</em>: Anda hanya membayar durasi jam yang disewa, tanpa komitmen kontrak bulanan.
+              Tidak. WorkNest menganut model <em>pay-as-you-go</em>: Anda hanya membayar durasi jam yang disewa, tanpa komitmen kontrak bulanan.
             </p>
           </div>
 
