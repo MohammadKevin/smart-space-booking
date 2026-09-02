@@ -15,7 +15,8 @@ export class MidtransNotificationController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Webhook Notifikasi Pembayaran dari Midtrans',
-    description: 'Diterima oleh Midtrans saat status pembayaran berubah. Memverifikasi signature lalu memperbarui status pembayaran.',
+    description:
+      'Diterima oleh Midtrans saat status pembayaran berubah. Memverifikasi signature lalu memperbarui status pembayaran.',
   })
   @ApiResponse({ status: 200, description: 'Notifikasi diterima.' })
   @ApiResponse({ status: 202, description: 'Notifikasi diterima (sukses).' })

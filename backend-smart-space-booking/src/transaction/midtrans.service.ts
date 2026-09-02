@@ -96,7 +96,9 @@ export class MidtransService {
       const message = Array.isArray(data.error_messages)
         ? data.error_messages.join(', ')
         : 'Gagal membuat token pembayaran Midtrans.';
-      throw new Error(`Midtrans createSnapToken failed (${res.status}): ${message}`);
+      throw new Error(
+        `Midtrans createSnapToken failed (${res.status}): ${message}`,
+      );
     }
 
     return {
@@ -110,16 +112,13 @@ export class MidtransService {
    * Used to verify (defense-in-depth) the webhook / frontend callback.
    */
   async getTransactionStatus(orderId: string): Promise<Record<string, any>> {
-    const res = await fetch(
-      `${this.baseUrl}/v2/${orderId}/status`,
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: this.authHeader(),
-        },
+    const res = await fetch(`${this.baseUrl}/v2/${orderId}/status`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: this.authHeader(),
       },
-    );
+    });
 
     if (!res.ok) {
       throw new Error(`Midtrans getTransactionStatus failed (${res.status})`);

@@ -73,7 +73,10 @@ export class ReportService {
     };
   }
 
-  async getMonthlyRevenue(ownerUserId: number, year: number = new Date().getFullYear()) {
+  async getMonthlyRevenue(
+    ownerUserId: number,
+    year: number = new Date().getFullYear(),
+  ) {
     const owner = await this.getOwner(ownerUserId);
 
     const startOfYear = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
@@ -131,8 +134,14 @@ export class ReportService {
       }
     }
 
-    const grandTotalRevenue = monthlyStats.reduce((acc, curr) => acc + curr.revenue, 0);
-    const grandTotalBookings = monthlyStats.reduce((acc, curr) => acc + curr.totalBookings, 0);
+    const grandTotalRevenue = monthlyStats.reduce(
+      (acc, curr) => acc + curr.revenue,
+      0,
+    );
+    const grandTotalBookings = monthlyStats.reduce(
+      (acc, curr) => acc + curr.totalBookings,
+      0,
+    );
 
     return {
       year,
@@ -165,7 +174,10 @@ export class ReportService {
       },
     });
 
-    const distribution: Record<SpaceTipe, { type: SpaceTipe; label: string; count: number; revenue: number }> = {
+    const distribution: Record<
+      SpaceTipe,
+      { type: SpaceTipe; label: string; count: number; revenue: number }
+    > = {
       [SpaceTipe.desk]: {
         type: SpaceTipe.desk,
         label: 'Hot Desk & Workstation',

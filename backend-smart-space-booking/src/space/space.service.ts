@@ -25,7 +25,9 @@ export class SpaceService {
     });
 
     if (!owner) {
-      throw new ForbiddenException('Hanya pengelola coworking (admin_space) yang dapat menambahkan space.');
+      throw new ForbiddenException(
+        'Hanya pengelola coworking (admin_space) yang dapat menambahkan space.',
+      );
     }
 
     return this.prisma.space.create({
@@ -111,10 +113,15 @@ export class SpaceService {
           const existingStart = timeStringToMinutes(res.jamMulai);
           const existingEnd = existingStart + res.durasiJam * 60;
 
-          return isTimeOverlapping(newStartMinutes, newEndMinutes, existingStart, existingEnd);
+          return isTimeOverlapping(
+            newStartMinutes,
+            newEndMinutes,
+            existingStart,
+            existingEnd,
+          );
         });
 
-        const { detailReservasi, ...spaceData } = space;
+        const { detailReservasi: _detailReservasi, ...spaceData } = space; // eslint-disable-line @typescript-eslint/no-unused-vars
         return {
           ...spaceData,
           isAvailable: !hasConflict,
@@ -123,7 +130,7 @@ export class SpaceService {
     }
 
     return spaces.map((space) => {
-      const { detailReservasi, ...spaceData } = space;
+      const { detailReservasi: _detailReservasi, ...spaceData } = space; // eslint-disable-line @typescript-eslint/no-unused-vars
       return spaceData;
     });
   }
@@ -168,7 +175,9 @@ export class SpaceService {
     });
 
     if (!owner || space.ownerId !== owner.id) {
-      throw new ForbiddenException('Anda tidak memiliki izin untuk mengubah space ini.');
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk mengubah space ini.',
+      );
     }
 
     return this.prisma.space.update({
@@ -194,7 +203,9 @@ export class SpaceService {
     });
 
     if (!owner || space.ownerId !== owner.id) {
-      throw new ForbiddenException('Anda tidak memiliki izin untuk menghapus space ini.');
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk menghapus space ini.',
+      );
     }
 
     const activeReservations = await this.prisma.detailReservasi.count({

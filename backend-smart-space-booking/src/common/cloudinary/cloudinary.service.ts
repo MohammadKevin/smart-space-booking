@@ -1,5 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  UploadApiErrorResponse,
+} from 'cloudinary';
 import { Readable } from 'stream';
 
 @Injectable()
@@ -12,9 +16,16 @@ export class CloudinaryService {
       throw new BadRequestException('File gambar tidak boleh kosong');
     }
 
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/jpg',
+    ];
     if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException('Format file harus berupa gambar (JPEG, PNG, WEBP)');
+      throw new BadRequestException(
+        'Format file harus berupa gambar (JPEG, PNG, WEBP)',
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -28,9 +39,13 @@ export class CloudinaryService {
             { fetch_format: 'auto' },
           ],
         },
-        (error, result) => {
-          if (error) return reject(error);
-          if (!result) return reject(new Error('Cloudinary upload result is undefined'));
+        (
+          error: UploadApiErrorResponse | undefined,
+          result: UploadApiResponse | undefined,
+        ) => {
+          if (error) return reject(new Error(JSON.stringify(error)));
+          if (!result)
+            return reject(new Error('Cloudinary upload result is undefined'));
           resolve(result);
         },
       );

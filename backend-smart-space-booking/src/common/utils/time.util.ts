@@ -2,14 +2,25 @@ import * as crypto from 'crypto';
 
 export function timeStringToMinutes(timeStr: string): number {
   if (!timeStr || !timeStr.includes(':')) {
-    throw new Error(`Format waktu tidak valid: ${timeStr}. Gunakan format HH:mm (contoh: 09:00).`);
+    throw new Error(
+      `Format waktu tidak valid: ${timeStr}. Gunakan format HH:mm (contoh: 09:00).`,
+    );
   }
   const [hoursStr, minutesStr] = timeStr.split(':');
   const hours = parseInt(hoursStr, 10);
   const minutes = parseInt(minutesStr, 10);
 
-  if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-    throw new Error(`Nilai jam atau menit di luar rentang yang valid (00:00 - 23:59): ${timeStr}`);
+  if (
+    isNaN(hours) ||
+    isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    throw new Error(
+      `Nilai jam atau menit di luar rentang yang valid (00:00 - 23:59): ${timeStr}`,
+    );
   }
 
   return hours * 60 + minutes;
@@ -32,7 +43,9 @@ export function isTimeOverlapping(
 
 export function normalizeDateToStartOfDay(dateInput: Date | string): Date {
   const d = new Date(dateInput);
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0),
+  );
 }
 
 export function generateQrCode(): string {
@@ -40,4 +53,3 @@ export function generateQrCode(): string {
   const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
   return `SSB-${timestamp}-${randomSuffix}`;
 }
-

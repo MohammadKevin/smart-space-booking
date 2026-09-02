@@ -33,9 +33,13 @@ export class CheckinController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Verifikasi & Scan Kode QR',
-    description: 'Staff / Admin Space memindai QR code tiket member untuk memeriksa validitas dan status terkini reservasi.',
+    description:
+      'Staff / Admin Space memindai QR code tiket member untuk memeriksa validitas dan status terkini reservasi.',
   })
-  @ApiResponse({ status: 200, description: 'QR Code valid dan detail reservasi berhasil diverifikasi.' })
+  @ApiResponse({
+    status: 200,
+    description: 'QR Code valid dan detail reservasi berhasil diverifikasi.',
+  })
   @ApiResponse({ status: 404, description: 'Kode QR tidak ditemukan.' })
   verifyQr(@Body() verifyDto: VerifyQrDto, @GetUser() user: any) {
     return this.checkinService.verifyQr(verifyDto.qrCode, user);
@@ -45,14 +49,18 @@ export class CheckinController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Proses Check-In / Check-Out Seketika',
-    description: 'Melakukan transisi status secara otomatis: "disetujui" -> "aktif" (Check-In) -> "selesai" (Check-Out).',
+    description:
+      'Melakukan transisi status secara otomatis: "disetujui" -> "aktif" (Check-In) -> "selesai" (Check-Out).',
   })
-  @ApiResponse({ status: 200, description: 'Proses Check-In atau Check-Out berhasil.' })
-  @ApiResponse({ status: 400, description: 'Status reservasi tidak valid untuk check-in/out.' })
-  processCheckin(
-    @Body() processDto: ProcessCheckinDto,
-    @GetUser() user: any,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'Proses Check-In atau Check-Out berhasil.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Status reservasi tidak valid untuk check-in/out.',
+  })
+  processCheckin(@Body() processDto: ProcessCheckinDto, @GetUser() user: any) {
     return this.checkinService.processCheckin(processDto, user);
   }
 }

@@ -47,7 +47,8 @@ export class UserController {
   @Roles(Role.admin_space, Role.staff)
   @ApiOperation({
     summary: 'Mendapatkan Daftar Semua Member',
-    description: 'Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.',
+    description:
+      'Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.',
   })
   @ApiResponse({ status: 200, description: 'Daftar member berhasil dimuat.' })
   getAllMembers() {
@@ -58,7 +59,8 @@ export class UserController {
   @Roles(Role.admin_space)
   @ApiOperation({
     summary: 'Mendapatkan Daftar Staff Coworking Space',
-    description: 'Hanya dapat diakses oleh admin_space untuk melihat seluruh staff yang bekerja di spacenya.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk melihat seluruh staff yang bekerja di spacenya.',
   })
   @ApiResponse({ status: 200, description: 'Daftar staff berhasil dimuat.' })
   getOwnerStaffs(@GetUser('id') ownerUserId: number) {
@@ -69,7 +71,8 @@ export class UserController {
   @Roles(Role.admin_space)
   @ApiOperation({
     summary: 'Menghapus Akun Staff',
-    description: 'Hanya dapat diakses oleh admin_space untuk menghapus staff miliknya.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk menghapus staff miliknya.',
   })
   @ApiResponse({ status: 200, description: 'Staff berhasil dihapus.' })
   deleteStaff(

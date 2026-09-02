@@ -52,7 +52,8 @@ export class RegisterMemberDto {
   telp: string;
 
   @ApiPropertyOptional({
-    example: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
+    example:
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80',
     description: 'URL foto profil member',
   })
   @IsOptional()

@@ -6,7 +6,8 @@ import { ReservasiStatus } from '@prisma/client';
 export class FilterReservationDto {
   @ApiPropertyOptional({
     enum: ReservasiStatus,
-    description: 'Filter berdasarkan status reservasi: pending, disetujui, aktif, selesai, dibatalkan',
+    description:
+      'Filter berdasarkan status reservasi: pending, disetujui, aktif, selesai, dibatalkan',
   })
   @IsOptional()
   @IsEnum(ReservasiStatus)

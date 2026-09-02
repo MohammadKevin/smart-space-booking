@@ -34,7 +34,8 @@ export class DiscountController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Membuat Promo / Diskon Baru',
-    description: 'Hanya dapat diakses oleh admin_space untuk membuat kode promo baru.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk membuat kode promo baru.',
   })
   @ApiResponse({ status: 201, description: 'Diskon berhasil dibuat.' })
   create(@Body() createDiscountDto: CreateDiscountDto) {
@@ -54,10 +55,14 @@ export class DiscountController {
   @Get('check/:code')
   @ApiOperation({
     summary: 'Cek Keaktifan dan Validitas Kode Promo',
-    description: 'Memeriksa apakah kode promo valid, ada, dan masih dalam periode tanggal berlaku.',
+    description:
+      'Memeriksa apakah kode promo valid, ada, dan masih dalam periode tanggal berlaku.',
   })
   @ApiResponse({ status: 200, description: 'Kode promo valid.' })
-  @ApiResponse({ status: 400, description: 'Kode promo kedaluwarsa atau tidak aktif.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Kode promo kedaluwarsa atau tidak aktif.',
+  })
   @ApiResponse({ status: 404, description: 'Kode promo tidak ditemukan.' })
   checkValidity(@Param('code') code: string) {
     return this.discountService.checkValidity(code);
@@ -80,7 +85,8 @@ export class DiscountController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Memperbarui Promo / Diskon',
-    description: 'Hanya dapat diakses oleh admin_space untuk mengubah parameter diskon.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk mengubah parameter diskon.',
   })
   @ApiResponse({ status: 200, description: 'Diskon berhasil diperbarui.' })
   update(

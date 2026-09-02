@@ -12,12 +12,18 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'smart-space-booking-super-secret-jwt-key-ukk-2026-2027',
-        signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') || '7d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresInRaw =
+          configService.get<string>('JWT_EXPIRES_IN') || '7d';
+        return {
+          secret:
+            configService.get<string>('JWT_SECRET') ||
+            'smart-space-booking-super-secret-jwt-key-ukk-2026-2027',
+          signOptions: {
+            expiresIn: expiresInRaw as any,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

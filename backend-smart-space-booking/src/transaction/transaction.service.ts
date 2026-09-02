@@ -5,10 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  MidtransService,
-  SnapTokenResult,
-} from './midtrans.service';
+import { MidtransService, SnapTokenResult } from './midtrans.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 
 @Injectable()
@@ -26,11 +23,15 @@ export class TransactionService {
   private assertOwnerScope(reservationOwnerId: number, user: any) {
     if (user.role === Role.admin_space) {
       if (user.spaceOwner?.id !== reservationOwnerId) {
-        throw new ForbiddenException('Transaksi ini bukan milik coworking space Anda.');
+        throw new ForbiddenException(
+          'Transaksi ini bukan milik coworking space Anda.',
+        );
       }
     } else if (user.role === Role.staff) {
       if (user.staff?.ownerId !== reservationOwnerId) {
-        throw new ForbiddenException('Transaksi ini bukan milik coworking space tempat Anda bertugas.');
+        throw new ForbiddenException(
+          'Transaksi ini bukan milik coworking space tempat Anda bertugas.',
+        );
       }
     }
   }
@@ -54,8 +55,13 @@ export class TransactionService {
       throw new NotFoundException(`Transaksi dengan ID ${id} tidak ditemukan.`);
     }
 
-    if (user.role === Role.member && user.member?.id !== tx.reservasi.memberId) {
-      throw new ForbiddenException('Anda tidak memiliki izin untuk melihat transaksi ini.');
+    if (
+      user.role === Role.member &&
+      user.member?.id !== tx.reservasi.memberId
+    ) {
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk melihat transaksi ini.',
+      );
     }
     this.assertOwnerScope(tx.reservasi.ownerId, user);
 
@@ -92,7 +98,9 @@ export class TransactionService {
       include: { user: { select: { username: true } } },
     });
     if (!member) {
-      throw new ForbiddenException('Hanya akun Member yang dapat melakukan pembayaran.');
+      throw new ForbiddenException(
+        'Hanya akun Member yang dapat melakukan pembayaran.',
+      );
     }
 
     const reservation = await this.prisma.reservasi.findUnique({
@@ -101,7 +109,9 @@ export class TransactionService {
     });
 
     if (!reservation) {
-      throw new NotFoundException(`Reservasi dengan ID ${reservationId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Reservasi dengan ID ${reservationId} tidak ditemukan.`,
+      );
     }
     if (reservation.memberId !== member.id) {
       throw new ForbiddenException('Reservasi ini bukan milik Anda.');
@@ -127,7 +137,9 @@ export class TransactionService {
       throw new BadRequestException('Transaksi ini sudah berstatus lunas.');
     }
     if (tx.statusPembayaran === PembayaranStatus.refund) {
-      throw new BadRequestException('Transaksi ini telah di-refund dan tidak dapat dibayar ulang.');
+      throw new BadRequestException(
+        'Transaksi ini telah di-refund dan tidak dapat dibayar ulang.',
+      );
     }
 
     const orderId = tx.nomorInvoice;
@@ -151,7 +163,8 @@ export class TransactionService {
     });
 
     return {
-      message: 'Snap pembayaran berhasil dibuat. Silakan selesaikan pembayaran.',
+      message:
+        'Snap pembayaran berhasil dibuat. Silakan selesaikan pembayaran.',
       data: {
         transactionId: tx.id,
         nomorInvoice: tx.nomorInvoice,
@@ -165,7 +178,9 @@ export class TransactionService {
   }
 
   /** Public webhook receiver called by Midtrans on payment status changes. */
-  async handleNotification(payload: Record<string, any>): Promise<{ success: boolean }> {
+  async handleNotification(
+    payload: Record<string, any>,
+  ): Promise<{ success: boolean }> {
     const orderId = payload.order_id;
     const statusCode = String(payload.status_code ?? '');
     const grossAmount = String(payload.gross_amount ?? '');
@@ -175,9 +190,16 @@ export class TransactionService {
     if (
       !orderId ||
       !signatureKey ||
-      !this.midtrans.verifySignature(orderId, statusCode, grossAmount, signatureKey)
+      !this.midtrans.verifySignature(
+        orderId,
+        statusCode,
+        grossAmount,
+        signatureKey,
+      )
     ) {
-      throw new BadRequestException('Signature notifikasi Midtrans tidak valid.');
+      throw new BadRequestException(
+        'Signature notifikasi Midtrans tidak valid.',
+      );
     }
 
     const tx = await this.prisma.transaksi.findUnique({
@@ -185,7 +207,9 @@ export class TransactionService {
     });
 
     if (!tx) {
-      throw new NotFoundException(`Transaksi dengan order ID '${orderId}' tidak ditemukan.`);
+      throw new NotFoundException(
+        `Transaksi dengan order ID '${orderId}' tidak ditemukan.`,
+      );
     }
 
     let status: PembayaranStatus;
@@ -204,7 +228,8 @@ export class TransactionService {
         statusPembayaran: status,
         metodePembayaran: payload.payment_type || tx.metodePembayaran,
         midtransTransId: payload.transaction_id || tx.midtransTransId,
-        dibayarPada: status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
+        dibayarPada:
+          status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
       },
     });
 
@@ -215,7 +240,9 @@ export class TransactionService {
   async syncPayment(id: number, user: any) {
     const tx = await this.findScoped(id, user);
     if (!tx.midtransOrderId) {
-      throw new BadRequestException('Belum ada order pembayaran yang dibuat untuk transaksi ini.');
+      throw new BadRequestException(
+        'Belum ada order pembayaran yang dibuat untuk transaksi ini.',
+      );
     }
 
     const mt = await this.midtrans.getTransactionStatus(tx.midtransOrderId);
@@ -236,7 +263,8 @@ export class TransactionService {
         statusPembayaran: status,
         metodePembayaran: mt.payment_type || tx.metodePembayaran,
         midtransTransId: mt.transaction_id || tx.midtransTransId,
-        dibayarPada: status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
+        dibayarPada:
+          status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
       },
       include: {
         reservasi: {
@@ -299,13 +327,17 @@ export class TransactionService {
    */
   async markRefund(id: number, user: any) {
     if (user.role !== Role.admin_space && user.role !== Role.staff) {
-      throw new ForbiddenException('Hanya admin space dan staff yang dapat melakukan refund.');
+      throw new ForbiddenException(
+        'Hanya admin space dan staff yang dapat melakukan refund.',
+      );
     }
 
     const tx = await this.findScoped(id, user);
 
     if (tx.statusPembayaran !== PembayaranStatus.lunas) {
-      throw new BadRequestException('Hanya transaksi berstatus lunas yang dapat di-refund.');
+      throw new BadRequestException(
+        'Hanya transaksi berstatus lunas yang dapat di-refund.',
+      );
     }
 
     const updated = await this.prisma.transaksi.update({

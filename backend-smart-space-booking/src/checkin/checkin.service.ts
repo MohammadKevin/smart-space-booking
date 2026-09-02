@@ -7,23 +7,35 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ProcessCheckinDto, CheckinAction } from './dto/process-checkin.dto';
 import { ReservasiStatus, Role } from '@prisma/client';
-import { timeStringToMinutes, minutesToTimeString } from '../common/utils/time.util';
+import {
+  timeStringToMinutes,
+  minutesToTimeString,
+} from '../common/utils/time.util';
 
 @Injectable()
 export class CheckinService {
   constructor(private prisma: PrismaService) {}
 
-  private validateStaffOrOwnerPermission(reservationOwnerId: number, user: any) {
+  private validateStaffOrOwnerPermission(
+    reservationOwnerId: number,
+    user: any,
+  ) {
     if (user.role === Role.admin_space) {
       if (user.spaceOwner?.id !== reservationOwnerId) {
-        throw new ForbiddenException('Reservasi ini bukan milik coworking space Anda.');
+        throw new ForbiddenException(
+          'Reservasi ini bukan milik coworking space Anda.',
+        );
       }
     } else if (user.role === Role.staff) {
       if (user.staff?.ownerId !== reservationOwnerId) {
-        throw new ForbiddenException('Reservasi ini bukan milik coworking space tempat Anda bertugas.');
+        throw new ForbiddenException(
+          'Reservasi ini bukan milik coworking space tempat Anda bertugas.',
+        );
       }
     } else {
-      throw new ForbiddenException('Hanya admin space dan staff yang dapat melakukan scan QR.');
+      throw new ForbiddenException(
+        'Hanya admin space dan staff yang dapat melakukan scan QR.',
+      );
     }
   }
 
@@ -43,7 +55,9 @@ export class CheckinService {
     });
 
     if (!reservation) {
-      throw new NotFoundException(`Kode QR '${qrCode}' tidak valid atau tidak ditemukan.`);
+      throw new NotFoundException(
+        `Kode QR '${qrCode}' tidak valid atau tidak ditemukan.`,
+      );
     }
 
     this.validateStaffOrOwnerPermission(reservation.ownerId, user);
@@ -58,9 +72,12 @@ export class CheckinService {
     let actionLabel = 'Tidak ada aksi yang tersedia';
     if (canCheckIn) actionLabel = 'Siap Check-In (Mulai Pemakaian)';
     else if (canCheckOut) actionLabel = 'Siap Check-Out (Selesai Pemakaian)';
-    else if (reservation.status === ReservasiStatus.pending) actionLabel = 'Menunggu Persetujuan Admin';
-    else if (reservation.status === ReservasiStatus.selesai) actionLabel = 'Reservasi Telah Selesai';
-    else if (reservation.status === ReservasiStatus.dibatalkan) actionLabel = 'Reservasi Dibatalkan';
+    else if (reservation.status === ReservasiStatus.pending)
+      actionLabel = 'Menunggu Persetujuan Admin';
+    else if (reservation.status === ReservasiStatus.selesai)
+      actionLabel = 'Reservasi Telah Selesai';
+    else if (reservation.status === ReservasiStatus.dibatalkan)
+      actionLabel = 'Reservasi Dibatalkan';
 
     return {
       isValid: true,
@@ -99,7 +116,8 @@ export class CheckinService {
 
     if (
       reservation.status === ReservasiStatus.disetujui &&
-      (requestedAction === CheckinAction.AUTO || requestedAction === CheckinAction.CHECKIN)
+      (requestedAction === CheckinAction.AUTO ||
+        requestedAction === CheckinAction.CHECKIN)
     ) {
       const updated = await this.prisma.reservasi.update({
         where: { id: reservation.id },
@@ -120,7 +138,8 @@ export class CheckinService {
 
     if (
       reservation.status === ReservasiStatus.aktif &&
-      (requestedAction === CheckinAction.AUTO || requestedAction === CheckinAction.CHECKOUT)
+      (requestedAction === CheckinAction.AUTO ||
+        requestedAction === CheckinAction.CHECKOUT)
     ) {
       const updated = await this.prisma.reservasi.update({
         where: { id: reservation.id },
@@ -146,7 +165,9 @@ export class CheckinService {
     }
 
     if (reservation.status === ReservasiStatus.selesai) {
-      throw new BadRequestException('Reservasi ini sudah selesai (sudah check-out sebelumnya).');
+      throw new BadRequestException(
+        'Reservasi ini sudah selesai (sudah check-out sebelumnya).',
+      );
     }
 
     if (reservation.status === ReservasiStatus.dibatalkan) {

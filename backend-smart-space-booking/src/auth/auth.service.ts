@@ -52,7 +52,7 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password, ...sanitizedUser } = user;
+    const { password: _password, ...sanitizedUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     return {
       message: 'Login berhasil',
@@ -67,7 +67,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(`Username '${dto.username}' sudah terdaftar.`);
+      throw new ConflictException(
+        `Username '${dto.username}' sudah terdaftar.`,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -120,7 +122,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(`Username '${dto.username}' sudah terdaftar.`);
+      throw new ConflictException(
+        `Username '${dto.username}' sudah terdaftar.`,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -172,7 +176,9 @@ export class AuthService {
     });
 
     if (!owner) {
-      throw new ForbiddenException('Hanya admin/pemilik coworking space yang dapat mendaftarkan staff.');
+      throw new ForbiddenException(
+        'Hanya admin/pemilik coworking space yang dapat mendaftarkan staff.',
+      );
     }
 
     const existingUser = await this.prisma.user.findUnique({
@@ -180,7 +186,9 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException(`Username '${dto.username}' sudah terdaftar.`);
+      throw new ConflictException(
+        `Username '${dto.username}' sudah terdaftar.`,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -243,7 +251,7 @@ export class AuthService {
       throw new NotFoundException('Pengguna tidak ditemukan.');
     }
 
-    const { password, ...sanitizedUser } = user;
+    const { password: _password, ...sanitizedUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
     return sanitizedUser;
   }
 }

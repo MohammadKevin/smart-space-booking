@@ -19,7 +19,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'smart-space-booking-super-secret-jwt-key-ukk-2026-2027',
+      secretOrKey:
+        configService.get<string>('JWT_SECRET') ||
+        'smart-space-booking-super-secret-jwt-key-ukk-2026-2027',
     });
   }
 
@@ -38,10 +40,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Sesi tidak valid atau pengguna tidak ditemukan.');
+      throw new UnauthorizedException(
+        'Sesi tidak valid atau pengguna tidak ditemukan.',
+      );
     }
 
-    const { password, ...userWithoutPassword } = user;
+    const { password: _password, ...userWithoutPassword } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
     return userWithoutPassword;
   }
 }

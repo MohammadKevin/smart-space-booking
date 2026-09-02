@@ -15,7 +15,12 @@ import {
   timeStringToMinutes,
   minutesToTimeString,
 } from '../common/utils/time.util';
-import { Prisma, ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
+import {
+  Prisma,
+  ReservasiStatus,
+  PembayaranStatus,
+  Role,
+} from '@prisma/client';
 
 @Injectable()
 export class ReservationService {
@@ -32,7 +37,9 @@ export class ReservationService {
     });
 
     if (!member) {
-      throw new ForbiddenException('Hanya akun dengan profil Member yang dapat melakukan reservasi.');
+      throw new ForbiddenException(
+        'Hanya akun dengan profil Member yang dapat melakukan reservasi.',
+      );
     }
 
     const space = await this.prisma.space.findUnique({
@@ -41,7 +48,9 @@ export class ReservationService {
     });
 
     if (!space) {
-      throw new NotFoundException(`Space dengan ID ${dto.spaceId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Space dengan ID ${dto.spaceId} tidak ditemukan.`,
+      );
     }
 
     const targetDate = normalizeDateToStartOfDay(dto.tanggalReservasi);
@@ -51,14 +60,18 @@ export class ReservationService {
 
     const todayStart = normalizeDateToStartOfDay(new Date());
     if (targetDate.getTime() < todayStart.getTime()) {
-      throw new BadRequestException('Tidak dapat membuat reservasi untuk tanggal di masa lalu.');
+      throw new BadRequestException(
+        'Tidak dapat membuat reservasi untuk tanggal di masa lalu.',
+      );
     }
 
     if (targetDate.getTime() === todayStart.getTime()) {
       const now = new Date();
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
       if (newStartMinutes <= nowMinutes) {
-        throw new BadRequestException('Jam mulai reservasi harus lebih dari waktu saat ini.');
+        throw new BadRequestException(
+          'Jam mulai reservasi harus lebih dari waktu saat ini.',
+        );
       }
     }
 
@@ -86,7 +99,14 @@ export class ReservationService {
         const exStartMinutes = timeStringToMinutes(ex.jamMulai);
         const exEndMinutes = exStartMinutes + ex.durasiJam * 60;
 
-        if (isTimeOverlapping(newStartMinutes, newEndMinutes, exStartMinutes, exEndMinutes)) {
+        if (
+          isTimeOverlapping(
+            newStartMinutes,
+            newEndMinutes,
+            exStartMinutes,
+            exEndMinutes,
+          )
+        ) {
           const exSelesaiStr = minutesToTimeString(exEndMinutes);
           throw new BadRequestException(
             `Jadwal bentrok! Space '${space.namaSpace}' telah terisi pada slot ${ex.jamMulai} - ${exSelesaiStr}. Silakan pilih jam atau durasi lain.`,
@@ -112,7 +132,9 @@ export class ReservationService {
 
       if (selectedDiskon) {
         const now = new Date();
-        const isValidDate = now >= selectedDiskon.tanggalAwal && now <= selectedDiskon.tanggalAkhir;
+        const isValidDate =
+          now >= selectedDiskon.tanggalAwal &&
+          now <= selectedDiskon.tanggalAkhir;
 
         if (!isValidDate) {
           throw new BadRequestException(
@@ -264,13 +286,19 @@ export class ReservationService {
     }
 
     if (user.role === Role.member && user.member?.id !== res.memberId) {
-      throw new ForbiddenException('Anda tidak memiliki izin untuk melihat reservasi ini.');
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk melihat reservasi ini.',
+      );
     }
     if (user.role === Role.admin_space && user.spaceOwner?.id !== res.ownerId) {
-      throw new ForbiddenException('Reservasi ini bukan milik coworking space Anda.');
+      throw new ForbiddenException(
+        'Reservasi ini bukan milik coworking space Anda.',
+      );
     }
     if (user.role === Role.staff && user.staff?.ownerId !== res.ownerId) {
-      throw new ForbiddenException('Reservasi ini bukan milik coworking space tempat Anda bertugas.');
+      throw new ForbiddenException(
+        'Reservasi ini bukan milik coworking space tempat Anda bertugas.',
+      );
     }
 
     const startMinutes = timeStringToMinutes(res.jamMulai);
@@ -283,10 +311,12 @@ export class ReservationService {
   }
 
   async updateStatus(id: number, dto: UpdateReservationStatusDto, user: any) {
-    const res = await this.findOne(id, user);
+    const _res = await this.findOne(id, user); // eslint-disable-line @typescript-eslint/no-unused-vars
 
     if (user.role !== Role.admin_space && user.role !== Role.staff) {
-      throw new ForbiddenException('Hanya admin space dan staff yang dapat memperbarui status reservasi.');
+      throw new ForbiddenException(
+        'Hanya admin space dan staff yang dapat memperbarui status reservasi.',
+      );
     }
 
     const updated = await this.prisma.reservasi.update({
@@ -315,7 +345,9 @@ export class ReservationService {
     });
 
     if (!member) {
-      throw new ForbiddenException('Hanya member yang dapat membatalkan reservasinya.');
+      throw new ForbiddenException(
+        'Hanya member yang dapat membatalkan reservasinya.',
+      );
     }
 
     const res = await this.prisma.reservasi.findUnique({
@@ -323,10 +355,15 @@ export class ReservationService {
     });
 
     if (!res || res.memberId !== member.id) {
-      throw new NotFoundException('Reservasi tidak ditemukan atau bukan milik Anda.');
+      throw new NotFoundException(
+        'Reservasi tidak ditemukan atau bukan milik Anda.',
+      );
     }
 
-    if (res.status !== ReservasiStatus.pending && res.status !== ReservasiStatus.disetujui) {
+    if (
+      res.status !== ReservasiStatus.pending &&
+      res.status !== ReservasiStatus.disetujui
+    ) {
       throw new BadRequestException(
         `Reservasi dengan status '${res.status}' tidak dapat dibatalkan secara mandiri.`,
       );

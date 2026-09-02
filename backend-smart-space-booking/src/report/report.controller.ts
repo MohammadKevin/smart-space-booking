@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -29,9 +24,13 @@ export class ReportController {
   @Get('summary')
   @ApiOperation({
     summary: 'Ringkasan Metrik Dashboard',
-    description: 'Menampilkan total pendapatan, jumlah space, jumlah staff, dan ringkasan status reservasi untuk Admin Space.',
+    description:
+      'Menampilkan total pendapatan, jumlah space, jumlah staff, dan ringkasan status reservasi untuk Admin Space.',
   })
-  @ApiResponse({ status: 200, description: 'Ringkasan metrik berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Ringkasan metrik berhasil dimuat.',
+  })
   getDashboardSummary(@GetUser('id') ownerUserId: number) {
     return this.reportService.getDashboardSummary(ownerUserId);
   }
@@ -39,9 +38,13 @@ export class ReportController {
   @Get('monthly-revenue')
   @ApiOperation({
     summary: 'Laporan Pendapatan Bulanan',
-    description: 'Menghitung total pendapatan dan jumlah booking per bulan (Januari - Desember) pada tahun yang dipilih.',
+    description:
+      'Menghitung total pendapatan dan jumlah booking per bulan (Januari - Desember) pada tahun yang dipilih.',
   })
-  @ApiResponse({ status: 200, description: 'Laporan pendapatan bulanan berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Laporan pendapatan bulanan berhasil dimuat.',
+  })
   getMonthlyRevenue(
     @GetUser('id') ownerUserId: number,
     @Query() queryDto: ReportQueryDto,
@@ -52,9 +55,13 @@ export class ReportController {
   @Get('space-distribution')
   @ApiOperation({
     summary: 'Distribusi Pendapatan Berdasarkan Tipe Space',
-    description: 'Menganalisis pendapatan dan kontribusi pesanan berdasarkan tipe: desk, meeting_room, dan private_office.',
+    description:
+      'Menganalisis pendapatan dan kontribusi pesanan berdasarkan tipe: desk, meeting_room, dan private_office.',
   })
-  @ApiResponse({ status: 200, description: 'Distribusi tipe space berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Distribusi tipe space berhasil dimuat.',
+  })
   getSpaceTypeDistribution(@GetUser('id') ownerUserId: number) {
     return this.reportService.getSpaceTypeDistribution(ownerUserId);
   }
@@ -62,13 +69,20 @@ export class ReportController {
   @Get('recent-transactions')
   @ApiOperation({
     summary: 'Daftar Transaksi Terbaru',
-    description: 'Mengambil riwayat transaksi dan reservasi terbaru pada coworking space.',
+    description:
+      'Mengambil riwayat transaksi dan reservasi terbaru pada coworking space.',
   })
-  @ApiResponse({ status: 200, description: 'Daftar transaksi terbaru berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar transaksi terbaru berhasil dimuat.',
+  })
   getRecentTransactions(
     @GetUser('id') ownerUserId: number,
     @Query() queryDto: ReportQueryDto,
   ) {
-    return this.reportService.getRecentTransactions(ownerUserId, queryDto.limit);
+    return this.reportService.getRecentTransactions(
+      ownerUserId,
+      queryDto.limit,
+    );
   }
 }

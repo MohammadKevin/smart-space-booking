@@ -20,7 +20,8 @@ export class ProcessCheckinDto {
     enum: CheckinAction,
     default: CheckinAction.AUTO,
     example: CheckinAction.AUTO,
-    description: 'Aksi check-in / check-out: "auto" (otomatis deteksi), "checkin", atau "checkout"',
+    description:
+      'Aksi check-in / check-out: "auto" (otomatis deteksi), "checkin", atau "checkout"',
   })
   @IsOptional()
   @IsEnum(CheckinAction)

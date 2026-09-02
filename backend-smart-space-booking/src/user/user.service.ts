@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Role } from '@prisma/client';
@@ -33,13 +37,18 @@ export class UserService {
         where: { userId },
       });
       if (!owner) {
-        throw new NotFoundException('Data pengelola coworking tidak ditemukan.');
+        throw new NotFoundException(
+          'Data pengelola coworking tidak ditemukan.',
+        );
       }
 
       return this.prisma.spaceOwner.update({
         where: { userId },
         data: {
-          namaCoworking: dto.namaCoworking !== undefined ? dto.namaCoworking : owner.namaCoworking,
+          namaCoworking:
+            dto.namaCoworking !== undefined
+              ? dto.namaCoworking
+              : owner.namaCoworking,
           namaPemilik: dto.nama !== undefined ? dto.nama : owner.namaPemilik,
           alamat: dto.alamat !== undefined ? dto.alamat : owner.alamat,
           telp: dto.telp !== undefined ? dto.telp : owner.telp,
@@ -127,7 +136,9 @@ export class UserService {
     });
 
     if (!staff || staff.ownerId !== owner.id) {
-      throw new NotFoundException('Staff tidak ditemukan atau bukan milik coworking space Anda.');
+      throw new NotFoundException(
+        'Staff tidak ditemukan atau bukan milik coworking space Anda.',
+      );
     }
 
     await this.prisma.user.delete({

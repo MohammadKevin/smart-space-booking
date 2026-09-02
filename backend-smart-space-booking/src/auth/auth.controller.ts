@@ -33,10 +33,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login Akun',
-    description: 'Autentikasi untuk semua role (admin_space, staff, member) menggunakan username dan password.',
+    description:
+      'Autentikasi untuk semua role (admin_space, staff, member) menggunakan username dan password.',
   })
-  @ApiResponse({ status: 200, description: 'Login berhasil, mengembalikan access_token dan data user.' })
-  @ApiResponse({ status: 401, description: 'Username atau password tidak valid.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login berhasil, mengembalikan access_token dan data user.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Username atau password tidak valid.',
+  })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
@@ -44,9 +51,13 @@ export class AuthController {
   @Post('register/member')
   @ApiOperation({
     summary: 'Registrasi Member Baru',
-    description: 'Mendaftarkan akun baru dengan role "member" beserta data profil member.',
+    description:
+      'Mendaftarkan akun baru dengan role "member" beserta data profil member.',
   })
-  @ApiResponse({ status: 201, description: 'Registrasi member berhasil dibuat.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Registrasi member berhasil dibuat.',
+  })
   @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
   registerMember(@Body() registerMemberDto: RegisterMemberDto) {
     return this.authService.registerMember(registerMemberDto);
@@ -55,9 +66,13 @@ export class AuthController {
   @Post('register/owner')
   @ApiOperation({
     summary: 'Registrasi Pengelola Coworking (Space Owner)',
-    description: 'Mendaftarkan akun baru dengan role "admin_space" beserta informasi Coworking Space miliknya.',
+    description:
+      'Mendaftarkan akun baru dengan role "admin_space" beserta informasi Coworking Space miliknya.',
   })
-  @ApiResponse({ status: 201, description: 'Registrasi admin space berhasil dibuat.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Registrasi admin space berhasil dibuat.',
+  })
   @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
   registerOwner(@Body() registerOwnerDto: RegisterOwnerDto) {
     return this.authService.registerOwner(registerOwnerDto);
@@ -69,12 +84,19 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Pendaftaran Akun Staff oleh Space Owner',
-    description: 'Hanya dapat diakses oleh "admin_space" untuk mendaftarkan staff operasional di coworking spacenya.',
+    description:
+      'Hanya dapat diakses oleh "admin_space" untuk mendaftarkan staff operasional di coworking spacenya.',
   })
   @ApiResponse({ status: 201, description: 'Akun staff berhasil dibuat.' })
-  @ApiResponse({ status: 403, description: 'Akses ditolak (bukan admin_space).' })
+  @ApiResponse({
+    status: 403,
+    description: 'Akses ditolak (bukan admin_space).',
+  })
   @ApiResponse({ status: 409, description: 'Username sudah digunakan.' })
-  createStaff(@Body() createStaffDto: CreateStaffDto, @GetUser('id') ownerUserId: number) {
+  createStaff(
+    @Body() createStaffDto: CreateStaffDto,
+    @GetUser('id') ownerUserId: number,
+  ) {
     return this.authService.createStaff(createStaffDto, ownerUserId);
   }
 
@@ -83,10 +105,14 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Mendapatkan Profil Pengguna Login',
-    description: 'Mengambil data profil lengkap pengguna yang saat ini sedang login berdasarkan token JWT.',
+    description:
+      'Mengambil data profil lengkap pengguna yang saat ini sedang login berdasarkan token JWT.',
   })
   @ApiResponse({ status: 200, description: 'Profil pengguna berhasil dimuat.' })
-  @ApiResponse({ status: 401, description: 'Token tidak valid atau telah kedaluwarsa.' })
+  @ApiResponse({
+    status: 401,
+    description: 'Token tidak valid atau telah kedaluwarsa.',
+  })
   getProfile(@GetUser('id') userId: number) {
     return this.authService.getProfile(userId);
   }

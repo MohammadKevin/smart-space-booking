@@ -31,7 +31,8 @@ export class TransactionController {
   @Roles(Role.member)
   @ApiOperation({
     summary: 'Memulai Pembayaran Reservasi (Midtrans Snap)',
-    description: 'Member membuat token Snap untuk menyelesaikan pembayaran reservasi yang sudah disetujui.',
+    description:
+      'Member membuat token Snap untuk menyelesaikan pembayaran reservasi yang sudah disetujui.',
   })
   @ApiResponse({ status: 201, description: 'Snap token berhasil dibuat.' })
   startPayment(
@@ -44,7 +45,8 @@ export class TransactionController {
   @Get()
   @ApiOperation({
     summary: 'Daftar Transaksi Sesuai Role',
-    description: 'Member melihat transaksinya sendiri; Admin Space & Staff melihat seluruh transaksi pada coworking space mereka.',
+    description:
+      'Member melihat transaksinya sendiri; Admin Space & Staff melihat seluruh transaksi pada coworking space mereka.',
   })
   findAll(@GetUser() user: any) {
     return this.transactionService.findAll(user);
@@ -53,7 +55,8 @@ export class TransactionController {
   @Get(':id')
   @ApiOperation({
     summary: 'Detail Satu Transaksi / Invoice',
-    description: 'Menampilkan rincian invoice, status pembayaran, dan data reservasi terkait.',
+    description:
+      'Menampilkan rincian invoice, status pembayaran, dan data reservasi terkait.',
   })
   @ApiResponse({ status: 404, description: 'Transaksi tidak ditemukan.' })
   findOne(@Param('id', ParseIntPipe) id: number, @GetUser() user: any) {
@@ -63,7 +66,8 @@ export class TransactionController {
   @Post(':id/sync')
   @ApiOperation({
     summary: 'Sinkronkan Status Pembayaran dengan Midtrans',
-    description: 'Menanyakan ulang status transaksi ke Midtrans dan memperbarui status pembayaran di sistem.',
+    description:
+      'Menanyakan ulang status transaksi ke Midtrans dan memperbarui status pembayaran di sistem.',
   })
   syncPayment(@Param('id', ParseIntPipe) id: number, @GetUser() user: any) {
     return this.transactionService.syncPayment(id, user);
@@ -73,9 +77,13 @@ export class TransactionController {
   @Roles(Role.admin_space, Role.staff)
   @ApiOperation({
     summary: 'Tandai Transaksi sebagai Refund',
-    description: 'Admin Space / Staff menandai transaksi lunas sebagai refund, misalnya saat pembatalan sebelum check-in.',
+    description:
+      'Admin Space / Staff menandai transaksi lunas sebagai refund, misalnya saat pembatalan sebelum check-in.',
   })
-  @ApiResponse({ status: 200, description: 'Transaksi ditandai sebagai refund.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Transaksi ditandai sebagai refund.',
+  })
   markRefund(@Param('id', ParseIntPipe) id: number, @GetUser() user: any) {
     return this.transactionService.markRefund(id, user);
   }

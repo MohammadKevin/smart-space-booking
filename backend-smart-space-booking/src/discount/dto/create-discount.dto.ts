@@ -41,7 +41,10 @@ export class CreateDiscountDto {
     example: '2026-01-01T00:00:00.000Z',
     description: 'Tanggal & waktu mulai berlakunya promo (ISO-8601 string)',
   })
-  @IsDateString({}, { message: 'Tanggal awal harus berupa format ISO-8601 string' })
+  @IsDateString(
+    {},
+    { message: 'Tanggal awal harus berupa format ISO-8601 string' },
+  )
   @IsNotEmpty({ message: 'Tanggal awal tidak boleh kosong' })
   tanggalAwal: string;
 
@@ -49,7 +52,10 @@ export class CreateDiscountDto {
     example: '2026-12-31T23:59:59.000Z',
     description: 'Tanggal & waktu berakhirnya promo (ISO-8601 string)',
   })
-  @IsDateString({}, { message: 'Tanggal akhir harus berupa format ISO-8601 string' })
+  @IsDateString(
+    {},
+    { message: 'Tanggal akhir harus berupa format ISO-8601 string' },
+  )
   @IsNotEmpty({ message: 'Tanggal akhir tidak boleh kosong' })
   tanggalAkhir: string;
 }

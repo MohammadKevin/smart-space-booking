@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { SpaceTipe } from '@prisma/client';
 
@@ -17,7 +26,10 @@ export class CreateSpaceDto {
     example: SpaceTipe.desk,
     description: 'Tipe space: desk, meeting_room, atau private_office',
   })
-  @IsEnum(SpaceTipe, { message: 'Tipe space harus salah satu dari: desk, meeting_room, private_office' })
+  @IsEnum(SpaceTipe, {
+    message:
+      'Tipe space harus salah satu dari: desk, meeting_room, private_office',
+  })
   @IsNotEmpty({ message: 'Tipe space tidak boleh kosong' })
   tipe: SpaceTipe;
 
@@ -40,7 +52,8 @@ export class CreateSpaceDto {
   kapasitas: number;
 
   @ApiPropertyOptional({
-    example: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80',
+    example:
+      'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80',
     description: 'URL foto ruangan / workstation',
   })
   @IsOptional()
@@ -48,7 +61,8 @@ export class CreateSpaceDto {
   foto?: string;
 
   @ApiPropertyOptional({
-    example: 'Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.',
+    example:
+      'Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.',
     description: 'Deskripsi fasilitas dan keunggulan space',
   })
   @IsOptional()

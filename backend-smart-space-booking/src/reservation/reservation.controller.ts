@@ -36,10 +36,14 @@ export class ReservationController {
   @Roles(Role.member)
   @ApiOperation({
     summary: 'Membuat Reservasi Ruangan / Workstation Baru',
-    description: 'Member memesan workstation dengan pengecekan bentrok slot waktu (anti-collision) dan kalkulasi diskon otomatis.',
+    description:
+      'Member memesan workstation dengan pengecekan bentrok slot waktu (anti-collision) dan kalkulasi diskon otomatis.',
   })
   @ApiResponse({ status: 201, description: 'Reservasi berhasil dibuat.' })
-  @ApiResponse({ status: 400, description: 'Jadwal bentrok atau kupon tidak valid.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Jadwal bentrok atau kupon tidak valid.',
+  })
   create(
     @Body() createReservationDto: CreateReservationDto,
     @GetUser('id') memberUserId: number,
@@ -50,9 +54,13 @@ export class ReservationController {
   @Get()
   @ApiOperation({
     summary: 'Mendapatkan Daftar Reservasi Sesuai Role',
-    description: 'Member melihat reservasinya sendiri; Admin Space & Staff melihat semua reservasi pada Coworking Space mereka.',
+    description:
+      'Member melihat reservasinya sendiri; Admin Space & Staff melihat semua reservasi pada Coworking Space mereka.',
   })
-  @ApiResponse({ status: 200, description: 'Daftar reservasi berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar reservasi berhasil dimuat.',
+  })
   findAll(@Query() filterDto: FilterReservationDto, @GetUser() user: any) {
     return this.reservationService.findAll(filterDto, user);
   }
@@ -60,9 +68,13 @@ export class ReservationController {
   @Get(':id')
   @ApiOperation({
     summary: 'Mendapatkan Detail Satu Reservasi',
-    description: 'Menampilkan detail lengkap transaksi reservasi, informasi workstation, diskon, dan status.',
+    description:
+      'Menampilkan detail lengkap transaksi reservasi, informasi workstation, diskon, dan status.',
   })
-  @ApiResponse({ status: 200, description: 'Detail reservasi berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Detail reservasi berhasil dimuat.',
+  })
   @ApiResponse({ status: 404, description: 'Reservasi tidak ditemukan.' })
   findOne(@Param('id', ParseIntPipe) id: number, @GetUser() user: any) {
     return this.reservationService.findOne(id, user);
@@ -72,9 +84,13 @@ export class ReservationController {
   @Roles(Role.admin_space, Role.staff)
   @ApiOperation({
     summary: 'Mengubah Status Reservasi',
-    description: 'Hanya dapat diakses oleh Admin Space dan Staff untuk menyetujui, mengaktifkan, menyelesaikan, atau membatalkan reservasi.',
+    description:
+      'Hanya dapat diakses oleh Admin Space dan Staff untuk menyetujui, mengaktifkan, menyelesaikan, atau membatalkan reservasi.',
   })
-  @ApiResponse({ status: 200, description: 'Status reservasi berhasil diperbarui.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status reservasi berhasil diperbarui.',
+  })
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateStatusDto: UpdateReservationStatusDto,
@@ -87,10 +103,14 @@ export class ReservationController {
   @Roles(Role.member)
   @ApiOperation({
     summary: 'Batalkan Reservasi Mandiri oleh Member',
-    description: 'Member dapat membatalkan reservasinya sendiri jika status masih "pending" atau "disetujui".',
+    description:
+      'Member dapat membatalkan reservasinya sendiri jika status masih "pending" atau "disetujui".',
   })
   @ApiResponse({ status: 200, description: 'Reservasi berhasil dibatalkan.' })
-  @ApiResponse({ status: 400, description: 'Reservasi tidak dapat dibatalkan.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Reservasi tidak dapat dibatalkan.',
+  })
   cancelMyReservation(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('id') memberUserId: number,

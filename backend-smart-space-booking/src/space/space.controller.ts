@@ -48,7 +48,8 @@ export class SpaceController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: 'Upload Foto Ruangan ke Cloudinary',
-    description: 'Mengunggah file gambar ruangan dan mengembalikan URL publik Cloudinary.',
+    description:
+      'Mengunggah file gambar ruangan dan mengembalikan URL publik Cloudinary.',
   })
   @ApiBody({
     schema: {
@@ -62,7 +63,10 @@ export class SpaceController {
     },
   })
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const result = await this.cloudinaryService.uploadImage(file, 'smartspace/spaces');
+    const result = await this.cloudinaryService.uploadImage(
+      file,
+      'smartspace/spaces',
+    );
     return {
       url: (result as any).secure_url || (result as any).url,
       publicId: (result as any).public_id,
@@ -75,10 +79,14 @@ export class SpaceController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Membuat Ruangan / Workstation Baru',
-    description: 'Hanya dapat diakses oleh admin_space untuk menambahkan unit workstation / ruangan baru.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk menambahkan unit workstation / ruangan baru.',
   })
   @ApiResponse({ status: 201, description: 'Space berhasil dibuat.' })
-  @ApiResponse({ status: 403, description: 'Akses ditolak (bukan admin_space).' })
+  @ApiResponse({
+    status: 403,
+    description: 'Akses ditolak (bukan admin_space).',
+  })
   create(
     @Body() createSpaceDto: CreateSpaceDto,
     @GetUser('id') ownerUserId: number,
@@ -89,7 +97,8 @@ export class SpaceController {
   @Get()
   @ApiOperation({
     summary: 'Melihat Daftar Seluruh Space (Katalog)',
-    description: 'Publik & Member dapat melihat katalog space dengan filter tipe, kapasitas, kata kunci, dan ketersediaan waktu.',
+    description:
+      'Publik & Member dapat melihat katalog space dengan filter tipe, kapasitas, kata kunci, dan ketersediaan waktu.',
   })
   @ApiResponse({ status: 200, description: 'Daftar space berhasil dimuat.' })
   findAll(@Query() filterDto: FilterSpaceDto) {
@@ -102,9 +111,13 @@ export class SpaceController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Mendapatkan Daftar Space Milik Sendiri',
-    description: 'Hanya dapat diakses oleh admin_space untuk melihat seluruh unit ruangan di coworking spacenya.',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk melihat seluruh unit ruangan di coworking spacenya.',
   })
-  @ApiResponse({ status: 200, description: 'Daftar space pengelola berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar space pengelola berhasil dimuat.',
+  })
   getMySpaces(@GetUser('id') ownerUserId: number) {
     return this.spaceService.getMySpaces(ownerUserId);
   }
@@ -112,7 +125,8 @@ export class SpaceController {
   @Get(':id')
   @ApiOperation({
     summary: 'Mendapatkan Detail Satu Space',
-    description: 'Menampilkan detail lengkap unit space beserta informasi coworking space pemilik.',
+    description:
+      'Menampilkan detail lengkap unit space beserta informasi coworking space pemilik.',
   })
   @ApiResponse({ status: 200, description: 'Detail space berhasil dimuat.' })
   @ApiResponse({ status: 404, description: 'Space tidak ditemukan.' })
@@ -126,7 +140,8 @@ export class SpaceController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Memperbarui Data Space',
-    description: 'Hanya pemilik space (admin_space) yang dapat memperbarui unit space miliknya.',
+    description:
+      'Hanya pemilik space (admin_space) yang dapat memperbarui unit space miliknya.',
   })
   @ApiResponse({ status: 200, description: 'Space berhasil diperbarui.' })
   @ApiResponse({ status: 403, description: 'Akses ditolak.' })
@@ -145,7 +160,8 @@ export class SpaceController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Menghapus Unit Space',
-    description: 'Hanya pemilik space (admin_space) yang dapat menghapus unit space miliknya.',
+    description:
+      'Hanya pemilik space (admin_space) yang dapat menghapus unit space miliknya.',
   })
   @ApiResponse({ status: 200, description: 'Space berhasil dihapus.' })
   @ApiResponse({ status: 403, description: 'Akses ditolak.' })

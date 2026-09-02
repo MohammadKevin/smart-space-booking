@@ -17,7 +17,9 @@ export class DiscountService {
     const tglAkhir = new Date(dto.tanggalAkhir);
 
     if (tglAwal >= tglAkhir) {
-      throw new BadRequestException('Tanggal awal promo harus lebih awal daripada tanggal akhir.');
+      throw new BadRequestException(
+        'Tanggal awal promo harus lebih awal daripada tanggal akhir.',
+      );
     }
 
     if (dto.kodeDiskon) {
@@ -25,7 +27,9 @@ export class DiscountService {
         where: { kodeDiskon: dto.kodeDiskon.toUpperCase() },
       });
       if (existing) {
-        throw new ConflictException(`Kode diskon '${dto.kodeDiskon}' sudah digunakan.`);
+        throw new ConflictException(
+          `Kode diskon '${dto.kodeDiskon}' sudah digunakan.`,
+        );
       }
     }
 
@@ -79,7 +83,9 @@ export class DiscountService {
     }
 
     if (!diskon) {
-      throw new NotFoundException(`Kupon diskon '${codeOrId}' tidak ditemukan.`);
+      throw new NotFoundException(
+        `Kupon diskon '${codeOrId}' tidak ditemukan.`,
+      );
     }
 
     const now = new Date();
@@ -115,7 +121,9 @@ export class DiscountService {
 
     if (updateData.tanggalAwal && updateData.tanggalAkhir) {
       if (updateData.tanggalAwal >= updateData.tanggalAkhir) {
-        throw new BadRequestException('Tanggal awal promo harus lebih awal daripada tanggal akhir.');
+        throw new BadRequestException(
+          'Tanggal awal promo harus lebih awal daripada tanggal akhir.',
+        );
       }
     }
 

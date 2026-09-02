@@ -50,7 +50,8 @@ export class FilterSpaceDto {
   ownerId?: number;
 
   @ApiPropertyOptional({
-    description: 'Tanggal reservasi yang ingin dicek ketersediaannya (YYYY-MM-DD)',
+    description:
+      'Tanggal reservasi yang ingin dicek ketersediaannya (YYYY-MM-DD)',
     example: '2026-09-10',
   })
   @IsOptional()

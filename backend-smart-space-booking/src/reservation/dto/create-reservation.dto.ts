@@ -25,7 +25,10 @@ export class CreateReservationDto {
     example: '2026-09-10',
     description: 'Tanggal reservasi (format YYYY-MM-DD atau ISO-8601 string)',
   })
-  @IsDateString({}, { message: 'Tanggal reservasi harus berformat YYYY-MM-DD atau ISO string' })
+  @IsDateString(
+    {},
+    { message: 'Tanggal reservasi harus berformat YYYY-MM-DD atau ISO string' },
+  )
   @IsNotEmpty({ message: 'Tanggal reservasi tidak boleh kosong' })
   tanggalReservasi: string;
 

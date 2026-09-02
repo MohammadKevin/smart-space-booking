@@ -27,7 +27,13 @@ async function bootstrap() {
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+    ],
   });
 
   app.useGlobalPipes(
@@ -55,4 +61,4 @@ async function bootstrap() {
   console.log(`\n🚀 Backend Server berjalan di: http://localhost:${port}/api`);
   console.log(`📑 Swagger Documentation: http://localhost:${port}/api/docs\n`);
 }
-bootstrap();
+void bootstrap();
