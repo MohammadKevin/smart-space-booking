@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   User,
+  UserCog,
   TicketPercent,
   CalendarClock,
 } from "lucide-react";
@@ -173,18 +174,36 @@ export function Navbar() {
                           <UserCheck className="w-3.5 h-3.5 text-slate-400" />
                           <span>Tim Staff</span>
                         </Link>
+                        <Link
+                          href="/dashboard/owner/profile"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
                       </>
                     )}
 
                     {currentRole === "staff" && (
-                      <Link
-                        href="/dashboard/staff"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        <QrCode className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Terminal Check-In</span>
-                      </Link>
+                      <>
+                        <Link
+                          href="/dashboard/staff"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Terminal Check-In</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/staff/profile"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
                     )}
 
                     {currentRole === "member" && (
@@ -202,8 +221,8 @@ export function Navbar() {
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                         >
-                          <User className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Profil Member</span>
+                          <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pengaturan Akun</span>
                         </Link>
                       </>
                     )}

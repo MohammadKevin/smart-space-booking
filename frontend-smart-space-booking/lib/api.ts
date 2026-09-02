@@ -339,6 +339,9 @@ export async function deleteStaff(id: number | string): Promise<{ message: strin
 
 export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile> {
   const { data } = await api.put<UserProfile>("/users/profile", dto);
+  if (typeof window !== "undefined" && data) {
+    localStorage.setItem("user", JSON.stringify(data));
+  }
   return data;
 }
 

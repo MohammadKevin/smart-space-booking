@@ -3,6 +3,6 @@
 import React from "react";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 
-export default function MemberProfilePage() {
-  return <ProfileSettingsForm role="member" />;
+export default function StaffProfilePage() {
+  return <ProfileSettingsForm role="staff" />;
 }

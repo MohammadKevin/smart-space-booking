@@ -134,6 +134,9 @@ export interface CreateStaffDto {
 
 export interface UpdateProfileDto {
   nama?: string;
+  email?: string;
+  oldPassword?: string;
+  password?: string;
   instansi?: string;
   alamat?: string;
   telp?: string;

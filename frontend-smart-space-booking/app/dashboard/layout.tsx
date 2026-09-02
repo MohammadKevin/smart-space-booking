@@ -23,6 +23,7 @@ import {
   CalendarClock,
   ClipboardList,
   User,
+  UserCog,
   ReceiptText,
   Wallet,
   AlertCircle,
@@ -185,19 +186,21 @@ export default function DashboardLayout({
         { label: "Inventory Ruangan", href: "/dashboard/owner/spaces", icon: Building },
         { label: "Kode Promo Diskon", href: "/dashboard/owner/discounts", icon: TicketPercent },
         { label: "Manajemen Staff", href: "/dashboard/owner/staff", icon: UserCheck },
+        { label: "Pengaturan Akun", href: "/dashboard/owner/profile", icon: UserCog },
       ];
     }
     if (role === "staff") {
       return [
         { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
         { label: "Transaksi & Pembayaran", href: "/dashboard/owner/transactions", icon: ReceiptText },
+        { label: "Pengaturan Akun", href: "/dashboard/staff/profile", icon: UserCog },
       ];
     }
     return [
       { label: "Tiket & Jadwal Saya", href: "/dashboard/member", icon: CalendarCheck },
       { label: "Transaksi & Invoice", href: "/dashboard/member/transactions", icon: Wallet },
       { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
-      { label: "Profil Member", href: "/dashboard/member/profile", icon: User },
+      { label: "Pengaturan Akun", href: "/dashboard/member/profile", icon: UserCog },
     ];
   };
 
@@ -209,6 +212,7 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
+    if (pathname.endsWith("/profile")) return "Pengaturan Akun";
     if (pathname.startsWith("/dashboard/owner/transactions")) return "Transaksi & Pembayaran";
     if (pathname.startsWith("/dashboard/owner/reservations")) return "Manajemen Reservasi";
     if (pathname.startsWith("/dashboard/owner/discounts")) return "Kode Promo Diskon";
@@ -217,7 +221,6 @@ export default function DashboardLayout({
     if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";
     if (pathname.startsWith("/dashboard/staff")) return "Terminal Check-In";
     if (pathname.startsWith("/dashboard/member/transactions")) return "Transaksi & Invoice";
-    if (pathname.startsWith("/dashboard/member/profile")) return "Profil Member";
     if (pathname.startsWith("/dashboard/member")) return "Tiket & Jadwal Saya";
     return "Dashboard";
   };
