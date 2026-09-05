@@ -122,4 +122,84 @@ export class MailService {
       }
     }
   }
+
+  async sendBookingApprovedEmail(
+    email: string,
+    memberName: string,
+    spaceName: string,
+    date: string,
+    time: string,
+    qrCode: string,
+    invoiceNumber: string,
+    total: number,
+  ) {
+    const from = process.env.SMTP_FROM || '"WorkNest Booking" <booking@worknest.app>';
+    const subject = `[WorkNest] Reservasi #${qrCode} Disetujui! - ${spaceName}`;
+    const html = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
+        <div style="background-color: #0891b2; padding: 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">WorkNest</h1>
+          <p style="color: #cffafe; margin: 4px 0 0 0; font-size: 12px;">Pemesanan Anda Telah Dikonfirmasi</p>
+        </div>
+        <div style="padding: 28px;">
+          <h2 style="font-size: 16px; font-weight: 700; margin-top: 0; color: #0f172a;">Halo ${memberName},</h2>
+          <p style="font-size: 13px; color: #475569; line-height: 1.6;">
+            Reservasi Anda untuk <strong>${spaceName}</strong> telah <strong>disetujui</strong> oleh pengelola coworking space.
+          </p>
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 12px; line-height: 1.8;">
+            <div><strong>Nomor Invoice:</strong> ${invoiceNumber}</div>
+            <div><strong>Jadwal:</strong> ${date}, Pukul ${time} WIB</div>
+            <div><strong>Kode Tiket QR:</strong> <span style="font-family: monospace; font-weight: 700; color: #0891b2;">${qrCode}</span></div>
+            <div><strong>Total Biaya:</strong> Rp ${total.toLocaleString('id-ID')}</div>
+          </div>
+          <p style="font-size: 12px; color: #64748b;">
+            Tunjukkan kode tiket QR saat tiba di lokasi untuk proses check-in cepat oleh staff resepsionis.
+          </p>
+        </div>
+      </div>
+    `;
+
+    this.logger.log(`[EMAIL NOTIFICATION] Booking approved for ${email}: ${spaceName} (${qrCode})`);
+
+    if (this.transporter) {
+      try {
+        await this.transporter.sendMail({ from, to: email, subject, html });
+      } catch (err: any) {
+        this.logger.error(`SMTP notification error: ${err.message}`);
+      }
+    }
+  }
+
+  async sendPaymentSuccessEmail(
+    email: string,
+    memberName: string,
+    spaceName: string,
+    invoiceNumber: string,
+    total: number,
+    method: string,
+  ) {
+    const from = process.env.SMTP_FROM || '"WorkNest Payments" <billing@worknest.app>';
+    const subject = `[WorkNest] Pembayaran Berhasil - Invoice ${invoiceNumber}`;
+    const html = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
+        <div style="background-color: #10b981; padding: 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">Pembayaran Lunas</h1>
+          <p style="color: #d1fae5; margin: 4px 0 0 0; font-size: 12px;">Terima kasih atas pembayaran Anda</p>
+        </div>
+        <div style="padding: 28px; font-size: 13px; line-height: 1.6; color: #334155;">
+          <p>Halo <strong>${memberName}</strong>, pembayaran untuk invoice <strong>${invoiceNumber}</strong> sebesar <strong>Rp ${total.toLocaleString('id-ID')}</strong> melalui metode <strong>${method || 'Midtrans'}</strong> telah berhasil diverifikasi.</p>
+        </div>
+      </div>
+    `;
+
+    this.logger.log(`[EMAIL NOTIFICATION] Payment success for ${email}: ${invoiceNumber}`);
+
+    if (this.transporter) {
+      try {
+        await this.transporter.sendMail({ from, to: email, subject, html });
+      } catch (err: any) {
+        this.logger.error(`SMTP payment notification error: ${err.message}`);
+      }
+    }
+  }
 }

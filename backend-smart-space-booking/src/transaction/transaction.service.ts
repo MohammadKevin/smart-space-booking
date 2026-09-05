@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MidtransService, SnapTokenResult } from './midtrans.service';
+import { MailService } from '../common/mail/mail.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class TransactionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly midtrans: MidtransService,
+    private readonly mailService: MailService,
   ) {}
 
   private generateInvoiceNumber(reservationId: number): string {
@@ -260,12 +262,34 @@ export class TransactionService {
       include: {
         reservasi: {
           include: {
-            member: true,
+            member: {
+              include: { user: true },
+            },
             detailReservasi: { include: { space: true, diskon: true } },
           },
         },
       },
     });
+
+    if (status === PembayaranStatus.lunas && updated.reservasi?.member?.user?.email) {
+      const email = updated.reservasi.member.user.email;
+      const memberName = updated.reservasi.member.namaMember;
+      const spaceName = updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
+      const invoiceNum = updated.nomorInvoice;
+      const totalAmount = updated.jumlah;
+      const method = updated.metodePembayaran || 'Midtrans';
+
+      this.mailService
+        .sendPaymentSuccessEmail(
+          email,
+          memberName,
+          spaceName,
+          invoiceNum,
+          totalAmount,
+          method,
+        )
+        .catch(() => {});
+    }
 
     return { message: 'Status pembayaran diperbarui.', data: updated };
   }

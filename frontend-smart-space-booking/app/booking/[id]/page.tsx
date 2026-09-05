@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   getSpaceDetail,
+  getBookedSlots,
   getSpaces,
   createReservation,
   checkDiscount,
@@ -110,26 +111,28 @@ export default function BookingPage({ params }: BookingPageProps) {
     async function checkAvailability() {
       const result: Record<string, boolean> = {};
       try {
-        const probes = await Promise.all(
-          TIME_SLOTS.map((slot) => {
-            return getSpaces({
-              tanggal: tanggalReservasi,
-              jamMulai: slot,
-              durasiJam: 1,
-            }).then(
-              (list) => {
-                const available =
-                  Array.isArray(list) && list.some((s) => s.id === spaceId);
-                return [slot, available] as const;
-              },
-              () => [slot, false] as const,
-            );
-          }),
-        );
-        for (const [slot, available] of probes) {
-          result[slot] = available;
+        const bookedSlots = await getBookedSlots(spaceId, tanggalReservasi);
+        
+        for (const slot of TIME_SLOTS) {
+          const [sh, sm] = slot.split(":").map(Number);
+          const startMins = sh * 60 + sm;
+          const endMins = startMins + durasiJam * 60;
+
+          const hasConflict = bookedSlots.some((b) => {
+            const [bh, bm] = b.jamMulai.split(":").map(Number);
+            const bStart = bh * 60 + bm;
+            const bEnd = bStart + b.durasiJam * 60;
+            // Overlapping condition: max(start1, start2) < min(end1, end2)
+            return Math.max(startMins, bStart) < Math.min(endMins, bEnd);
+          });
+
+          result[slot] = !hasConflict;
         }
       } catch {
+        // Fallback: assume available
+        for (const slot of TIME_SLOTS) {
+          result[slot] = true;
+        }
       } finally {
         if (!cancelled) {
           setAvailability(result);
@@ -142,7 +145,7 @@ export default function BookingPage({ params }: BookingPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [tanggalReservasi, spaceId]);
+  }, [tanggalReservasi, spaceId, durasiJam]);
 
   const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();

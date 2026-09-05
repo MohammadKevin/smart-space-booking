@@ -236,4 +236,52 @@ export class SpaceService {
 
     return { message: `Space '${space.namaSpace}' berhasil dihapus.` };
   }
+
+  async getBookedSlots(spaceId: number, dateStr?: string) {
+    const space = await this.findOne(spaceId);
+    const targetDate = dateStr
+      ? normalizeDateToStartOfDay(dateStr)
+      : normalizeDateToStartOfDay(new Date().toISOString());
+
+    const nextDay = new Date(targetDate.getTime() + 24 * 60 * 60 * 1000);
+
+    const reservations = await this.prisma.reservasi.findMany({
+      where: {
+        detailReservasi: {
+          spaceId: space.id,
+        },
+        tanggalReservasi: {
+          gte: targetDate,
+          lt: nextDay,
+        },
+        status: {
+          in: [
+            ReservasiStatus.pending,
+            ReservasiStatus.disetujui,
+            ReservasiStatus.aktif,
+          ],
+        },
+      },
+      select: {
+        id: true,
+        jamMulai: true,
+        durasiJam: true,
+        status: true,
+        tanggalReservasi: true,
+      },
+      orderBy: { jamMulai: 'asc' },
+    });
+
+    return reservations.map((r) => {
+      const startMin = timeStringToMinutes(r.jamMulai);
+      const endMin = startMin + r.durasiJam * 60;
+      return {
+        id: r.id,
+        jamMulai: r.jamMulai,
+        durasiJam: r.durasiJam,
+        jamSelesai: minutesToTimeString(endMin),
+        status: r.status,
+      };
+    });
+  }
 }

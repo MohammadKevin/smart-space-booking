@@ -6,6 +6,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../common/mail/mail.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { UpdateReservationStatusDto } from './dto/update-status.dto';
@@ -26,7 +27,10 @@ import {
 
 @Injectable()
 export class ReservationService implements OnModuleInit {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   onModuleInit() {
     this.cleanupExpiredReservations().catch(() => {});
@@ -39,7 +43,11 @@ export class ReservationService implements OnModuleInit {
 
   async cleanupExpiredReservations() {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const expiredReservations = await this.prisma.reservasi.findMany({
+    const now = new Date();
+    const todayStart = normalizeDateToStartOfDay(now.toISOString());
+
+    // 1. Pending reservations created over 24h ago
+    const expiredByAge = await this.prisma.reservasi.findMany({
       where: {
         status: ReservasiStatus.pending,
         createdAt: { lt: oneDayAgo },
@@ -47,11 +55,43 @@ export class ReservationService implements OnModuleInit {
       include: { transaksi: true },
     });
 
-    for (const item of expiredReservations) {
+    // 2. Unpaid reservations where scheduled reservation date is in the past
+    const expiredByDate = await this.prisma.reservasi.findMany({
+      where: {
+        status: {
+          in: [ReservasiStatus.pending, ReservasiStatus.disetujui],
+        },
+        tanggalReservasi: { lt: todayStart },
+        OR: [
+          { transaksi: null },
+          {
+            transaksi: {
+              statusPembayaran: {
+                in: [
+                  PembayaranStatus.belum_bayar,
+                  PembayaranStatus.menunggu_pembayaran,
+                  PembayaranStatus.gagal,
+                ],
+              },
+            },
+          },
+        ],
+      },
+      include: { transaksi: true },
+    });
+
+    const combined = [...expiredByAge, ...expiredByDate];
+    const uniqueIds = new Set<number>();
+
+    for (const item of combined) {
+      if (uniqueIds.has(item.id)) continue;
+      uniqueIds.add(item.id);
+
       await this.prisma.reservasi.update({
         where: { id: item.id },
         data: { status: ReservasiStatus.dibatalkan },
       });
+
       if (
         item.transaksi &&
         item.transaksi.statusPembayaran !== PembayaranStatus.lunas
@@ -404,7 +444,12 @@ export class ReservationService implements OnModuleInit {
       where: { id },
       data: { status: dto.status },
       include: {
-        member: true,
+        member: {
+          include: {
+            user: true,
+          },
+        },
+        transaksi: true,
         detailReservasi: {
           include: {
             space: true,
@@ -413,6 +458,28 @@ export class ReservationService implements OnModuleInit {
         },
       },
     });
+
+    if (dto.status === ReservasiStatus.disetujui && updated.member?.user?.email) {
+      const email = updated.member.user.email;
+      const memberName = updated.member.namaMember;
+      const spaceName = updated.detailReservasi?.space?.namaSpace || 'Space';
+      const rawDate = updated.tanggalReservasi ? updated.tanggalReservasi.toISOString().split('T')[0] : '';
+      const invoiceNum = updated.transaksi?.nomorInvoice || `INV-${updated.id}`;
+      const totalCost = updated.detailReservasi?.totalHarga || 0;
+
+      this.mailService
+        .sendBookingApprovedEmail(
+          email,
+          memberName,
+          spaceName,
+          rawDate,
+          updated.jamMulai,
+          updated.qrCode,
+          invoiceNum,
+          totalCost,
+        )
+        .catch(() => {});
+    }
 
     return {
       message: `Status reservasi berhasil diubah menjadi '${dto.status}'.`,

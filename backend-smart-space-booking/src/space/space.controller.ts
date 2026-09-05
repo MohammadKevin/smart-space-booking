@@ -122,6 +122,23 @@ export class SpaceController {
     return this.spaceService.getMySpaces(ownerUserId);
   }
 
+  @Get(':id/booked-slots')
+  @ApiOperation({
+    summary: 'Mendapatkan Daftar Slot Jam Terisi / Dipesan untuk Ruangan',
+    description:
+      'Melihat slot jadwal yang sudah terisi pada tanggal tertentu untuk tampilan grid ketersediaan visual.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar slot terisi berhasil dimuat.',
+  })
+  getBookedSlots(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('date') date?: string,
+  ) {
+    return this.spaceService.getBookedSlots(id, date);
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Mendapatkan Detail Satu Space',

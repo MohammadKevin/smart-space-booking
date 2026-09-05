@@ -28,7 +28,7 @@ jobs:
         env:
           DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy_db"
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npx prisma generate
           npm run build
 

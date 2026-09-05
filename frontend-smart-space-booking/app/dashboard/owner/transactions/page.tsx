@@ -25,6 +25,7 @@ import {
   Wallet,
   Clock,
   ArrowUpRight,
+  Download,
 } from "lucide-react";
 
 type PaymentTab = "all" | "lunas" | "menunggu_pembayaran" | "belum_bayar" | "refund" | "gagal";
@@ -134,6 +135,45 @@ export default function OwnerTransactionsPage() {
     }
   };
 
+  const handleExportCsv = () => {
+    if (!transactions.length) return;
+    const headers = [
+      "ID",
+      "Nomor Invoice",
+      "ID Reservasi",
+      "Nama Member",
+      "Nama Ruangan",
+      "Metode Pembayaran",
+      "Nominal",
+      "Status Pembayaran",
+      "Tanggal Dibuat",
+      "Tanggal Dibayar",
+    ];
+
+    const rows = filtered.map((t) => [
+      t.id,
+      t.nomorInvoice,
+      t.reservasiId,
+      `"${(t.reservasi?.member?.namaMember || "").replace(/"/g, '""')}"`,
+      `"${(t.reservasi?.detailReservasi?.space?.namaSpace || "").replace(/"/g, '""')}"`,
+      t.metodePembayaran || "-",
+      t.jumlah || 0,
+      t.statusPembayaran,
+      t.createdAt ? t.createdAt.split("T")[0] : "-",
+      t.dibayarPada ? t.dibayarPada.split("T")[0] : "-",
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `WorkNest_Transactions_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const tabs: { id: PaymentTab; label: string }[] = [
     { id: "all", label: `Semua (${counts.all})` },
     { id: "lunas", label: `Lunas (${counts.lunas})` },
@@ -155,11 +195,21 @@ export default function OwnerTransactionsPage() {
             Kelola arus kas masuk, invoice, dan status pembayaran Midtrans.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <div className="px-3.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/80 text-right">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Terbayar</p>
             <p className="text-sm font-extrabold text-slate-900 font-mono">{formatRupiah(totalLunas)}</p>
           </div>
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={loading || filtered.length === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50"
+            title="Export ke file CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Export CSV</span>
+          </button>
           <button
             type="button"
             onClick={fetchTransactions}
