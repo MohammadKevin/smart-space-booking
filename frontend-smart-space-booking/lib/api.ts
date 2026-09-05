@@ -405,8 +405,12 @@ export async function getSpaceTypeDistribution(): Promise<SpaceTypeDistributionI
       tipe: (d.type || d.tipe || "desk") as SpaceType,
       label: d.label || d.tipe || "Space",
       count: Number(d.count) || 0,
-      totalRevenue: Number(d.revenue || d.totalRevenue) || 0,
-      percentage: Math.round(((Number(d.count) || 0) / totalCount) * 100),
+      totalRevenue: Number(d.revenue ?? d.totalRevenue ?? 0),
+      totalBookings: Number(d.totalBookings ?? d.bookings ?? 0),
+      percentage:
+        typeof d.percentage === "number"
+          ? d.percentage
+          : Math.round(((Number(d.count) || 0) / totalCount) * 100),
     }));
   }
   return [];

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ReservasiStatus, SpaceTipe } from '@prisma/client';
+import { ReservasiStatus, SpaceTipe, PembayaranStatus } from '@prisma/client';
 
 @Injectable()
 export class ReportService {
@@ -25,6 +25,7 @@ export class ReportService {
       where: { ownerId: owner.id },
       include: {
         detailReservasi: true,
+        transaksi: true,
       },
     });
 
@@ -41,11 +42,17 @@ export class ReportService {
     for (const res of reservations) {
       bookingCounts[res.status] = (bookingCounts[res.status] || 0) + 1;
 
-      if (
+      const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
+      const isValidStatus =
         res.status === ReservasiStatus.selesai ||
         res.status === ReservasiStatus.aktif ||
-        res.status === ReservasiStatus.disetujui
-      ) {
+        res.status === ReservasiStatus.disetujui;
+      const isNotCancelled =
+        res.status !== ReservasiStatus.dibatalkan &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
+
+      if ((isPaid || isValidStatus) && isNotCancelled) {
         if (res.detailReservasi?.totalHarga) {
           totalRevenue += res.detailReservasi.totalHarga;
         }
@@ -94,16 +101,10 @@ export class ReportService {
           gte: startOfYear,
           lt: endOfYear,
         },
-        status: {
-          in: [
-            ReservasiStatus.disetujui,
-            ReservasiStatus.aktif,
-            ReservasiStatus.selesai,
-          ],
-        },
       },
       include: {
         detailReservasi: true,
+        transaksi: true,
       },
     });
 
@@ -130,11 +131,23 @@ export class ReportService {
     }));
 
     for (const res of reservations) {
-      const monthIdx = new Date(res.tanggalReservasi).getUTCMonth();
-      if (monthIdx >= 0 && monthIdx < 12) {
-        monthlyStats[monthIdx].totalBookings += 1;
-        if (res.detailReservasi?.totalHarga) {
-          monthlyStats[monthIdx].revenue += res.detailReservasi.totalHarga;
+      const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
+      const isValidStatus =
+        res.status === ReservasiStatus.selesai ||
+        res.status === ReservasiStatus.aktif ||
+        res.status === ReservasiStatus.disetujui;
+      const isNotCancelled =
+        res.status !== ReservasiStatus.dibatalkan &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
+
+      if ((isPaid || isValidStatus) && isNotCancelled) {
+        const monthIdx = new Date(res.tanggalReservasi).getUTCMonth();
+        if (monthIdx >= 0 && monthIdx < 12) {
+          monthlyStats[monthIdx].totalBookings += 1;
+          if (res.detailReservasi?.totalHarga) {
+            monthlyStats[monthIdx].revenue += res.detailReservasi.totalHarga;
+          }
         }
       }
     }
@@ -159,16 +172,13 @@ export class ReportService {
   async getSpaceTypeDistribution(ownerUserId: number) {
     const owner = await this.getOwner(ownerUserId);
 
+    const spaces = await this.prisma.space.findMany({
+      where: { ownerId: owner.id },
+    });
+
     const reservations = await this.prisma.reservasi.findMany({
       where: {
         ownerId: owner.id,
-        status: {
-          in: [
-            ReservasiStatus.disetujui,
-            ReservasiStatus.aktif,
-            ReservasiStatus.selesai,
-          ],
-        },
       },
       include: {
         detailReservasi: {
@@ -176,41 +186,81 @@ export class ReportService {
             space: true,
           },
         },
+        transaksi: true,
       },
     });
 
     const distribution: Record<
       SpaceTipe,
-      { type: SpaceTipe; label: string; count: number; revenue: number }
+      {
+        type: SpaceTipe;
+        label: string;
+        count: number;
+        revenue: number;
+        totalBookings: number;
+        percentage: number;
+      }
     > = {
       [SpaceTipe.desk]: {
         type: SpaceTipe.desk,
         label: 'Hot Desk & Workstation',
         count: 0,
         revenue: 0,
+        totalBookings: 0,
+        percentage: 0,
       },
       [SpaceTipe.meeting_room]: {
         type: SpaceTipe.meeting_room,
         label: 'Meeting Room',
         count: 0,
         revenue: 0,
+        totalBookings: 0,
+        percentage: 0,
       },
       [SpaceTipe.private_office]: {
         type: SpaceTipe.private_office,
         label: 'Private Office',
         count: 0,
         revenue: 0,
+        totalBookings: 0,
+        percentage: 0,
       },
     };
 
+    for (const space of spaces) {
+      if (distribution[space.tipe]) {
+        distribution[space.tipe].count += 1;
+      }
+    }
+
     for (const res of reservations) {
-      const spaceType = res.detailReservasi?.space?.tipe;
-      if (spaceType && distribution[spaceType]) {
-        distribution[spaceType].count += 1;
-        if (res.detailReservasi?.totalHarga) {
-          distribution[spaceType].revenue += res.detailReservasi.totalHarga;
+      const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
+      const isValidStatus =
+        res.status === ReservasiStatus.selesai ||
+        res.status === ReservasiStatus.aktif ||
+        res.status === ReservasiStatus.disetujui;
+      const isNotCancelled =
+        res.status !== ReservasiStatus.dibatalkan &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
+        res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
+
+      if ((isPaid || isValidStatus) && isNotCancelled) {
+        const spaceType = res.detailReservasi?.space?.tipe;
+        if (spaceType && distribution[spaceType]) {
+          distribution[spaceType].totalBookings += 1;
+          if (res.detailReservasi?.totalHarga) {
+            distribution[spaceType].revenue += res.detailReservasi.totalHarga;
+          }
         }
       }
+    }
+
+    const totalSpaces = spaces.length;
+    for (const key of Object.keys(distribution) as SpaceTipe[]) {
+      distribution[key].percentage =
+        totalSpaces > 0
+          ? Math.round((distribution[key].count / totalSpaces) * 100)
+          : 0;
     }
 
     return Object.values(distribution);

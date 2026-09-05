@@ -362,6 +362,7 @@ export interface SpaceTypeDistributionItem {
   label: string;
   count: number;
   totalRevenue: number;
+  totalBookings?: number;
   percentage: number;
 }
 
