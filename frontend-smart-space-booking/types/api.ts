@@ -364,3 +364,30 @@ export interface SpaceTypeDistributionItem {
   totalRevenue: number;
   percentage: number;
 }
+
+export interface Review {
+  id: number;
+  rating: number;
+  komentar?: string | null;
+  reservasiId: number;
+  createdAt: string;
+  updatedAt: string;
+  reservasi?: Reservation;
+}
+
+export interface ReviewListResponse {
+  data: Review[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface RatingSummary {
+  spaceId: number;
+  averageRating: number;
+  totalReviews: number;
+}
+

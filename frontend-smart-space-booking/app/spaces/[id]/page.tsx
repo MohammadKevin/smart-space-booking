@@ -2,7 +2,15 @@
 
 import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { getSpaceDetail, Space, getApiErrorMessage } from "@/lib/api";
+import {
+  getSpaceDetail,
+  getSpaceReviews,
+  getSpaceRatingSummary,
+  Space,
+  Review,
+  RatingSummary,
+  getApiErrorMessage,
+} from "@/lib/api";
 import { formatRupiah } from "@/components/SpaceCard";
 import {
   Building2,
@@ -19,6 +27,9 @@ import {
   Coffee,
   CheckCircle2,
   MapPin,
+  Star,
+  MessageSquareQuote,
+  Sparkles,
 } from "lucide-react";
 
 interface SpaceDetailPageProps {
@@ -33,21 +44,32 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
+  const [loadingReviews, setLoadingReviews] = useState<boolean>(true);
+
   useEffect(() => {
-    async function loadDetail() {
+    async function loadData() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getSpaceDetail(spaceId);
-        setSpace(data);
+        const [spaceData, reviewsRes, summaryRes] = await Promise.all([
+          getSpaceDetail(spaceId),
+          getSpaceReviews(spaceId, 1, 10).catch(() => ({ data: [] } as any)),
+          getSpaceRatingSummary(spaceId).catch(() => null),
+        ]);
+        setSpace(spaceData);
+        setReviews(reviewsRes?.data || []);
+        setRatingSummary(summaryRes);
       } catch (err: unknown) {
         setError(getApiErrorMessage(err));
       } finally {
         setLoading(false);
+        setLoadingReviews(false);
       }
     }
     if (spaceId) {
-      loadDetail();
+      loadData();
     }
   }, [spaceId]);
 
@@ -133,9 +155,20 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                     <span>{space.owner.namaCoworking}</span>
                   </div>
                 )}
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                  {space.namaSpace}
-                </h1>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+                    {space.namaSpace}
+                  </h1>
+                  {ratingSummary && ratingSummary.totalReviews > 0 && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <span>{ratingSummary.averageRating.toFixed(1)}</span>
+                      <span className="text-slate-400 font-normal">
+                        ({ratingSummary.totalReviews} ulasan)
+                      </span>
+                    </div>
+                  )}
+                </div>
                 {space.owner?.alamat && (
                   <div className="flex items-center gap-1 text-xs text-slate-500">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -186,6 +219,109 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Rating & Reviews Section */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                  <h2 className="text-base font-bold text-slate-900">
+                    Rating & Ulasan Pengunjung
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Ulasan terverifikasi dari member yang telah menyelesaikan sesi di ruangan ini.
+                </p>
+              </div>
+
+              {ratingSummary && ratingSummary.totalReviews > 0 ? (
+                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 text-amber-900">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <span className="font-bold text-sm">
+                      {ratingSummary.averageRating.toFixed(1)}
+                    </span>
+                  </div>
+                  <span className="text-xs text-amber-700 font-medium">
+                    ({ratingSummary.totalReviews} ulasan)
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                  Belum ada rating
+                </span>
+              )}
+            </div>
+
+            {loadingReviews ? (
+              <div className="p-8 text-center text-slate-400">
+                <Loader2 className="w-5 h-5 animate-spin mx-auto text-sky-600" />
+                <p className="text-xs mt-2 font-medium">Memuat ulasan ruangan...</p>
+              </div>
+            ) : reviews.length > 0 ? (
+              <div className="space-y-4 divide-y divide-slate-100">
+                {reviews.map((rev) => {
+                  const reviewerName =
+                    rev.reservasi?.member?.namaMember || "Pengunjung WorkNest";
+                  const revDate = rev.createdAt
+                    ? new Date(rev.createdAt).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "";
+
+                  return (
+                    <div key={rev.id} className="pt-4 first:pt-0 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-cyan-100 text-cyan-800 font-bold text-xs flex items-center justify-center border border-cyan-200">
+                            {reviewerName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900">
+                              {reviewerName}
+                            </p>
+                            <p className="text-[10px] text-slate-400">{revDate}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={`w-3.5 h-3.5 ${
+                                s <= rev.rating
+                                  ? "fill-amber-400 text-amber-400"
+                                  : "text-slate-200"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {rev.komentar && (
+                        <p className="text-xs text-slate-700 leading-relaxed pl-10 bg-slate-50/50 p-2.5 rounded-lg border border-slate-100/80">
+                          &ldquo;{rev.komentar}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
+                <MessageSquareQuote className="w-8 h-8 text-slate-300 mx-auto" />
+                <p className="text-xs font-semibold text-slate-700">
+                  Belum ada ulasan untuk ruangan ini
+                </p>
+                <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
+                  Jadilah pengunjung pertama yang memesan dan memberikan pengalaman menarik Anda setelah sesi selesai.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

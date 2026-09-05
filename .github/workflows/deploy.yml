@@ -32,7 +32,7 @@ jobs:
           npx prisma generate
           npm run build
 
-      - name: 🚀 Sync Dist & Schema to cPanel
+      - name: 🚀 Sync Dist to cPanel
         uses: easingthemes/ssh-deploy@v5.0.3
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
@@ -42,6 +42,17 @@ jobs:
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
           TARGET: "/home/budayaki/backend_ukk/dist"
+
+      - name: 📂 Sync Prisma Schema to cPanel
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          SOURCE: "backend-smart-space-booking/prisma/"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: "/home/budayaki/backend_ukk/prisma"
 
       - name: 🔄 Generate Prisma on Server & Restart Passenger
         uses: appleboy/ssh-action@v1.0.3
@@ -53,6 +64,7 @@ jobs:
           script: |
             source /home/budayaki/nodevenv/backend_ukk/20/bin/activate
             cd /home/budayaki/backend_ukk
+            npx prisma db push --skip-generate
             npx prisma generate
             mkdir -p tmp
             touch tmp/restart.txt

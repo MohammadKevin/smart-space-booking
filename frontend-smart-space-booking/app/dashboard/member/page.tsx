@@ -8,6 +8,7 @@ import {
   getTransactions,
   startPayment,
   syncPayment,
+  createReview,
   Reservation,
   Transaksi,
   getApiErrorMessage,
@@ -43,6 +44,7 @@ import {
   Sparkles,
   ChevronRight,
   Ticket,
+  Star,
   Wallet,
 } from "lucide-react";
 
@@ -65,6 +67,128 @@ export default function MemberDashboardPage() {
   const [payingId, setPayingId] = useState<number | null>(null);
   const [payMessage, setPayMessage] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
+
+  const [selectedReviewBooking, setSelectedReviewBooking] = useState<Reservation | null>(null);
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewComment, setReviewComment] = useState<string>("");
+  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
+
+  const handleDownloadFullPass = (ticket: Reservation) => {
+    const svg = document.getElementById(`qr-svg-${ticket.qrCode}`);
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 600;
+    canvas.height = 800;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 600, 800);
+
+    const grad = ctx.createLinearGradient(0, 0, 600, 160);
+    grad.addColorStop(0, "#0891b2");
+    grad.addColorStop(1, "#0f172a");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 160);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.fillText("WORKNEST SMART PASS", 40, 55);
+
+    ctx.font = "14px sans-serif";
+    ctx.fillStyle = "#bae6fd";
+    ctx.fillText(ticket.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space", 40, 85);
+
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#e0f2fe";
+    ctx.fillText("DIGITAL BOARDING PASS & ACCESS KEY", 40, 125);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText(ticket.detailReservasi?.space?.namaSpace || "Ruangan Space", 40, 210);
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(`Tipe: ${ticket.detailReservasi?.space?.tipe?.toUpperCase() || "SPACE"}`, 40, 235);
+
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(40, 260, 520, 95);
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.strokeRect(40, 260, 520, 95);
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "11px sans-serif";
+    ctx.fillText("TANGGAL", 60, 290);
+    ctx.fillText("JAM SESI", 240, 290);
+    ctx.fillText("PEMESAN", 400, 290);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 13px sans-serif";
+    const dateStr = ticket.tanggalReservasi ? ticket.tanggalReservasi.split("T")[0] : "-";
+    ctx.fillText(dateStr, 60, 315);
+    ctx.fillText(`${ticket.jamMulai} WIB (${ticket.durasiJam || 1} Jam)`, 240, 315);
+    ctx.fillText(user?.member?.namaMember || user?.email || "Member", 400, 315);
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(175, 385, 250, 250);
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.strokeRect(175, 385, 250, 250);
+
+      ctx.drawImage(img, 200, 410, 200, 200);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 16px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(ticket.qrCode, 300, 675);
+
+      ctx.fillStyle = "#059669";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText("STATUS: TIKET VALID / RESMI", 300, 710);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "12px sans-serif";
+      ctx.fillText("Tunjukkan barcode ini kepada staf resepsionis untuk Check-In", 300, 745);
+
+      const pngUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = pngUrl;
+      link.download = `WorkNest-Pass-${ticket.qrCode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedReviewBooking) return;
+    setSubmittingReview(true);
+    setReviewError(null);
+    try {
+      await createReview({
+        reservasiId: selectedReviewBooking.id,
+        rating: reviewRating,
+        komentar: reviewComment.trim() || undefined,
+      });
+      setReviewSuccessMsg("Terima kasih! Ulasan Anda berhasil dikirim.");
+      setSelectedReviewBooking(null);
+      setReviewComment("");
+      await fetchBookings();
+    } catch (err: unknown) {
+      setReviewError(getApiErrorMessage(err));
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -144,20 +268,19 @@ export default function MemberDashboardPage() {
       const result = response.data;
       await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
         onSuccess: async () => {
-          setPayMessage(`Pembayaran ${result.nomorInvoice} berhasil. Status sedang diperbarui...`);
+          setPayMessage(`Pembayaran ${result.nomorInvoice} berhasil. Sedang menyinkronkan status...`);
           try {
-            const tx = await getTransactions();
-            const map: Record<number, Transaksi> = {};
-            for (const t of tx) map[t.reservasiId] = t;
-            setTransactions(map);
-          } catch {
-          }
+            await syncPayment(result.transactionId);
+          } catch {}
           setPayMessage(`Pembayaran invoice ${result.nomorInvoice} telah lunas. Terima kasih!`);
           await fetchBookings();
           await loadTransactions();
         },
         onPending: async () => {
-          setPayMessage("Pembayaran sedang menunggu konfirmasi. Status akan diperbarui otomatis via notifikasi.");
+          try {
+            await syncPayment(result.transactionId);
+          } catch {}
+          setPayMessage("Pembayaran sedang menunggu konfirmasi. Status telah disinkronkan.");
           await fetchBookings();
           await loadTransactions();
         },
@@ -271,6 +394,22 @@ export default function MemberDashboardPage() {
           <button
             type="button"
             onClick={() => setCancelSuccessMsg(null)}
+            className="font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {reviewSuccessMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-xs">
+          <div className="flex items-center gap-2 font-medium">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{reviewSuccessMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setReviewSuccessMsg(null)}
             className="font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer"
           >
             ✕
@@ -466,6 +605,22 @@ export default function MemberDashboardPage() {
                           <span>WhatsApp</span>
                         </a>
                       )}
+
+                      {res.status?.toLowerCase() === "selesai" && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReviewBooking(res);
+                            setReviewRating(5);
+                            setReviewComment("");
+                            setReviewError(null);
+                          }}
+                          className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold rounded-lg border border-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>Beri Ulasan</span>
+                        </button>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -587,6 +742,15 @@ export default function MemberDashboardPage() {
               <p className="text-[11px] text-slate-400 leading-relaxed">
                 Tunjukkan layar ini kepada staf resepsionis untuk dipindai kamera check-in.
               </p>
+
+              <button
+                type="button"
+                onClick={() => handleDownloadFullPass(selectedTicket)}
+                className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-cyan-400" />
+                <span>Unduh E-Pass Digital HD (PNG)</span>
+              </button>
             </div>
           </div>
         </div>
@@ -715,6 +879,113 @@ export default function MemberDashboardPage() {
                 {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Ya, Batalkan</span>}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {selectedReviewBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <h3 className="text-base font-bold text-slate-900">Beri Ulasan Ruangan</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReviewBooking(null)}
+                className="text-slate-400 hover:text-slate-700 font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1 text-xs">
+              <p className="font-bold text-slate-900">
+                {selectedReviewBooking.detailReservasi?.space?.namaSpace}
+              </p>
+              <p className="text-slate-500">
+                {selectedReviewBooking.detailReservasi?.space?.owner?.namaCoworking}
+              </p>
+            </div>
+
+            {reviewError && (
+              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{reviewError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitReview} className="space-y-4">
+              <div className="space-y-1.5 text-center">
+                <label className="text-xs font-bold text-slate-700 block">Rating Kepuasan</label>
+                <div className="flex items-center justify-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <Star
+                        className={`w-7 h-7 ${
+                          star <= reviewRating
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-slate-200"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {reviewRating === 5 && "⭐ Sangat Memuaskan (5/5)"}
+                  {reviewRating === 4 && "⭐ Memuaskan (4/5)"}
+                  {reviewRating === 3 && "⭐ Cukup Baik (3/5)"}
+                  {reviewRating === 2 && "⭐ Kurang Memuaskan (2/5)"}
+                  {reviewRating === 1 && "⭐ Sangat Kurang (1/5)"}
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 block">
+                  Komentar & Testimoni (Opsional)
+                </label>
+                <textarea
+                  rows={3}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Ceritakan pengalaman Anda, suasana ruangan, kecepatan internet, atau fasilitas lainnya..."
+                  className="w-full p-3 bg-slate-50 focus:bg-white border border-slate-200 focus:border-cyan-600 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none transition-colors resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setSelectedReviewBooking(null)}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60"
+                >
+                  {submittingReview ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Mengirim...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Kirim Ulasan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

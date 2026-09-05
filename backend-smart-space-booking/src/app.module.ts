@@ -11,6 +11,7 @@ import { ReservationModule } from './reservation/reservation.module';
 import { CheckinModule } from './checkin/checkin.module';
 import { ReportModule } from './report/report.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TransactionModule } from './transaction/transaction.module';
     CheckinModule,
     ReportModule,
     TransactionModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

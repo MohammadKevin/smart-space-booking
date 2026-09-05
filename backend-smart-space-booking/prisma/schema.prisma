@@ -61,9 +61,11 @@ model SpaceOwner {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  staffs       Staff[]
-  spaces       Space[]
-  reservasi    Reservasi[]
+  staffs             Staff[]
+  spaces             Space[]
+  reservasi          Reservasi[]
+  diskon             Diskon[]
+  autoApproveHotDesk Boolean     @default(true)
 
   @@map("space_owners")
 }
@@ -126,6 +128,8 @@ model Diskon {
   persentaseDiskon Float
   tanggalAwal      DateTime
   tanggalAkhir     DateTime
+  ownerId          Int?
+  owner            SpaceOwner?       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 

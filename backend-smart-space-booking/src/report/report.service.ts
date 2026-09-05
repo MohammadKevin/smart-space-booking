@@ -60,7 +60,12 @@ export class ReportService {
       where: { ownerId: owner.id },
     });
 
-    const totalMembers = await this.prisma.member.count();
+    const distinctMembers = await this.prisma.reservasi.findMany({
+      where: { ownerId: owner.id },
+      select: { memberId: true },
+      distinct: ['memberId'],
+    });
+    const totalMembers = distinctMembers.length;
 
     return {
       coworkingName: owner.namaCoworking,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   processCheckIn,
   processCheckOut,
@@ -29,6 +29,7 @@ import {
   Users,
   Calendar,
   Sparkles,
+  Volume2,
 } from "lucide-react";
 
 export default function StaffTerminalPage() {
@@ -43,6 +44,48 @@ export default function StaffTerminalPage() {
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loadingActive, setLoadingActive] = useState(true);
+
+  const cooldownUntilRef = useRef<number>(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const remainingMs = cooldownUntilRef.current - Date.now();
+      if (remainingMs > 0) {
+        setCooldownRemaining(Math.ceil(remainingMs / 1000));
+      } else {
+        setCooldownRemaining(0);
+      }
+    }, 500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const playScanBeep = (isSuccess = true) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      if (isSuccess) {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.18);
+      } else {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(250, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      }
+    } catch {}
+  };
 
   const fetchOccupancy = useCallback(async () => {
     setLoadingActive(true);
@@ -64,9 +107,14 @@ export default function StaffTerminalPage() {
   );
   const checkedInNow = reservations.filter((r) => r.status?.toLowerCase() === "aktif");
 
-  const executeCheckinProcess = async (codeToProcess: string) => {
+  const executeCheckinProcess = async (codeToProcess: string, isFromCamera = false) => {
     if (!codeToProcess.trim()) {
       setError("Masukkan atau scan kode tiket QR.");
+      return;
+    }
+
+    // Debounce check: if still in 5-second cooldown, ignore camera scan to prevent double check-in / check-out
+    if (isFromCamera && Date.now() < cooldownUntilRef.current) {
       return;
     }
 
@@ -86,8 +134,12 @@ export default function StaffTerminalPage() {
 
       setResult(res);
       setQrCode("");
+      playScanBeep(true);
+      cooldownUntilRef.current = Date.now() + 5000;
+      setCooldownRemaining(5);
       await fetchOccupancy();
     } catch (err: unknown) {
+      playScanBeep(false);
       setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
@@ -96,7 +148,7 @@ export default function StaffTerminalPage() {
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    executeCheckinProcess(qrCode);
+    executeCheckinProcess(qrCode, false);
   };
 
   const handleQuickCheckOut = async (code: string) => {
@@ -224,10 +276,19 @@ export default function StaffTerminalPage() {
             </div>
           </div>
 
+          {cooldownRemaining > 0 && (
+            <div className="p-3 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-900 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs animate-pulse">
+              <Volume2 className="w-4 h-4 text-cyan-600 shrink-0" />
+              <span>
+                Barcode tiket berhasil diproses! Cooldown proteksi aktif: <strong>{cooldownRemaining} detik</strong> (mencegah double-scan / checkout).
+              </span>
+            </div>
+          )}
+
           {inputMode === "camera" ? (
             <LiveQrScanner
-              onScanSuccess={(code) => executeCheckinProcess(code)}
-              isProcessing={loading}
+              onScanSuccess={(code) => executeCheckinProcess(code, true)}
+              isProcessing={loading || cooldownRemaining > 0}
             />
           ) : (
             <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-xs">

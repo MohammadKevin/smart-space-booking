@@ -37,6 +37,9 @@ import {
   SpaceTypeDistributionItem,
   Transaksi,
   StartPaymentResponse,
+  Review,
+  ReviewListResponse,
+  RatingSummary,
 } from "@/types/api";
 
 export * from "@/types/api";
@@ -458,6 +461,36 @@ export async function syncPayment(id: number): Promise<any> {
 
 export async function markRefund(id: number): Promise<any> {
   const { data } = await api.patch<any>(`/transactions/${id}/refund`);
+  return data;
+}
+
+export async function getSpaceReviews(
+  spaceId?: number,
+  page = 1,
+  limit = 10
+): Promise<ReviewListResponse> {
+  const url = spaceId
+    ? `/reviews?spaceId=${spaceId}&page=${page}&limit=${limit}`
+    : `/reviews?page=${page}&limit=${limit}`;
+  const { data } = await api.get<ReviewListResponse>(url);
+  return data;
+}
+
+export async function getSpaceRatingSummary(
+  spaceId: number
+): Promise<RatingSummary> {
+  const { data } = await api.get<RatingSummary>(
+    `/reviews/space/${spaceId}/summary`
+  );
+  return data;
+}
+
+export async function createReview(body: {
+  reservasiId: number;
+  rating: number;
+  komentar?: string;
+}): Promise<any> {
+  const { data } = await api.post<any>("/reviews", body);
   return data;
 }
 

@@ -3,16 +3,24 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class DiscountService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateDiscountDto) {
+  private async getOwner(userId: number) {
+    return this.prisma.spaceOwner.findUnique({
+      where: { userId },
+    });
+  }
+
+  async create(dto: CreateDiscountDto, user: any) {
     const tglAwal = new Date(dto.tanggalAwal);
     const tglAkhir = new Date(dto.tanggalAkhir);
 
@@ -33,6 +41,14 @@ export class DiscountService {
       }
     }
 
+    let ownerId: number | null = null;
+    if (user && user.id) {
+      const owner = await this.getOwner(user.id);
+      if (owner) {
+        ownerId = owner.id;
+      }
+    }
+
     return this.prisma.diskon.create({
       data: {
         namaDiskon: dto.namaDiskon,
@@ -40,14 +56,42 @@ export class DiscountService {
         persentaseDiskon: dto.persentaseDiskon,
         tanggalAwal: tglAwal,
         tanggalAkhir: tglAkhir,
+        ownerId,
+      },
+      include: {
+        owner: true,
       },
     });
   }
 
-  async findAll() {
+  async findAll(ownerId?: number, spaceId?: number) {
+    const where: Prisma.DiskonWhereInput = {};
+
+    let targetOwnerId = ownerId;
+    if (!targetOwnerId && spaceId) {
+      const space = await this.prisma.space.findUnique({
+        where: { id: spaceId },
+      });
+      if (space) {
+        targetOwnerId = space.ownerId;
+      }
+    }
+
+    if (targetOwnerId) {
+      where.OR = [{ ownerId: targetOwnerId }, { ownerId: null }];
+    }
+
     return this.prisma.diskon.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       include: {
+        owner: {
+          select: {
+            id: true,
+            namaCoworking: true,
+            namaPemilik: true,
+          },
+        },
         _count: {
           select: {
             detailReservasi: true,
@@ -60,6 +104,9 @@ export class DiscountService {
   async findOne(id: number) {
     const diskon = await this.prisma.diskon.findUnique({
       where: { id },
+      include: {
+        owner: true,
+      },
     });
 
     if (!diskon) {
@@ -69,16 +116,18 @@ export class DiscountService {
     return diskon;
   }
 
-  async checkValidity(codeOrId: string | number) {
+  async checkValidity(codeOrId: string | number, spaceId?: number) {
     let diskon: any = null;
 
     if (typeof codeOrId === 'number' || !isNaN(Number(codeOrId))) {
       diskon = await this.prisma.diskon.findUnique({
         where: { id: Number(codeOrId) },
+        include: { owner: true },
       });
     } else {
       diskon = await this.prisma.diskon.findUnique({
-        where: { kodeDiskon: codeOrId.toUpperCase() },
+        where: { kodeDiskon: String(codeOrId).toUpperCase() },
+        include: { owner: true },
       });
     }
 
@@ -97,6 +146,17 @@ export class DiscountService {
       );
     }
 
+    if (spaceId && diskon.ownerId !== null) {
+      const space = await this.prisma.space.findUnique({
+        where: { id: spaceId },
+      });
+      if (space && space.ownerId !== diskon.ownerId) {
+        throw new BadRequestException(
+          `Kupon promo '${diskon.namaDiskon}' hanya berlaku pada coworking space '${diskon.owner?.namaCoworking || 'terkait'}'.`,
+        );
+      }
+    }
+
     return {
       isValid: true,
       message: `Kupon promo '${diskon.namaDiskon}' aktif dengan potongan ${diskon.persentaseDiskon}%.`,
@@ -104,8 +164,17 @@ export class DiscountService {
     };
   }
 
-  async update(id: number, dto: UpdateDiscountDto) {
-    await this.findOne(id);
+  async update(id: number, dto: UpdateDiscountDto, user: any) {
+    const existing = await this.findOne(id);
+
+    if (user && user.id) {
+      const owner = await this.getOwner(user.id);
+      if (owner && existing.ownerId && existing.ownerId !== owner.id) {
+        throw new ForbiddenException(
+          'Anda tidak memiliki izin untuk mengubah diskon milik coworking space lain.',
+        );
+      }
+    }
 
     const updateData: any = { ...dto };
 
@@ -130,11 +199,21 @@ export class DiscountService {
     return this.prisma.diskon.update({
       where: { id },
       data: updateData,
+      include: { owner: true },
     });
   }
 
-  async remove(id: number) {
-    await this.findOne(id);
+  async remove(id: number, user: any) {
+    const existing = await this.findOne(id);
+
+    if (user && user.id) {
+      const owner = await this.getOwner(user.id);
+      if (owner && existing.ownerId && existing.ownerId !== owner.id) {
+        throw new ForbiddenException(
+          'Anda tidak memiliki izin untuk menghapus diskon milik coworking space lain.',
+        );
+      }
+    }
 
     await this.prisma.diskon.delete({
       where: { id },

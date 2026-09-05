@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   getTransactions,
   startPayment,
+  syncPayment,
   Transaksi,
   getApiErrorMessage,
 } from "@/lib/api";
@@ -106,10 +107,16 @@ export default function MemberTransactionsPage() {
       const result = response.data;
       await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
         onSuccess: async () => {
+          try {
+            await syncPayment(result.transactionId);
+          } catch {}
           setMessage(`Pembayaran ${result.nomorInvoice} berhasil. Terima kasih!`);
           await loadTransactions();
         },
         onPending: async () => {
+          try {
+            await syncPayment(result.transactionId);
+          } catch {}
           setMessage("Pembayaran sedang menunggu konfirmasi. Status akan diperbarui otomatis.");
           await loadTransactions();
         },

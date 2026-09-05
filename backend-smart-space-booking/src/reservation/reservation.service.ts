@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -20,11 +21,48 @@ import {
   ReservasiStatus,
   PembayaranStatus,
   Role,
+  SpaceTipe,
 } from '@prisma/client';
 
 @Injectable()
-export class ReservationService {
+export class ReservationService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
+
+  onModuleInit() {
+    this.cleanupExpiredReservations().catch(() => {});
+    setInterval(() => {
+      this.cleanupExpiredReservations().catch((err) => {
+        console.error('Error cleaning up expired reservations:', err);
+      });
+    }, 15 * 60 * 1000);
+  }
+
+  async cleanupExpiredReservations() {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const expiredReservations = await this.prisma.reservasi.findMany({
+      where: {
+        status: ReservasiStatus.pending,
+        createdAt: { lt: oneDayAgo },
+      },
+      include: { transaksi: true },
+    });
+
+    for (const item of expiredReservations) {
+      await this.prisma.reservasi.update({
+        where: { id: item.id },
+        data: { status: ReservasiStatus.dibatalkan },
+      });
+      if (
+        item.transaksi &&
+        item.transaksi.statusPembayaran !== PembayaranStatus.lunas
+      ) {
+        await this.prisma.transaksi.update({
+          where: { id: item.transaksi.id },
+          data: { statusPembayaran: PembayaranStatus.gagal },
+        });
+      }
+    }
+  }
 
   private generateInvoiceNumber(reservationId: number): string {
     const stamp = Date.now().toString().slice(-6);
@@ -155,6 +193,15 @@ export class ReservationService {
       }
 
       if (selectedDiskon) {
+        if (
+          selectedDiskon.ownerId !== null &&
+          selectedDiskon.ownerId !== space.ownerId
+        ) {
+          throw new BadRequestException(
+            `Kupon promo '${selectedDiskon.namaDiskon}' tidak berlaku untuk coworking space ini.`,
+          );
+        }
+
         const nowCheck = new Date();
         const isValidDate =
           nowCheck >= selectedDiskon.tanggalAwal &&
@@ -175,51 +222,61 @@ export class ReservationService {
 
     const qrCode = generateQrCode();
 
-    const reservation = await this.prisma.$transaction(async (tx) => {
-      const res = await tx.reservasi.create({
-        data: {
-          tanggalReservasi: new Date(tanggalReservasi),
-          jamMulai: jamMulai,
-          durasiJam: durasiJam,
-          status: ReservasiStatus.pending,
-          qrCode,
-          ownerId: space.ownerId,
-          memberId: member.id,
-        },
-      });
+    const isHotDesk = space.tipe === SpaceTipe.desk;
+    const isAutoApproved =
+      isHotDesk && space.owner?.autoApproveHotDesk !== false;
+    const initialStatus = isAutoApproved
+      ? ReservasiStatus.disetujui
+      : ReservasiStatus.pending;
 
-      const detail = await tx.detailReservasi.create({
-        data: {
-          reservasiId: res.id,
-          spaceId: space.id,
-          diskonId: selectedDiskon ? selectedDiskon.id : null,
-          totalHarga,
-        },
-        include: {
-          space: true,
-          diskon: true,
-        },
-      });
+    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      const transaksi = await tx.transaksi.create({
-        data: {
-          nomorInvoice: this.generateInvoiceNumber(res.id),
-          reservasiId: res.id,
-          jumlah: totalHarga,
-          statusPembayaran: PembayaranStatus.belum_bayar,
+    const res = await this.prisma.reservasi.create({
+      data: {
+        tanggalReservasi: new Date(tanggalReservasi),
+        jamMulai: jamMulai,
+        durasiJam: durasiJam,
+        status: initialStatus,
+        qrCode,
+        ownerId: space.ownerId,
+        memberId: member.id,
+        detailReservasi: {
+          create: {
+            spaceId: space.id,
+            diskonId: selectedDiskon ? selectedDiskon.id : null,
+            totalHarga,
+          },
         },
-      });
-
-      return {
-        ...res,
-        jamSelesai: jamSelesaiStr,
-        detailReservasi: detail,
-        transaksi,
-      };
+        transaksi: {
+          create: {
+            nomorInvoice: invoiceNumber,
+            jumlah: totalHarga,
+            statusPembayaran: PembayaranStatus.belum_bayar,
+          },
+        },
+      },
+      include: {
+        detailReservasi: {
+          include: {
+            space: true,
+            diskon: true,
+          },
+        },
+        transaksi: true,
+      },
     });
 
+    const reservation = {
+      ...res,
+      jamSelesai: jamSelesaiStr,
+    };
+
+    const message = isAutoApproved
+      ? 'Reservasi berhasil dibuat dan otomatis disetujui (Instant Booking Hot Desk). Silakan selesaikan pembayaran.'
+      : 'Reservasi berhasil dibuat. Menunggu konfirmasi admin/staff.';
+
     return {
-      message: 'Reservasi berhasil dibuat. Menunggu konfirmasi admin/staff.',
+      message,
       data: reservation,
     };
   }
