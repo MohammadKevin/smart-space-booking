@@ -36,12 +36,17 @@ enum PembayaranStatus {
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  email     String      @unique
-  password  String
-  role      Role        @default(member)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id                  Int         @id @default(autoincrement())
+  email               String      @unique
+  password            String
+  role                Role        @default(member)
+  isVerified          Boolean     @default(true)
+  otpCode             String?
+  otpExpires          DateTime?
+  resetOtpCode        String?
+  resetOtpExpires     DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
   spaceOwner SpaceOwner?
   staff      Staff?

@@ -124,6 +124,26 @@ export interface CreateStaffDto {
   telp: string;
 }
 
+export interface VerifyEmailDto {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpDto {
+  email: string;
+  type?: "register" | "forgot_password";
+}
+
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  otp: string;
+  password: string;
+}
+
 export interface UpdateProfileDto {
   nama?: string;
   email?: string;

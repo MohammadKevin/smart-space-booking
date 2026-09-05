@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { updateProfile, UpdateProfileDto, getApiErrorMessage } from "@/lib/api";
 import { ImageUploader } from "@/components/ImageUploader";
@@ -12,7 +12,6 @@ import {
   MapPin,
   Building,
   Building2,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -20,8 +19,6 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  UserCheck,
-  Sparkles,
 } from "lucide-react";
 
 interface ProfileSettingsFormProps {
@@ -98,9 +95,9 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
         email: email.trim(),
         telp: telp.trim(),
         alamat: alamat.trim(),
+        instansi: instansi.trim() || undefined,
+        namaCoworking: namaCoworking.trim() || undefined,
         foto: foto || undefined,
-        instansi: role === "member" ? instansi.trim() : undefined,
-        namaCoworking: role === "owner" ? namaCoworking.trim() : undefined,
         oldPassword: oldPassword || undefined,
         password: newPassword || undefined,
       };
@@ -110,7 +107,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
         await refreshUser();
       }
 
-      setSuccessMessage("Pengaturan profil dan akun berhasil diperbarui.");
+      setSuccessMessage("Profil akun berhasil diperbarui.");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -128,30 +125,28 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-        <div className="space-y-1.5 relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+    <div className="space-y-6 max-w-4xl">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div className="space-y-1">
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
             Pengaturan Akun & Profil
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
-            Perbarui data diri, email login, kata sandi, foto profil, dan informasi kontak akun Anda.
+          <p className="text-xs text-slate-500 font-medium">
+            Perbarui data diri, email login, kata sandi, dan informasi kontak akun Anda.
           </p>
         </div>
 
-        <div className="relative z-10 shrink-0">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-50 text-cyan-900 border border-cyan-200">
-            <ShieldCheck className="w-4 h-4 text-cyan-600" />
+        <div className="shrink-0">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800 border border-slate-200">
             <span>{getRoleLabel()}</span>
           </span>
         </div>
       </div>
 
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
-          <div className="flex items-center gap-2 font-semibold">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
+          <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMessage}</span>
           </div>
@@ -159,7 +154,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <div className="space-y-0.5">
             <p className="font-bold">Gagal Menyimpan Perubahan</p>
@@ -169,13 +164,13 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
-          <div className="border-b border-slate-100 pb-3.5 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-slate-900">Informasi Profil & Kontak</h2>
-              <p className="text-xs text-slate-500">Data identitas yang terhubung dengan akun WorkNest Anda.</p>
+              <p className="text-xs text-slate-500">Data identitas yang terhubung dengan akun Anda.</p>
             </div>
-            <User className="w-4 h-4 text-cyan-600" />
+            <User className="w-4 h-4 text-slate-400" />
           </div>
 
           {role === "member" && (
@@ -207,7 +202,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
                   placeholder="Nama lengkap Anda"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -225,7 +220,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={namaCoworking}
                     onChange={(e) => setNamaCoworking(e.target.value)}
                     placeholder="Contoh: SpaceWorks Hub Surabaya"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -243,7 +238,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={instansi}
                     onChange={(e) => setInstansi(e.target.value)}
                     placeholder="Nama instansi atau Umum / Personal"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -261,7 +256,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   value={telp}
                   onChange={(e) => setTelp(e.target.value)}
                   placeholder="081234567890"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                 />
               </div>
             </div>
@@ -278,7 +273,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={alamat}
                     onChange={(e) => setAlamat(e.target.value)}
                     placeholder="Alamat jalan, gedung, atau kota domisili"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -286,13 +281,13 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-7 space-y-5 shadow-xs">
-          <div className="border-b border-slate-100 pb-3.5 flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-slate-900">Email & Kata Sandi</h2>
               <p className="text-xs text-slate-500">Ubah email login atau perbarui kata sandi akun Anda.</p>
             </div>
-            <KeyRound className="w-4 h-4 text-cyan-600" />
+            <KeyRound className="w-4 h-4 text-slate-400" />
           </div>
 
           <div className="space-y-4">
@@ -308,7 +303,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nama@email.com"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                 />
               </div>
             </div>
@@ -328,7 +323,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="Kata sandi lama"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -349,7 +344,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min. 6 karakter"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -370,7 +365,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Ulangi sandi baru"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -379,16 +374,16 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-3 pt-1">
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-sm shadow-cyan-600/30 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-xs shadow-cyan-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Perubahan...</span>
+                <span>Menyimpan...</span>
               </>
             ) : (
               <>

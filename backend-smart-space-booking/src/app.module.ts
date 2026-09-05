@@ -12,6 +12,7 @@ import { CheckinModule } from './checkin/checkin.module';
 import { ReportModule } from './report/report.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ReviewModule } from './review/review.module';
+import { MailModule } from './common/mail/mail.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ReviewModule } from './review/review.module';
       isGlobal: true,
     }),
     PrismaModule,
+    MailModule,
     AuthModule,
     UserModule,
     SpaceModule,

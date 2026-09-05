@@ -18,6 +18,10 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterMemberDto } from './dto/register-member.dto';
 import { RegisterOwnerDto } from './dto/register-owner.dto';
 import { CreateStaffDto } from './dto/create-staff.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -44,6 +48,10 @@ export class AuthController {
     status: 401,
     description: 'Email atau password tidak valid.',
   })
+  @ApiResponse({
+    status: 403,
+    description: 'Email belum diverifikasi.',
+  })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
@@ -52,11 +60,11 @@ export class AuthController {
   @ApiOperation({
     summary: 'Registrasi Member Baru',
     description:
-      'Mendaftarkan akun baru dengan role "member" beserta data profil member.',
+      'Mendaftarkan akun baru dengan role "member" dan mengirimkan kode OTP verifikasi email.',
   })
   @ApiResponse({
     status: 201,
-    description: 'Registrasi member berhasil dibuat.',
+    description: 'Registrasi member berhasil dibuat, OTP terkirim.',
   })
   @ApiResponse({ status: 409, description: 'Email sudah digunakan.' })
   registerMember(@Body() registerMemberDto: RegisterMemberDto) {
@@ -67,15 +75,87 @@ export class AuthController {
   @ApiOperation({
     summary: 'Registrasi Pengelola Coworking (Space Owner)',
     description:
-      'Mendaftarkan akun baru dengan role "admin_space" beserta informasi Coworking Space miliknya.',
+      'Mendaftarkan akun baru dengan role "admin_space" dan mengirimkan kode OTP verifikasi email.',
   })
   @ApiResponse({
     status: 201,
-    description: 'Registrasi admin space berhasil dibuat.',
+    description: 'Registrasi admin space berhasil dibuat, OTP terkirim.',
   })
   @ApiResponse({ status: 409, description: 'Email sudah digunakan.' })
   registerOwner(@Body() registerOwnerDto: RegisterOwnerDto) {
     return this.authService.registerOwner(registerOwnerDto);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verifikasi Email dengan 6-Digit OTP',
+    description:
+      'Memverifikasi alamat email akun yang baru didaftarkan menggunakan kode OTP yang dikirimkan via email.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email berhasil diverifikasi, mengembalikan token JWT.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Kode OTP salah atau telah kedaluwarsa.',
+  })
+  verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto);
+  }
+
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Kirim Ulang Kode OTP',
+    description:
+      'Mengirimkan kode OTP 6-digit baru ke alamat email untuk keperluan verifikasi registrasi atau reset password.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Kode OTP baru berhasil dikirimkan.',
+  })
+  resendOtp(@Body() resendOtpDto: ResendOtpDto) {
+    return this.authService.resendOtp(resendOtpDto);
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lupa Kata Sandi (Kirim OTP Reset)',
+    description:
+      'Mengirimkan kode OTP 6-digit ke email terdaftar untuk proses pemulihan kata sandi.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Kode OTP reset kata sandi telah dikirimkan ke email.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Email tidak terdaftar di sistem.',
+  })
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset Kata Sandi dengan OTP',
+    description:
+      'Memperbarui kata sandi akun menggunakan 6-digit kode OTP reset yang valid.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Kata sandi berhasil diperbarui.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Kode OTP tidak valid atau telah kedaluwarsa.',
+  })
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @Post('staff')

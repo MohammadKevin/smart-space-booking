@@ -41,11 +41,14 @@ export class UserService {
     }
 
     if (dto.password) {
-      if (dto.oldPassword) {
-        const isOldValid = await bcrypt.compare(dto.oldPassword, user.password);
-        if (!isOldValid) {
-          throw new BadRequestException('Kata sandi saat ini (lama) tidak sesuai.');
-        }
+      if (!dto.oldPassword) {
+        throw new BadRequestException(
+          'Kata sandi saat ini (lama) wajib diisi untuk mengubah kata sandi.',
+        );
+      }
+      const isOldValid = await bcrypt.compare(dto.oldPassword, user.password);
+      if (!isOldValid) {
+        throw new BadRequestException('Kata sandi saat ini (lama) tidak sesuai.');
       }
       userDataToUpdate.password = await bcrypt.hash(dto.password, 10);
     }

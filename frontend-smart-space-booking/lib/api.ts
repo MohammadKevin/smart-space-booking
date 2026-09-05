@@ -14,6 +14,10 @@ import {
   RegisterMemberDto,
   RegisterOwnerDto,
   CreateStaffDto,
+  VerifyEmailDto,
+  ResendOtpDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
   UpdateProfileDto,
   Space,
   CreateSpaceDto,
@@ -64,16 +68,6 @@ api.interceptors.request.use(
         sessionStorage.getItem("token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
-      }
-
-      const makerKey =
-        localStorage.getItem("x-maker-key") ||
-        localStorage.getItem("maker_key") ||
-        localStorage.getItem("app_key") ||
-        process.env.NEXT_PUBLIC_MAKER_KEY;
-      if (makerKey && config.headers) {
-        config.headers["x-maker-key"] = makerKey;
-        config.headers["x-app-key"] = makerKey;
       }
     }
     if (config.data instanceof FormData && config.headers) {
@@ -143,13 +137,53 @@ export async function login(dto: LoginDto): Promise<AuthResponse> {
   return data;
 }
 
-export async function registerMember(dto: RegisterMemberDto): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>("/auth/register/member", dto);
+export async function registerMember(dto: RegisterMemberDto): Promise<any> {
+  const { data } = await api.post<any>("/auth/register/member", dto);
   return data;
 }
 
-export async function registerOwner(dto: RegisterOwnerDto): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>("/auth/register/owner", dto);
+export async function registerOwner(dto: RegisterOwnerDto): Promise<any> {
+  const { data } = await api.post<any>("/auth/register/owner", dto);
+  return data;
+}
+
+export async function verifyEmail(dto: VerifyEmailDto): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>("/auth/verify-email", dto);
+  if (typeof window !== "undefined" && data.access_token) {
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
+  return data;
+}
+
+export async function resendOtp(
+  dto: ResendOtpDto
+): Promise<{ message: string; devOtp?: string }> {
+  const { data } = await api.post<{ message: string; devOtp?: string }>(
+    "/auth/resend-otp",
+    dto
+  );
+  return data;
+}
+
+export async function forgotPassword(
+  dto: ForgotPasswordDto
+): Promise<{ message: string; devOtp?: string }> {
+  const { data } = await api.post<{ message: string; devOtp?: string }>(
+    "/auth/forgot-password",
+    dto
+  );
+  return data;
+}
+
+export async function resetPassword(
+  dto: ResetPasswordDto
+): Promise<{ message: string }> {
+  const { data } = await api.post<{ message: string }>(
+    "/auth/reset-password",
+    dto
+  );
   return data;
 }
 

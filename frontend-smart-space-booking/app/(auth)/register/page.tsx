@@ -94,7 +94,7 @@ function RegisterForm() {
 
         const res = await registerMember(dto);
         setSuccessMessage(
-          res.message || "Pendaftaran akun Member berhasil! Mengarahkan ke halaman login..."
+          res.message || "Pendaftaran akun Member berhasil! Mengarahkan ke verifikasi email..."
         );
       } else {
         if (!namaCoworking.trim()) {
@@ -129,13 +129,13 @@ function RegisterForm() {
 
         const res = await registerOwner(dto);
         setSuccessMessage(
-          res.message || "Pendaftaran akun Space Owner berhasil! Mengarahkan ke halaman login..."
+          res.message || "Pendaftaran akun Space Owner berhasil! Mengarahkan ke verifikasi email..."
         );
       }
 
       setTimeout(() => {
-        router.push("/login");
-      }, 1200);
+        router.push(`/verify-email?email=${encodeURIComponent(email.trim())}&type=register`);
+      }, 800);
     } catch (err: unknown) {
       setErrorMessage(getApiErrorMessage(err));
     } finally {

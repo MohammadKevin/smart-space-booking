@@ -27,8 +27,6 @@ import {
   RefreshCw,
   X,
   Search,
-  Sparkles,
-  Clock,
 } from "lucide-react";
 
 export default function OwnerDiscountsPage() {
@@ -54,7 +52,6 @@ export default function OwnerDiscountsPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<Discount | null>(null);
   const [deleting, setDeleting] = useState(false);
-
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const fetchDiscounts = useCallback(async () => {
@@ -211,25 +208,24 @@ export default function OwnerDiscountsPage() {
   }, [discounts, searchQuery]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-100/40 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
-        <div className="space-y-1.5 relative z-10">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+    <div className="space-y-6">
+      {/* Header Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div className="space-y-1">
+          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
             Kode Promo & Diskon Spesial
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
-            Buat kupon potongan harga untuk menarik member baru, atur persentase diskon, dan tetapkan periode aktif voucher.
+          <p className="text-xs text-slate-500 font-medium">
+            Kelola voucher potongan harga, tetapkan kupon promo, dan atur masa berlaku kupon.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 relative z-10 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={fetchDiscounts}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-cyan-300 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : "text-slate-400"}`} />
             <span>Segarkan</span>
@@ -237,16 +233,16 @@ export default function OwnerDiscountsPage() {
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs shadow-cyan-600/30 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs shadow-cyan-600/20 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Buat Promo Baru</span>
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{actionSuccess}</span>
@@ -262,7 +258,7 @@ export default function OwnerDiscountsPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <div className="space-y-0.5">
             <p className="font-bold">Terjadi Kendala</p>
@@ -271,7 +267,8 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
+      {/* Search Toolbar */}
+      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
           <input
@@ -279,18 +276,18 @@ export default function OwnerDiscountsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama program promo atau kode kupon..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
           />
         </div>
         <div className="text-xs text-slate-500 font-semibold hidden sm:block">
-          Total: <span className="font-mono text-cyan-700 font-bold">{filteredDiscounts.length}</span> Voucher
+          Total: <span className="font-mono text-slate-900 font-bold">{filteredDiscounts.length}</span> Voucher
         </div>
       </div>
 
       {loading ? (
-        <div className="p-16 bg-white rounded-xl border border-slate-200 text-center shadow-xs">
-          <Loader2 className="w-8 h-8 text-cyan-600 animate-spin mx-auto" />
-          <p className="text-xs text-slate-500 mt-3 font-medium">Memuat kode promo...</p>
+        <div className="p-16 bg-white rounded-xl border border-slate-200 text-center shadow-2xs space-y-2">
+          <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
+          <p className="text-xs text-slate-500 font-medium">Memuat kode promo...</p>
         </div>
       ) : filteredDiscounts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -302,38 +299,38 @@ export default function OwnerDiscountsPage() {
             return (
               <div
                 key={d.id}
-                className="bg-white rounded-xl border border-slate-200 hover:border-cyan-300 transition-all shadow-xs hover:shadow-md p-5 flex flex-col justify-between space-y-4 relative group"
+                className="bg-white rounded-xl border border-slate-200/90 hover:border-slate-300 transition-all shadow-2xs hover:shadow-xs p-5 flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span
-                      className={`px-2 py-0.5 rounded text-[11px] font-bold border ${validity.className}`}
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${validity.className}`}
                     >
                       {validity.label}
                     </span>
-                    <div className="px-2.5 py-1 rounded-lg bg-cyan-50 border border-cyan-200 text-cyan-800 font-extrabold text-sm">
+                    <div className="px-2.5 py-0.5 rounded-lg bg-slate-900 text-white font-mono font-bold text-xs">
                       {d.persentaseDiskon}% OFF
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base leading-snug">
+                    <h3 className="font-bold text-slate-900 text-sm leading-snug">
                       {d.namaDiskon}
                     </h3>
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-slate-50 border border-dashed border-slate-300 flex items-center justify-between">
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-dashed border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Tag className="w-3.5 h-3.5 text-cyan-600" />
+                      <Tag className="w-3.5 h-3.5 text-slate-500" />
                       <span className="font-mono font-bold text-slate-900 text-xs tracking-wider">
-                        {d.kodeDiskon || "(Otomatis)"}
+                        {d.kodeDiskon || "(Diskon Otomatis)"}
                       </span>
                     </div>
                     {d.kodeDiskon && (
                       <button
                         type="button"
                         onClick={() => handleCopyCode(d.kodeDiskon!)}
-                        className="p-1 rounded text-slate-400 hover:text-cyan-700 hover:bg-cyan-50 transition-colors cursor-pointer"
+                        className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
                         title="Salin Kode Kupon"
                       >
                         {copiedCode === d.kodeDiskon ? (
@@ -345,7 +342,7 @@ export default function OwnerDiscountsPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 pt-1">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 pt-0.5">
                     <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span>{startDate} s/d {endDate}</span>
                   </div>
@@ -355,17 +352,17 @@ export default function OwnerDiscountsPage() {
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(d)}
-                    className="py-1.5 px-3 bg-slate-50 hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-3.5 h-3.5 text-slate-500" />
                     <span>Edit</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeleteTarget(d)}
-                    className="py-1.5 px-3 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-rose-600 text-xs font-semibold rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="py-1.5 px-3 bg-slate-50 hover:bg-rose-50 text-rose-600 text-xs font-semibold rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                     <span>Hapus</span>
                   </button>
                 </div>
@@ -374,32 +371,33 @@ export default function OwnerDiscountsPage() {
           })}
         </div>
       ) : (
-        <div className="w-full p-12 sm:p-16 bg-white rounded-xl border border-slate-200 text-center shadow-xs flex flex-col items-center justify-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto border border-cyan-200">
-            <TicketPercent className="w-6 h-6" />
+        <div className="w-full p-16 bg-white rounded-xl border border-slate-200/90 text-center shadow-2xs flex flex-col items-center justify-center space-y-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
+            <TicketPercent className="w-5 h-5" />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
             <h3 className="text-sm font-bold text-slate-900">Belum Ada Kode Promo</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              {searchQuery ? "Tidak ditemukan kode promo dengan kata kunci tersebut." : "Buat voucher potongan harga pertama untuk menarik lebih banyak member memesan ruangan."}
+              {searchQuery ? "Tidak ditemukan kode promo dengan kata kunci tersebut." : "Buat voucher potongan harga untuk menarik lebih banyak member memesan ruangan."}
             </p>
           </div>
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg shadow-xs shadow-cyan-600/30 cursor-pointer"
+            className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg shadow-2xs cursor-pointer"
           >
             Buat Promo Sekarang
           </button>
         </div>
       )}
 
+      {/* Create / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 sm:p-7 space-y-5 border border-slate-200 shadow-2xl">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 border border-slate-200 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center border border-cyan-200">
+                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
                   <TicketPercent className="w-4 h-4" />
                 </div>
                 <div>
@@ -438,7 +436,7 @@ export default function OwnerDiscountsPage() {
                   value={namaDiskon}
                   onChange={(e) => setNamaDiskon(e.target.value)}
                   placeholder="Contoh: Promo Ramadhan 2026"
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                  className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                 />
               </div>
 
@@ -452,7 +450,7 @@ export default function OwnerDiscountsPage() {
                     value={kodeDiskon}
                     onChange={(e) => setKodeDiskon(e.target.value.toUpperCase())}
                     placeholder="Contoh: HEMAT20"
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 font-mono font-bold focus:outline-none transition-all uppercase"
+                    className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 font-mono font-bold focus:outline-none transition-all uppercase"
                   />
                 </div>
 
@@ -467,7 +465,7 @@ export default function OwnerDiscountsPage() {
                     required
                     value={persentaseDiskon}
                     onChange={(e) => setPersentaseDiskon(parseInt(e.target.value, 10) || 0)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 font-mono focus:outline-none transition-all"
+                    className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 font-mono focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -482,7 +480,7 @@ export default function OwnerDiscountsPage() {
                     required
                     value={tanggalAwal}
                     onChange={(e) => setTanggalAwal(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
 
@@ -495,7 +493,7 @@ export default function OwnerDiscountsPage() {
                     required
                     value={tanggalAkhir}
                     onChange={(e) => setTanggalAkhir(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -504,14 +502,14 @@ export default function OwnerDiscountsPage() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs shadow-cyan-600/30 transition-all cursor-pointer"
+                  className="py-2 px-4 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
                 >
                   {formLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Simpan Promo</span>}
                 </button>
@@ -524,8 +522,8 @@ export default function OwnerDiscountsPage() {
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
-              <Trash2 className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <Trash2 className="w-5 h-5" />
             </div>
             <div className="space-y-1">
               <h3 className="text-base font-bold text-slate-900">Hapus Kode Promo?</h3>
@@ -533,11 +531,11 @@ export default function OwnerDiscountsPage() {
                 Apakah Anda yakin ingin menghapus voucher <strong>{deleteTarget.namaDiskon}</strong>? Member tidak akan dapat menggunakan kupon ini lagi.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 pt-2">
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -545,7 +543,7 @@ export default function OwnerDiscountsPage() {
                 type="button"
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
-                className="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
               >
                 {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Ya, Hapus</span>}
               </button>
