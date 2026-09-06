@@ -17,9 +17,10 @@ export class TransactionService {
     private readonly mailService: MailService,
   ) {}
 
-  private generateInvoiceNumber(reservationId: number): string {
+  private generateInvoiceNumber(reservationId: number, ownerId?: number): string {
     const stamp = Date.now().toString().slice(-6);
-    return `INV-${reservationId}-${stamp}`;
+    const ownerTag = ownerId ? `OWNER${ownerId}-` : '';
+    return `INV-${ownerTag}RES${reservationId}-${stamp}`;
   }
 
   private assertOwnerScope(reservationOwnerId: number, user: any) {
@@ -73,7 +74,11 @@ export class TransactionService {
     return tx;
   }
 
-  private async ensureTransaction(reservationId: number, jumlah: number) {
+  private async ensureTransaction(
+    reservationId: number,
+    jumlah: number,
+    ownerId?: number,
+  ) {
     let tx = await this.prisma.transaksi.findUnique({
       where: { reservasiId: reservationId },
     });
@@ -81,7 +86,7 @@ export class TransactionService {
     if (!tx) {
       tx = await this.prisma.transaksi.create({
         data: {
-          nomorInvoice: this.generateInvoiceNumber(reservationId),
+          nomorInvoice: this.generateInvoiceNumber(reservationId, ownerId),
           reservasiId: reservationId,
           jumlah,
           statusPembayaran: PembayaranStatus.menunggu_pembayaran,
@@ -105,7 +110,15 @@ export class TransactionService {
 
     const reservation = await this.prisma.reservasi.findUnique({
       where: { id: reservationId },
-      include: { detailReservasi: true },
+      include: {
+        owner: true,
+        detailReservasi: {
+          include: {
+            space: true,
+            diskon: true,
+          },
+        },
+      },
     });
 
     if (!reservation) {
@@ -130,7 +143,11 @@ export class TransactionService {
       throw new BadRequestException('Total pembayaran tidak valid (Rp 0).');
     }
 
-    const tx = await this.ensureTransaction(reservationId, jumlah);
+    const tx = await this.ensureTransaction(
+      reservationId,
+      jumlah,
+      reservation.ownerId,
+    );
 
     if (tx.statusPembayaran === PembayaranStatus.lunas) {
       throw new BadRequestException('Transaksi ini sudah berstatus lunas.');
@@ -142,6 +159,11 @@ export class TransactionService {
     }
 
     const orderId = tx.nomorInvoice;
+    const ownerId = reservation.ownerId;
+    const coworkingName = reservation.owner?.namaCoworking || 'Coworking Space';
+    const spaceId = reservation.detailReservasi?.spaceId || 0;
+    const spaceName = reservation.detailReservasi?.space?.namaSpace || 'Ruangan';
+    const durasiJam = reservation.durasiJam || 1;
 
     const snap: SnapTokenResult = await this.midtrans.createSnapToken({
       orderId,
@@ -149,6 +171,18 @@ export class TransactionService {
       firstName: member.namaMember,
       email: member.user?.email || undefined,
       phone: member.telp,
+      itemDetails: [
+        {
+          id: `SPACE-${spaceId}`,
+          price: Math.round(tx.jumlah),
+          quantity: 1,
+          name: `[${coworkingName}] ${spaceName} (${durasiJam} Jam)`.slice(0, 50),
+          merchant_name: coworkingName.slice(0, 50),
+        },
+      ],
+      customField1: `OwnerID:${ownerId}|${coworkingName}`.slice(0, 255),
+      customField2: `SpaceID:${spaceId}|${spaceName}`.slice(0, 255),
+      customField3: `MemberID:${member.id}|UserID:${memberUserId}`.slice(0, 255),
     });
 
     await this.prisma.transaksi.update({

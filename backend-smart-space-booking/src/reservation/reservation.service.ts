@@ -267,7 +267,7 @@ export class ReservationService implements OnModuleInit {
       }
 
       const qrCode = generateQrCode();
-      const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const invoiceNumber = `INV-OWNER${space.ownerId}-RES${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
       return tx.reservasi.create({
         data: {

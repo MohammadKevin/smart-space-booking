@@ -49,8 +49,28 @@ export class MidtransService {
     firstName?: string;
     email?: string;
     phone?: string;
+    itemDetails?: Array<{
+      id: string;
+      price: number;
+      quantity: number;
+      name: string;
+      merchant_name?: string;
+    }>;
+    customField1?: string;
+    customField2?: string;
+    customField3?: string;
   }): Promise<SnapTokenResult> {
-    const { orderId, grossAmount, firstName, email, phone } = params;
+    const {
+      orderId,
+      grossAmount,
+      firstName,
+      email,
+      phone,
+      itemDetails,
+      customField1,
+      customField2,
+      customField3,
+    } = params;
 
     const customerDetails: Record<string, string> = {
       first_name: firstName || 'Member',
@@ -69,6 +89,10 @@ export class MidtransService {
         secure: true,
       },
       customer_details: customerDetails,
+      ...(itemDetails && itemDetails.length > 0 ? { item_details: itemDetails } : {}),
+      ...(customField1 ? { custom_field1: customField1 } : {}),
+      ...(customField2 ? { custom_field2: customField2 } : {}),
+      ...(customField3 ? { custom_field3: customField3 } : {}),
       enabled_payments: [
         'credit_card',
         'bca_va',
