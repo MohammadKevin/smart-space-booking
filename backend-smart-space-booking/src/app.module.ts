@@ -13,6 +13,7 @@ import { ReportModule } from './report/report.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { ReviewModule } from './review/review.module';
 import { MailModule } from './common/mail/mail.module';
+import { SuperAdminModule } from './super-admin/super-admin.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MailModule } from './common/mail/mail.module';
     MailModule,
     AuthModule,
     UserModule,
+    SuperAdminModule,
     SpaceModule,
     DiscountModule,
     ReservationModule,

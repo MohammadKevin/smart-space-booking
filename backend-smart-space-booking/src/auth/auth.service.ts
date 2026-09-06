@@ -18,6 +18,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SecretProvisionDto } from './dto/secret-provision.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -509,6 +510,59 @@ export class AuthService {
         role: result.user.role,
         staff: result.staff,
       },
+    };
+  }
+
+  async provisionSuperAdmin(dto: SecretProvisionDto) {
+    const configuredSecret =
+      process.env.SUPER_ADMIN_SECRET_KEY || 'WorkNest_CEO_SuperAdmin_Secret_Key_2026*';
+
+    if (dto.secretKey !== configuredSecret) {
+      throw new ForbiddenException('Kunci rahasia Super Admin salah atau tidak valid.');
+    }
+
+    const cleanEmail = dto.email.trim().toLowerCase();
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const existing = await this.prisma.user.findUnique({
+      where: { email: cleanEmail },
+    });
+
+    let user;
+    if (existing) {
+      user = await this.prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          password: hashedPassword,
+          role: Role.super_admin,
+          isVerified: true,
+          otpCode: null,
+          otpExpires: null,
+        },
+      });
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          email: cleanEmail,
+          password: hashedPassword,
+          role: Role.super_admin,
+          isVerified: true,
+        },
+      });
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    const token = this.jwtService.sign(payload);
+    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+
+    return {
+      message: 'Akun Super Admin (Platform CEO) berhasil diaktifkan.',
+      access_token: token,
+      user: sanitizedUser,
     };
   }
 

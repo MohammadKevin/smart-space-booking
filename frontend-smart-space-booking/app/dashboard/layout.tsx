@@ -58,6 +58,7 @@ export default function DashboardLayout({
   const getNormalizedRole = () => {
     if (!user) return "";
     const r = user.role?.toLowerCase();
+    if (r === "super_admin") return "super_admin";
     if (r === "admin_space" || r === "owner") return "owner";
     if (r === "staff") return "staff";
     return "member";
@@ -68,25 +69,40 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!isLoading && isAuthenticated && user) {
       if (pathname === "/dashboard") {
-        if (role === "owner") router.replace("/dashboard/owner");
+        if (role === "super_admin") router.replace("/dashboard/super-admin");
+        else if (role === "owner") router.replace("/dashboard/owner");
         else if (role === "staff") router.replace("/dashboard/staff");
         else router.replace("/dashboard/member");
         return;
       }
 
-      if (role === "member") {
-        if (pathname.startsWith("/dashboard/owner") || pathname.startsWith("/dashboard/staff") || pathname.startsWith("/dashboard/checkin")) {
+      if (role === "super_admin") {
+        if (!pathname.startsWith("/dashboard/super-admin")) {
+          router.replace("/dashboard/super-admin");
+        }
+      } else if (role === "member") {
+        if (
+          pathname.startsWith("/dashboard/super-admin") ||
+          pathname.startsWith("/dashboard/owner") ||
+          pathname.startsWith("/dashboard/staff") ||
+          pathname.startsWith("/dashboard/checkin")
+        ) {
           router.replace("/dashboard/member");
         }
       } else if (role === "staff") {
         if (
+          pathname.startsWith("/dashboard/super-admin") ||
           (pathname.startsWith("/dashboard/owner") && !pathname.startsWith("/dashboard/owner/transactions")) ||
           pathname.startsWith("/dashboard/member")
         ) {
           router.replace("/dashboard/staff");
         }
       } else if (role === "owner") {
-        if (pathname.startsWith("/dashboard/member") || pathname === "/dashboard/staff") {
+        if (
+          pathname.startsWith("/dashboard/super-admin") ||
+          pathname.startsWith("/dashboard/member") ||
+          pathname === "/dashboard/staff"
+        ) {
           router.replace("/dashboard/owner");
         }
       }
@@ -155,6 +171,12 @@ export default function DashboardLayout({
   };
 
   const getRoleBadge = () => {
+    if (role === "super_admin") {
+      return {
+        label: "Platform CEO",
+        className: "bg-slate-900 text-white border-slate-900",
+      };
+    }
     if (role === "owner") {
       return {
         label: "Space Owner",
@@ -176,6 +198,15 @@ export default function DashboardLayout({
   const roleBadge = getRoleBadge();
 
   const getSidebarLinks = () => {
+    if (role === "super_admin") {
+      return [
+        { label: "Overview Platform", href: "/dashboard/super-admin", icon: LayoutDashboard },
+        { label: "Mitra Space Owner", href: "/dashboard/super-admin/owners", icon: Building },
+        { label: "Komisi Platform", href: "/dashboard/super-admin/commission", icon: TicketPercent },
+        { label: "Transaksi Global", href: "/dashboard/super-admin/transactions", icon: ReceiptText },
+        { label: "Pengaturan Akun", href: "/dashboard/super-admin/profile", icon: UserCog },
+      ];
+    }
     if (role === "owner") {
       return [
         { label: "Overview KPI", href: "/dashboard/owner", icon: LayoutDashboard },
@@ -210,6 +241,10 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/dashboard/super-admin/commission")) return "Komisi Platform";
+    if (pathname.startsWith("/dashboard/super-admin/owners")) return "Mitra Space Owner";
+    if (pathname.startsWith("/dashboard/super-admin/transactions")) return "Transaksi Global";
+    if (pathname.startsWith("/dashboard/super-admin")) return "Overview Platform";
     if (pathname.endsWith("/profile")) return "Pengaturan Akun";
     if (pathname.startsWith("/dashboard/owner/transactions")) return "Transaksi & Pembayaran";
     if (pathname.startsWith("/dashboard/owner/reservations")) return "Manajemen Reservasi";

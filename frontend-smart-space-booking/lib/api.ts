@@ -44,6 +44,11 @@ import {
   Review,
   ReviewListResponse,
   RatingSummary,
+  SuperAdminOverview,
+  SuperAdminCommissionInfo,
+  SuperAdminMonthlyRevenueItem,
+  SuperAdminSpaceOwner,
+  SuperAdminTransaction,
 } from "@/types/api";
 
 export * from "@/types/api";
@@ -550,6 +555,76 @@ export async function createReview(body: {
   komentar?: string;
 }): Promise<any> {
   const { data } = await api.post<any>("/reviews", body);
+  return data;
+}
+
+export async function getSuperAdminOverview(): Promise<SuperAdminOverview> {
+  const { data } = await api.get<SuperAdminOverview>("/super-admin/overview");
+  return data;
+}
+
+export async function getSuperAdminCommission(): Promise<SuperAdminCommissionInfo> {
+  const { data } = await api.get<SuperAdminCommissionInfo>("/super-admin/commission");
+  return data;
+}
+
+export async function updateSuperAdminCommission(
+  percent: number
+): Promise<{ success: boolean; commissionPercent: number; message: string }> {
+  const { data } = await api.put<{
+    success: boolean;
+    commissionPercent: number;
+    message: string;
+  }>("/super-admin/commission", {
+    commissionPercent: percent,
+  });
+  return data;
+}
+
+export async function getSuperAdminMonthlyRevenue(year?: number): Promise<{
+  year: number;
+  commissionPercent: number;
+  totalGmvAnnual: number;
+  totalPlatformProfitAnnual: number;
+  months: SuperAdminMonthlyRevenueItem[];
+}> {
+  const { data } = await api.get<any>("/super-admin/monthly-revenue", {
+    params: year ? { year } : undefined,
+  });
+  return data;
+}
+
+export async function getSuperAdminOwners(): Promise<SuperAdminSpaceOwner[]> {
+  const { data } = await api.get<SuperAdminSpaceOwner[]>("/super-admin/owners");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getSuperAdminTransactions(
+  limit = 50
+): Promise<SuperAdminTransaction[]> {
+  const { data } = await api.get<SuperAdminTransaction[]>("/super-admin/transactions", {
+    params: { limit },
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function provisionSuperAdmin(
+  secretKey: string,
+  email: string,
+  password: string,
+  nama?: string
+): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>("/auth/secret-super-admin-provision", {
+    secretKey,
+    email,
+    password,
+    nama,
+  });
+  if (typeof window !== "undefined" && data.access_token) {
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
   return data;
 }
 

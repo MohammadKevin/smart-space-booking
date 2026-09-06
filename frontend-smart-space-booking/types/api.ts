@@ -1,4 +1,4 @@
-export type UserRole = "admin_space" | "staff" | "member";
+export type UserRole = "super_admin" | "admin_space" | "staff" | "member";
 
 export type SpaceType = "desk" | "meeting_room" | "private_office";
 
@@ -418,4 +418,61 @@ export interface RatingSummary {
   spaceId: number;
   averageRating: number;
   totalReviews: number;
+}
+
+export interface SuperAdminOverview {
+  totalGmv: number;
+  platformProfit: number;
+  totalOwnersPayout: number;
+  currentCommissionPercent: number;
+  totalOwners: number;
+  totalSpaces: number;
+  totalMembers: number;
+  totalStaffs: number;
+  totalReservations: number;
+  activeReservations: number;
+}
+
+export interface SuperAdminCommissionInfo {
+  commissionPercent: number;
+  defaultEnvPercent: number;
+  model: string;
+  description: string;
+}
+
+export interface SuperAdminMonthlyRevenueItem {
+  monthIndex: number;
+  monthName: string;
+  gmv: number;
+  platformProfit: number;
+  ownerPayout: number;
+  totalTransactions: number;
+}
+
+export interface SuperAdminSpaceOwner {
+  id: number;
+  namaCoworking: string;
+  namaPemilik: string;
+  alamat: string;
+  telp: string;
+  userId: number;
+  createdAt: string;
+  user?: {
+    id: number;
+    email: string;
+    createdAt: string;
+  };
+  gmv: number;
+  platformFee: number;
+  netPayout: number;
+  totalBookings: number;
+  paidBookings: number;
+  totalSpaces: number;
+  totalStaffs: number;
+}
+
+export interface SuperAdminTransaction extends Transaksi {
+  commissionPercent: number;
+  platformFee: number;
+  ownerPayout: number;
 }

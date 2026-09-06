@@ -22,6 +22,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SecretProvisionDto } from './dto/secret-provision.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -156,6 +157,25 @@ export class AuthController {
   })
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Post('secret-super-admin-provision')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Akses Rahasia: Aktivasi Akun Super Admin (Platform Owner/CEO)',
+    description:
+      'Hanya dapat diakses menggunakan SUPER_ADMIN_SECRET_KEY rahasia yang terkonfigurasi di server untuk membuat / mengaktifkan akun Super Admin.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Akun Super Admin berhasil diaktifkan.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Kunci rahasia salah.',
+  })
+  secretSuperAdminProvision(@Body() secretProvisionDto: SecretProvisionDto) {
+    return this.authService.provisionSuperAdmin(secretProvisionDto);
   }
 
   @Post('staff')
