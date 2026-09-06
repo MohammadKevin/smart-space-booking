@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
-  getDiscounts,
+  getMyDiscounts,
   createDiscount,
   updateDiscount,
   deleteDiscount,
@@ -64,7 +64,7 @@ export default function OwnerDiscountsPage() {
     setError(null);
     try {
       const [discData, spacesData] = await Promise.all([
-        getDiscounts().catch(() => []),
+        getMyDiscounts().catch(() => []),
         getMySpaces().catch(() => []),
       ]);
       setDiscounts(Array.isArray(discData) ? discData : []);

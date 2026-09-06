@@ -21,6 +21,13 @@ export class DiscountService {
   }
 
   async create(dto: CreateDiscountDto, user: any) {
+    const owner = await this.getOwner(user.id);
+    if (!owner) {
+      throw new ForbiddenException(
+        'Hanya admin/pemilik coworking space (admin_space) yang dapat membuat diskon.',
+      );
+    }
+
     const tglAwal = new Date(dto.tanggalAwal);
     const tglAkhir = new Date(dto.tanggalAkhir);
 
@@ -32,20 +39,12 @@ export class DiscountService {
 
     if (dto.kodeDiskon) {
       const existing = await this.prisma.diskon.findUnique({
-        where: { kodeDiskon: dto.kodeDiskon.toUpperCase() },
+        where: { kodeDiskon: dto.kodeDiskon.toUpperCase().trim() },
       });
       if (existing) {
         throw new ConflictException(
-          `Kode diskon '${dto.kodeDiskon}' sudah digunakan.`,
+          `Kode diskon '${dto.kodeDiskon}' sudah digunakan. Silakan gunakan kode kupon lain.`,
         );
-      }
-    }
-
-    let ownerId: number | null = null;
-    if (user && user.id) {
-      const owner = await this.getOwner(user.id);
-      if (owner) {
-        ownerId = owner.id;
       }
     }
 
@@ -59,7 +58,7 @@ export class DiscountService {
           `Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`,
         );
       }
-      if (ownerId && space.ownerId !== ownerId) {
+      if (space.ownerId !== owner.id) {
         throw new ForbiddenException(
           'Ruangan ini bukan milik coworking space Anda.',
         );
@@ -74,12 +73,45 @@ export class DiscountService {
         persentaseDiskon: dto.persentaseDiskon,
         tanggalAwal: tglAwal,
         tanggalAkhir: tglAkhir,
-        ownerId,
+        ownerId: owner.id,
         spaceId: targetSpaceId,
       },
       include: {
         owner: true,
         space: true,
+      },
+    });
+  }
+
+  async getMyDiscounts(ownerUserId: number) {
+    const owner = await this.getOwner(ownerUserId);
+    if (!owner) {
+      throw new NotFoundException('Data coworking space tidak ditemukan.');
+    }
+
+    return this.prisma.diskon.findMany({
+      where: { ownerId: owner.id },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            namaCoworking: true,
+            namaPemilik: true,
+          },
+        },
+        space: {
+          select: {
+            id: true,
+            namaSpace: true,
+            tipe: true,
+          },
+        },
+        _count: {
+          select: {
+            detailReservasi: true,
+          },
+        },
       },
     });
   }
@@ -98,14 +130,11 @@ export class DiscountService {
     }
 
     if (targetOwnerId) {
-      where.OR = [{ ownerId: targetOwnerId }, { ownerId: null }];
+      where.ownerId = targetOwnerId;
     }
 
     if (spaceId) {
-      where.OR = [
-        { spaceId: spaceId },
-        { spaceId: null },
-      ];
+      where.OR = [{ spaceId: spaceId }, { spaceId: null }];
     }
 
     return this.prisma.diskon.findMany({
@@ -167,9 +196,7 @@ export class DiscountService {
     }
 
     if (!diskon) {
-      throw new NotFoundException(
-        `Kupon diskon '${codeOrId}' tidak ditemukan.`,
-      );
+      throw new NotFoundException(`Kupon diskon '${codeOrId}' tidak ditemukan.`);
     }
 
     const now = new Date();
@@ -186,20 +213,25 @@ export class DiscountService {
     }
 
     if (spaceId) {
-      if (diskon.spaceId && diskon.spaceId !== spaceId) {
+      const space = await this.prisma.space.findUnique({
+        where: { id: spaceId },
+        include: { owner: true },
+      });
+
+      if (!space) {
+        throw new NotFoundException(`Ruangan dengan ID ${spaceId} tidak ditemukan.`);
+      }
+
+      if (diskon.ownerId && space.ownerId !== diskon.ownerId) {
+        throw new BadRequestException(
+          `Kupon promo '${diskon.namaDiskon}' hanya berlaku pada coworking space '${diskon.owner?.namaCoworking || 'lain'}'.`,
+        );
+      }
+
+      if (diskon.spaceId && diskon.spaceId !== space.id) {
         throw new BadRequestException(
           `Kupon promo '${diskon.namaDiskon}' hanya berlaku khusus untuk ruangan '${diskon.space?.namaSpace || 'tertentu'}'.`,
         );
-      }
-      if (diskon.ownerId !== null) {
-        const space = await this.prisma.space.findUnique({
-          where: { id: spaceId },
-        });
-        if (space && space.ownerId !== diskon.ownerId) {
-          throw new BadRequestException(
-            `Kupon promo '${diskon.namaDiskon}' hanya berlaku pada coworking space '${diskon.owner?.namaCoworking || 'terkait'}'.`,
-          );
-        }
       }
     }
 
@@ -212,18 +244,12 @@ export class DiscountService {
 
   async update(id: number, dto: UpdateDiscountDto, user: any) {
     const existing = await this.findOne(id);
+    const owner = await this.getOwner(user.id);
 
-    let ownerId: number | null = null;
-    if (user && user.id) {
-      const owner = await this.getOwner(user.id);
-      if (owner && existing.ownerId && existing.ownerId !== owner.id) {
-        throw new ForbiddenException(
-          'Anda tidak memiliki izin untuk mengubah diskon milik coworking space lain.',
-        );
-      }
-      if (owner) {
-        ownerId = owner.id;
-      }
+    if (!owner || existing.ownerId !== owner.id) {
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk mengubah diskon milik coworking space lain.',
+      );
     }
 
     const updateData: any = {};
@@ -252,7 +278,7 @@ export class DiscountService {
         if (!space) {
           throw new NotFoundException(`Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`);
         }
-        if (ownerId && space.ownerId !== ownerId) {
+        if (space.ownerId !== owner.id) {
           throw new ForbiddenException('Ruangan ini bukan milik coworking space Anda.');
         }
         updateData.spaceId = space.id;
@@ -279,14 +305,12 @@ export class DiscountService {
 
   async remove(id: number, user: any) {
     const existing = await this.findOne(id);
+    const owner = await this.getOwner(user.id);
 
-    if (user && user.id) {
-      const owner = await this.getOwner(user.id);
-      if (owner && existing.ownerId && existing.ownerId !== owner.id) {
-        throw new ForbiddenException(
-          'Anda tidak memiliki izin untuk menghapus diskon milik coworking space lain.',
-        );
-      }
+    if (!owner || existing.ownerId !== owner.id) {
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin untuk menghapus diskon milik coworking space lain.',
+      );
     }
 
     await this.prisma.diskon.delete({

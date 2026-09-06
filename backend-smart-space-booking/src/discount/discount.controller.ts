@@ -104,6 +104,20 @@ export class DiscountController {
     );
   }
 
+  @Get('my-discounts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.admin_space)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Daftar Promo Milik Space Owner Sendiri',
+    description:
+      'Hanya dapat diakses oleh admin_space untuk melihat daftar promo yang dibuat untuk coworking spacenya.',
+  })
+  @ApiResponse({ status: 200, description: 'Daftar diskon milik owner berhasil dimuat.' })
+  getMyDiscounts(@GetUser('id') ownerUserId: number) {
+    return this.discountService.getMyDiscounts(ownerUserId);
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Mendapatkan Detail Satu Diskon',

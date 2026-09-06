@@ -379,6 +379,11 @@ export async function checkDiscount(code: string, spaceId?: number | string): Pr
   };
 }
 
+export async function getMyDiscounts(): Promise<Discount[]> {
+  const { data } = await api.get<Discount[]>("/discounts/my-discounts");
+  return Array.isArray(data) ? data : [];
+}
+
 export async function getDiscounts(ownerId?: number, spaceId?: number): Promise<Discount[]> {
   const params: any = {};
   if (ownerId) params.ownerId = ownerId;
