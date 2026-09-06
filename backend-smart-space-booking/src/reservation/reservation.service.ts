@@ -175,91 +175,7 @@ export class ReservationService implements OnModuleInit {
       }
     }
 
-    const existingReservations = await this.prisma.reservasi.findMany({
-      where: {
-        detailReservasi: {
-          spaceId: space.id,
-        },
-        status: {
-          in: [
-            ReservasiStatus.pending,
-            ReservasiStatus.disetujui,
-            ReservasiStatus.aktif,
-          ],
-        },
-      },
-      include: {
-        detailReservasi: true,
-      },
-    });
-
-    for (const ex of existingReservations) {
-      const exDate = normalizeDateToStartOfDay(ex.tanggalReservasi);
-      if (exDate.getTime() === targetDate.getTime()) {
-        const exStartMinutes = timeStringToMinutes(ex.jamMulai);
-        const exEndMinutes = exStartMinutes + ex.durasiJam * 60;
-
-        if (
-          isTimeOverlapping(
-            newStartMinutes,
-            newEndMinutes,
-            exStartMinutes,
-            exEndMinutes,
-          )
-        ) {
-          const exSelesaiStr = minutesToTimeString(exEndMinutes);
-          throw new BadRequestException(
-            `Jadwal bentrok! Space '${space.namaSpace}' telah terisi pada slot ${ex.jamMulai} - ${exSelesaiStr}. Silakan pilih jam atau durasi lain.`,
-          );
-        }
-      }
-    }
-
     const basePrice = space.hargaPerJam * durasiJam;
-    let selectedDiskon: any = null;
-    let totalHarga = basePrice;
-
-    if (diskonId || kodeDiskon) {
-      if (diskonId) {
-        selectedDiskon = await this.prisma.diskon.findUnique({
-          where: { id: diskonId },
-        });
-      } else if (kodeDiskon) {
-        selectedDiskon = await this.prisma.diskon.findUnique({
-          where: { kodeDiskon: kodeDiskon.toUpperCase() },
-        });
-      }
-
-      if (selectedDiskon) {
-        if (
-          selectedDiskon.ownerId !== null &&
-          selectedDiskon.ownerId !== space.ownerId
-        ) {
-          throw new BadRequestException(
-            `Kupon promo '${selectedDiskon.namaDiskon}' tidak berlaku untuk coworking space ini.`,
-          );
-        }
-
-        const nowCheck = new Date();
-        const isValidDate =
-          nowCheck >= selectedDiskon.tanggalAwal &&
-          nowCheck <= selectedDiskon.tanggalAkhir;
-
-        if (!isValidDate) {
-          throw new BadRequestException(
-            `Kupon diskon '${selectedDiskon.namaDiskon}' tidak aktif atau sudah kedaluwarsa.`,
-          );
-        }
-
-        const potongan = (basePrice * selectedDiskon.persentaseDiskon) / 100;
-        totalHarga = Math.max(0, basePrice - potongan);
-      } else {
-        throw new NotFoundException('Kupon diskon tidak ditemukan.');
-      }
-    }
-
-    const qrCode = generateQrCode();
-
     const isHotDesk = space.tipe === SpaceTipe.desk;
     const isAutoApproved =
       isHotDesk && space.owner?.autoApproveHotDesk !== false;
@@ -267,41 +183,126 @@ export class ReservationService implements OnModuleInit {
       ? ReservasiStatus.disetujui
       : ReservasiStatus.pending;
 
-    const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-    const res = await this.prisma.reservasi.create({
-      data: {
-        tanggalReservasi: new Date(tanggalReservasi),
-        jamMulai: jamMulai,
-        durasiJam: durasiJam,
-        status: initialStatus,
-        qrCode,
-        ownerId: space.ownerId,
-        memberId: member.id,
-        detailReservasi: {
-          create: {
+    const res = await this.prisma.$transaction(async (tx) => {
+      const existingReservations = await tx.reservasi.findMany({
+        where: {
+          detailReservasi: {
             spaceId: space.id,
-            diskonId: selectedDiskon ? selectedDiskon.id : null,
-            totalHarga,
+          },
+          status: {
+            in: [
+              ReservasiStatus.pending,
+              ReservasiStatus.disetujui,
+              ReservasiStatus.aktif,
+            ],
           },
         },
-        transaksi: {
-          create: {
-            nomorInvoice: invoiceNumber,
-            jumlah: totalHarga,
-            statusPembayaran: PembayaranStatus.belum_bayar,
+        include: {
+          detailReservasi: true,
+        },
+      });
+
+      for (const ex of existingReservations) {
+        const exDate = normalizeDateToStartOfDay(ex.tanggalReservasi);
+        if (exDate.getTime() === targetDate.getTime()) {
+          const exStartMinutes = timeStringToMinutes(ex.jamMulai);
+          const exEndMinutes = exStartMinutes + ex.durasiJam * 60;
+
+          if (
+            isTimeOverlapping(
+              newStartMinutes,
+              newEndMinutes,
+              exStartMinutes,
+              exEndMinutes,
+            )
+          ) {
+            const exSelesaiStr = minutesToTimeString(exEndMinutes);
+            throw new BadRequestException(
+              `Jadwal bentrok! Space '${space.namaSpace}' telah terisi pada slot ${ex.jamMulai} - ${exSelesaiStr}. Silakan pilih jam atau durasi lain.`,
+            );
+          }
+        }
+      }
+
+      let selectedDiskon: any = null;
+      let totalHarga = basePrice;
+
+      if (diskonId || kodeDiskon) {
+        if (diskonId) {
+          selectedDiskon = await tx.diskon.findUnique({
+            where: { id: diskonId },
+          });
+        } else if (kodeDiskon) {
+          selectedDiskon = await tx.diskon.findUnique({
+            where: { kodeDiskon: kodeDiskon.toUpperCase() },
+          });
+        }
+
+        if (selectedDiskon) {
+          if (
+            selectedDiskon.ownerId !== null &&
+            selectedDiskon.ownerId !== space.ownerId
+          ) {
+            throw new BadRequestException(
+              `Kupon promo '${selectedDiskon.namaDiskon}' tidak berlaku untuk coworking space ini.`,
+            );
+          }
+
+          const nowCheck = new Date();
+          const isValidDate =
+            nowCheck >= selectedDiskon.tanggalAwal &&
+            nowCheck <= selectedDiskon.tanggalAkhir;
+
+          if (!isValidDate) {
+            throw new BadRequestException(
+              `Kupon diskon '${selectedDiskon.namaDiskon}' tidak aktif atau sudah kedaluwarsa.`,
+            );
+          }
+
+          const potongan = (basePrice * selectedDiskon.persentaseDiskon) / 100;
+          totalHarga = Math.max(0, basePrice - potongan);
+        } else {
+          throw new NotFoundException('Kupon diskon tidak ditemukan.');
+        }
+      }
+
+      const qrCode = generateQrCode();
+      const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      return tx.reservasi.create({
+        data: {
+          tanggalReservasi: new Date(tanggalReservasi),
+          jamMulai: jamMulai,
+          durasiJam: durasiJam,
+          status: initialStatus,
+          qrCode,
+          ownerId: space.ownerId,
+          memberId: member.id,
+          detailReservasi: {
+            create: {
+              spaceId: space.id,
+              diskonId: selectedDiskon ? selectedDiskon.id : null,
+              totalHarga,
+            },
+          },
+          transaksi: {
+            create: {
+              nomorInvoice: invoiceNumber,
+              jumlah: totalHarga,
+              statusPembayaran: PembayaranStatus.belum_bayar,
+            },
           },
         },
-      },
-      include: {
-        detailReservasi: {
-          include: {
-            space: true,
-            diskon: true,
+        include: {
+          detailReservasi: {
+            include: {
+              space: true,
+              diskon: true,
+            },
           },
+          transaksi: true,
         },
-        transaksi: true,
-      },
+      });
     });
 
     const reservation = {
@@ -498,6 +499,9 @@ export class ReservationService implements OnModuleInit {
 
     const res = await this.prisma.reservasi.findUnique({
       where: { id },
+      include: {
+        transaksi: true,
+      },
     });
 
     if (!res || res.memberId !== member.id) {
@@ -515,9 +519,34 @@ export class ReservationService implements OnModuleInit {
       );
     }
 
-    const updated = await this.prisma.reservasi.update({
-      where: { id },
-      data: { status: ReservasiStatus.dibatalkan },
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const cancelledRes = await tx.reservasi.update({
+        where: { id },
+        data: { status: ReservasiStatus.dibatalkan },
+        include: {
+          transaksi: true,
+          detailReservasi: { include: { space: true, diskon: true } },
+        },
+      });
+
+      if (res.transaksi) {
+        if (res.transaksi.statusPembayaran === PembayaranStatus.lunas) {
+          await tx.transaksi.update({
+            where: { id: res.transaksi.id },
+            data: { statusPembayaran: PembayaranStatus.refund },
+          });
+        } else if (
+          res.transaksi.statusPembayaran === PembayaranStatus.belum_bayar ||
+          res.transaksi.statusPembayaran === PembayaranStatus.menunggu_pembayaran
+        ) {
+          await tx.transaksi.update({
+            where: { id: res.transaksi.id },
+            data: { statusPembayaran: PembayaranStatus.gagal },
+          });
+        }
+      }
+
+      return cancelledRes;
     });
 
     return {

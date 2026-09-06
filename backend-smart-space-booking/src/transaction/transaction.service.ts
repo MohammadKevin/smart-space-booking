@@ -23,6 +23,9 @@ export class TransactionService {
   }
 
   private assertOwnerScope(reservationOwnerId: number, user: any) {
+    if (user.role === Role.super_admin) {
+      return;
+    }
     if (user.role === Role.admin_space) {
       if (user.spaceOwner?.id !== reservationOwnerId) {
         throw new ForbiddenException(
@@ -301,7 +304,9 @@ export class TransactionService {
 
     const where: any = {};
 
-    if (user.role === Role.member) {
+    if (user.role === Role.super_admin) {
+      // Super admin can see all transactions
+    } else if (user.role === Role.member) {
       if (!user.member) {
         throw new ForbiddenException('Profil member tidak ditemukan.');
       }
@@ -349,9 +354,13 @@ export class TransactionService {
   }
 
   async markRefund(id: number, user: any) {
-    if (user.role !== Role.admin_space && user.role !== Role.staff) {
+    if (
+      user.role !== Role.super_admin &&
+      user.role !== Role.admin_space &&
+      user.role !== Role.staff
+    ) {
       throw new ForbiddenException(
-        'Hanya admin space dan staff yang dapat melakukan refund.',
+        'Hanya super admin, admin space, dan staff yang dapat melakukan refund.',
       );
     }
 

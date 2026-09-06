@@ -5,7 +5,7 @@ import { Prisma, ReservasiStatus } from '@prisma/client';
 
 @Injectable()
 export class ReviewService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateReviewDto, memberUserId: number) {
     

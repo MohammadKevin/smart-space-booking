@@ -14,7 +14,7 @@ import {
 
 @Injectable()
 export class CheckinService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private validateStaffOrOwnerPermission(
     reservationOwnerId: number,

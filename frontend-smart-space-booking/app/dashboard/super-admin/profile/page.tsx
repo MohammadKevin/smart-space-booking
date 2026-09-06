@@ -4,5 +4,5 @@ import React from "react";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 
 export default function SuperAdminProfilePage() {
-  return <ProfileSettingsForm role="owner" />;
+  return <ProfileSettingsForm role="super_admin" />;
 }

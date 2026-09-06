@@ -12,7 +12,7 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class DiscountService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private async getOwner(userId: number) {
     return this.prisma.spaceOwner.findUnique({

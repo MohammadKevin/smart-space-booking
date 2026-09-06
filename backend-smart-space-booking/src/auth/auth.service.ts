@@ -33,6 +33,13 @@ export class AuthService {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
+  private getDevOtp(otpCode: string): string | undefined {
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_DEV_OTP !== 'true') {
+      return undefined;
+    }
+    return otpCode;
+  }
+
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email.trim().toLowerCase() },
@@ -80,10 +87,11 @@ export class AuthService {
         newOtp,
       );
 
+      const devOtp = this.getDevOtp(newOtp);
       throw new ForbiddenException({
         isVerified: false,
         email: user.email,
-        devOtp: newOtp,
+        ...(devOtp ? { devOtp } : {}),
         message:
           'Email Anda belum diverifikasi. Kode OTP verifikasi baru telah dikirimkan ke email Anda.',
       });
@@ -151,12 +159,13 @@ export class AuthService {
       otpCode,
     );
 
+    const devOtp = this.getDevOtp(otpCode);
     return {
       message:
         'Pendaftaran berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi 6-digit.',
       email: cleanEmail,
       isVerified: false,
-      devOtp: otpCode,
+      ...(devOtp ? { devOtp } : {}),
       user: {
         id: result.user.id,
         email: result.user.email,
@@ -211,12 +220,13 @@ export class AuthService {
       otpCode,
     );
 
+    const devOtp = this.getDevOtp(otpCode);
     return {
       message:
         'Pendaftaran pengelola coworking berhasil! Silakan periksa email Anda untuk memasukkan kode OTP verifikasi.',
       email: cleanEmail,
       isVerified: false,
-      devOtp: otpCode,
+      ...(devOtp ? { devOtp } : {}),
       user: {
         id: result.user.id,
         email: result.user.email,
@@ -358,10 +368,11 @@ export class AuthService {
       );
     }
 
+    const devOtp = this.getDevOtp(newOtp);
     return {
       message: 'Kode OTP baru berhasil dikirimkan ke email Anda.',
       email: cleanEmail,
-      devOtp: newOtp,
+      ...(devOtp ? { devOtp } : {}),
     };
   }
 

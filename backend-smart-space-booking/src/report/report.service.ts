@@ -4,7 +4,7 @@ import { ReservasiStatus, SpaceTipe, PembayaranStatus } from '@prisma/client';
 
 @Injectable()
 export class ReportService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private async getOwner(ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({
@@ -273,6 +273,7 @@ export class ReportService {
       where: { ownerId: owner.id },
       include: {
         member: true,
+        transaksi: true,
         detailReservasi: {
           include: {
             space: true,

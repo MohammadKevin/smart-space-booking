@@ -18,7 +18,7 @@ import { Prisma, ReservasiStatus } from '@prisma/client';
 
 @Injectable()
 export class SpaceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateSpaceDto, ownerUserId: number) {
     const owner = await this.prisma.spaceOwner.findUnique({

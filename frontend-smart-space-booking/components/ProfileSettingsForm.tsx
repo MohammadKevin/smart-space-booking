@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 interface ProfileSettingsFormProps {
-  role: "owner" | "staff" | "member";
+  role: "owner" | "staff" | "member" | "super_admin";
 }
 
 export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
@@ -119,6 +119,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
   };
 
   const getRoleLabel = () => {
+    if (role === "super_admin") return "Platform CEO / Super Admin";
     if (role === "owner") return "Space Owner / Pengelola";
     if (role === "staff") return "Petugas Staff Resepsionis";
     return "Member Pengguna";
@@ -164,122 +165,146 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
-          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">Informasi Profil & Kontak</h2>
-              <p className="text-xs text-slate-500">Data identitas yang terhubung dengan akun Anda.</p>
+        {role === "super_admin" ? (
+          <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Hak Akses & Otoritas Eksekutif</h2>
+                <p className="text-xs text-slate-500">Akun memiliki hak penuh tata kelola seluruh platform WorkNest.</p>
+              </div>
+              <User className="w-4 h-4 text-slate-400" />
             </div>
-            <User className="w-4 h-4 text-slate-400" />
+
+            <div className="p-4 rounded-xl bg-slate-900 text-white space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-400 text-slate-950 uppercase tracking-wide">
+                  Platform CEO & Administrator
+                </span>
+                <span className="text-xs text-slate-300 font-mono">{user?.email}</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Anda memiliki akses monitoring GMV, approval mitra, kebijakan komisi bagi hasil, dan seluruh transaksi se-platform.
+              </p>
+            </div>
           </div>
-
-          {role === "member" && (
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-700">Foto Profil / Avatar</label>
-              <ImageUploader
-                value={foto}
-                onChange={(val) => setFoto(val || "")}
-                label=""
-                helperText="Upload foto profil resmi untuk verifikasi saat check-in tiket (JPG, PNG, WebP)."
-              />
+        ) : (
+          <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Informasi Profil & Kontak</h2>
+                <p className="text-xs text-slate-500">Data identitas yang terhubung dengan akun Anda.</p>
+              </div>
+              <User className="w-4 h-4 text-slate-400" />
             </div>
-          )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700">
-                {role === "owner"
-                  ? "Nama Pemilik / Penanggung Jawab"
-                  : role === "staff"
-                  ? "Nama Lengkap Staff"
-                  : "Nama Lengkap Member"}
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  required
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  placeholder="Nama lengkap Anda"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+            {role === "member" && (
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-700">Foto Profil / Avatar</label>
+                <ImageUploader
+                  value={foto}
+                  onChange={(val) => setFoto(val || "")}
+                  label=""
+                  helperText="Upload foto profil resmi untuk verifikasi saat check-in tiket (JPG, PNG, WebP)."
                 />
               </div>
-            </div>
+            )}
 
-            {role === "owner" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Nama Bisnis Coworking Space
+                  {role === "owner"
+                    ? "Nama Pemilik / Penanggung Jawab"
+                    : role === "staff"
+                    ? "Nama Lengkap Staff"
+                    : "Nama Lengkap Member"}
                 </label>
                 <div className="relative">
-                  <Building className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                  <User className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                   <input
                     type="text"
                     required
-                    value={namaCoworking}
-                    onChange={(e) => setNamaCoworking(e.target.value)}
-                    placeholder="Contoh: SpaceWorks Hub Surabaya"
+                    value={nama}
+                    onChange={(e) => setNama(e.target.value)}
+                    placeholder="Nama lengkap Anda"
                     className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
-            )}
 
-            {role === "member" && (
+              {role === "owner" && (
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Nama Bisnis Coworking Space
+                  </label>
+                  <div className="relative">
+                    <Building className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      required
+                      value={namaCoworking}
+                      onChange={(e) => setNamaCoworking(e.target.value)}
+                      placeholder="Contoh: SpaceWorks Hub Surabaya"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {role === "member" && (
+                <div className="space-y-1">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Instansi / Perusahaan / Kampus
+                  </label>
+                  <div className="relative">
+                    <Building2 className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={instansi}
+                      onChange={(e) => setInstansi(e.target.value)}
+                      placeholder="Nama instansi atau Umum / Personal"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Instansi / Perusahaan / Kampus
+                  Nomor Telepon / WhatsApp
                 </label>
                 <div className="relative">
-                  <Building2 className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                  <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                   <input
-                    type="text"
-                    value={instansi}
-                    onChange={(e) => setInstansi(e.target.value)}
-                    placeholder="Nama instansi atau Umum / Personal"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    type="tel"
+                    required
+                    value={telp}
+                    onChange={(e) => setTelp(e.target.value)}
+                    placeholder="081234567890"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                   />
                 </div>
               </div>
-            )}
 
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700">
-                Nomor Telepon / WhatsApp
-              </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                <input
-                  type="tel"
-                  required
-                  value={telp}
-                  onChange={(e) => setTelp(e.target.value)}
-                  placeholder="081234567890"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
-                />
-              </div>
+              {role !== "staff" && (
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    {role === "owner" ? "Alamat Lengkap Coworking Space" : "Alamat Domisili"}
+                  </label>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={alamat}
+                      onChange={(e) => setAlamat(e.target.value)}
+                      placeholder="Alamat jalan, gedung, atau kota domisili"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-
-            {role !== "staff" && (
-              <div className="space-y-1 sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700">
-                  {role === "owner" ? "Alamat Lengkap Coworking Space" : "Alamat Domisili"}
-                </label>
-                <div className="relative">
-                  <MapPin className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={alamat}
-                    onChange={(e) => setAlamat(e.target.value)}
-                    placeholder="Alamat jalan, gedung, atau kota domisili"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
-                  />
-                </div>
-              </div>
-            )}
           </div>
-        </div>
+        )}
 
         <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">

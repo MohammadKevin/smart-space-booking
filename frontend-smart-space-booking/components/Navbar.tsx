@@ -58,6 +58,7 @@ export function Navbar() {
   const getNormalizedRole = () => {
     if (!user) return "";
     const r = user.role?.toLowerCase();
+    if (r === "super_admin") return "super_admin";
     if (r === "admin_space" || r === "owner") return "owner";
     if (r === "staff") return "staff";
     return "member";
@@ -65,6 +66,7 @@ export function Navbar() {
 
   const getRoleLabel = () => {
     const role = getNormalizedRole();
+    if (role === "super_admin") return "Platform CEO";
     if (role === "owner") return "Space Owner";
     if (role === "staff") return "Staff";
     return "Member";
@@ -127,7 +129,89 @@ export function Navbar() {
                       </p>
                     </div>
 
-                    {currentRole === "owner" && (
+                    {currentRole === "super_admin" && (
+                      <>
+                        <Link
+                          href="/dashboard/super-admin"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <LayoutDashboard className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Overview Platform</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/owners"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <Building className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Mitra Space Owner</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/commission"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <TicketPercent className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Komisi Platform</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/transactions"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <CalendarCheck className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Transaksi Global</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/profile"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                        >
+                          <UserCog className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
+                    )}
+
+              {currentRole === "super_admin" && (
+                <>
+                  <Link
+                    href="/dashboard/super-admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                    <span>Overview Platform</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/super-admin/owners"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <Building className="w-4 h-4 text-slate-500" />
+                    <span>Mitra Space Owner</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/super-admin/commission"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <TicketPercent className="w-4 h-4 text-slate-500" />
+                    <span>Komisi Platform</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/super-admin/transactions"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-md"
+                  >
+                    <CalendarCheck className="w-4 h-4 text-slate-500" />
+                    <span>Transaksi Global</span>
+                  </Link>
+                </>
+              )}
+
+              {currentRole === "owner" && (
                       <>
                         <Link
                           href="/dashboard/owner"

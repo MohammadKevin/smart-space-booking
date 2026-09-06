@@ -9,21 +9,50 @@ export class SuperAdminService {
     process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
   );
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  getCommissionRate() {
+  async getCommissionRate() {
+    const activeRate = await this.getCurrentCommissionRate();
     return {
-      commissionPercent: this.commissionPercent,
+      commissionPercent: activeRate,
       defaultEnvPercent: parseFloat(
         process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
       ),
       model: 'revenue_share_settlement',
-      description: `Platform memotong ${this.commissionPercent}% dari total omzet setiap transaksi yang lunas.`,
+      description: `Platform memotong ${activeRate}% dari total omzet setiap transaksi yang lunas.`,
     };
   }
 
-  setCommissionRate(percent: number) {
+  private async getCurrentCommissionRate(): Promise<number> {
+    try {
+      const setting = await this.prisma.platformSetting.findUnique({
+        where: { key: 'PLATFORM_COMMISSION_PERCENT' },
+      });
+      if (setting && setting.value) {
+        const parsed = parseFloat(setting.value);
+        if (!isNaN(parsed)) {
+          this.commissionPercent = parsed;
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback to in-memory / env
+    }
+    return this.commissionPercent;
+  }
+
+  async setCommissionRate(percent: number) {
     this.commissionPercent = percent;
+    try {
+      await this.prisma.platformSetting.upsert({
+        where: { key: 'PLATFORM_COMMISSION_PERCENT' },
+        update: { value: percent.toString() },
+        create: { key: 'PLATFORM_COMMISSION_PERCENT', value: percent.toString() },
+      });
+    } catch (err: any) {
+      this.logger.warn(`Failed to persist commission rate to DB, using in-memory: ${err.message}`);
+    }
+
     this.logger.log(`Platform commission rate updated to: ${percent}%`);
     return {
       success: true,
@@ -33,6 +62,7 @@ export class SuperAdminService {
   }
 
   async getOverview() {
+    const rate = await this.getCurrentCommissionRate();
     const transactions = await this.prisma.transaksi.findMany({
       where: {
         statusPembayaran: PembayaranStatus.lunas,
@@ -40,7 +70,7 @@ export class SuperAdminService {
     });
 
     const totalGmv = transactions.reduce((acc, t) => acc + (t.jumlah || 0), 0);
-    const platformProfit = (totalGmv * this.commissionPercent) / 100;
+    const platformProfit = (totalGmv * rate) / 100;
     const totalOwnersPayout = totalGmv - platformProfit;
 
     const totalOwners = await this.prisma.spaceOwner.count();
@@ -61,7 +91,7 @@ export class SuperAdminService {
       totalGmv,
       platformProfit,
       totalOwnersPayout,
-      currentCommissionPercent: this.commissionPercent,
+      currentCommissionPercent: rate,
       totalOwners,
       totalSpaces,
       totalMembers,
@@ -72,6 +102,7 @@ export class SuperAdminService {
   }
 
   async getMonthlyRevenue(year: number = new Date().getFullYear()) {
+    const rate = await this.getCurrentCommissionRate();
     const startOfYear = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
     const endOfYear = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0));
 
@@ -114,7 +145,7 @@ export class SuperAdminService {
       const monthIdx = new Date(date).getUTCMonth();
       if (monthIdx >= 0 && monthIdx < 12) {
         const amt = tx.jumlah || 0;
-        const profit = (amt * this.commissionPercent) / 100;
+        const profit = (amt * rate) / 100;
         const payout = amt - profit;
 
         monthlyStats[monthIdx].gmv += amt;
@@ -132,7 +163,7 @@ export class SuperAdminService {
 
     return {
       year,
-      commissionPercent: this.commissionPercent,
+      commissionPercent: rate,
       totalGmvAnnual,
       totalPlatformProfitAnnual,
       months: monthlyStats,
@@ -140,6 +171,7 @@ export class SuperAdminService {
   }
 
   async getAllSpaceOwners() {
+    const rate = await this.getCurrentCommissionRate();
     const owners = await this.prisma.spaceOwner.findMany({
       include: {
         user: {
@@ -197,7 +229,7 @@ export class SuperAdminService {
         }
       }
 
-      const platformFee = (gmv * this.commissionPercent) / 100;
+      const platformFee = (gmv * rate) / 100;
       const netPayout = gmv - platformFee;
 
       const { reservasi: _, ...rest } = o;
@@ -216,6 +248,7 @@ export class SuperAdminService {
   }
 
   async getAllTransactions(limit = 50) {
+    const rate = await this.getCurrentCommissionRate();
     const transactions = await this.prisma.transaksi.findMany({
       include: {
         reservasi: {
@@ -238,15 +271,16 @@ export class SuperAdminService {
     return transactions.map((t) => {
       const amt = t.jumlah || 0;
       const isPaid = t.statusPembayaran === PembayaranStatus.lunas;
-      const platformFee = isPaid ? (amt * this.commissionPercent) / 100 : 0;
+      const platformFee = isPaid ? (amt * rate) / 100 : 0;
       const ownerPayout = isPaid ? amt - platformFee : 0;
 
       return {
         ...t,
-        commissionPercent: this.commissionPercent,
+        commissionPercent: rate,
         platformFee,
         ownerPayout,
       };
     });
   }
 }
+

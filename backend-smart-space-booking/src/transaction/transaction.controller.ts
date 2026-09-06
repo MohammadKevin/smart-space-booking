@@ -98,11 +98,11 @@ export class TransactionController {
   }
 
   @Patch(':id/refund')
-  @Roles(Role.admin_space, Role.staff)
+  @Roles(Role.super_admin, Role.admin_space, Role.staff)
   @ApiOperation({
     summary: 'Tandai Transaksi sebagai Refund',
     description:
-      'Admin Space / Staff menandai transaksi lunas sebagai refund, misalnya saat pembatalan sebelum check-in.',
+      'Super Admin / Admin Space / Staff menandai transaksi lunas sebagai refund, misalnya saat pembatalan sebelum check-in.',
   })
   @ApiResponse({
     status: 200,
