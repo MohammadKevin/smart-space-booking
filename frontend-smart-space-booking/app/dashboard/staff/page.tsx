@@ -113,7 +113,6 @@ export default function StaffTerminalPage() {
       return;
     }
 
-    // Debounce check: if still in 5-second cooldown, ignore camera scan to prevent double check-in / check-out
     if (isFromCamera && Date.now() < cooldownUntilRef.current) {
       return;
     }

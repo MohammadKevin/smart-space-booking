@@ -141,7 +141,7 @@ export default function OwnerStaffPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Toolbar */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
@@ -173,7 +173,6 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      {/* Information Banner (Clean & Neutral) */}
       <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-start gap-3 text-xs text-slate-700 shadow-2xs">
         <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
           <ShieldCheck className="w-4 h-4" />
@@ -212,7 +211,6 @@ export default function OwnerStaffPage() {
         </div>
       )}
 
-      {/* Search Toolbar */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -229,7 +227,6 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      {/* Staff Table */}
       <div className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs">
         {loading ? (
           <div className="p-16 text-center space-y-2">
@@ -335,7 +332,6 @@ export default function OwnerStaffPage() {
         )}
       </div>
 
-      {/* Create Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 border border-slate-200 shadow-2xl">

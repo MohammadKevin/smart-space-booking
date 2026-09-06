@@ -122,14 +122,14 @@ export default function BookingPage({ params }: BookingPageProps) {
             const [bh, bm] = b.jamMulai.split(":").map(Number);
             const bStart = bh * 60 + bm;
             const bEnd = bStart + b.durasiJam * 60;
-            // Overlapping condition: max(start1, start2) < min(end1, end2)
+            
             return Math.max(startMins, bStart) < Math.min(endMins, bEnd);
           });
 
           result[slot] = !hasConflict;
         }
       } catch {
-        // Fallback: assume available
+        
         for (const slot of TIME_SLOTS) {
           result[slot] = true;
         }

@@ -411,4 +411,3 @@ export interface RatingSummary {
   averageRating: number;
   totalReviews: number;
 }
-

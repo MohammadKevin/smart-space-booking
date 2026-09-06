@@ -121,7 +121,7 @@ export default function OwnerReservationsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Toolbar */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
@@ -171,7 +171,6 @@ export default function OwnerReservationsPage() {
         </div>
       )}
 
-      {/* Filter Tabs & Search Bar */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col lg:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-1 p-0.5 bg-slate-100/80 rounded-lg w-full lg:w-auto overflow-x-auto">
           <button
@@ -259,7 +258,6 @@ export default function OwnerReservationsPage() {
         </div>
       </div>
 
-      {/* Bookings Table */}
       <div className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs">
         {loading ? (
           <div className="p-16 text-center space-y-2">
@@ -424,7 +422,6 @@ export default function OwnerReservationsPage() {
         )}
       </div>
 
-      {/* Reservation Detail Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8">

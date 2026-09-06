@@ -46,7 +46,6 @@ export class ReservationService implements OnModuleInit {
     const now = new Date();
     const todayStart = normalizeDateToStartOfDay(now.toISOString());
 
-    // 1. Pending reservations created over 24h ago
     const expiredByAge = await this.prisma.reservasi.findMany({
       where: {
         status: ReservasiStatus.pending,
@@ -55,7 +54,6 @@ export class ReservationService implements OnModuleInit {
       include: { transaksi: true },
     });
 
-    // 2. Unpaid reservations where scheduled reservation date is in the past
     const expiredByDate = await this.prisma.reservasi.findMany({
       where: {
         status: {

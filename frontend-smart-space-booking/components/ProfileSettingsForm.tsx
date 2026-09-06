@@ -126,7 +126,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* Header Toolbar */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">

@@ -74,11 +74,6 @@ export interface ChartPoint {
   bookings: number;
 }
 
-/**
- * Fritsch-Carlson Monotone Cubic Spline Algorithm.
- * Ensures strict monotonicity: perfectly horizontal lines at 0 revenue,
- * smooth apex curves at peaks, and zero overshoot/undershoot below baseline.
- */
 function getSmoothSplinePath(
   pts: ChartPoint[],
   baseline: number,
@@ -234,7 +229,6 @@ export default function OwnerOverviewPage() {
     }, safeMonthlyRevenue[0]);
   }, [safeMonthlyRevenue]);
 
-  // Scaled max calculations for clean grid line intervals
   const rawMax = useMemo(() => {
     return Math.max(...safeMonthlyRevenue.map((m) => Number(m?.revenue) || 0), 0);
   }, [safeMonthlyRevenue]);
@@ -301,7 +295,7 @@ export default function OwnerOverviewPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Toolbar */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
@@ -351,9 +345,8 @@ export default function OwnerOverviewPage() {
         </div>
       )}
 
-      {/* 2. Precision Metric KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Omzet Bersih */}
+        
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500">Pendapatan Terverifikasi</span>
@@ -372,7 +365,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Card 2: Total Reservasi */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500">Volume Reservasi</span>
@@ -390,7 +382,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Card 3: Ruangan Aktif */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500">Ruangan & Workstation</span>
@@ -408,7 +399,6 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        {/* Card 4: Staff Scanner */}
         <div className="p-5 bg-white rounded-xl border border-slate-200/90 shadow-2xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500">Petugas Resepsionis</span>
@@ -427,9 +417,8 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      {/* 3. Main Analytics & Distribution Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Financial Trend Line Chart */}
+        
         <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
             <div>
@@ -446,7 +435,6 @@ export default function OwnerOverviewPage() {
               </p>
             </div>
 
-            {/* Year Selector */}
             <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs font-semibold shadow-2xs">
               {[currentYear, currentYear - 1, currentYear - 2].map((yr) => (
                 <button
@@ -486,7 +474,6 @@ export default function OwnerOverviewPage() {
                     </linearGradient>
                   </defs>
 
-                  {/* Horizontal Gridlines & Y-Axis Scale Labels */}
                   {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
                     const y = baseline - usableHeight * ratio;
                     const val = maxRevenue * ratio;
@@ -515,7 +502,6 @@ export default function OwnerOverviewPage() {
                     );
                   })}
 
-                  {/* Vertical Hairline Guide on Hover */}
                   {hoveredIndex !== null && points[hoveredIndex] && (
                     <line
                       x1={points[hoveredIndex].x}
@@ -530,7 +516,6 @@ export default function OwnerOverviewPage() {
                     />
                   )}
 
-                  {/* Area fill under curve */}
                   {areaPath && (
                     <path
                       d={areaPath}
@@ -539,7 +524,6 @@ export default function OwnerOverviewPage() {
                     />
                   )}
 
-                  {/* Smooth Trend Line */}
                   {linePath && (
                     <path
                       d={linePath}
@@ -552,7 +536,6 @@ export default function OwnerOverviewPage() {
                     />
                   )}
 
-                  {/* Data Point Nodes and Month Labels */}
                   {points.map((pt, idx) => {
                     const stepX = usableWidth / points.length;
                     const isHovered = hoveredIndex === idx;
@@ -564,7 +547,7 @@ export default function OwnerOverviewPage() {
                         onMouseEnter={() => setHoveredIndex(idx)}
                         onMouseLeave={() => setHoveredIndex(null)}
                       >
-                        {/* Invisible Touch Target */}
+                        
                         <rect
                           x={pt.x - stepX / 2}
                           y={paddingTop}
@@ -573,7 +556,6 @@ export default function OwnerOverviewPage() {
                           fill="transparent"
                         />
 
-                        {/* Outer Glow on Hover */}
                         {isHovered && (
                           <circle
                             cx={pt.x}
@@ -585,7 +567,6 @@ export default function OwnerOverviewPage() {
                           />
                         )}
 
-                        {/* Node Circle */}
                         {(pt.rev > 0 || isHovered) && (
                           <circle
                             cx={pt.x}
@@ -598,7 +579,6 @@ export default function OwnerOverviewPage() {
                           />
                         )}
 
-                        {/* Month Label below */}
                         <text
                           x={pt.x}
                           y={chartHeight - 12}
@@ -615,7 +595,6 @@ export default function OwnerOverviewPage() {
                   })}
                 </svg>
 
-                {/* Floating Tooltip Card */}
                 {hoveredIndex !== null && points[hoveredIndex] && (
                   (() => {
                     const rawLeftPercent = (points[hoveredIndex].x / chartWidth) * 100;
@@ -646,7 +625,6 @@ export default function OwnerOverviewPage() {
                 )}
               </div>
 
-              {/* Performance Metrics Strip */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 text-xs">
                 <div className="p-3 bg-slate-50/70 rounded-lg border border-slate-200/60">
                   <span className="text-[11px] text-slate-500 block">Total Omzet {selectedYear}</span>
@@ -680,7 +658,6 @@ export default function OwnerOverviewPage() {
           )}
         </div>
 
-        {/* Right: Space Inventory & Distribution (Unified, Clean Palette) */}
         <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs flex flex-col justify-between">
           <div className="space-y-4">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
@@ -731,7 +708,6 @@ export default function OwnerOverviewPage() {
                         </span>
                       </div>
 
-                      {/* Unified Sleek Progress Bar (No Mixed Rainbow Colors) */}
                       <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-slate-800 rounded-full transition-all duration-500"
@@ -778,7 +754,6 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      {/* 4. Recent Transactions Stream */}
       <div className="space-y-3">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div>

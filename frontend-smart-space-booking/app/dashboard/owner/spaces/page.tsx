@@ -185,7 +185,7 @@ export default function OwnerSpacesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Toolbar */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
@@ -243,7 +243,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Filter Tabs & Search */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-1 p-0.5 bg-slate-100/80 rounded-lg w-full sm:w-auto overflow-x-auto">
           <button
@@ -498,7 +497,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Create / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
           <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8">
@@ -636,7 +634,6 @@ export default function OwnerSpacesPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">

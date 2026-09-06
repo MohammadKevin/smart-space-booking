@@ -53,7 +53,6 @@ function VerifyEmailContent() {
     }
   }, [emailParam]);
 
-  // Countdown timer for OTP resend
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => {
@@ -63,7 +62,6 @@ function VerifyEmailContent() {
     }
   }, [resendCooldown]);
 
-  // Auto-focus first OTP input
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
@@ -71,7 +69,7 @@ function VerifyEmailContent() {
   }, []);
 
   const handleOtpChange = (index: number, value: string) => {
-    // Handle paste of full 6 digit string
+    
     if (value.length > 1) {
       const pastedDigits = value.replace(/\D/g, "").slice(0, 6).split("");
       if (pastedDigits.length > 0) {
@@ -91,7 +89,6 @@ function VerifyEmailContent() {
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    // Auto advance to next input
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -206,7 +203,7 @@ function VerifyEmailContent() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50/70 text-slate-900">
       <div className="w-full max-w-md space-y-6">
-        {/* Back Link */}
+        
         <div className="flex items-center justify-between">
           <Link
             href="/login"
@@ -218,7 +215,6 @@ function VerifyEmailContent() {
           <span className="text-[11px] font-semibold text-slate-400">WorkNest Security</span>
         </div>
 
-        {/* Card Container */}
         <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200/90 shadow-2xs space-y-6">
           <div className="text-center space-y-2">
             <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center mx-auto border border-slate-200">
@@ -277,7 +273,6 @@ function VerifyEmailContent() {
               </div>
             )}
 
-            {/* 6 Digit OTP Inputs */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-700 text-center">
                 Kode Verifikasi OTP (6 Digit)
@@ -301,7 +296,6 @@ function VerifyEmailContent() {
               </div>
             </div>
 
-            {/* If Reset Password, Show New Password Inputs */}
             {typeParam === "reset" && (
               <div className="space-y-3 pt-2 border-t border-slate-100">
                 <div className="space-y-1">
@@ -347,7 +341,6 @@ function VerifyEmailContent() {
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -367,7 +360,6 @@ function VerifyEmailContent() {
             </button>
           </form>
 
-          {/* Resend OTP Section */}
           <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>Tidak menerima kode?</span>
             <button

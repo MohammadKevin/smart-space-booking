@@ -55,7 +55,6 @@ export class AuthService {
       throw new UnauthorizedException('Email atau password salah.');
     }
 
-    // Check email verification
     if (!user.isVerified) {
       const newOtp = this.generate6DigitOtp();
       const expires = new Date(Date.now() + 15 * 60 * 1000);
@@ -145,7 +144,6 @@ export class AuthService {
       return { user, member };
     });
 
-    // Send verification OTP email
     await this.mailService.sendVerificationOtp(
       cleanEmail,
       dto.namaMember,
@@ -206,7 +204,6 @@ export class AuthService {
       return { user, spaceOwner };
     });
 
-    // Send verification OTP email
     await this.mailService.sendVerificationOtp(
       cleanEmail,
       dto.namaPemilik,
@@ -273,7 +270,6 @@ export class AuthService {
       );
     }
 
-    // Mark as verified
     const updatedUser = await this.prisma.user.update({
       where: { id: user.id },
       data: {
@@ -486,7 +482,7 @@ export class AuthService {
           email: cleanEmail,
           password: hashedPassword,
           role: Role.staff,
-          isVerified: true, // Created directly by space owner
+          isVerified: true, 
         },
       });
 

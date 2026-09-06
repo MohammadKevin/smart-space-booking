@@ -8,7 +8,7 @@ export class ReviewService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateReviewDto, memberUserId: number) {
-    // Cek apakah user punya reservasi yang relevan
+    
     const reservasi = await this.prisma.reservasi.findUnique({
       where: { id: dto.reservasiId },
       include: {
@@ -33,7 +33,6 @@ export class ReviewService {
       throw new ForbiddenException('Ulasan hanya dapat diberikan setelah reservasi selesai.');
     }
 
-    // Cek apakah sudah ada review untuk reservasi ini
     const existingReview = await this.prisma.review.findUnique({
       where: { reservasiId: dto.reservasiId },
     });
