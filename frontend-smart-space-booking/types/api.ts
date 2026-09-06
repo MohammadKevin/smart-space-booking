@@ -207,6 +207,12 @@ export interface Discount {
   persentaseDiskon: number;
   tanggalAwal: string;
   tanggalAkhir: string;
+  spaceId?: number | null;
+  space?: {
+    id: number;
+    namaSpace: string;
+    tipe: SpaceType;
+  } | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -217,6 +223,7 @@ export interface CreateDiscountDto {
   persentaseDiskon: number;
   tanggalAwal: string;
   tanggalAkhir: string;
+  spaceId?: number | null;
 }
 
 export interface UpdateDiscountDto {
@@ -225,6 +232,7 @@ export interface UpdateDiscountDto {
   persentaseDiskon?: number;
   tanggalAwal?: string;
   tanggalAkhir?: string;
+  spaceId?: number | null;
 }
 
 export interface DiscountCheckResponse {

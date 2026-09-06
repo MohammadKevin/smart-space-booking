@@ -364,8 +364,11 @@ export async function updateProfile(dto: UpdateProfileDto): Promise<UserProfile>
   return data;
 }
 
-export async function checkDiscount(code: string): Promise<any> {
-  const { data } = await api.get<any>(`/discounts/check/${encodeURIComponent(code)}`);
+export async function checkDiscount(code: string, spaceId?: number | string): Promise<any> {
+  const url = spaceId
+    ? `/discounts/check/${encodeURIComponent(code)}?spaceId=${spaceId}`
+    : `/discounts/check/${encodeURIComponent(code)}`;
+  const { data } = await api.get<any>(url);
   const diskonObj = data?.diskon || data?.data || data;
   return {
     isValid: !!(data?.isValid || data?.valid || diskonObj?.id),
@@ -376,8 +379,11 @@ export async function checkDiscount(code: string): Promise<any> {
   };
 }
 
-export async function getDiscounts(): Promise<Discount[]> {
-  const { data } = await api.get<Discount[]>("/discounts");
+export async function getDiscounts(ownerId?: number, spaceId?: number): Promise<Discount[]> {
+  const params: any = {};
+  if (ownerId) params.ownerId = ownerId;
+  if (spaceId) params.spaceId = spaceId;
+  const { data } = await api.get<Discount[]>("/discounts", { params });
   return Array.isArray(data) ? data : [];
 }
 

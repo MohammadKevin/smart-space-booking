@@ -6,7 +6,9 @@ import {
   createDiscount,
   updateDiscount,
   deleteDiscount,
+  getMySpaces,
   Discount,
+  Space,
   CreateDiscountDto,
   UpdateDiscountDto,
   getApiErrorMessage,
@@ -27,12 +29,14 @@ import {
   RefreshCw,
   X,
   Search,
+  Building2,
 } from "lucide-react";
 
 export default function OwnerDiscountsPage() {
   const { user } = useAuth();
 
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -49,17 +53,22 @@ export default function OwnerDiscountsPage() {
   const [persentaseDiskon, setPersentaseDiskon] = useState<number>(20);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
+  const [spaceId, setSpaceId] = useState<number | "">("");
 
   const [deleteTarget, setDeleteTarget] = useState<Discount | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  const fetchDiscounts = useCallback(async () => {
+  const fetchDiscountsAndSpaces = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getDiscounts();
-      setDiscounts(Array.isArray(data) ? data : []);
+      const [discData, spacesData] = await Promise.all([
+        getDiscounts().catch(() => []),
+        getMySpaces().catch(() => []),
+      ]);
+      setDiscounts(Array.isArray(discData) ? discData : []);
+      setSpaces(Array.isArray(spacesData) ? spacesData : []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -68,8 +77,8 @@ export default function OwnerDiscountsPage() {
   }, []);
 
   useEffect(() => {
-    fetchDiscounts();
-  }, [fetchDiscounts]);
+    fetchDiscountsAndSpaces();
+  }, [fetchDiscountsAndSpaces]);
 
   const handleCopyCode = (code: string) => {
     if (!code) return;
@@ -90,6 +99,7 @@ export default function OwnerDiscountsPage() {
     setPersentaseDiskon(20);
     setTanggalAwal(today);
     setTanggalAkhir(nextMonth);
+    setSpaceId("");
     setFormError(null);
     setModalOpen(true);
   };
@@ -101,6 +111,7 @@ export default function OwnerDiscountsPage() {
     setPersentaseDiskon(d.persentaseDiskon);
     setTanggalAwal(d.tanggalAwal ? d.tanggalAwal.split("T")[0] : "");
     setTanggalAkhir(d.tanggalAkhir ? d.tanggalAkhir.split("T")[0] : "");
+    setSpaceId(d.spaceId || "");
     setFormError(null);
     setModalOpen(true);
   };
@@ -127,6 +138,7 @@ export default function OwnerDiscountsPage() {
       const cleanCode = kodeDiskon.trim().toUpperCase() || undefined;
       const startIso = new Date(tanggalAwal).toISOString();
       const endIso = new Date(tanggalAkhir + "T23:59:59.000Z").toISOString();
+      const targetSpaceId = spaceId ? Number(spaceId) : null;
 
       if (editingDiscount) {
         const dto: UpdateDiscountDto = {
@@ -135,6 +147,7 @@ export default function OwnerDiscountsPage() {
           persentaseDiskon: Number(persentaseDiskon),
           tanggalAwal: startIso,
           tanggalAkhir: endIso,
+          spaceId: targetSpaceId,
         };
         await updateDiscount(editingDiscount.id, dto);
         setActionSuccess(`Kode promo "${namaDiskon}" berhasil diperbarui.`);
@@ -145,13 +158,14 @@ export default function OwnerDiscountsPage() {
           persentaseDiskon: Number(persentaseDiskon),
           tanggalAwal: startIso,
           tanggalAkhir: endIso,
+          spaceId: targetSpaceId,
         };
         await createDiscount(dto);
         setActionSuccess(`Kode promo "${namaDiskon}" berhasil dibuat.`);
       }
 
       setModalOpen(false);
-      await fetchDiscounts();
+      await fetchDiscountsAndSpaces();
     } catch (err: unknown) {
       setFormError(getApiErrorMessage(err));
     } finally {
@@ -166,7 +180,7 @@ export default function OwnerDiscountsPage() {
       await deleteDiscount(deleteTarget.id);
       setActionSuccess(`Kode promo "${deleteTarget.namaDiskon}" berhasil dihapus.`);
       setDeleteTarget(null);
-      await fetchDiscounts();
+      await fetchDiscountsAndSpaces();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
       setDeleteTarget(null);
@@ -203,27 +217,28 @@ export default function OwnerDiscountsPage() {
       const q = searchQuery.toLowerCase();
       const matchName = d.namaDiskon.toLowerCase().includes(q);
       const matchCode = (d.kodeDiskon || "").toLowerCase().includes(q);
-      return matchName || matchCode;
+      const matchSpace = (d.space?.namaSpace || "").toLowerCase().includes(q);
+      return matchName || matchCode || matchSpace;
     });
   }, [discounts, searchQuery]);
 
   return (
     <div className="space-y-6">
-      
+      {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
             Kode Promo & Diskon Spesial
           </h1>
           <p className="text-xs text-slate-500 font-medium">
-            Kelola voucher potongan harga, tetapkan kupon promo, dan atur masa berlaku kupon.
+            Kelola kupon potongan harga spesifik per ruangan atau general untuk seluruh workspace.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
-            onClick={fetchDiscounts}
+            onClick={fetchDiscountsAndSpaces}
             disabled={loading}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer"
           >
@@ -267,6 +282,7 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
+      {/* Search Toolbar */}
       <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -274,7 +290,7 @@ export default function OwnerDiscountsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama program promo atau kode kupon..."
+            placeholder="Cari nama promo, kode kupon, atau nama ruangan..."
             className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
           />
         </div>
@@ -294,6 +310,7 @@ export default function OwnerDiscountsPage() {
             const startDate = d.tanggalAwal ? d.tanggalAwal.split("T")[0] : "-";
             const endDate = d.tanggalAkhir ? d.tanggalAkhir.split("T")[0] : "-";
             const validity = getValidityStatus(d.tanggalAwal, d.tanggalAkhir);
+            const targetSpaceName = d.space?.namaSpace || "Semua Ruangan (Global)";
 
             return (
               <div
@@ -316,6 +333,10 @@ export default function OwnerDiscountsPage() {
                     <h3 className="font-bold text-slate-900 text-sm leading-snug">
                       {d.namaDiskon}
                     </h3>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                      <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-medium text-slate-700 truncate">{targetSpaceName}</span>
+                    </div>
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-slate-50 border border-dashed border-slate-200 flex items-center justify-between">
@@ -390,6 +411,7 @@ export default function OwnerDiscountsPage() {
         </div>
       )}
 
+      {/* Create / Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 border border-slate-200 shadow-2xl">
@@ -403,7 +425,7 @@ export default function OwnerDiscountsPage() {
                     {editingDiscount ? "Edit Kode Promo" : "Buat Kode Promo Baru"}
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    Atur besaran persentase dan periode berlaku kupon
+                    Atur besaran persentase, target ruangan, dan masa berlaku
                   </p>
                 </div>
               </div>
@@ -436,6 +458,28 @@ export default function OwnerDiscountsPage() {
                   placeholder="Contoh: Promo Ramadhan 2026"
                   className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                 />
+              </div>
+
+              {/* Specific Space Selector */}
+              <div className="space-y-1">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Target Ruangan (Spesifik Space)
+                </label>
+                <select
+                  value={spaceId}
+                  onChange={(e) => setSpaceId(e.target.value ? Number(e.target.value) : "")}
+                  className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none cursor-pointer transition-all font-medium"
+                >
+                  <option value="">🌐 Semua Ruangan (Berlaku Global)</option>
+                  {spaces.map((sp) => (
+                    <option key={sp.id} value={sp.id}>
+                      🏢 {sp.namaSpace} ({sp.tipe === "desk" ? "Hot Desk" : sp.tipe === "meeting_room" ? "Meeting Room" : "Private Office"})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-400">
+                  Pilih ruangan tertentu jika promo hanya khusus untuk 1 ruangan saja.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

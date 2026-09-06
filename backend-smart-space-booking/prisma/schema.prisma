@@ -122,6 +122,7 @@ model Space {
 
   detailReservasi DetailReservasi[]
   waitlist        Waitlist[]
+  diskon          Diskon[]
 
   @@map("spaces")
 }
@@ -135,6 +136,8 @@ model Diskon {
   tanggalAkhir     DateTime
   ownerId          Int?
   owner            SpaceOwner?       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  spaceId          Int?
+  space            Space?            @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 

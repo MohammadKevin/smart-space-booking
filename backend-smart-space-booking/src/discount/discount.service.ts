@@ -49,17 +49,37 @@ export class DiscountService {
       }
     }
 
+    let targetSpaceId: number | null = null;
+    if (dto.spaceId) {
+      const space = await this.prisma.space.findUnique({
+        where: { id: dto.spaceId },
+      });
+      if (!space) {
+        throw new NotFoundException(
+          `Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`,
+        );
+      }
+      if (ownerId && space.ownerId !== ownerId) {
+        throw new ForbiddenException(
+          'Ruangan ini bukan milik coworking space Anda.',
+        );
+      }
+      targetSpaceId = space.id;
+    }
+
     return this.prisma.diskon.create({
       data: {
-        namaDiskon: dto.namaDiskon,
-        kodeDiskon: dto.kodeDiskon ? dto.kodeDiskon.toUpperCase() : null,
+        namaDiskon: dto.namaDiskon.trim(),
+        kodeDiskon: dto.kodeDiskon ? dto.kodeDiskon.toUpperCase().trim() : null,
         persentaseDiskon: dto.persentaseDiskon,
         tanggalAwal: tglAwal,
         tanggalAkhir: tglAkhir,
         ownerId,
+        spaceId: targetSpaceId,
       },
       include: {
         owner: true,
+        space: true,
       },
     });
   }
@@ -81,6 +101,13 @@ export class DiscountService {
       where.OR = [{ ownerId: targetOwnerId }, { ownerId: null }];
     }
 
+    if (spaceId) {
+      where.OR = [
+        { spaceId: spaceId },
+        { spaceId: null },
+      ];
+    }
+
     return this.prisma.diskon.findMany({
       where,
       orderBy: { createdAt: 'desc' },
@@ -90,6 +117,13 @@ export class DiscountService {
             id: true,
             namaCoworking: true,
             namaPemilik: true,
+          },
+        },
+        space: {
+          select: {
+            id: true,
+            namaSpace: true,
+            tipe: true,
           },
         },
         _count: {
@@ -106,6 +140,7 @@ export class DiscountService {
       where: { id },
       include: {
         owner: true,
+        space: true,
       },
     });
 
@@ -122,12 +157,12 @@ export class DiscountService {
     if (typeof codeOrId === 'number' || !isNaN(Number(codeOrId))) {
       diskon = await this.prisma.diskon.findUnique({
         where: { id: Number(codeOrId) },
-        include: { owner: true },
+        include: { owner: true, space: true },
       });
     } else {
       diskon = await this.prisma.diskon.findUnique({
-        where: { kodeDiskon: String(codeOrId).toUpperCase() },
-        include: { owner: true },
+        where: { kodeDiskon: String(codeOrId).toUpperCase().trim() },
+        include: { owner: true, space: true },
       });
     }
 
@@ -138,7 +173,11 @@ export class DiscountService {
     }
 
     const now = new Date();
-    const isValid = now >= diskon.tanggalAwal && now <= diskon.tanggalAkhir;
+    const tglAwal = new Date(diskon.tanggalAwal);
+    tglAwal.setHours(0, 0, 0, 0);
+    const tglAkhir = new Date(diskon.tanggalAkhir);
+    tglAkhir.setHours(23, 59, 59, 999);
+    const isValid = now >= tglAwal && now <= tglAkhir;
 
     if (!isValid) {
       throw new BadRequestException(
@@ -146,14 +185,21 @@ export class DiscountService {
       );
     }
 
-    if (spaceId && diskon.ownerId !== null) {
-      const space = await this.prisma.space.findUnique({
-        where: { id: spaceId },
-      });
-      if (space && space.ownerId !== diskon.ownerId) {
+    if (spaceId) {
+      if (diskon.spaceId && diskon.spaceId !== spaceId) {
         throw new BadRequestException(
-          `Kupon promo '${diskon.namaDiskon}' hanya berlaku pada coworking space '${diskon.owner?.namaCoworking || 'terkait'}'.`,
+          `Kupon promo '${diskon.namaDiskon}' hanya berlaku khusus untuk ruangan '${diskon.space?.namaSpace || 'tertentu'}'.`,
         );
+      }
+      if (diskon.ownerId !== null) {
+        const space = await this.prisma.space.findUnique({
+          where: { id: spaceId },
+        });
+        if (space && space.ownerId !== diskon.ownerId) {
+          throw new BadRequestException(
+            `Kupon promo '${diskon.namaDiskon}' hanya berlaku pada coworking space '${diskon.owner?.namaCoworking || 'terkait'}'.`,
+          );
+        }
       }
     }
 
@@ -167,6 +213,7 @@ export class DiscountService {
   async update(id: number, dto: UpdateDiscountDto, user: any) {
     const existing = await this.findOne(id);
 
+    let ownerId: number | null = null;
     if (user && user.id) {
       const owner = await this.getOwner(user.id);
       if (owner && existing.ownerId && existing.ownerId !== owner.id) {
@@ -174,12 +221,21 @@ export class DiscountService {
           'Anda tidak memiliki izin untuk mengubah diskon milik coworking space lain.',
         );
       }
+      if (owner) {
+        ownerId = owner.id;
+      }
     }
 
-    const updateData: any = { ...dto };
+    const updateData: any = {};
 
-    if (dto.kodeDiskon) {
-      updateData.kodeDiskon = dto.kodeDiskon.toUpperCase();
+    if (dto.namaDiskon !== undefined) {
+      updateData.namaDiskon = dto.namaDiskon.trim();
+    }
+    if (dto.persentaseDiskon !== undefined) {
+      updateData.persentaseDiskon = Number(dto.persentaseDiskon);
+    }
+    if (dto.kodeDiskon !== undefined) {
+      updateData.kodeDiskon = dto.kodeDiskon ? dto.kodeDiskon.toUpperCase().trim() : null;
     }
     if (dto.tanggalAwal) {
       updateData.tanggalAwal = new Date(dto.tanggalAwal);
@@ -188,18 +244,36 @@ export class DiscountService {
       updateData.tanggalAkhir = new Date(dto.tanggalAkhir);
     }
 
-    if (updateData.tanggalAwal && updateData.tanggalAkhir) {
-      if (updateData.tanggalAwal >= updateData.tanggalAkhir) {
-        throw new BadRequestException(
-          'Tanggal awal promo harus lebih awal daripada tanggal akhir.',
-        );
+    if (dto.spaceId !== undefined) {
+      if (dto.spaceId) {
+        const space = await this.prisma.space.findUnique({
+          where: { id: dto.spaceId },
+        });
+        if (!space) {
+          throw new NotFoundException(`Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`);
+        }
+        if (ownerId && space.ownerId !== ownerId) {
+          throw new ForbiddenException('Ruangan ini bukan milik coworking space Anda.');
+        }
+        updateData.spaceId = space.id;
+      } else {
+        updateData.spaceId = null;
       }
+    }
+
+    const start = updateData.tanggalAwal || existing.tanggalAwal;
+    const end = updateData.tanggalAkhir || existing.tanggalAkhir;
+
+    if (start >= end) {
+      throw new BadRequestException(
+        'Tanggal awal promo harus lebih awal daripada tanggal akhir.',
+      );
     }
 
     return this.prisma.diskon.update({
       where: { id },
       data: updateData,
-      include: { owner: true },
+      include: { owner: true, space: true },
     });
   }
 

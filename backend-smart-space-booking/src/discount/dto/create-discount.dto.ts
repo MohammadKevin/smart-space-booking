@@ -48,6 +48,15 @@ export class CreateDiscountDto {
   @IsNotEmpty({ message: 'Tanggal awal tidak boleh kosong' })
   tanggalAwal: string;
 
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: 'ID Ruangan harus berupa angka' })
+  spaceId?: number;
+
   @ApiProperty({
     example: '2026-12-31T23:59:59.000Z',
     description: 'Tanggal & waktu berakhirnya promo (ISO-8601 string)',
