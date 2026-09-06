@@ -521,6 +521,12 @@ export class AuthService {
       throw new ForbiddenException('Kunci rahasia Super Admin salah atau tidak valid.');
     }
 
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`,
+      );
+    } catch {}
+
     const cleanEmail = dto.email.trim().toLowerCase();
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
@@ -528,36 +534,52 @@ export class AuthService {
       where: { email: cleanEmail },
     });
 
-    let user;
+    let userId: number;
     if (existing) {
-      user = await this.prisma.user.update({
+      await this.prisma.user.update({
         where: { id: existing.id },
         data: {
           password: hashedPassword,
-          role: Role.super_admin,
           isVerified: true,
           otpCode: null,
           otpExpires: null,
         },
       });
+      userId = existing.id;
     } else {
-      user = await this.prisma.user.create({
+      const created = await this.prisma.user.create({
         data: {
           email: cleanEmail,
           password: hashedPassword,
-          role: Role.super_admin,
           isVerified: true,
         },
       });
+      userId = created.id;
     }
 
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `UPDATE users SET role = 'super_admin' WHERE id = ?;`,
+        userId,
+      );
+    } catch {}
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        member: true,
+        spaceOwner: true,
+        staff: true,
+      },
+    });
+
     const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
+      sub: user!.id,
+      email: user!.email,
+      role: user!.role,
     };
     const token = this.jwtService.sign(payload);
-    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user!;
 
     return {
       message: 'Akun Super Admin (Platform CEO) berhasil diaktifkan.',

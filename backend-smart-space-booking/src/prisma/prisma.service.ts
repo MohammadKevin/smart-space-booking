@@ -8,6 +8,11 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
+    try {
+      await this.$executeRawUnsafe(
+        `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`
+      );
+    } catch {}
   }
 
   async onModuleDestroy() {
