@@ -29,7 +29,7 @@ jobs:
           DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy_db"
         run: |
           npm ci --legacy-peer-deps
-          npx prisma generate
+          npx prisma generate --schema=./prisma/schema.prisma
           npm run build
 
       - name: 🚀 Sync Dist to cPanel
@@ -76,7 +76,8 @@ jobs:
             source /home/budayaki/nodevenv/backend_ukk/20/bin/activate
             cd /home/budayaki/backend_ukk
             npm install --legacy-peer-deps
-            npx prisma db push --skip-generate
-            npx prisma generate
+            npx prisma generate --schema=./prisma/schema.prisma
+            npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss
+            npx prisma generate --schema=./prisma/schema.prisma
             mkdir -p tmp
             touch tmp/restart.txt
