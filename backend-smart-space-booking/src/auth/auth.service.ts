@@ -19,6 +19,7 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SecretProvisionDto } from './dto/secret-provision.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -596,6 +597,140 @@ export class AuthService {
       message: 'Akun Super Admin (Platform CEO) berhasil diaktifkan.',
       access_token: token,
       user: sanitizedUser,
+    };
+  }
+
+  async googleAuth(dto: GoogleLoginDto) {
+    let email = dto.email?.trim().toLowerCase();
+    let name = dto.name?.trim();
+    let avatar = dto.avatar?.trim();
+
+    if (dto.token) {
+      try {
+        const googleRes = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${dto.token}`,
+        );
+        if (googleRes.ok) {
+          const googleData = await googleRes.json();
+          if (googleData.email) {
+            email = googleData.email.trim().toLowerCase();
+            name = googleData.name || name || (email ? email.split('@')[0] : 'Member');
+            avatar = googleData.picture || avatar;
+          }
+        } else {
+          const userinfoRes = await fetch(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            {
+              headers: { Authorization: `Bearer ${dto.token}` },
+            },
+          );
+          if (userinfoRes.ok) {
+            const userinfoData = await userinfoRes.json();
+            if (userinfoData.email) {
+              email = userinfoData.email.trim().toLowerCase();
+              name = userinfoData.name || name || (email ? email.split('@')[0] : 'Member');
+              avatar = userinfoData.picture || avatar;
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (!email) {
+      throw new BadRequestException(
+        'Autentikasi Google gagal. Alamat email tidak dapat diverifikasi.',
+      );
+    }
+
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        member: true,
+        spaceOwner: true,
+        staff: true,
+      },
+    });
+
+    if (user) {
+      if (!user.isVerified) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { isVerified: true, otpCode: null, otpExpires: null },
+          include: {
+            member: true,
+            spaceOwner: true,
+            staff: true,
+          },
+        });
+      }
+
+      if (user.member && avatar && !user.member.foto) {
+        await this.prisma.member.update({
+          where: { id: user.member.id },
+          data: { foto: avatar },
+        });
+      }
+
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      };
+      const token = this.jwtService.sign(payload);
+      const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+
+      return {
+        message: 'Login dengan Google berhasil!',
+        access_token: token,
+        user: sanitizedUser,
+      };
+    }
+
+    const randomPassword = Math.random().toString(36).slice(-10) + 'Aa1*';
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    const memberName = name || email.split('@')[0];
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          role: Role.member,
+          isVerified: true,
+        },
+      });
+
+      const member = await tx.member.create({
+        data: {
+          namaMember: memberName,
+          instansi: 'Umum / Personal',
+          alamat: 'Indonesia',
+          telp: '081234567890',
+          foto: avatar || null,
+          userId: newUser.id,
+        },
+      });
+
+      return { user: newUser, member };
+    });
+
+    const payload = {
+      sub: result.user.id,
+      email: result.user.email,
+      role: result.user.role,
+    };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      message: 'Registrasi Akun Member dengan Google berhasil!',
+      access_token: token,
+      user: {
+        id: result.user.id,
+        email: result.user.email,
+        role: result.user.role,
+        isVerified: true,
+        member: result.member,
+      },
     };
   }
 

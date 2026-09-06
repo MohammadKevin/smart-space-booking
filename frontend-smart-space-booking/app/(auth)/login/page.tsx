@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { login, forgotPassword, getApiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import {
   Lock,
   Mail,
@@ -315,6 +316,20 @@ function LoginForm() {
                   <span>Ingat perangkat ini</span>
                 </label>
               </div>
+
+              <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-[11px] uppercase">
+                  <span className="bg-white px-2 text-slate-400 font-semibold">atau</span>
+                </div>
+              </div>
+
+              <GoogleLoginButton
+                label="Masuk Cepat dengan Google"
+                onError={(err) => setErrorMessage(err)}
+              />
             </form>
           </div>
 

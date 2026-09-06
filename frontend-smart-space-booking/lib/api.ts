@@ -49,6 +49,7 @@ import {
   SuperAdminMonthlyRevenueItem,
   SuperAdminSpaceOwner,
   SuperAdminTransaction,
+  GoogleAuthDto,
 } from "@/types/api";
 
 export * from "@/types/api";
@@ -134,6 +135,16 @@ export function getApiErrorMessage(error: unknown): string {
 
 export async function login(dto: LoginDto): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>("/auth/login", dto);
+  if (typeof window !== "undefined" && data.access_token) {
+    localStorage.setItem("token", data.access_token);
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
+  return data;
+}
+
+export async function googleAuth(dto: GoogleAuthDto): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>("/auth/google", dto);
   if (typeof window !== "undefined" && data.access_token) {
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("access_token", data.access_token);

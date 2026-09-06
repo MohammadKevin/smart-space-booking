@@ -23,6 +23,7 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SecretProvisionDto } from './dto/secret-provision.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -55,6 +56,21 @@ export class AuthController {
   })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Login & Registrasi Cepat Member via Google OAuth',
+    description:
+      'Autentikasi 1-klik untuk akun Member menggunakan Google Credential / Token.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login atau pendaftaran Google berhasil, mengembalikan access_token.',
+  })
+  googleAuth(@Body() googleDto: GoogleLoginDto) {
+    return this.authService.googleAuth(googleDto);
   }
 
   @Post('register/member')

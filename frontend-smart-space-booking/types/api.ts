@@ -98,6 +98,13 @@ export interface LoginDto {
   password: string;
 }
 
+export interface GoogleAuthDto {
+  token: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
+}
+
 export interface RegisterMemberDto {
   email: string;
   password: string;
