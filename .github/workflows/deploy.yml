@@ -65,6 +65,17 @@ jobs:
           REMOTE_USER: ${{ secrets.SSH_USER }}
           TARGET: "/home/budayaki/backend_ukk/prisma"
 
+      - name: 📂 Sync Generated Prisma Client Artifacts to cPanel
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          ARGS: "-rlgoDzvc"
+          SOURCE: "backend-smart-space-booking/node_modules/.prisma/"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: "/home/budayaki/backend_ukk/node_modules/.prisma"
+
       - name: 🔄 Install Dependencies, Update DB & Restart Passenger
         uses: appleboy/ssh-action@v1.0.3
         with:
