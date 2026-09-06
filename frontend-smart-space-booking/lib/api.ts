@@ -501,10 +501,12 @@ export async function getRecentTransactions(limit: number = 10): Promise<Reserva
 }
 
 export async function startPayment(
-  reservationId: number
+  reservationId: number,
+  paymentMethod?: string
 ): Promise<StartPaymentResponse> {
   const { data } = await api.post<StartPaymentResponse>(
-    `/transactions/${reservationId}/pay`
+    `/transactions/${reservationId}/pay`,
+    paymentMethod ? { paymentMethod } : {}
   );
   return data;
 }

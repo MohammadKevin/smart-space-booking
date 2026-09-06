@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Body,
   Param,
   Query,
   ParseIntPipe,
@@ -32,16 +33,21 @@ export class TransactionController {
   @Post(':reservationId/pay')
   @Roles(Role.member)
   @ApiOperation({
-    summary: 'Memulai Pembayaran Reservasi (Midtrans Snap)',
+    summary: 'Memulai Pembayaran Reservasi (Direct VA / Midtrans Snap)',
     description:
-      'Member membuat token Snap untuk menyelesaikan pembayaran reservasi yang sudah disetujui.',
+      'Member membuat token Snap atau langsung mendapatkan VA/QRIS Midtrans untuk menyelesaikan pembayaran reservasi.',
   })
-  @ApiResponse({ status: 201, description: 'Snap token berhasil dibuat.' })
+  @ApiResponse({ status: 201, description: 'Pembayaran berhasil diinisialisasi.' })
   startPayment(
     @Param('reservationId', ParseIntPipe) reservationId: number,
     @GetUser('id') memberUserId: number,
+    @Body('paymentMethod') paymentMethod?: string,
   ) {
-    return this.transactionService.startPayment(reservationId, memberUserId);
+    return this.transactionService.startPayment(
+      reservationId,
+      memberUserId,
+      paymentMethod,
+    );
   }
 
   @Get()

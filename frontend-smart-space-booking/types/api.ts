@@ -327,6 +327,25 @@ export interface Transaksi {
   reservasi?: Reservation;
 }
 
+export interface DirectPaymentInfo {
+  success: boolean;
+  transactionId: string;
+  orderId: string;
+  grossAmount: number;
+  paymentType: string;
+  paymentMethod: string;
+  bank?: string;
+  vaNumber?: string | null;
+  billerCode?: string | null;
+  billKey?: string | null;
+  paymentCode?: string | null;
+  qrString?: string | null;
+  qrImageUrl?: string | null;
+  deepLink?: string | null;
+  expiryTime?: string;
+  statusMessage?: string;
+}
+
 export interface StartPaymentResult {
   transactionId: number;
   nomorInvoice: string;
@@ -335,6 +354,7 @@ export interface StartPaymentResult {
   redirectUrl: string;
   clientKey: string;
   snapScriptUrl: string;
+  directPayment?: DirectPaymentInfo | null;
 }
 
 export interface StartPaymentResponse {

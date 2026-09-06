@@ -97,7 +97,11 @@ export class TransactionService {
     return tx;
   }
 
-  async startPayment(reservationId: number, memberUserId: number) {
+  async startPayment(
+    reservationId: number,
+    memberUserId: number,
+    paymentMethod?: string,
+  ) {
     const member = await this.prisma.member.findUnique({
       where: { userId: memberUserId },
       include: { user: { select: { email: true } } },
@@ -165,24 +169,47 @@ export class TransactionService {
     const spaceName = reservation.detailReservasi?.space?.namaSpace || 'Ruangan';
     const durasiJam = reservation.durasiJam || 1;
 
+    const itemDetails = [
+      {
+        id: `SPACE-${spaceId}`,
+        price: Math.round(tx.jumlah),
+        quantity: 1,
+        name: `[${coworkingName}] ${spaceName} (${durasiJam} Jam)`.slice(0, 50),
+        merchant_name: coworkingName.slice(0, 50),
+      },
+    ];
+    const customField1 = `OwnerID:${ownerId}|${coworkingName}`.slice(0, 255);
+    const customField2 = `SpaceID:${spaceId}|${spaceName}`.slice(0, 255);
+    const customField3 = `MemberID:${member.id}|UserID:${memberUserId}`.slice(0, 255);
+
+    let directChargeResult: any = null;
+    if (paymentMethod && paymentMethod !== 'snap' && paymentMethod !== 'credit_card') {
+      try {
+        directChargeResult = await this.midtrans.chargeDirectPayment({
+          orderId,
+          grossAmount: tx.jumlah,
+          paymentMethod,
+          firstName: member.namaMember,
+          email: member.user?.email || undefined,
+          phone: member.telp,
+          itemDetails,
+          customField1,
+          customField2,
+          customField3,
+        });
+      } catch {}
+    }
+
     const snap: SnapTokenResult = await this.midtrans.createSnapToken({
       orderId,
       grossAmount: tx.jumlah,
       firstName: member.namaMember,
       email: member.user?.email || undefined,
       phone: member.telp,
-      itemDetails: [
-        {
-          id: `SPACE-${spaceId}`,
-          price: Math.round(tx.jumlah),
-          quantity: 1,
-          name: `[${coworkingName}] ${spaceName} (${durasiJam} Jam)`.slice(0, 50),
-          merchant_name: coworkingName.slice(0, 50),
-        },
-      ],
-      customField1: `OwnerID:${ownerId}|${coworkingName}`.slice(0, 255),
-      customField2: `SpaceID:${spaceId}|${spaceName}`.slice(0, 255),
-      customField3: `MemberID:${member.id}|UserID:${memberUserId}`.slice(0, 255),
+      itemDetails,
+      customField1,
+      customField2,
+      customField3,
     });
 
     await this.prisma.transaksi.update({
@@ -191,13 +218,14 @@ export class TransactionService {
         snapToken: snap.token,
         snapRedirectUrl: snap.redirect_url,
         midtransOrderId: orderId,
+        metodePembayaran: paymentMethod || tx.metodePembayaran,
         statusPembayaran: PembayaranStatus.menunggu_pembayaran,
       },
     });
 
     return {
       message:
-        'Snap pembayaran berhasil dibuat. Silakan selesaikan pembayaran.',
+        'Informasi pembayaran berhasil dibuat. Silakan selesaikan pembayaran.',
       data: {
         transactionId: tx.id,
         nomorInvoice: tx.nomorInvoice,
@@ -206,6 +234,7 @@ export class TransactionService {
         redirectUrl: snap.redirect_url,
         clientKey: this.midtrans.clientKey,
         snapScriptUrl: this.midtrans.snapScriptUrl,
+        directPayment: directChargeResult,
       },
     };
   }

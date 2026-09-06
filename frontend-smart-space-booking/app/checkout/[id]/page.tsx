@@ -39,6 +39,9 @@ import {
   Lock,
   Download,
   ExternalLink,
+  Copy,
+  Check,
+  RefreshCw,
 } from "lucide-react";
 
 interface CheckoutPageProps {
@@ -131,6 +134,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const [paySuccess, setPaySuccess] = useState(false);
+  const [directPaymentData, setDirectPaymentData] = useState<any | null>(null);
+  const [copiedVa, setCopiedVa] = useState(false);
 
   const fetchReservation = async () => {
     setLoading(true);
@@ -154,16 +159,29 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     }
   }, [reservationId]);
 
+  const handleCopyVa = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedVa(true);
+    setTimeout(() => setCopiedVa(null as any), 2000);
+  };
+
   const handlePayNow = async () => {
     if (!reservation) return;
     setPaying(true);
     setPayError(null);
 
     try {
-      const response = await startPayment(reservation.id);
+      const response = await startPayment(reservation.id, selectedPaymentMethod);
       const result = response.data;
 
-      // Optional: Open Midtrans direct standalone page if popup is blocked
+      if (result.directPayment) {
+        setDirectPaymentData(result.directPayment);
+        setPaying(false);
+        return;
+      }
+
+      // If Snap popup fallback
       if (result.redirectUrl) {
         window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
       }
@@ -197,6 +215,18 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       setPayError(getApiErrorMessage(err));
       setPaying(false);
     }
+  };
+
+  const handleCheckDirectPaymentStatus = async () => {
+    if (!reservation) return;
+    setPaying(true);
+    try {
+      if (reservation.transaksi?.id) {
+        await syncPayment(reservation.transaksi.id);
+      }
+      await fetchReservation();
+    } catch {}
+    setPaying(false);
   };
 
   if (loading) {
@@ -476,6 +506,102 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                   <span>{payError}</span>
+                </div>
+              )}
+
+              {/* Direct VA / QRIS Instruction Card if Generated */}
+              {directPaymentData && (
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-50 via-white to-sky-50 border-2 border-cyan-400 shadow-md space-y-4 animate-fadeIn">
+                  <div className="flex items-center justify-between border-b border-cyan-100 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-bold text-xs">
+                        VA
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">
+                          Instruksi Pembayaran {directPaymentData.bank || "BANK"}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          Selesaikan transfer sebelum batas waktu berakhir.
+                        </p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                      Menunggu Pembayaran
+                    </span>
+                  </div>
+
+                  {directPaymentData.vaNumber ? (
+                    <div className="p-4 rounded-xl bg-white border border-cyan-200 space-y-2">
+                      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                        Nomor Virtual Account ({directPaymentData.bank})
+                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xl sm:text-2xl font-mono font-extrabold text-slate-900 tracking-wider">
+                          {directPaymentData.vaNumber}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyVa(directPaymentData.vaNumber)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs border border-cyan-200 transition-colors cursor-pointer"
+                        >
+                          {copiedVa ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedVa ? "Tersalin!" : "Salin"}</span>
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-slate-400">
+                        Transfer persis senilai <strong className="font-mono text-slate-700">{formatRupiah(totalHarga)}</strong> via ATM / m-Banking / Internet Banking.
+                      </p>
+                    </div>
+                  ) : directPaymentData.billerCode && directPaymentData.billKey ? (
+                    <div className="p-4 rounded-xl bg-white border border-cyan-200 space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[10px] font-semibold text-slate-400">KODE PERUSAHAAN (BILLER)</p>
+                          <p className="text-base font-mono font-bold text-slate-900">{directPaymentData.billerCode}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-slate-400">KODE PEMBAYARAN (BILL KEY)</p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-base font-mono font-bold text-slate-900">{directPaymentData.billKey}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyVa(directPaymentData.billKey)}
+                              className="p-1 text-cyan-600 hover:text-cyan-800 cursor-pointer"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : directPaymentData.qrString || directPaymentData.qrImageUrl ? (
+                    <div className="p-4 rounded-xl bg-white border border-cyan-200 text-center space-y-3">
+                      <p className="text-xs font-bold text-slate-900">Scan QRIS untuk Menyelesaikan Pembayaran</p>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 inline-block">
+                        <img
+                          src={directPaymentData.qrImageUrl}
+                          alt="QRIS Code"
+                          className="w-48 h-48 mx-auto object-contain"
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        Buka aplikasi e-wallet (GoPay, OVO, Dana, ShopeePay) atau m-Banking lalu scan kode di atas.
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="flex items-center justify-between gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleCheckDirectPaymentStatus}
+                      disabled={paying}
+                      className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${paying ? "animate-spin" : ""}`} />
+                      <span>Saya Sudah Bayar (Cek Status)</span>
+                    </button>
+                  </div>
                 </div>
               )}
 
