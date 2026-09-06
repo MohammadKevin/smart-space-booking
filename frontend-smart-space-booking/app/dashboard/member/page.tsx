@@ -630,19 +630,13 @@ export default function MemberDashboardPage() {
 
                     <div className="flex items-center gap-2">
                       {canPay && (
-                        <button
-                          type="button"
-                          disabled={payingId === res.id}
-                          onClick={() => handlePay(res)}
-                          className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        <Link
+                          href={`/checkout/${res.id}`}
+                          className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                         >
-                          {payingId === res.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <Wallet className="w-3.5 h-3.5" />
-                          )}
-                          <span>{payingId === res.id ? "Memproses..." : "Bayar"}</span>
-                        </button>
+                          <Wallet className="w-3.5 h-3.5" />
+                          <span>Bayar Sekarang</span>
+                        </Link>
                       )}
 
                       {canCancel && (

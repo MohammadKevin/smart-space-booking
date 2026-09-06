@@ -294,6 +294,10 @@ export default function BookingPage({ params }: BookingPageProps) {
 
       const res = await createReservation(payload);
       const reservationData = (res as any)?.data || res;
+      if (reservationData?.id) {
+        router.push(`/checkout/${reservationData.id}`);
+        return;
+      }
       setBookingSuccessData(reservationData);
     } catch (err: unknown) {
       const errorMsg = getApiErrorMessage(err);
@@ -665,7 +669,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </>
                 ) : (
                   <>
-                    <span>Ajukan Reservasi</span>
+                    <span>Lanjut ke Review & Pembayaran</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}

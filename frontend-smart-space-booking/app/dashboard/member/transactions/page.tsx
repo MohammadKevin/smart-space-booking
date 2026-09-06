@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   getTransactions,
@@ -315,19 +316,13 @@ export default function MemberTransactionsPage() {
                     </button>
 
                     {canPay(t) && (
-                      <button
-                        type="button"
-                        disabled={payingId === t.id}
-                        onClick={() => handlePay(t)}
-                        className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                      <Link
+                        href={`/checkout/${t.reservasiId}`}
+                        className="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                       >
-                        {payingId === t.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <CreditCard className="w-3.5 h-3.5" />
-                        )}
-                        Bayar
-                      </button>
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Bayar</span>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -432,19 +427,13 @@ export default function MemberTransactionsPage() {
               </div>
 
               {canPay(selected) && (
-                <button
-                  type="button"
-                  disabled={payingId === selected.id}
-                  onClick={() => handlePay(selected)}
-                  className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                <Link
+                  href={`/checkout/${selected.reservasiId}`}
+                  className="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  {payingId === selected.id ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <CreditCard className="w-3.5 h-3.5" />
-                  )}
-                  Bayar Sekarang
-                </button>
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Bayar Sekarang (Buka Checkout)</span>
+                </Link>
               )}
             </div>
           </div>

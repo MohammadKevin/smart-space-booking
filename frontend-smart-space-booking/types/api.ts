@@ -275,6 +275,7 @@ export interface Reservation {
   member?: MemberProfile;
   owner?: SpaceOwnerProfile;
   detailReservasi?: DetailReservasi;
+  transaksi?: Transaksi | null;
 }
 
 export interface CreateReservationDto {
