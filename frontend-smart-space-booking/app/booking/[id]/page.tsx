@@ -214,6 +214,11 @@ export default function BookingPage({ params }: BookingPageProps) {
     try {
       const response = await startPayment(bookingSuccessData.id);
       const result = response.data;
+
+      if (result.redirectUrl) {
+        window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
+      }
+
       await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
         onSuccess: async () => {
           try {

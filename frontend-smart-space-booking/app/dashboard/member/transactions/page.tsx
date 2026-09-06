@@ -105,6 +105,11 @@ export default function MemberTransactionsPage() {
     try {
       const response = await startPayment(t.reservasiId);
       const result = response.data;
+
+      if (result.redirectUrl) {
+        window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
+      }
+
       await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
         onSuccess: async () => {
           try {

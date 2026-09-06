@@ -266,6 +266,11 @@ export default function MemberDashboardPage() {
     try {
       const response = await startPayment(res.id);
       const result = response.data;
+
+      if (result.redirectUrl) {
+        window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
+      }
+
       await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
         onSuccess: async () => {
           setPayMessage(`Pembayaran ${result.nomorInvoice} berhasil. Sedang menyinkronkan status...`);
