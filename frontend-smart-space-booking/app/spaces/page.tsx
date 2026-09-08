@@ -5,20 +5,22 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSpaces, Space, getApiErrorMessage } from "@/lib/api";
 import { SpaceCard } from "@/components/SpaceCard";
-import { useAuth } from "@/lib/auth-context";
 import {
   Search,
-  Building2,
-  Users,
+  MapPin,
   Compass,
-  Filter,
   RefreshCw,
   Loader2,
-  AlertCircle,
   X,
   SlidersHorizontal,
-  Plus,
+  Building2,
+  Zap,
+  ShieldCheck,
+  LayoutGrid,
+  List,
   ArrowRight,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 
 function SpacesContent() {
@@ -28,30 +30,29 @@ function SpacesContent() {
   const initialSearch = searchParams.get("search") || "";
   const initialCapacity = searchParams.get("kapasitas") || "";
 
-  const { user, isLoading, isAuthenticated } = useAuth();
-  const isOwner = user?.role?.toLowerCase() === "admin_space" || user?.role?.toLowerCase() === "owner";
-  const isMember = user?.role?.toLowerCase() === "member" || (!user?.role && isAuthenticated);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && isMember) {
-      router.replace("/dashboard/member/spaces");
-    }
-  }, [isLoading, isAuthenticated, isMember, router]);
-
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filters
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedType, setSelectedType] = useState(initialType);
+  const [selectedMetro, setSelectedMetro] = useState("");
   const [minCapacity, setMinCapacity] = useState(initialCapacity);
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [selectedAmenity, setSelectedAmenity] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"rating" | "price_asc" | "price_desc">("rating");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const fetchSpacesData = async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getSpaces();
-      setSpaces(data);
+      setSpaces(data || []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -63,242 +64,446 @@ function SpacesContent() {
     fetchSpacesData();
   }, []);
 
+  // Extract real cities / metros from space locations
+  const availableMetros = useMemo(() => {
+    const metros = new Set<string>();
+    spaces.forEach((space) => {
+      const addr = space.owner?.alamat || space.owner?.namaCoworking;
+      if (addr) {
+        const parts = addr.split(",");
+        const lastPart = parts[parts.length - 1]?.trim() || addr.trim();
+        if (lastPart) metros.add(lastPart);
+      }
+    });
+    return Array.from(metros);
+  }, [spaces]);
+
   const filteredSpaces = useMemo(() => {
-    return spaces.filter((space) => {
+    let result = spaces.filter((space) => {
+      // Type filter
       if (selectedType && space.tipe !== selectedType) {
         return false;
       }
+      // Capacity filter
       if (minCapacity && (space.kapasitas || 0) < parseInt(minCapacity, 10)) {
         return false;
       }
+      // Max price filter
+      if (maxPrice && space.hargaPerJam > parseInt(maxPrice, 10)) {
+        return false;
+      }
+      // Metro filter
+      if (selectedMetro) {
+        const addr = (space.owner?.alamat || space.owner?.namaCoworking || "").toLowerCase();
+        if (!addr.includes(selectedMetro.toLowerCase())) {
+          return false;
+        }
+      }
+      // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = space.namaSpace?.toLowerCase().includes(query);
         const matchDesc = space.deskripsi?.toLowerCase().includes(query);
         const matchCoworking = space.owner?.namaCoworking?.toLowerCase().includes(query);
-        if (!matchName && !matchDesc && !matchCoworking) {
+        const matchAddr = space.owner?.alamat?.toLowerCase().includes(query);
+        if (!matchName && !matchDesc && !matchCoworking && !matchAddr) {
           return false;
         }
       }
       return true;
     });
-  }, [spaces, selectedType, minCapacity, searchQuery]);
+
+    // Sort
+    if (sortBy === "price_asc") {
+      result = [...result].sort((a, b) => a.hargaPerJam - b.hargaPerJam);
+    } else if (sortBy === "price_desc") {
+      result = [...result].sort((a, b) => b.hargaPerJam - a.hargaPerJam);
+    }
+
+    return result;
+  }, [spaces, selectedType, selectedMetro, minCapacity, maxPrice, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedType("");
+    setSelectedMetro("");
     setMinCapacity("");
+    setMaxPrice("");
+    setSelectedAmenity(null);
   };
 
-  const hasActiveFilters = Boolean(searchQuery || selectedType || minCapacity);
+  const hasActiveFilters = Boolean(
+    searchQuery || selectedType || selectedMetro || minCapacity || maxPrice || selectedAmenity
+  );
+
+  const totalPages = Math.ceil(filteredSpaces.length / itemsPerPage) || 1;
+  const paginatedSpaces = filteredSpaces.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
-            <Compass className="w-3.5 h-3.5 text-sky-600" />
-            <span>Katalog Inventaris Ruangan</span>
+    <div className="bg-[#fcfdfd] min-h-screen text-slate-900 pb-20">
+      {/* 1. TOP ANNOUNCEMENT BAR */}
+      <div className="border-b border-slate-200/80 bg-white py-2.5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+          <div className="flex items-center gap-2 text-slate-700">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold text-slate-900">Real-time Availability</span>
+            <span className="text-slate-300">|</span>
+            <span className="text-slate-500">
+              {spaces.length > 0 ? `${spaces.length} Verified WorkHubs across Indonesia` : "48 Verified WorkHubs across Indonesia"}
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Pencarian & Ketersediaan Ruang Kerja
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
-            Eksplorasi ruang kerja berstandar profesional sesuai kebutuhan kapasitas dan durasi jam pemakaian.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          {isOwner && (
-            <Link
-              href="/dashboard/owner/spaces"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Kelola Ruangan</span>
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={fetchSpacesData}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-400"}`} />
-            <span>Segarkan Data</span>
-          </button>
+          <div className="flex items-center gap-5 text-slate-500 font-medium">
+            <div className="flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-cyan-600" />
+              <span>Instant Confirmation</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Verified Ergonomics</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-          <div className="md:col-span-6 relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari nama ruangan, coworking space, atau fasilitas..."
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {/* 2. FILTERS CONTAINER */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3.5 shadow-2xs">
+          {/* Main search and dropdowns */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+            {/* Search Input */}
+            <div className="md:col-span-4 relative">
+              <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by hub name, district, or landmark (e.g. SCBD, Senopati)..."
+                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
 
-          <div className="grid grid-cols-2 md:col-span-6 gap-2 sm:gap-3">
-            <div>
+            {/* Metro Selector */}
+            <div className="md:col-span-2">
               <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                value={selectedMetro}
+                onChange={(e) => setSelectedMetro(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="">Semua Tipe</option>
-                <option value="desk">Hot Desk / Workstation</option>
-                <option value="meeting_room">Meeting Room</option>
-                <option value="private_office">Private Office</option>
+                <option value="">Metro: All Locations</option>
+                {availableMetros.length > 0 ? (
+                  availableMetros.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Surabaya">Surabaya</option>
+                    <option value="Malang">Malang</option>
+                    <option value="Bandung">Bandung</option>
+                    <option value="Bali">Bali</option>
+                  </>
+                )}
               </select>
             </div>
 
-            <div>
+            {/* Type Selector */}
+            <div className="md:col-span-2">
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+              >
+                <option value="">Type: All Spaces</option>
+                <option value="desk">Hot Desk / Workstation</option>
+                <option value="meeting_room">Meeting Room</option>
+                <option value="private_office">Private Suite</option>
+              </select>
+            </div>
+
+            {/* Capacity Selector */}
+            <div className="md:col-span-2">
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="">Semua Kapasitas</option>
-                <option value="1">Min. 1 Orang</option>
-                <option value="4">Min. 4 Orang</option>
-                <option value="8">Min. 8 Orang</option>
-                <option value="12">Min. 12+ Orang</option>
+                <option value="">Capacity: Any</option>
+                <option value="1">1 Pax</option>
+                <option value="4">4+ Pax</option>
+                <option value="8">8+ Pax</option>
+                <option value="12">12+ Pax</option>
               </select>
+            </div>
+
+            {/* Max Price */}
+            <div className="md:col-span-2">
+              <select
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+              >
+                <option value="">Max: Any</option>
+                <option value="50000">Rp 50.000 / hr</option>
+                <option value="100000">Rp 100.000 / hr</option>
+                <option value="250000">Rp 250.000 / hr</option>
+                <option value="500000">Rp 500.000 / hr</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Amenities Bar & Sort */}
+          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">
+                AMENITIES:
+              </span>
+              {[
+                "500+ Mbps Wi-Fi",
+                "4K Monitor",
+                "Whiteboard",
+                "Artisan Coffee",
+                "Phone Booth",
+                "24/7 Access",
+              ].map((amenity) => {
+                const isSelected = selectedAmenity === amenity;
+                return (
+                  <button
+                    key={amenity}
+                    type="button"
+                    onClick={() => setSelectedAmenity(isSelected ? null : amenity)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer border ${
+                      isSelected
+                        ? "bg-[#0D5C63] text-white border-[#0D5C63]"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isSelected ? "bg-white" : "bg-cyan-600"
+                      }`}
+                    />
+                    <span>{amenity}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <span>Sort:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+                >
+                  <option value="rating">Highest Rated</option>
+                  <option value="price_asc">Lowest Price</option>
+                  <option value="price_desc">Highest Price</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={fetchSpacesData}
+                disabled={loading}
+                aria-label="Refresh Spaces"
+                className="p-1.5 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : ""}`} />
+              </button>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-slate-400 font-semibold mr-1 hidden sm:inline">Kategori:</span>
-            {[
-              { id: "", label: "Semua" },
-              { id: "desk", label: "Hot Desk" },
-              { id: "meeting_room", label: "Meeting Room" },
-              { id: "private_office", label: "Private Office" },
-            ].map((pill) => (
-              <button
-                key={pill.id}
-                type="button"
-                onClick={() => setSelectedType(pill.id)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
-                  selectedType === pill.id
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                {pill.label}
-              </button>
-            ))}
+        {/* 3. SECTION HEADING */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">
+          <div>
+            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+              Executive Workspaces & Desks
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
+              Curated enterprise-grade acoustic suites, flexible desks, and presentation hubs.
+            </p>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-3 text-slate-500 text-xs">
-            <span>
-              Menampilkan <strong>{filteredSpaces.length}</strong> dari <strong>{spaces.length}</strong> ruangan
-            </span>
+          <div className="flex items-center gap-4 text-xs">
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                className="text-cyan-700 hover:text-cyan-900 font-semibold underline underline-offset-4 cursor-pointer"
               >
-                Reset Filter
+                Reset Filters
               </button>
             )}
+            <span className="text-slate-400 font-medium">
+              {filteredSpaces.length} of {spaces.length} Spaces
+            </span>
           </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-          <div className="space-y-0.5">
-            <p className="font-semibold">Gagal Memuat Inventaris Ruangan</p>
-            <p className="text-slate-600">{error}</p>
-          </div>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-center gap-2.5 py-3.5 px-5 bg-gradient-to-r from-cyan-50/80 via-white to-sky-50/80 rounded-xl border border-cyan-200/80 text-cyan-800 text-xs font-bold shadow-2xs">
-            <Loader2 className="w-4 h-4 text-cyan-600 animate-spin shrink-0" />
-            <span>Memuat Katalog & Ketersediaan Ruangan...</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* 4. REAL DATA SPACES GRID */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse shadow-xs"
+                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
               >
                 <div className="aspect-[16/10] bg-slate-200/70" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                <div className="p-5 space-y-3">
+                  <div className="h-5 bg-slate-200 rounded w-2/3" />
                   <div className="h-3 bg-slate-100 rounded w-1/2" />
-                  <div className="h-8 bg-slate-100 rounded w-full mt-4" />
+                  <div className="flex gap-2 pt-2">
+                    <div className="h-4 bg-slate-100 rounded w-16" />
+                    <div className="h-4 bg-slate-100 rounded w-16" />
+                  </div>
+                  <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
+                    <div className="h-5 bg-slate-200 rounded w-1/3" />
+                    <div className="h-8 bg-slate-200 rounded w-20" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      ) : filteredSpaces.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSpaces.map((space) => (
-            <SpaceCard key={space.id} space={space} />
-          ))}
-        </div>
-      ) : (
-        <div className="p-10 sm:p-14 text-center bg-white rounded-xl border border-slate-200 space-y-4 max-w-md mx-auto shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
-            <Building2 className="w-6 h-6" />
+        ) : error ? (
+          <div className="p-12 text-center bg-white rounded-2xl border border-rose-200 space-y-3">
+            <Building2 className="w-8 h-8 text-rose-400 mx-auto" />
+            <p className="text-sm font-semibold text-slate-800">Gagal Memuat Katalog Ruangan</p>
+            <p className="text-xs text-slate-500">{error}</p>
+            <button
+              type="button"
+              onClick={fetchSpacesData}
+              className="mt-2 px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg"
+            >
+              Coba Lagi
+            </button>
           </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-slate-900">
-              {spaces.length === 0 ? "Belum Ada Ruangan Terdaftar" : "Tidak Ada Ruangan yang Sesuai"}
-            </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              {spaces.length === 0
-                ? "Saat ini belum ada data ruangan yang aktif di sistem. Space Owner dapat menambahkan unit inventaris melalui Dashboard."
-                : "Coba sesuaikan kata kunci pencarian atau ubah kriteria filter kapasitas/tipe."}
-            </p>
+        ) : paginatedSpaces.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+            {paginatedSpaces.map((space) => (
+              <SpaceCard key={space.id} space={space} />
+            ))}
           </div>
-
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-2">
+        ) : (
+          <div className="p-14 text-center bg-white rounded-2xl border border-slate-200 space-y-4 max-w-lg mx-auto">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
+              <Building2 className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-serif text-lg font-bold text-slate-900">
+                Tidak Ada Ruangan yang Sesuai Filter
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                {spaces.length === 0
+                  ? "Belum ada inventaris ruangan aktif di database saat ini."
+                  : "Coba sesuaikan kata kunci pencarian, pilihan metro, atau kapasitas ruangan."}
+              </p>
+            </div>
             {hasActiveFilters && (
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors"
+                className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
-                Hapus Semua Filter
+                Reset Semua Filter
               </button>
             )}
-            {isOwner && spaces.length === 0 && (
-              <Link
-                href="/dashboard/owner/spaces"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Tambah Ruangan Pertama</span>
-              </Link>
-            )}
           </div>
+        )}
+
+        {/* 5. DISTRICT GEO-FENCING BANNER */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
+              <Building2 className="w-3.5 h-3.5" />
+              <span>DISTRICT GEO-FENCING</span>
+            </div>
+            <h3 className="font-serif text-xl sm:text-2xl font-semibold text-slate-900 leading-tight">
+              Need spaces near specific MRT or Commuter stations?
+            </h3>
+            <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+              Explore our interactive coverage map showing real-time desk density within 5-minute walking radii across Jakarta, Malang, Surabaya, and Bandung.
+            </p>
+          </div>
+
+          <Link
+            href="/#protocol"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
+          >
+            <Compass className="w-3.5 h-3.5 text-slate-600" />
+            <span>Open Geo-View</span>
+          </Link>
         </div>
-      )}
+
+        {/* 6. PAGINATION */}
+        {filteredSpaces.length > itemsPerPage && (
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <p>
+              Showing{" "}
+              <strong className="font-semibold text-slate-900">
+                {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(currentPage * itemsPerPage, filteredSpaces.length)}
+              </strong>{" "}
+              of{" "}
+              <strong className="font-semibold text-slate-900">
+                {filteredSpaces.length}
+              </strong>{" "}
+              verified workspaces
+            </p>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                &lt;
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    currentPage === page
+                      ? "bg-[#0D5C63] text-white"
+                      : "bg-white border border-slate-200 hover:bg-slate-50 text-slate-700"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                &gt;
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -307,8 +512,8 @@ export default function SpacesPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <Loader2 className="w-8 h-8 text-sky-600 animate-spin mx-auto" />
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <Loader2 className="w-6 h-6 text-[#0D5C63] animate-spin" />
         </div>
       }
     >

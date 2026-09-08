@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Newsreader } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
@@ -10,6 +10,14 @@ const geist = Geist({
   weight: ["100", "200", "300", "400", "500", "600", "700"],
   display: "swap",
   variable: "--font-geist",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-newsreader",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`h-full bg-white antialiased ${geist.className}`}>
+    <html lang="id" className={`h-full bg-white antialiased ${geist.variable} ${newsreader.variable} ${geist.className}`}>
       <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white font-light tracking-tight">
         <AuthProvider>
           <Navbar />

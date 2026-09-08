@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -23,6 +23,7 @@ import {
   CalendarClock,
   Wallet,
   ReceiptText,
+  Search,
 } from "lucide-react";
 
 export function Navbar() {
@@ -77,126 +78,144 @@ export function Navbar() {
 
   const currentRole = getNormalizedRole();
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        router.push("/spaces");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router]);
+
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 w-full shadow-2xs">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 w-full shadow-2xs">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center gap-8">
             <Link
               href="/"
-              className="flex items-center gap-2.5 group focus:outline-none"
+              className="flex items-center gap-2 group focus:outline-none"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-xs flex items-center justify-center bg-white">
-                <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
+              <div className="w-6 h-6 rounded-md bg-[#0D5C63] flex items-center justify-center text-white shrink-0 shadow-xs">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                  <path d="M2 17l10 5 10-5" />
+                  <path d="M2 12l10 5 10-5" />
+                </svg>
               </div>
-              <span className="font-extrabold text-slate-900 text-base tracking-tight">
+              <span className="font-bold text-slate-900 text-[15px] tracking-tight">
                 WorkNest
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-6 text-[13px] font-normal text-slate-600">
               <Link
                 href="/spaces"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  pathname.startsWith("/spaces")
-                    ? "bg-cyan-50 text-cyan-800 font-bold border border-cyan-200/80"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                className={`transition-colors hover:text-slate-900 ${
+                  pathname.startsWith("/spaces") ? "text-slate-900 font-semibold" : ""
                 }`}
               >
-                <Compass className="w-3.5 h-3.5 text-cyan-600" />
-                <span>Katalog Ruangan</span>
+                Spaces
+              </Link>
+              <Link
+                href="/#instant-rates"
+                className="transition-colors hover:text-slate-900"
+              >
+                Pricing
+              </Link>
+              <Link
+                href="/register?role=owner"
+                className="transition-colors hover:text-slate-900"
+              >
+                For Space Owners
+              </Link>
+              <Link
+                href="/#protocol"
+                className="transition-colors hover:text-slate-900"
+              >
+                About
               </Link>
 
               {isAuthenticated && currentRole === "member" && (
-                <>
-                  <Link
-                    href="/dashboard/member"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                      pathname === "/dashboard/member"
-                        ? "bg-cyan-50 text-cyan-800 font-bold border border-cyan-200/80"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                    }`}
-                  >
-                    <CalendarCheck className="w-3.5 h-3.5 text-cyan-600" />
-                    <span>Tiket Saya</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/member/transactions"
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                      pathname.startsWith("/dashboard/member/transactions")
-                        ? "bg-cyan-50 text-cyan-800 font-bold border border-cyan-200/80"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                    }`}
-                  >
-                    <Wallet className="w-3.5 h-3.5 text-cyan-600" />
-                    <span>Transaksi</span>
-                  </Link>
-                </>
+                <Link
+                  href="/dashboard/member"
+                  className="inline-flex items-center gap-1 text-cyan-700 hover:text-cyan-900 font-medium bg-cyan-50 px-2 py-0.5 rounded text-xs border border-cyan-200/70"
+                >
+                  <CalendarCheck className="w-3 h-3" />
+                  <span>Tiket Saya</span>
+                </Link>
               )}
-
               {isAuthenticated && currentRole === "owner" && (
-                <>
-                  <Link
-                    href="/dashboard/owner"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                  >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-cyan-600" />
-                    <span>Dashboard KPI</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/owner/reservations"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                  >
-                    <CalendarClock className="w-3.5 h-3.5 text-cyan-600" />
-                    <span>Reservasi</span>
-                  </Link>
-                </>
+                <Link
+                  href="/dashboard/owner"
+                  className="inline-flex items-center gap-1 text-cyan-700 hover:text-cyan-900 font-medium bg-cyan-50 px-2 py-0.5 rounded text-xs border border-cyan-200/70"
+                >
+                  <LayoutDashboard className="w-3 h-3" />
+                  <span>Dashboard Owner</span>
+                </Link>
               )}
-
               {isAuthenticated && currentRole === "staff" && (
                 <Link
                   href="/dashboard/staff"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                  className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-medium bg-emerald-50 px-2 py-0.5 rounded text-xs border border-emerald-200/70"
                 >
-                  <QrCode className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Terminal Check-In</span>
+                  <QrCode className="w-3 h-3" />
+                  <span>Terminal</span>
                 </Link>
               )}
-
               {isAuthenticated && currentRole === "super_admin" && (
                 <Link
                   href="/dashboard/super-admin"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                  className="inline-flex items-center gap-1 text-slate-800 hover:text-slate-950 font-medium bg-slate-100 px-2 py-0.5 rounded text-xs border border-slate-200"
                 >
-                  <LayoutDashboard className="w-3.5 h-3.5 text-slate-800" />
-                  <span>Overview Platform</span>
+                  <LayoutDashboard className="w-3 h-3" />
+                  <span>Overview</span>
                 </Link>
               )}
             </nav>
           </div>
 
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/spaces")}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50/80 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors text-xs cursor-pointer"
+            >
+              <Search className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-slate-400 text-xs pr-1">Search...</span>
+              <kbd className="text-[10px] font-mono px-1 py-0.2 rounded bg-white text-slate-500 border border-slate-200 shadow-2xs">
+                ⌘K
+              </kbd>
+            </button>
+
             {isAuthenticated && user ? (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/spaces"
+                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0D5C63] hover:bg-[#094348] rounded-md transition-colors shadow-2xs"
                 >
-                  <div className="w-6 h-6 rounded-md bg-cyan-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                    {(getDisplayName() || "U").charAt(0).toUpperCase()}
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-900 leading-none">
-                      {getDisplayName()}
-                    </p>
-                    <p className="text-[10px] text-cyan-700 font-medium leading-none mt-0.5">
-                      {getRoleLabel()}
-                    </p>
-                  </div>
-                  <ChevronDown className="w-3 h-3 text-slate-400" />
-                </button>
+                  Book a Space
+                </Link>
+
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                    className="flex items-center gap-2 px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-[#0D5C63] text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                      {(getDisplayName() || "U").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-left hidden lg:block">
+                      <p className="text-xs font-bold text-slate-900 leading-none truncate max-w-[100px]">
+                        {getDisplayName()}
+                      </p>
+                    </div>
+                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                  </button>
 
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-fadeIn">
@@ -399,21 +418,27 @@ export function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
+            </div>
+          ) : (
+              <div className="flex items-center gap-3">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:text-cyan-700 bg-slate-50 hover:bg-cyan-50/60 border border-slate-300/90 hover:border-cyan-400 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer active:scale-98"
+                  className="text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors px-1"
                 >
-                  <User className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-600" />
-                  <span>Masuk</span>
+                  Sign In
                 </Link>
                 <Link
-                  href="/register"
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 hover:from-cyan-500 hover:via-sky-500 hover:to-blue-500 rounded-lg transition-all shadow-md shadow-cyan-600/30 hover:shadow-lg hover:shadow-cyan-600/40 hover:-translate-y-0.5 cursor-pointer active:scale-98"
+                  href="/spaces"
+                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0D5C63] hover:bg-[#094348] rounded-md transition-colors shadow-2xs"
                 >
-                  <span>Daftar</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-cyan-100" />
+                  Book a Space
+                </Link>
+                <Link
+                  href="/login"
+                  aria-label="User Account"
+                  className="w-7 h-7 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                >
+                  <User className="w-3.5 h-3.5" />
                 </Link>
               </div>
             )}
@@ -433,14 +458,36 @@ export function Navbar() {
 
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-3 shadow-lg">
-          <Link
-            href="/spaces"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-800 bg-slate-50 hover:bg-cyan-50 hover:text-cyan-800 rounded-lg transition-colors border border-slate-200"
-          >
-            <Compass className="w-4 h-4 text-cyan-600" />
-            <span>Katalog Ruangan Coworking</span>
-          </Link>
+          <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-700 pb-2 border-b border-slate-100">
+            <Link
+              href="/spaces"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+            >
+              Spaces
+            </Link>
+            <Link
+              href="/#instant-rates"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="/register?role=owner"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+            >
+              For Space Owners
+            </Link>
+            <Link
+              href="/#protocol"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+            >
+              About
+            </Link>
+          </div>
 
           {isAuthenticated && user ? (
             <div className="space-y-2 pt-1 border-t border-slate-100">

@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --font-serif: var(--font-newsreader), "Newsreader", Georgia, serif;
+}
+
 :root {
-  --background: #f8fafc;
+  --background: #ffffff;
   --foreground: #0f172a;
+  --font-newsreader: "Newsreader", Georgia, serif;
+}
+
+.font-serif {
+  font-family: var(--font-newsreader), "Newsreader", Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 body {
