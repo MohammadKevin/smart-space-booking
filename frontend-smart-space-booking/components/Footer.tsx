@@ -10,6 +10,7 @@ export function Footer() {
 
   if (
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/member") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/verify-email"

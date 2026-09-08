@@ -824,7 +824,7 @@ export default function BookingPage({ params }: BookingPageProps) {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/spaces")}
+                onClick={() => router.push("/member/spaces/explore")}
                 className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
               >
                 Katalog Ruangan

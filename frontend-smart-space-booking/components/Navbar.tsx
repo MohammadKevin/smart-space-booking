@@ -34,6 +34,7 @@ export function Navbar() {
 
   if (
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/member") ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/verify-email"
@@ -366,7 +367,7 @@ export function Navbar() {
                             <span>Transaksi & Invoice</span>
                           </Link>
                           <Link
-                            href="/spaces"
+                            href="/member/spaces/explore"
                             onClick={() => setUserDropdownOpen(false)}
                             className="flex items-center gap-2 px-3.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                           >

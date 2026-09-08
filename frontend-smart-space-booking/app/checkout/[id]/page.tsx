@@ -408,7 +408,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
-                href="/spaces"
+                href="/member/spaces/explore"
                 className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all text-center"
               >
                 <span>Jelajahi Ruangan Lain</span>

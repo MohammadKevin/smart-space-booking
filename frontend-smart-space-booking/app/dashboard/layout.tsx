@@ -93,7 +93,8 @@ export default function DashboardLayout({
         if (
           pathname.startsWith("/dashboard/super-admin") ||
           (pathname.startsWith("/dashboard/owner") && !pathname.startsWith("/dashboard/owner/transactions")) ||
-          pathname.startsWith("/dashboard/member")
+          pathname.startsWith("/dashboard/member") ||
+          pathname.startsWith("/member")
         ) {
           router.replace("/dashboard/staff");
         }
@@ -101,6 +102,7 @@ export default function DashboardLayout({
         if (
           pathname.startsWith("/dashboard/super-admin") ||
           pathname.startsWith("/dashboard/member") ||
+          pathname.startsWith("/member") ||
           pathname === "/dashboard/staff"
         ) {
           router.replace("/dashboard/owner");
@@ -228,12 +230,19 @@ export default function DashboardLayout({
     return [
       { label: "Tiket & Jadwal Saya", href: "/dashboard/member", icon: CalendarCheck },
       { label: "Transaksi & Invoice", href: "/dashboard/member/transactions", icon: Wallet },
-      { label: "Katalog Ruangan", href: "/spaces", icon: Compass },
+      { label: "Katalog Ruangan", href: "/member/spaces/explore", icon: Compass },
       { label: "Pengaturan Akun", href: "/dashboard/member/profile", icon: UserCog },
     ];
   };
 
   const links = getSidebarLinks();
+
+  const isLinkActive = (href: string) => {
+    if (href === "/member/spaces/explore") {
+      return pathname.startsWith("/member/spaces") || pathname.startsWith("/dashboard/member/spaces");
+    }
+    return pathname === href;
+  };
 
   const handleLogout = () => {
     logoutUser();
@@ -241,6 +250,7 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
+    if (pathname.startsWith("/member/spaces") || pathname.startsWith("/dashboard/member/spaces")) return "Katalog Ruangan";
     if (pathname.startsWith("/dashboard/super-admin/commission")) return "Komisi Platform";
     if (pathname.startsWith("/dashboard/super-admin/owners")) return "Mitra Space Owner";
     if (pathname.startsWith("/dashboard/super-admin/transactions")) return "Transaksi Global";
@@ -283,7 +293,7 @@ export default function DashboardLayout({
               </p>
               {links.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                const isActive = isLinkActive(link.href);
                 return (
                   <Link
                     key={link.href}
@@ -355,7 +365,7 @@ export default function DashboardLayout({
             <nav className="space-y-1">
               {links.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                const isActive = isLinkActive(link.href);
                 return (
                   <Link
                     key={link.href}
@@ -392,4 +402,4 @@ export default function DashboardLayout({
     </div>
   );
 }
-
+
