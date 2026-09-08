@@ -508,17 +508,19 @@ export default function MemberDashboardPage() {
               const spacePhoto = res.detailReservasi?.space?.foto;
               const totalCost = res.detailReservasi?.totalHarga || 0;
               const payment = transactions[res.id];
+              const isPaid = payment?.statusPembayaran === "lunas";
               const canPay =
-                res.status?.toLowerCase() === "disetujui" &&
-                (!payment || payment.statusPembayaran !== "lunas") &&
+                !isPaid &&
+                res.status?.toLowerCase() !== "dibatalkan" &&
+                res.status?.toLowerCase() !== "selesai" &&
                 payment?.statusPembayaran !== "refund";
               const canCancel = res.status?.toLowerCase() === "pending" || res.status?.toLowerCase() === "disetujui";
-              const isReadyForScan = res.status?.toLowerCase() === "disetujui" || res.status?.toLowerCase() === "aktif";
+              const isReadyForScan = isPaid || res.status?.toLowerCase() === "disetujui" || res.status?.toLowerCase() === "aktif";
 
               return (
                 <div
                   key={res.id}
-                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                  className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
                 >
                   <div className="p-5 space-y-4">
                     <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
@@ -527,39 +529,42 @@ export default function MemberDashboardPage() {
                           <Building2 className="w-3.5 h-3.5" />
                           <span>{coworkingName}</span>
                         </span>
-                        <h3 className="text-base font-bold text-slate-900 mt-0.5 line-clamp-1">
+                        <h3 className="text-base font-extrabold text-slate-900 mt-0.5 line-clamp-1">
                           {spaceName}
                         </h3>
                       </div>
-                      <StatusBadge status={res.status} />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <StatusBadge status={res.status} />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-12 gap-3.5 items-center">
-                      <div className="col-span-4 flex flex-col items-center">
+                      <div className="col-span-12 sm:col-span-5 flex flex-col items-center">
                         <div
                           onClick={() => setSelectedTicket(res)}
                           title="Klik untuk memperbesar QR"
-                          className="cursor-pointer group p-2 bg-slate-50 hover:bg-cyan-50/50 rounded-xl border border-slate-200 transition-all text-center flex flex-col items-center"
+                          className="w-full cursor-pointer group hover:bg-cyan-50/70 p-2.5 bg-slate-50/70 rounded-2xl border border-slate-200 transition-all flex flex-col items-center shadow-2xs hover:shadow-cyan-100"
                         >
-                          <QrCodeCard value={res.qrCode} size={90} showCopy={false} />
-                          <span className="text-[10px] font-bold text-cyan-700 group-hover:underline mt-1">
-                            Perbesar QR
+                          <QrCodeCard value={res.qrCode} size={110} showCopy={false} />
+                          <span className="text-[10px] font-bold text-cyan-700 bg-white px-2.5 py-0.5 rounded-full border border-cyan-100 mt-2 flex items-center gap-1 group-hover:underline shadow-2xs">
+                            <QrCode className="w-3 h-3 text-cyan-600" />
+                            <span>Perbesar Tiket Pass</span>
                           </span>
                         </div>
                       </div>
 
-                      <div className="col-span-8 space-y-2 text-xs text-slate-600 pl-1">
+                      <div className="col-span-12 sm:col-span-7 space-y-2.5 text-xs text-slate-600 sm:pl-1">
                         <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="font-semibold text-slate-800">{rawDate}</span>
+                          <Calendar className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                          <span className="font-bold text-slate-800">{rawDate}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <Clock className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
                           <span>{res.jamMulai} WIB ({res.durasiJam || 1} Jam Sesi)</span>
                         </div>
                         <div className="pt-2 border-t border-slate-100 flex items-baseline justify-between">
-                          <span className="text-[11px] text-slate-400 font-semibold uppercase">Total Biaya:</span>
-                          <span className="font-mono text-sm font-bold text-slate-900">
+                          <span className="text-[11px] text-slate-400 font-semibold uppercase">Total Tagihan:</span>
+                          <span className="font-mono text-sm font-extrabold text-slate-900">
                             {formatRupiah(totalCost)}
                           </span>
                         </div>
@@ -579,8 +584,8 @@ export default function MemberDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                  <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <button
                         type="button"
                         onClick={() => setSelectedTicket(res)}
@@ -632,7 +637,7 @@ export default function MemberDashboardPage() {
                       {canPay && (
                         <Link
                           href={`/checkout/${res.id}`}
-                          className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                          className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                         >
                           <Wallet className="w-3.5 h-3.5" />
                           <span>Bayar Sekarang</span>
@@ -704,7 +709,7 @@ export default function MemberDashboardPage() {
             </div>
 
             <div className="p-6 space-y-5 text-center">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 inline-block shadow-inner">
+              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 inline-block shadow-inner">
                 <QrCodeCard
                   value={selectedTicket.qrCode}
                   size={190}
@@ -738,14 +743,14 @@ export default function MemberDashboardPage() {
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Tunjukkan layar ini kepada staf resepsionis untuk dipindai kamera check-in.
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Tunjukkan barcode ini kepada staf resepsionis atau petugas scanner saat tiba di lokasi untuk Check-In mandiri.
               </p>
 
               <button
                 type="button"
                 onClick={() => handleDownloadFullPass(selectedTicket)}
-                className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <Download className="w-4 h-4 text-cyan-400" />
                 <span>Unduh E-Pass Digital HD (PNG)</span>
