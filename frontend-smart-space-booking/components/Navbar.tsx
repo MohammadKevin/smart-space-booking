@@ -33,6 +33,17 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        router.push("/spaces");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [router]);
+
   if (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/member") ||
@@ -78,17 +89,6 @@ export function Navbar() {
 
   const currentRole = getNormalizedRole();
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        router.push("/spaces");
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [router]);
-
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 w-full shadow-2xs">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -118,25 +118,25 @@ export function Navbar() {
                   pathname.startsWith("/spaces") ? "text-slate-900 font-semibold" : ""
                 }`}
               >
-                Spaces
+                Ruangan
               </Link>
               <Link
                 href="/#instant-rates"
                 className="transition-colors hover:text-slate-900"
               >
-                Pricing
+                Tarif
               </Link>
               <Link
                 href="/register?role=owner"
                 className="transition-colors hover:text-slate-900"
               >
-                For Space Owners
+                Pemilik Ruangan
               </Link>
               <Link
                 href="/#protocol"
                 className="transition-colors hover:text-slate-900"
               >
-                About
+                Tentang Kami
               </Link>
 
               {isAuthenticated && currentRole === "member" && (
@@ -185,7 +185,7 @@ export function Navbar() {
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50/80 hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors text-xs cursor-pointer"
             >
               <Search className="w-3.5 h-3.5 text-slate-400" />
-              <span className="text-slate-400 text-xs pr-1">Search...</span>
+              <span className="text-slate-400 text-xs pr-1">Cari ruangan...</span>
               <kbd className="text-[10px] font-mono px-1 py-0.2 rounded bg-white text-slate-500 border border-slate-200 shadow-2xs">
                 ⌘K
               </kbd>
@@ -197,7 +197,7 @@ export function Navbar() {
                   href="/spaces"
                   className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0D5C63] hover:bg-[#094348] rounded-md transition-colors shadow-2xs"
                 >
-                  Book a Space
+                  Pesan Ruangan
                 </Link>
 
                 <div className="relative">
@@ -425,13 +425,13 @@ export function Navbar() {
                   href="/login"
                   className="text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors px-1"
                 >
-                  Sign In
+                  Masuk
                 </Link>
                 <Link
                   href="/spaces"
                   className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0D5C63] hover:bg-[#094348] rounded-md transition-colors shadow-2xs"
                 >
-                  Book a Space
+                  Pesan Ruangan
                 </Link>
                 <Link
                   href="/login"
@@ -464,28 +464,28 @@ export function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
             >
-              Spaces
+              Ruangan
             </Link>
             <Link
               href="/#instant-rates"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
             >
-              Pricing
+              Tarif
             </Link>
             <Link
               href="/register?role=owner"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
             >
-              For Space Owners
+              Pemilik Ruangan
             </Link>
             <Link
               href="/#protocol"
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
             >
-              About
+              Tentang Kami
             </Link>
           </div>
 

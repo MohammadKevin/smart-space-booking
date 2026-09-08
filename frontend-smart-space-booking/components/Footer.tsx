@@ -35,22 +35,22 @@ export function Footer() {
             </div>
             <span className="text-slate-300">|</span>
             <span className="text-[11px] text-slate-400">
-              © {new Date().getFullYear()} WorkNest Technologies Inc. All rights reserved.
+              © {new Date().getFullYear()} WorkNest Technologies Inc. Hak cipta dilindungi.
             </span>
           </div>
 
           <div className="flex items-center gap-6 text-xs text-slate-600 font-medium">
             <Link href="/spaces" className="hover:text-slate-900 transition-colors">
-              Spaces
+              Ruangan
             </Link>
             <Link href="/#instant-rates" className="hover:text-slate-900 transition-colors">
-              Pricing
+              Tarif
             </Link>
             <Link href="/register?role=owner" className="hover:text-slate-900 transition-colors">
-              Host Workspace
+              Daftarkan Ruangan
             </Link>
             <Link href="/#faq" className="hover:text-slate-900 transition-colors">
-              Security & Trust
+              Keamanan &amp; Privasi
             </Link>
           </div>
         </div>

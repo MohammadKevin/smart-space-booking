@@ -191,15 +191,15 @@ export default function OwnerOverviewPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-              Operations Overview
+              Ringkasan Operasional
             </h1>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Updated 1m ago
+              Diperbarui 1 mnt lalu
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            Live workspace telemetry, door access provisioning, and real-time ledger settlement.
+            Telemetri ruang kerja langsung, provisi akses pintu pintar, dan pencatatan settlement transaksi real-time.
           </p>
         </div>
 
@@ -210,7 +210,7 @@ export default function OwnerOverviewPage() {
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Export Report</span>
+            <span>Ekspor Laporan</span>
           </button>
 
           <Link
@@ -218,7 +218,7 @@ export default function OwnerOverviewPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span>Add New Room</span>
+            <span>Tambah Ruangan Baru</span>
           </Link>
         </div>
       </div>
@@ -236,7 +236,7 @@ export default function OwnerOverviewPage() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              TODAY&apos;S GROSS REVENUE
+              PENDAPATAN KOTOR HARI INI
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
               <CreditCard className="w-3.5 h-3.5" />
@@ -248,7 +248,7 @@ export default function OwnerOverviewPage() {
             </p>
             <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>+14.2% vs yesterday</span>
+              <span>+14.2% dibanding kemarin</span>
             </p>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function OwnerOverviewPage() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              REAL-TIME OCCUPANCY
+              OKUPANSI REAL-TIME
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
               <DoorOpen className="w-3.5 h-3.5" />
@@ -268,14 +268,14 @@ export default function OwnerOverviewPage() {
               <span className="text-2xl font-bold text-slate-900">
                 {loading ? "..." : `${occupiedCount} / ${totalRoomsCount}`}
               </span>
-              <span className="text-xs text-slate-500 font-sans">Rooms</span>
+              <span className="text-xs text-slate-500 font-sans">Ruangan</span>
             </div>
             <div className="flex items-center gap-2 mt-1">
               <span className="px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 text-[10px] font-bold border border-cyan-200">
-                {occupancyPercent}% Utilized
+                {occupancyPercent}% Terpakai
               </span>
               <span className="text-[11px] text-slate-500">
-                {availableRoomsCount} rooms available
+                {availableRoomsCount} ruangan tersedia
               </span>
             </div>
           </div>
@@ -285,7 +285,7 @@ export default function OwnerOverviewPage() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              IOT SMART LOCKS
+              KUNCI PINTAR IOT
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
               <Lock className="w-3.5 h-3.5" />
@@ -299,7 +299,7 @@ export default function OwnerOverviewPage() {
               <span className="text-xs text-emerald-600 font-bold font-sans">Online</span>
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-mono">
-              19ms latency • Zigbee 3.0 Mesh
+              Latensi 19ms • Jaringan Zigbee 3.0
             </p>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function OwnerOverviewPage() {
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              PAYOUT READY BALANCE
+              SALDO SIAP PENCAIRAN
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
               <DollarSign className="w-3.5 h-3.5" />
@@ -320,9 +320,9 @@ export default function OwnerOverviewPage() {
             </p>
             <div className="flex items-center gap-2 mt-1">
               <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
-                Instant BCA
+                Instan BCA
               </span>
-              <span className="text-[11px] text-slate-500">Disburse anytime</span>
+              <span className="text-[11px] text-slate-500">Cairkan kapan saja</span>
             </div>
           </div>
         </div>
@@ -333,10 +333,10 @@ export default function OwnerOverviewPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="font-serif text-lg font-bold text-slate-900">
-              Revenue &amp; Booking Velocity
+              Tren Pendapatan &amp; Volume Reservasi
             </h2>
             <p className="text-xs text-slate-500">
-              Intraday hourly occupancy curves compared against hourly run-rate benchmarks.
+              Kurva okupansi per jam sepanjang hari dibandingkan dengan tolok ukur pendapatan per jam.
             </p>
           </div>
 
@@ -344,11 +344,11 @@ export default function OwnerOverviewPage() {
             <div className="hidden sm:flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-xs bg-[#0D5C63]" />
-                <span className="text-slate-600">Gross Revenue (Rp)</span>
+                <span className="text-slate-600">Pendapatan Kotor (Rp)</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-4 h-0.5 bg-cyan-600" />
-                <span className="text-slate-600">Seat Volume</span>
+                <span className="text-slate-600">Volume Kursi</span>
               </div>
             </div>
 
@@ -364,7 +364,7 @@ export default function OwnerOverviewPage() {
                       : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
-                  {tab === "today" ? "Today" : tab === "7days" ? "7 Days" : "Month"}
+                  {tab === "today" ? "Hari Ini" : tab === "7days" ? "7 Hari" : "Bulan"}
                 </button>
               ))}
             </div>
@@ -439,7 +439,7 @@ export default function OwnerOverviewPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
           <div>
             <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              PEAK HOUR UTILIZATION
+              UTILITAS JAM SIBUK
             </p>
             <p className="text-base font-bold text-slate-900 font-mono mt-0.5">
               94.4% <span className="text-xs text-slate-500 font-normal font-sans">(14:00 - 15:00)</span>
@@ -448,28 +448,28 @@ export default function OwnerOverviewPage() {
 
           <div>
             <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              AVG. HOURLY DESK YIELD
+              RATA-RATA PENDAPATAN / JAM
             </p>
             <p className="text-base font-bold text-slate-900 font-mono mt-0.5">
-              Rp 48.800 <span className="text-xs text-slate-500 font-normal font-sans">/ desk</span>
+              Rp 48.800 <span className="text-xs text-slate-500 font-normal font-sans">/ meja</span>
             </p>
           </div>
 
           <div>
             <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              BOOKED OVERRUN RATE
+              TINGKAT OVERRUN PESANAN
             </p>
             <p className="text-base font-bold text-slate-900 font-mono mt-0.5">
-              3.2% <span className="text-xs text-emerald-600 font-medium font-sans">Within SLA</span>
+              3.2% <span className="text-xs text-emerald-600 font-medium font-sans">Sesuai SLA</span>
             </p>
           </div>
 
           <div>
             <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              MIDTRANS SETTLEMENT RATE
+              KECEPATAN SETTLEMENT MIDTRANS
             </p>
             <p className="text-base font-bold text-emerald-700 font-mono mt-0.5">
-              Instant <span className="text-xs text-slate-500 font-normal font-sans">T+0 API</span>
+              Instan <span className="text-xs text-slate-500 font-normal font-sans">API T+0</span>
             </p>
           </div>
         </div>
@@ -482,17 +482,17 @@ export default function OwnerOverviewPage() {
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-[#0D5C63]" />
               <h2 className="font-serif text-lg font-bold text-slate-900">
-                Room &amp; Inventory Live Status
+                Status Langsung Ruangan &amp; Inventaris
               </h2>
             </div>
             <p className="text-xs text-slate-500">
-              Hardware state, active OTP pincodes, and manual override controls
+              Status perangkat keras, kode PIN OTP aktif, dan kontrol akses manual
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50">
-              All Spaces ({spaces.length})
+              Semua Ruangan ({spaces.length})
             </span>
           </div>
         </div>
@@ -501,17 +501,17 @@ export default function OwnerOverviewPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4 font-bold">SPACE IDENTIFIER</th>
-                <th className="py-3 px-4 font-bold">CAPACITY</th>
-                <th className="py-3 px-4 font-bold">HOURLY RATE</th>
-                <th className="py-3 px-4 font-bold">LIVE STATUS</th>
-                <th className="py-3 px-4 font-bold">SMART LOCK OTP</th>
-                <th className="py-3 px-4 font-bold text-right">QUICK ACTION</th>
+                <th className="py-3 px-4 font-bold">IDENTITAS RUANGAN</th>
+                <th className="py-3 px-4 font-bold">KAPASITAS</th>
+                <th className="py-3 px-4 font-bold">TARIF PER JAM</th>
+                <th className="py-3 px-4 font-bold">STATUS LANGSUNG</th>
+                <th className="py-3 px-4 font-bold">KODE OTP SMART LOCK</th>
+                <th className="py-3 px-4 font-bold text-right">AKSI CEPAT</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {spaces.length > 0 ? (
-                spaces.map((sp, idx) => {
+                spaces.map((sp) => {
                   const activeRes = activeBookings.find(
                     (b) => b.detailReservasi?.spaceId === sp.id
                   );
@@ -530,27 +530,27 @@ export default function OwnerOverviewPage() {
                           <div>
                             <p className="font-bold text-slate-900">{sp.namaSpace}</p>
                             <p className="text-[10px] text-slate-400 font-normal">
-                              Floor {((sp.id || 1) % 4) + 1} • {sp.tipe?.toUpperCase() || "SPACE"}
+                              Lantai {((sp.id || 1) % 4) + 1} • {sp.tipe?.toUpperCase() || "SPACE"}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td className="py-3.5 px-4 font-medium text-slate-600">
-                        {sp.kapasitas} Person
+                        {sp.kapasitas} Orang
                       </td>
                       <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
-                        {formatRupiah(sp.hargaPerJam)} <span className="text-[10px] text-slate-400 font-normal">/h</span>
+                        {formatRupiah(sp.hargaPerJam)} <span className="text-[10px] text-slate-400 font-normal">/ jam</span>
                       </td>
                       <td className="py-3.5 px-4">
                         {isOccupied ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-800 font-semibold text-[11px] border border-cyan-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
-                            Occupied ({activeRes?.detailReservasi?.space?.owner?.namaCoworking || "Member"})
+                            Terisi ({activeRes?.detailReservasi?.space?.owner?.namaCoworking || "Member"})
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold text-[11px] border border-emerald-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Vacant &amp; Ready
+                            Kosong &amp; Siap
                           </span>
                         )}
                       </td>
@@ -565,13 +565,13 @@ export default function OwnerOverviewPage() {
                             href={`/spaces/${sp.id}`}
                             className="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium text-xs transition-colors"
                           >
-                            Details
+                            Detail
                           </Link>
                           <Link
                             href={`/booking/${sp.id}`}
                             className="px-3 py-1 rounded bg-[#0D5C63] hover:bg-[#09474D] text-white font-semibold text-xs transition-colors"
                           >
-                            Book Walk-in
+                            Pesan Langsung
                           </Link>
                         </div>
                       </td>
@@ -581,14 +581,14 @@ export default function OwnerOverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400 text-xs">
-                    No operational spaces registered in this workspace hub yet.
+                    Belum ada ruangan operasional yang terdaftar di hub workspace ini.
                     <div className="pt-3">
                       <Link
                         href="/dashboard/owner/spaces/create"
                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D5C63] hover:bg-[#09474D] text-white rounded-lg text-xs font-semibold"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Register First Workspace</span>
+                        <span>Daftarkan Ruangan Pertama</span>
                       </Link>
                     </div>
                   </td>
@@ -599,12 +599,12 @@ export default function OwnerOverviewPage() {
         </div>
 
         <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-          <span>Showing {spaces.length} of {spaces.length} registered operational spaces</span>
+          <span>Menampilkan {spaces.length} dari {spaces.length} ruangan operasional terdaftar</span>
           <Link
             href="/dashboard/owner/spaces"
             className="font-semibold text-[#0D5C63] hover:underline flex items-center gap-1"
           >
-            <span>View complete inventory schedule</span>
+            <span>Lihat jadwal inventaris lengkap</span>
             <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
@@ -617,11 +617,11 @@ export default function OwnerOverviewPage() {
             <div className="flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-[#0D5C63]" />
               <h2 className="font-serif text-lg font-bold text-slate-900">
-                Recent Midtrans Settlement Ledger
+                Buku Transaksi Settlement Midtrans Terbaru
               </h2>
             </div>
             <p className="text-xs text-slate-500">
-              Real-time payment gateway dispatches with automated tax invoicing
+              Pengiriman payment gateway real-time dengan penerbitan faktur otomatis
             </p>
           </div>
 
@@ -634,7 +634,7 @@ export default function OwnerOverviewPage() {
               href="/dashboard/owner/transactions"
               className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
             >
-              View Ledger Audit
+              Lihat Audit Buku Besar
             </Link>
           </div>
         </div>
@@ -643,19 +643,19 @@ export default function OwnerOverviewPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4 font-bold">TRANSACTION ID</th>
-                <th className="py-3 px-4 font-bold">ORDER REFERENCE</th>
-                <th className="py-3 px-4 font-bold">PAYMENT METHOD</th>
-                <th className="py-3 px-4 font-bold">SETTLED AMOUNT</th>
-                <th className="py-3 px-4 font-bold">TIMESTAMP</th>
-                <th className="py-3 px-4 font-bold text-right">INVOICE / RECEIPT</th>
+                <th className="py-3 px-4 font-bold">ID TRANSAKSI</th>
+                <th className="py-3 px-4 font-bold">REFERENSI PESANAN</th>
+                <th className="py-3 px-4 font-bold">METODE PEMBAYARAN</th>
+                <th className="py-3 px-4 font-bold">JUMLAH DITERIMA</th>
+                <th className="py-3 px-4 font-bold">WAKTU</th>
+                <th className="py-3 px-4 font-bold text-right">FAKTUR / BUKTI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {recentTransactions.length > 0 ? (
                 recentTransactions.map((trx) => {
                   const space = trx.detailReservasi?.space;
-                  const dateStr = trx.tanggalReservasi ? trx.tanggalReservasi.split("T")[0] : "Today";
+                  const dateStr = trx.tanggalReservasi ? trx.tanggalReservasi.split("T")[0] : "Hari ini";
                   const amount = trx.detailReservasi?.totalHarga || (space?.hargaPerJam || 50000) * (trx.durasiJam || 1);
 
                   return (
@@ -665,10 +665,10 @@ export default function OwnerOverviewPage() {
                       </td>
                       <td className="py-3.5 px-4">
                         <p className="font-semibold text-slate-900">
-                          WN-BOK-{trx.qrCode.slice(0, 6)} ({space?.namaSpace || "Workspace"})
+                          WN-BOK-{trx.qrCode.slice(0, 6)} ({space?.namaSpace || "Ruangan"})
                         </p>
                         <p className="text-[10px] text-slate-400">
-                          {trx.durasiJam || 1}h Dedicated Access Pass
+                          Akses Ruangan {trx.durasiJam || 1} Jam
                         </p>
                       </td>
                       <td className="py-3.5 px-4">
@@ -698,7 +698,7 @@ export default function OwnerOverviewPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="py-10 text-center text-slate-400 text-xs">
-                    No transactions settled yet. When members book workspaces, settlement webhooks appear live here.
+                    Belum ada transaksi yang diselesaikan. Saat member memesan ruangan, webhook settlement akan tampil langsung di sini.
                   </td>
                 </tr>
               )}

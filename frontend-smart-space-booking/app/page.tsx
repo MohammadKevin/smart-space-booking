@@ -47,16 +47,16 @@ function RealSpaceCard({ space }: { space: Space }) {
 
   const getStatusBadge = () => {
     if (space.tipe === "desk") {
-      return { label: "Live Turnstile", ping: true, color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+      return { label: "Turnstile Otomatis", ping: true, color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
     }
     if (space.tipe === "meeting_room") {
-      return { label: "Meeting Ready", ping: false, color: "text-cyan-700 bg-cyan-50 border-cyan-200" };
+      return { label: "Siap Digunakan", ping: false, color: "text-cyan-700 bg-cyan-50 border-cyan-200" };
     }
-    return { label: "Instant NFC", ping: false, color: "text-indigo-700 bg-indigo-50 border-indigo-200" };
+    return { label: "Akses NFC Instan", ping: false, color: "text-indigo-700 bg-indigo-50 border-indigo-200" };
   };
 
   const status = getStatusBadge();
-  const locationText = space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Partner Hub";
+  const locationText = space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Mitra Hub";
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all">
@@ -115,7 +115,7 @@ function RealSpaceCard({ space }: { space: Space }) {
           <div className="pt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-medium border-t border-slate-100">
             <div className="flex items-center gap-1.5">
               <Wifi className="w-3 h-3 text-cyan-600" />
-              <span>Gigabit WiFi</span>
+              <span>WiFi Gigabit</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Armchair className="w-3 h-3 text-cyan-600" />
@@ -123,11 +123,11 @@ function RealSpaceCard({ space }: { space: Space }) {
             </div>
             <div className="flex items-center gap-1.5">
               <Cpu className="w-3 h-3 text-cyan-600" />
-              <span>QR Digital Lock</span>
+              <span>Kunci Digital QR</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Coffee className="w-3 h-3 text-cyan-600" />
-              <span>Free-flow Coffee</span>
+              <span>Free-flow Kopi</span>
             </div>
           </div>
         </div>
@@ -135,17 +135,22 @@ function RealSpaceCard({ space }: { space: Space }) {
 
       {/* Bottom Price & Action */}
       <div className="p-5 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
-        <div className="flex items-baseline gap-1">
-          <span className="text-base font-bold text-slate-900 font-mono">
-            {formatRupiah(space.hargaPerJam)}
+        <div>
+          <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wide">
+            Tarif Sewa
           </span>
-          <span className="text-xs text-slate-500">/jam</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-base font-bold text-slate-900 font-mono">
+              {formatRupiah(space.hargaPerJam)}
+            </span>
+            <span className="text-xs text-slate-500">/ jam</span>
+          </div>
         </div>
         <Link
           href={`/booking/${space.id}`}
           className="px-4 py-1.5 rounded-lg bg-[#0D5C63] hover:bg-[#094348] text-xs font-semibold text-white transition-colors shadow-2xs"
         >
-          {space.tipe === "meeting_room" ? "Reserve Room" : "Reserve Seat"}
+          {space.tipe === "meeting_room" ? "Pesan Ruangan" : "Pesan Kursi"}
         </Link>
       </div>
     </div>
@@ -158,8 +163,8 @@ export default function HomePage() {
   // Search card state
   const [activeTab, setActiveTab] = useState<"flex" | "meeting" | "suite" | "all">("flex");
   const [selectedCity, setSelectedCity] = useState("Semua Kota");
-  const [selectedDate, setSelectedDate] = useState("Today, 24 Oct");
-  const [selectedDuration, setSelectedDuration] = useState("Full-day (09:00 - 18:00)");
+  const [selectedDate, setSelectedDate] = useState("Hari Ini, 24 Okt");
+  const [selectedDuration, setSelectedDuration] = useState("Seharian Penuh (09:00 - 18:00)");
 
   // FAQ Accordion state
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -258,20 +263,20 @@ export default function HomePage() {
 
   const faqs = [
     {
-      q: "How do instant digital IoT keys work?",
-      a: "Upon instant booking confirmation, our platform generates a dynamic, time-limited cryptographic QR code and authorized NFC payload directly on your mobile device. When you reach the workspace turnstile or meeting room smart lock, tap or scan to unlock in under 1.2 seconds without checking in at any front desk.",
+      q: "Bagaimana cara kerja kunci digital IoT instan?",
+      a: "Setelah pembayaran dikonfirmasi, sistem kami secara otomatis menghasilkan kode QR kriptografis yang dinamis serta otorisasi NFC pada perangkat Anda. Saat tiba di turnstile atau pintu ruangan rapat, cukup pindai atau dekatkan ponsel untuk membuka akses dalam waktu kurang dari 1,2 detik tanpa perlu melapor ke resepsionis.",
     },
     {
-      q: "Can I book strictly by the hour, or are monthly commitments needed?",
-      a: "WorkNest operates on a 100% commitment-free, pay-as-you-go model. You can reserve flex desks and meeting rooms for as brief as an hour, with automatic per-minute billing for overages. Dedicated desks and private suites are also available with flexible rolling monthly terms.",
+      q: "Apakah saya bisa memesan hitungan jam tanpa langganan bulanan?",
+      a: "Tentu saja. WorkNest beroperasi dengan skema fleksibel tanpa komitmen jangka panjang. Anda bisa memesan flex desk maupun ruang rapat mulai dari 1 jam saja, dengan pencatatan menit yang akurat. Ruang kerja privat bulanan juga tersedia sesuai kebutuhan tim Anda.",
     },
     {
-      q: "What is the cancellation and rescheduling policy?",
-      a: "Plans shift quickly. You can cancel or reschedule any reservation directly from your dashboard up to 1 hour prior to your reserved start time for an instant 100% refund credited back to your original payment method or WorkNest balance.",
+      q: "Bagaimana kebijakan pembatalan dan penjadwalan ulang?",
+      a: "Rencana dapat berubah sewaktu-waktu. Anda dapat membatalkan atau mengubah jadwal reservasi langsung dari portal dashboard hingga 1 jam sebelum sesi dimulai dengan pengembalian dana 100% instan.",
     },
     {
-      q: "Do corporate plans support Indonesian tax invoices (Faktur Pajak)?",
-      a: "Yes. Corporate and team plans include automated e-Faktur Pajak generation with your company's NPWP and registered business identity. Consolidated monthly invoices and detailed audit logs can be exported directly to CSV or synced to ERP tools.",
+      q: "Apakah tersedia faktur pajak resmi untuk keperluan perusahaan?",
+      a: "Ya. Setiap transaksi dilengkapi dengan bukti pembayaran resmi dan dukungan e-Faktur Pajak dengan mencantumkan NPWP dan nama instansi perusahaan Anda. Riwayat transaksi dapat diunduh dalam format PDF atau CSV kapan saja.",
     },
   ];
 
@@ -289,7 +294,7 @@ export default function HomePage() {
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
               <span className="font-semibold text-slate-900">WorkNest 2.0</span>
               <span className="text-slate-300">•</span>
-              <span>Nationwide Access Pass is live in 14 cities</span>
+              <span>Akses jaringan coworking kini aktif di 14 kota</span>
               <ArrowRight className="w-3 h-3 text-slate-400 ml-0.5" />
             </Link>
           </div>
@@ -297,10 +302,10 @@ export default function HomePage() {
           {/* Main Headline & Subtitle */}
           <div className="max-w-3xl mx-auto text-center space-y-4">
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-semibold text-slate-900 tracking-tight leading-[1.12]">
-              On-demand workspace for focused teams & founders.
+              Ruang kerja on-demand untuk tim &amp; founder berkinerja tinggi.
             </h1>
             <p className="text-xs sm:text-sm md:text-[15px] text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-              Book verified ergonomic desks, private soundproof suites, and fiber-connected boardrooms across 14 cities in Indonesia. Instant entry via automated IoT digital pass.
+              Pesan meja ergonomis terverifikasi, suite privat kedap suara, dan ruang rapat berkecepatan fiber di 14 kota di Indonesia. Akses masuk instan dengan kunci pintar digital IoT.
             </p>
           </div>
 
@@ -329,7 +334,7 @@ export default function HomePage() {
                       : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  Meeting Room
+                  Ruang Rapat
                 </button>
                 <button
                   type="button"
@@ -340,7 +345,7 @@ export default function HomePage() {
                       : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  Private Suite
+                  Suite Privat
                 </button>
                 <button
                   type="button"
@@ -364,7 +369,7 @@ export default function HomePage() {
                 <div className="sm:col-span-4 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                     <MapPin className="w-3 h-3 text-slate-400" />
-                    <span>City</span>
+                    <span>Kota / Lokasi</span>
                   </label>
                   <select
                     value={selectedCity}
@@ -394,17 +399,17 @@ export default function HomePage() {
                 <div className="sm:col-span-3 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    <span>Date</span>
+                    <span>Tanggal</span>
                   </label>
                   <select
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
                     className="w-full bg-transparent text-xs sm:text-[13px] font-medium text-slate-900 focus:outline-none cursor-pointer py-1"
                   >
-                    <option value="Today, 24 Oct">Today, 24 Oct</option>
-                    <option value="Tomorrow, 25 Oct">Tomorrow, 25 Oct</option>
-                    <option value="Saturday, 26 Oct">Saturday, 26 Oct</option>
-                    <option value="Monday, 28 Oct">Monday, 28 Oct</option>
+                    <option value="Hari Ini, 24 Okt">Hari Ini, 24 Okt</option>
+                    <option value="Besok, 25 Okt">Besok, 25 Okt</option>
+                    <option value="Sabtu, 26 Okt">Sabtu, 26 Okt</option>
+                    <option value="Senin, 28 Okt">Senin, 28 Okt</option>
                   </select>
                 </div>
 
@@ -412,17 +417,17 @@ export default function HomePage() {
                 <div className="sm:col-span-3 border-b sm:border-b-0 pb-2 sm:pb-0 sm:pr-2">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
                     <Clock className="w-3 h-3 text-slate-400" />
-                    <span>Duration</span>
+                    <span>Durasi</span>
                   </label>
                   <select
                     value={selectedDuration}
                     onChange={(e) => setSelectedDuration(e.target.value)}
                     className="w-full bg-transparent text-xs sm:text-[13px] font-medium text-slate-900 focus:outline-none cursor-pointer py-1"
                   >
-                    <option value="Full-day (09:00 - 18:00)">Full-day (09:00 - 18:00)</option>
-                    <option value="Half-day Morning (09:00 - 13:00)">Half-day Morning (09:00 - 13:00)</option>
-                    <option value="Half-day Afternoon (13:00 - 18:00)">Half-day Afternoon (13:00 - 18:00)</option>
-                    <option value="Hourly (2 Hours)">Hourly (2 Hours)</option>
+                    <option value="Seharian Penuh (09:00 - 18:00)">Seharian Penuh (09:00 - 18:00)</option>
+                    <option value="Setengah Hari Pagi (09:00 - 13:00)">Setengah Hari Pagi (09:00 - 13:00)</option>
+                    <option value="Setengah Hari Siang (13:00 - 18:00)">Setengah Hari Siang (13:00 - 18:00)</option>
+                    <option value="Per Jam (2 Jam Sesi)">Per Jam (2 Jam Sesi)</option>
                   </select>
                 </div>
 
@@ -433,7 +438,7 @@ export default function HomePage() {
                     className="w-full py-2.5 px-4 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                   >
                     <Search className="w-3.5 h-3.5" />
-                    <span>Find Spaces</span>
+                    <span>Cari Ruangan</span>
                   </button>
                 </div>
               </form>
@@ -444,10 +449,10 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto pt-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1">
               <p className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
-                {spaces.length > 0 ? `${spaces.length}+` : "420+"}
+                {spaces.length > 0 ? `${spaces.length}+` : "48+"}
               </p>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                Verified Spaces Across 14 Cities
+                Ruangan Terverifikasi di 14 Kota
               </p>
             </div>
 
@@ -459,16 +464,16 @@ export default function HomePage() {
                 <span className="text-emerald-500 text-sm font-bold">↑</span>
               </div>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                Reliable IoT Uptime
+                Uptime Kunci Pintar IoT
               </p>
             </div>
 
             <div className="space-y-1">
               <p className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
-                15,400+
+                15.400+
               </p>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                Engineers & Founders
+                Engineer &amp; Founder Bergabung
               </p>
             </div>
 
@@ -477,7 +482,7 @@ export default function HomePage() {
                 &lt; 1.2s
               </p>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                NFC / QR Door Unlock
+                Buka Pintu via NFC / QR
               </p>
             </div>
           </div>
@@ -489,34 +494,34 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6 text-xs text-slate-600">
             <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-500 uppercase shadow-2xs">
-              INSTANT RATES
+              TARIF INSTAN
             </span>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Flex Desks:</strong> from {formatRupiah(minDeskRate)}/hr
+                <strong className="font-semibold text-slate-800">Flex Desks:</strong> mulai {formatRupiah(minDeskRate)}/jam
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Meeting Rooms:</strong> from {formatRupiah(minMeetingRate)}/hr
+                <strong className="font-semibold text-slate-800">Ruang Rapat:</strong> mulai {formatRupiah(minMeetingRate)}/jam
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Private Suites:</strong> from {formatRupiah(minOfficeRate)}/hr
+                <strong className="font-semibold text-slate-800">Suite Privat:</strong> mulai {formatRupiah(minOfficeRate)}/jam
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Event Spaces:</strong> Custom Billing
+                <strong className="font-semibold text-slate-800">Ruang Event:</strong> Paket Khusus
               </span>
             </div>
           </div>
@@ -530,10 +535,10 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
-                ENGINEERED FOR OUTPUT
+                DIRANCANG UNTUK PRODUKTIVITAS
               </p>
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight">
-                Available today for frictionless booking
+                Tersedia hari ini untuk pemesanan instan
               </h2>
             </div>
 
@@ -541,7 +546,7 @@ export default function HomePage() {
               href="/spaces"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors"
             >
-              <span>View all {spaces.length} spaces nationwide</span>
+              <span>Lihat semua {spaces.length} ruangan di seluruh Indonesia</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -632,13 +637,13 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="max-w-3xl space-y-2">
             <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
-              THE WORKNEST PROTOCOL
+              STANDAR TEKNOLOGI WORKNEST
             </p>
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight">
-              Zero front desk friction. Built like modern developer tooling.
+              Akses instan tanpa antrean meja resepsionis.
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-              No receptionists, sign-in sheets, No physical membership plastic cards. Everything is orchestrated straight from your phone or CLI.
+              Tanpa kartu fisik atau formulir manual. Seluruh alur reservasi, pintu masuk, dan penagihan dikendalikan langsung lewat perangkat Anda.
             </p>
           </div>
 
@@ -650,16 +655,16 @@ export default function HomePage() {
                   <Cpu className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
-                  Zero-Wait IoT QR Pass
+                  Kunci Digital IoT Instan
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Book a seat seconds before arriving, tap your mobile audit-screen dynamic QR at the entrance turnstile. Magnetic locks open whisper and elevators automatically.
+                  Pesan kursi sesaat sebelum tiba, pindai barcode QR dinamis pada turnstile atau gagang pintu. Kunci magnetik otomatis terbuka dalam 1,2 detik.
                 </p>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                <span className="font-mono text-slate-400">Protocol: BLE 5.2 / NFC</span>
-                <span className="font-semibold text-cyan-700">Instant</span>
+                <span className="font-mono text-slate-400">Protokol: BLE 5.2 / NFC</span>
+                <span className="font-semibold text-cyan-700">Instan</span>
               </div>
             </div>
 
@@ -670,16 +675,16 @@ export default function HomePage() {
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
-                  Micro-Invoicing by the Minute
+                  Pembayaran Akurat Per Jam
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Only pay for what you occupy. Need an impromptu sound booth for a 35-minute client sync? Billing cuts independently to the minute without bloated rounded blocks.
+                  Hanya bayar waktu yang Anda gunakan. Butuh phone booth untuk panggilan klien 30 menit? Perhitungan tarif otomatis tanpa biaya siluman.
                 </p>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                <span className="font-mono text-slate-400">Billing: Zero-commitment Debit</span>
-                <span className="font-semibold text-cyan-700">Automated</span>
+                <span className="font-mono text-slate-400">Pembayaran: QRIS &amp; Virtual Account</span>
+                <span className="font-semibold text-cyan-700">Otomatis</span>
               </div>
             </div>
 
@@ -690,10 +695,10 @@ export default function HomePage() {
                   <Users className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
-                  Centralized Team Controls
+                  Kontrol Tim &amp; Perusahaan Terpusat
                 </h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Provision 50 remote teammates across Bali, Jakarta, and Malang under a shared pool. Set individual monthly spend quotas, and receive realtime utilization audits.
+                  Kelola 50 rekan kerja remote di berbagai kota dalam satu akun grup. Tentukan batas anggaran bulanan dan pantau laporan okupansi secara langsung.
                 </p>
               </div>
 
@@ -715,15 +720,15 @@ export default function HomePage() {
               <div className="lg:col-span-6 space-y-4">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
                   <MapPin className="w-3 h-3 text-slate-500" />
-                  <span>14 Metro Hubs</span>
+                  <span>14 Hub Metropolitan</span>
                 </span>
 
                 <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
-                  Available wherever your team chooses to ship code.
+                  Tersedia di mana pun tim Anda siap berkolaborasi.
                 </h2>
 
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-                  From high-rise towers in Mega Kuningan to quiet villas in Canggu and heritage villas in Malang. One digital account unlocks them all.
+                  Dari gedung perkantoran di Jakarta Selatan hingga coworking asri di Bandung dan Malang. Satu akun digital membuka seluruh akses hub kami.
                 </p>
 
                 <div className="pt-2 flex flex-wrap items-center gap-4">
@@ -731,13 +736,13 @@ export default function HomePage() {
                     href="/spaces"
                     className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-2xs"
                   >
-                    Browse Interactive Map
+                    Buka Peta &amp; Katalog
                   </Link>
                   <Link
                     href="/register?role=owner"
                     className="text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors inline-flex items-center gap-1"
                   >
-                    <span>Place your own space</span>
+                    <span>Daftarkan ruangan Anda</span>
                     <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
@@ -751,9 +756,9 @@ export default function HomePage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
-                    <span>Live Network Topology</span>
+                    <span>Topologi Jaringan Hub Aktif</span>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400">Mesh Sync v2.4</span>
+                  <span className="text-[11px] font-mono text-slate-400">Sinkronisasi v2.4</span>
                 </div>
 
                 <div className="p-4 bg-white rounded-lg border border-slate-200/90 text-xs space-y-2">
@@ -768,7 +773,7 @@ export default function HomePage() {
                 </div>
 
                 <p className="text-[11px] text-slate-400 text-center font-normal pt-1">
-                  Coverage: Greater Jakarta · Surabaya · Malang · Bandung · Denpasar
+                  Jangkauan: Jabodetabek · Surabaya · Malang · Bandung · Bali
                 </p>
               </div>
             </div>
@@ -776,15 +781,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. SECTION: CLARIFICATIONS / FAQ */}
+      {/* 6. SECTION: FAQ */}
       <section id="faq" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center space-y-1.5">
             <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
-              CLARIFICATIONS
+              PERTANYAAN UMUM
             </p>
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-              Frequently asked operational questions
+              Pertanyaan yang sering diajukan
             </h2>
           </div>
 
@@ -826,11 +831,11 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
-              Ready to streamline how your distributed team works?
+              Siap meningkatkan produktivitas tim Anda hari ini?
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto font-normal leading-relaxed">
-              Join over 15,000 founders, engineers, and remote operators booking spaces on WorkNest today.
+              Bergabung bersama ribuan founder, developer, dan pekerja kreatif yang telah menggunakan ekosistem WorkNest.
             </p>
 
             <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -838,13 +843,13 @@ export default function HomePage() {
                 href="/spaces"
                 className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-[13px] font-semibold transition-colors shadow-xs"
               >
-                Book a Space Now
+                Pesan Ruangan Sekarang
               </Link>
               <Link
                 href="/register?role=owner"
                 className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-[13px] font-semibold transition-colors"
               >
-                View Corporate Plans
+                Daftar Sebagai Pengelola Ruangan
               </Link>
             </div>
           </div>

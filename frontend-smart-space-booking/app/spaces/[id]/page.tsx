@@ -177,7 +177,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <Link href="/spaces" className="hover:text-slate-900">
-              Spaces
+              Ruangan
             </Link>
             <span>&gt;</span>
             <span>Indonesia</span>
@@ -190,7 +190,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Verified Hub</span>
+              <span>Hub Terverifikasi</span>
             </span>
             <span className="font-mono text-[11px] text-slate-500">ID: #SP-{String(space.id).padStart(2, "0")}</span>
           </div>
@@ -207,7 +207,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 <span>4.96</span>
                 <span className="text-slate-400 font-normal">
-                  ({reviews.length > 0 ? `${reviews.length} verified reviews` : "84 verified reviews"})
+                  ({reviews.length > 0 ? `${reviews.length} ulasan terverifikasi` : "84 ulasan terverifikasi"})
                 </span>
               </div>
               <span className="text-slate-300">•</span>
@@ -230,14 +230,14 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span>Share</span>
+              <span>Bagikan</span>
             </button>
             <button
               type="button"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
             >
               <Bookmark className="w-3.5 h-3.5" />
-              <span>Save</span>
+              <span>Simpan</span>
             </button>
           </div>
         </div>
@@ -256,7 +256,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
             />
             <div className="absolute bottom-4 left-4">
               <span className="px-3 py-1 rounded-md text-xs font-medium bg-black/60 backdrop-blur-md text-white border border-white/10 shadow-xs">
-                {space.tipe === "meeting_room" ? "Executive Main Suite" : "Dedicated Workstation Area"}
+                {space.tipe === "meeting_room" ? "Ruang Rapat Eksekutif" : "Area Meja Kerja Pilihan"}
               </span>
             </div>
           </div>
@@ -265,10 +265,10 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           <div className="md:col-span-4 grid grid-cols-2 gap-3">
             {galleryThumbs.map((thumb, idx) => (
               <div key={idx} className="relative aspect-[4/3] bg-slate-100 overflow-hidden rounded-xl">
-                <img src={thumb} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                <img src={thumb} alt={`Foto Ruangan ${idx + 1}`} className="w-full h-full object-cover" />
                 {idx === 3 && (
                   <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold">
-                    Show all photos
+                    Semua Foto
                   </div>
                 )}
               </div>
@@ -284,107 +284,107 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
             <div className="bg-white rounded-2xl border border-slate-200/90 p-6 space-y-4 shadow-2xs">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-semibold text-xs text-slate-400 uppercase tracking-wider">
-                  Executive Space Specifications
+                  Spesifikasi Ruangan Eksekutif
                 </h3>
-                <span className="text-[11px] font-mono text-slate-400">AREA: 48 SQM</span>
+                <span className="text-[11px] font-mono text-slate-400">LUAS: 48 M²</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 text-xs">
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <Users className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Capacity</span>
+                    <span>Kapasitas</span>
                   </span>
-                  <p className="font-semibold text-slate-900">{space.kapasitas} Executive Pax</p>
-                  <p className="text-[11px] text-slate-500">Ergonomic swivel seats</p>
+                  <p className="font-semibold text-slate-900">{space.kapasitas} Orang Eksekutif</p>
+                  <p className="text-[11px] text-slate-500">Kursi putar ergonomis</p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <Tv className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Display</span>
+                    <span>Layar / Presentasi</span>
                   </span>
-                  <p className="font-semibold text-slate-900">85" Sony Bravia 4K</p>
+                  <p className="font-semibold text-slate-900">Sony Bravia 4K 85 inci</p>
                   <p className="text-[11px] text-slate-500">HDMI 2.1 / AirPlay / USB-C</p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <Radio className="w-3.5 h-3.5 text-slate-400" />
-                    <span>AV System</span>
+                    <span>Sistem Audio Video</span>
                   </span>
                   <p className="font-semibold text-slate-900">Polycom Studio X50</p>
-                  <p className="text-[11px] text-slate-500">Auto-framing beamforming</p>
+                  <p className="text-[11px] text-slate-500">Auto-framing &amp; beamforming mic</p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <Wifi className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Network</span>
+                    <span>Koneksi Jaringan</span>
                   </span>
-                  <p className="font-semibold text-slate-900">1.2 Gbps Symmetrical</p>
-                  <p className="text-[11px] text-slate-500">Direct fiber line redundancy</p>
+                  <p className="font-semibold text-slate-900">1,2 Gbps Simetris</p>
+                  <p className="text-[11px] text-slate-500">Jalur fiber optik berkecepatan tinggi</p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Acoustics</span>
+                    <span>Akustik Kedap Suara</span>
                   </span>
-                  <p className="font-semibold text-slate-900">-42 dB Isolation</p>
-                  <p className="text-[11px] text-slate-500">Dual-glazed acoustic glass</p>
+                  <p className="font-semibold text-slate-900">Isolasi -42 dB</p>
+                  <p className="text-[11px] text-slate-500">Kaca ganda peredam suara bising</p>
                 </div>
 
                 <div className="space-y-1">
                   <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase">
                     <Coffee className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Beverages</span>
+                    <span>Minuman &amp; Snack</span>
                   </span>
-                  <p className="font-semibold text-slate-900">Unlimited Nespresso</p>
-                  <p className="text-[11px] text-slate-500">Chilled & hot mineral bar</p>
+                  <p className="font-semibold text-slate-900">Nespresso Sepuasnya</p>
+                  <p className="text-[11px] text-slate-500">Bar air mineral panas &amp; dingin</p>
                 </div>
               </div>
             </div>
 
             {/* About the Space */}
             <div className="space-y-3">
-              <h2 className="font-serif text-xl font-bold text-slate-900">About {space.namaSpace}</h2>
+              <h2 className="font-serif text-xl font-bold text-slate-900">Tentang {space.namaSpace}</h2>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {space.deskripsi ||
-                  "Architected specifically for high-stakes investor pitches, hybrid cross-border planning sessions, and executive board meetings. Provides guaranteed sound transmission class rating reduction with complete confidentiality maintained."}
+                  "Dirancang khusus untuk presentasi investor, rapat koordinasi hybrid lintas wilayah, dan rapat pimpinan eksekutif. Menjamin kenyamanan tingkat tinggi dan privasi suara terjaga penuh."}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-xs text-slate-700">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Ultra-wide 3m magnetic glass whiteboard</span>
+                  <span>Papan tulis kaca magnetik ultra-lebar 3 meter</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Individual Daikin climate control inverter</span>
+                  <span>Pengatur suhu pendingin Daikin mandiri</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Wireless Barco ClickShare screen dongles</span>
+                  <span>Dongle layar nirkabel Barco ClickShare</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Executive stationery pack & refill pads</span>
+                  <span>Paket alat tulis &amp; buku catatan eksekutif</span>
                 </div>
               </div>
             </div>
 
             {/* House Rules & Seamless Access */}
             <div className="space-y-3 pt-2">
-              <h3 className="font-serif text-lg font-bold text-slate-900">House Rules & Seamless Access</h3>
+              <h3 className="font-serif text-lg font-bold text-slate-900">Tata Tertib &amp; Akses Tanpa Hambatan</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-xl bg-white border border-slate-200/90 space-y-2">
                   <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center">
                     <Cpu className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-xs text-slate-900">Auto QR Turnstile Pass</h4>
+                  <h4 className="font-bold text-xs text-slate-900">Tiket Turnstile QR Otomatis</h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Encrypted visitor key generated and dispatched exactly 15 minutes before your booked window for turnstile access.
+                    Kunci akses terenkripsi terbit tepat 15 menit sebelum waktu pemesanan untuk membuka pintu masuk otomatis.
                   </p>
                 </div>
 
@@ -392,9 +392,9 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                   <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center">
                     <Wifi className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-xs text-slate-900">Zero-Config Wi-Fi</h4>
+                  <h4 className="font-bold text-xs text-slate-900">Wi-Fi Otomatis Tanpa Ribet</h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    WPA3 Enterprise credentials seamlessly handshake with your smartphone upon clearing the turnstile threshold.
+                    Kredensial WPA3 Enterprise langsung terhubung ke ponsel begitu Anda melewati gerbang masuk ruangan.
                   </p>
                 </div>
 
@@ -402,9 +402,9 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                   <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
-                  <h4 className="font-bold text-xs text-slate-900">Clean Air Protocol</h4>
+                  <h4 className="font-bold text-xs text-slate-900">Protokol Udara Bersih Bebas Asap</h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Strict 100% smoke-free environment. Dedicated outdoor garden lounge situated on floor 2 for breaks.
+                    Lingkungan 100% bebas asap rokok di dalam ruangan. Area taman terbuka tersedia di lantai 2 untuk istirahat.
                   </p>
                 </div>
               </div>
@@ -413,14 +413,14 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
             {/* Location & Arrival */}
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <h3 className="font-serif text-lg font-bold text-slate-900">Location & Arrival</h3>
+                <h3 className="font-serif text-lg font-bold text-slate-900">Lokasi &amp; Petunjuk Kedatangan</h3>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationText)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs font-medium text-cyan-700 hover:text-cyan-900 inline-flex items-center gap-1"
                 >
-                  <span>Open in Maps</span>
+                  <span>Buka di Google Maps</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -429,7 +429,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 <div className="text-center space-y-1">
                   <MapPin className="w-6 h-6 mx-auto text-cyan-700" />
                   <p className="font-semibold text-slate-800">{coworkingName}</p>
-                  <p className="text-[11px] text-slate-400">Basement B1 & B2 Valet / Self-parking available</p>
+                  <p className="text-[11px] text-slate-400">Tersedia parkir kendaraan mandiri &amp; valet di Basement B1 &amp; B2</p>
                 </div>
               </div>
             </div>
@@ -438,8 +438,8 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
             <div className="space-y-4 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-slate-900">Verified Member Reviews</h3>
-                  <p className="text-xs text-slate-500">From team leads and executives who hosted in this room</p>
+                  <h3 className="font-serif text-lg font-bold text-slate-900">Ulasan Member Terverifikasi</h3>
+                  <p className="text-xs text-slate-500">Dari pimpinan tim dan eksekutif yang pernah memesan ruangan ini</p>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xl font-bold font-mono text-slate-900">4.96</span>
@@ -461,15 +461,15 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900">Raditya Harsono</p>
-                        <p className="text-[10px] text-slate-400">Chief Technology Officer, Antara Labs • Oct 18, 2024</p>
+                        <p className="text-[10px] text-slate-400">Chief Technology Officer, Antara Labs • 18 Okt 2024</p>
                       </div>
                     </div>
                     <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                      Verified Booker
+                      Member Terverifikasi
                     </span>
                   </div>
                   <p className="text-slate-600 leading-relaxed">
-                    Hosted our quarterly engineering OKR session here with remote participants dialing in from Singapore and Tokyo. The Polycom Studio auto-speaker tracking was flawless, and the acoustic isolation made everyone feel in the exact same room.
+                    Sesi OKR tim engineering berjalan sangat lancar dengan peserta remote dari Singapura dan Tokyo. Audio tracking Polycom Studio bekerja sempurna, dan insulasi akustik ruangan sangat kedap.
                   </p>
                 </div>
 
@@ -481,15 +481,15 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900">Anindita Larasati</p>
-                        <p className="text-[10px] text-slate-400">Managing Director, Bromo Ventures • Oct 02, 2024</p>
+                        <p className="text-[10px] text-slate-400">Managing Director, Bromo Ventures • 02 Okt 2024</p>
                       </div>
                     </div>
                     <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                      Verified Booker
+                      Member Terverifikasi
                     </span>
                   </div>
                   <p className="text-slate-600 leading-relaxed">
-                    The QR key delivered directly via WhatsApp made onboarding frictionless for 10 guest investors. The concierge at Malang Hub had warm espresso ready as requested.
+                    Tiket QR langsung masuk ke WhatsApp membuat kedatangan 10 tamu investor sangat rapi tanpa perlu antre. Staf resepsionis juga sigap menyiapkan espresso hangat sesuai pesanan.
                   </p>
                 </div>
               </div>
@@ -505,20 +505,20 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                   <span className="font-serif text-2xl font-bold text-slate-900 font-mono">
                     {formatRupiah(space.hargaPerJam)}
                   </span>
-                  <span className="text-xs text-slate-500 font-normal"> / hour</span>
+                  <span className="text-xs text-slate-500 font-normal"> / jam</span>
                 </div>
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>Available Today</span>
+                  <span>Tersedia Hari Ini</span>
                 </span>
               </div>
 
               {/* Date Selector */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  <span>DATE</span>
+                  <span>TANGGAL</span>
                   <label htmlFor="date-input" className="text-cyan-700 hover:text-cyan-900 cursor-pointer">
-                    CHANGE DATE
+                    UBAH TANGGAL
                   </label>
                 </div>
                 <div className="relative">
@@ -536,8 +536,8 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
               {/* Select Duration Pills */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                  <span>SELECT DURATION</span>
-                  <span className="text-cyan-800 font-bold">{durationHours} Hours Selected</span>
+                  <span>PILIH JAM SESI</span>
+                  <span className="text-cyan-800 font-bold">{durationHours} Jam Dipilih</span>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
@@ -561,8 +561,8 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 </div>
 
                 <p className="text-[11px] text-slate-500 font-medium pt-1">
-                  Continuous booking: {selectedHours[0] || "09:00"} —{" "}
-                  {selectedHours[selectedHours.length - 1] || "17:00"} ({durationHours} hours)
+                  Sesi berkelanjutan: {selectedHours[0] || "09:00"} —{" "}
+                  {selectedHours[selectedHours.length - 1] || "17:00"} ({durationHours} jam)
                 </p>
               </div>
 
@@ -570,16 +570,16 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
               <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
                 <div className="flex items-center justify-between text-slate-600">
                   <span>
-                    {durationHours} Hours × {formatRupiah(space.hargaPerJam)}
+                    {durationHours} Jam × {formatRupiah(space.hargaPerJam)}
                   </span>
                   <span className="font-mono text-slate-900">{formatRupiah(subtotal)}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
-                  <span>Facility & Sanitation Fee</span>
+                  <span>Biaya Fasilitas &amp; Pemeliharaan</span>
                   <span className="font-mono text-slate-900">{formatRupiah(facilityFee)}</span>
                 </div>
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-sm">Total Investment</span>
+                  <span className="font-bold text-slate-900 text-sm">Total Pembayaran</span>
                   <span className="font-serif text-lg font-bold text-cyan-900 font-mono">
                     {formatRupiah(totalInvestment)}
                   </span>
@@ -592,13 +592,13 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
                 onClick={handleContinueBooking}
                 className="w-full py-3 px-4 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-md shadow-cyan-950/10 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
-                <span>Continue to Booking</span>
+                <span>Lanjutkan Pemesanan</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
               {/* Security note */}
               <p className="text-[11px] text-slate-400 leading-relaxed text-center">
-                Encrypted QR Pass sent instantly via WhatsApp & email after confirmation. No keycard pickup needed.
+                Tiket QR terenkripsi dikirimkan langsung via WhatsApp &amp; email begitu reservasi terkonfirmasi. Tanpa perlu antre kartu fisik.
               </p>
             </div>
           </div>
