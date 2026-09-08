@@ -11,10 +11,10 @@ export default function DashboardSpacesRedirect() {
   useEffect(() => {
     if (isLoading) return;
     const role = user?.role?.toLowerCase();
-    if (role === "member") {
-      router.replace("/member/spaces/explore");
-    } else {
+    if (role === "admin_space" || role === "owner") {
       router.replace("/dashboard/owner/spaces");
+    } else {
+      router.replace("/dashboard/member/spaces");
     }
   }, [router, user, isLoading]);
 

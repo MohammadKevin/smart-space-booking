@@ -28,18 +28,15 @@ function SpacesContent() {
   const initialSearch = searchParams.get("search") || "";
   const initialCapacity = searchParams.get("kapasitas") || "";
 
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const isOwner = user?.role?.toLowerCase() === "admin_space" || user?.role?.toLowerCase() === "owner";
+  const isMember = user?.role?.toLowerCase() === "member" || (!user?.role && isAuthenticated);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user) {
-      const role = user.role?.toLowerCase();
-      if (role === "member") {
-        const currentQuery = searchParams.toString();
-        router.replace(currentQuery ? `/member/spaces/explore?${currentQuery}` : "/member/spaces/explore");
-      }
+    if (!isLoading && isAuthenticated && isMember) {
+      router.replace("/dashboard/member/spaces");
     }
-  }, [isLoading, isAuthenticated, user, router, searchParams]);
+  }, [isLoading, isAuthenticated, isMember, router]);
 
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,17 +91,6 @@ function SpacesContent() {
   };
 
   const hasActiveFilters = Boolean(searchQuery || selectedType || minCapacity);
-
-  if (!isLoading && isAuthenticated && user?.role?.toLowerCase() === "member") {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center p-6">
-        <div className="flex flex-col items-center gap-2.5 text-cyan-600">
-          <Loader2 className="w-7 h-7 animate-spin" />
-          <p className="text-xs font-semibold text-slate-500">Mengarahkan ke Katalog Member...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">

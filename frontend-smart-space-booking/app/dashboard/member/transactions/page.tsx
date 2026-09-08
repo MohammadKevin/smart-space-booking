@@ -377,7 +377,7 @@ export default function MemberTransactionsPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push("/member/spaces/explore")}
+              onClick={() => router.push("/dashboard/member/spaces")}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <span>Jelajahi Ruangan</span>

@@ -230,7 +230,7 @@ export default function DashboardLayout({
     return [
       { label: "Tiket & Jadwal Saya", href: "/dashboard/member", icon: CalendarCheck },
       { label: "Transaksi & Invoice", href: "/dashboard/member/transactions", icon: Wallet },
-      { label: "Katalog Ruangan", href: "/member/spaces/explore", icon: Compass },
+      { label: "Katalog Ruangan", href: "/dashboard/member/spaces", icon: Compass },
       { label: "Pengaturan Akun", href: "/dashboard/member/profile", icon: UserCog },
     ];
   };
@@ -238,9 +238,6 @@ export default function DashboardLayout({
   const links = getSidebarLinks();
 
   const isLinkActive = (href: string) => {
-    if (href === "/member/spaces/explore") {
-      return pathname.startsWith("/member/spaces") || pathname.startsWith("/dashboard/member/spaces");
-    }
     return pathname === href;
   };
 
@@ -250,7 +247,6 @@ export default function DashboardLayout({
   };
 
   const getBreadcrumbTitle = () => {
-    if (pathname.startsWith("/member/spaces") || pathname.startsWith("/dashboard/member/spaces")) return "Katalog Ruangan";
     if (pathname.startsWith("/dashboard/super-admin/commission")) return "Komisi Platform";
     if (pathname.startsWith("/dashboard/super-admin/owners")) return "Mitra Space Owner";
     if (pathname.startsWith("/dashboard/super-admin/transactions")) return "Transaksi Global";
@@ -263,6 +259,7 @@ export default function DashboardLayout({
     if (pathname.startsWith("/dashboard/owner/staff")) return "Manajemen Staff";
     if (pathname.startsWith("/dashboard/owner")) return "Overview KPI";
     if (pathname.startsWith("/dashboard/staff")) return "Terminal Check-In";
+    if (pathname.startsWith("/dashboard/member/spaces")) return "Katalog Ruangan";
     if (pathname.startsWith("/dashboard/member/transactions")) return "Transaksi & Invoice";
     if (pathname.startsWith("/dashboard/member")) return "Tiket & Jadwal Saya";
     return "Dashboard";

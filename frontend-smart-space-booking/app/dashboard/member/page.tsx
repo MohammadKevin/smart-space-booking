@@ -339,7 +339,7 @@ export default function MemberDashboardPage() {
             <span>Segarkan</span>
           </button>
           <Link
-            href="/member/spaces/explore"
+            href="/dashboard/member/spaces"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white text-xs font-bold shadow-xs transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -673,7 +673,7 @@ export default function MemberDashboardPage() {
               </p>
             </div>
             <Link
-              href="/member/spaces/explore"
+              href="/dashboard/member/spaces"
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
             >
               <span>Jelajahi Katalog Ruangan</span>

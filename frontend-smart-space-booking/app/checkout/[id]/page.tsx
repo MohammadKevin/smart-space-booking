@@ -305,7 +305,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         <h2 className="text-lg font-bold text-slate-900">Pesanan Tidak Ditemukan</h2>
         <p className="text-xs text-slate-500">{error || "Data reservasi tidak tersedia atau telah dihapus."}</p>
         <Link
-          href="/spaces"
+          href="/dashboard/member/spaces"
           className="inline-flex items-center gap-1.5 px-4 py-2 bg-cyan-600 text-white text-xs font-semibold rounded-lg hover:bg-cyan-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -408,7 +408,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
               <Link
-                href="/member/spaces/explore"
+                href="/dashboard/member/spaces"
                 className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all text-center"
               >
                 <span>Jelajahi Ruangan Lain</span>
