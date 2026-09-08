@@ -83,6 +83,17 @@ function RegisterForm() {
           setLoading(false);
           return;
         }
+        const cleanMemberTelp = memberTelp.trim();
+        if (!/^(\+62|62|08)\d+$/.test(cleanMemberTelp)) {
+          setErrorMessage("Nomor telepon harus berformat Indonesia (diawali 08, 62, atau +62)");
+          setLoading(false);
+          return;
+        }
+        if (cleanMemberTelp.replace(/\D/g, "").length < 12) {
+          setErrorMessage("Nomor telepon minimal 12 digit");
+          setLoading(false);
+          return;
+        }
 
         const dto: RegisterMemberDto = {
           email: email.trim(),
@@ -110,6 +121,17 @@ function RegisterForm() {
         }
         if (!ownerTelp.trim()) {
           setErrorMessage("Nomor telepon coworking wajib diisi");
+          setLoading(false);
+          return;
+        }
+        const cleanOwnerTelp = ownerTelp.trim();
+        if (!/^(\+62|62|08)\d+$/.test(cleanOwnerTelp)) {
+          setErrorMessage("Nomor telepon harus berformat Indonesia (diawali 08, 62, atau +62)");
+          setLoading(false);
+          return;
+        }
+        if (cleanOwnerTelp.replace(/\D/g, "").length < 12) {
+          setErrorMessage("Nomor telepon minimal 12 digit");
           setLoading(false);
           return;
         }
@@ -345,9 +367,10 @@ function RegisterForm() {
                         <input
                           type="tel"
                           required
+                          minLength={12}
                           value={memberTelp}
                           onChange={(e) => setMemberTelp(e.target.value)}
-                          placeholder="081234567890"
+                          placeholder="081234567890 (min. 12 digit)"
                           className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                         />
                       </div>
@@ -421,9 +444,10 @@ function RegisterForm() {
                       <input
                         type="tel"
                         required
+                        minLength={12}
                         value={ownerTelp}
                         onChange={(e) => setOwnerTelp(e.target.value)}
-                        placeholder="081234567890"
+                        placeholder="081234567890 (min. 12 digit)"
                         className="w-full px-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                       />
                     </div>

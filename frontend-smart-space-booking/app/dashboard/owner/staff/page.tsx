@@ -87,6 +87,16 @@ export default function OwnerStaffPage() {
       return;
     }
 
+    const cleanTelp = telp.trim();
+    if (!/^(\+62|62|08)\d+$/.test(cleanTelp)) {
+      setFormError("Nomor telepon harus berformat Indonesia (diawali 08, 62, atau +62)");
+      return;
+    }
+    if (cleanTelp.replace(/\D/g, "").length < 12) {
+      setFormError("Nomor telepon minimal 12 digit");
+      return;
+    }
+
     setFormLoading(true);
     try {
       const dto: CreateStaffDto = {
@@ -430,9 +440,10 @@ export default function OwnerStaffPage() {
                   <input
                     type="tel"
                     required
+                    minLength={12}
                     value={telp}
                     onChange={(e) => setTelp(e.target.value)}
-                    placeholder="081234567890"
+                    placeholder="081234567890 (min. 12 digit)"
                     className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                   />
                 </div>

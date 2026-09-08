@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from '../common/mail/mail.service';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -21,6 +22,7 @@ describe('AuthService (QA/QC Unit Tests)', () => {
       user: {
         findUnique: jest.fn(),
         create: jest.fn(),
+        update: jest.fn().mockResolvedValue({}),
       },
       member: {
         create: jest.fn(),
@@ -39,11 +41,17 @@ describe('AuthService (QA/QC Unit Tests)', () => {
       sign: jest.fn(() => 'mock-jwt-token'),
     };
 
+    const mailService = {
+      sendVerificationEmail: jest.fn().mockResolvedValue(true),
+      sendVerificationOtp: jest.fn().mockResolvedValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prismaService },
         { provide: JwtService, useValue: jwtService },
+        { provide: MailService, useValue: mailService },
       ],
     }).compile();
 
@@ -86,6 +94,7 @@ describe('AuthService (QA/QC Unit Tests)', () => {
         email: 'user@example.com',
         password: hashedPassword,
         role: 'member',
+        isVerified: true,
         member: { id: 10, namaMember: 'Kevin' },
       });
 
@@ -114,7 +123,7 @@ describe('AuthService (QA/QC Unit Tests)', () => {
           namaMember: 'Kevin',
           instansi: 'SMK 1',
           alamat: 'Surabaya',
-          telp: '08123456789',
+          telp: '081234567890',
         }),
       ).rejects.toThrow(ConflictException);
     });
@@ -129,7 +138,7 @@ describe('AuthService (QA/QC Unit Tests)', () => {
       prismaService.member.create.mockResolvedValue({
         id: 20,
         namaMember: 'New Member',
-        telp: '08123456789',
+        telp: '081234567890',
       });
 
       const result = await authService.registerMember({
@@ -138,10 +147,10 @@ describe('AuthService (QA/QC Unit Tests)', () => {
         namaMember: 'New Member',
         instansi: 'SMK 1',
         alamat: 'Surabaya',
-        telp: '08123456789',
+        telp: '081234567890',
       });
 
-      expect(result).toHaveProperty('access_token', 'mock-jwt-token');
+      expect(result).toHaveProperty('isVerified', false);
       expect(result.user).toHaveProperty('email', 'newmember@example.com');
     });
   });

@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
 export class UpdateProfileDto {
   @ApiPropertyOptional({ example: 'Kevin Sanjaya Pratama' })
@@ -36,6 +36,8 @@ export class UpdateProfileDto {
   @ApiPropertyOptional({ example: '081234567899' })
   @IsOptional()
   @IsString()
+  @Matches(/^(\+62|62|08)\d+$/, { message: 'Nomor telepon harus format Indonesia (08xx / 62xx / +62xx)' })
+  @MinLength(12, { message: 'Nomor telepon minimal 12 digit (format Indonesia)' })
   telp?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
