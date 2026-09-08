@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProcessCheckinDto, CheckinAction } from './dto/process-checkin.dto';
-import { ReservasiStatus, Role } from '@prisma/client';
+import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 import {
   timeStringToMinutes,
   minutesToTimeString,
@@ -45,6 +45,7 @@ export class CheckinService {
       include: {
         member: true,
         owner: true,
+        transaksi: true,
         detailReservasi: {
           include: {
             space: true,
@@ -66,11 +67,18 @@ export class CheckinService {
     const endMinutes = startMinutes + reservation.durasiJam * 60;
     const jamSelesai = minutesToTimeString(endMinutes);
 
-    const canCheckIn = reservation.status === ReservasiStatus.disetujui;
+    const isPaid =
+      !reservation.transaksi ||
+      reservation.transaksi.statusPembayaran === PembayaranStatus.lunas;
+
+    const canCheckIn =
+      reservation.status === ReservasiStatus.disetujui && isPaid;
     const canCheckOut = reservation.status === ReservasiStatus.aktif;
 
     let actionLabel = 'Tidak ada aksi yang tersedia';
-    if (canCheckIn) actionLabel = 'Siap Check-In (Mulai Pemakaian)';
+    if (reservation.status === ReservasiStatus.disetujui && !isPaid)
+      actionLabel = 'Menunggu Pembayaran (Belum Lunas)';
+    else if (canCheckIn) actionLabel = 'Siap Check-In (Mulai Pemakaian)';
     else if (canCheckOut) actionLabel = 'Siap Check-Out (Selesai Pemakaian)';
     else if (reservation.status === ReservasiStatus.pending)
       actionLabel = 'Menunggu Persetujuan Admin';
@@ -98,6 +106,7 @@ export class CheckinService {
       include: {
         member: true,
         owner: true,
+        transaksi: true,
         detailReservasi: {
           include: {
             space: true,
@@ -113,6 +122,16 @@ export class CheckinService {
     this.validateStaffOrOwnerPermission(reservation.ownerId, user);
 
     const requestedAction = dto.action || CheckinAction.AUTO;
+
+    if (
+      reservation.status === ReservasiStatus.disetujui &&
+      reservation.transaksi &&
+      reservation.transaksi.statusPembayaran !== PembayaranStatus.lunas
+    ) {
+      throw new BadRequestException(
+        'Pembayaran untuk reservasi ini belum lunas. Selesaikan pembayaran terlebih dahulu sebelum check-in.',
+      );
+    }
 
     if (
       reservation.status === ReservasiStatus.disetujui &&

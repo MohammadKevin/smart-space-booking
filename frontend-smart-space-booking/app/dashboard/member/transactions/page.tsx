@@ -99,6 +99,28 @@ export default function MemberTransactionsPage() {
     });
   }, [transactions, activeTab, searchQuery]);
 
+  const [syncingId, setSyncingId] = useState<number | null>(null);
+
+  const handleSync = async (t: Transaksi) => {
+    setSyncingId(t.id);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await syncPayment(t.id);
+      const updatedTx = res?.data || res;
+      if (updatedTx?.statusPembayaran === "lunas") {
+        setMessage(`Pembayaran invoice ${t.nomorInvoice} berhasil diverifikasi (Lunas)!`);
+      } else {
+        setMessage(`Status pembayaran ${t.nomorInvoice}: ${updatedTx?.statusPembayaran || "menunggu pembayaran"}.`);
+      }
+      await loadTransactions();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setSyncingId(null);
+    }
+  };
+
   const handlePay = async (t: Transaksi) => {
     setPayingId(t.id);
     setError(null);
@@ -306,6 +328,19 @@ export default function MemberTransactionsPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {t.statusPembayaran === "menunggu_pembayaran" && (
+                      <button
+                        type="button"
+                        onClick={() => handleSync(t)}
+                        disabled={syncingId === t.id}
+                        title="Periksa konfirmasi pembayaran Midtrans"
+                        className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200 transition-colors inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${syncingId === t.id ? "animate-spin" : ""}`} />
+                        <span>Cek Status</span>
+                      </button>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => setSelected(t)}
@@ -425,6 +460,21 @@ export default function MemberTransactionsPage() {
                   <span className="text-lg font-extrabold text-slate-900 font-mono">{formatRupiah(selected.jumlah)}</span>
                 </div>
               </div>
+
+              {selected.statusPembayaran === "menunggu_pembayaran" && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await handleSync(selected);
+                    setSelected(null);
+                  }}
+                  disabled={syncingId === selected.id}
+                  className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${syncingId === selected.id ? "animate-spin" : ""}`} />
+                  <span>Cek Status Pembayaran Midtrans</span>
+                </button>
+              )}
 
               {canPay(selected) && (
                 <Link

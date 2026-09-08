@@ -43,6 +43,49 @@ export function ImageUploader({
     }
   }, [value]);
 
+  const compressImageLocally = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(event.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          resolve(dataUrl);
+        };
+        img.onerror = () => resolve(event.target?.result as string);
+        img.src = event.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const processAndCompressFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       alert("File harus berupa gambar (JPG, PNG, WebP).");
@@ -62,12 +105,18 @@ export function ImageUploader({
         setProcessing(false);
         return;
       }
-    } catch (uploadErr: unknown) {
-      const msg =
-        uploadErr instanceof Error ? uploadErr.message : "Terjadi kesalahan saat upload gambar.";
-      console.error("Gagal upload foto ke Cloudinary:", uploadErr);
-      alert(`Gagal mengunggah foto ke Cloudinary: ${msg}`);
-      setProcessing(false);
+    } catch {
+      try {
+        const base64 = await compressImageLocally(file);
+        setPreview(base64);
+        const approxBytes = Math.round((base64.length * 3) / 4);
+        setFileSize(`${Math.round(approxBytes / 1024)} KB (Lokal)`);
+        onChange(base64);
+      } catch {
+        alert("Gagal memproses file gambar.");
+      } finally {
+        setProcessing(false);
+      }
     }
   };
 

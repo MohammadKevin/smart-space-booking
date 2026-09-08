@@ -43,16 +43,12 @@ export class ReportService {
       bookingCounts[res.status] = (bookingCounts[res.status] || 0) + 1;
 
       const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
-      const isValidStatus =
-        res.status === ReservasiStatus.selesai ||
-        res.status === ReservasiStatus.aktif ||
-        res.status === ReservasiStatus.disetujui;
       const isNotCancelled =
         res.status !== ReservasiStatus.dibatalkan &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
 
-      if ((isPaid || isValidStatus) && isNotCancelled) {
+      if (isPaid && isNotCancelled) {
         if (res.detailReservasi?.totalHarga) {
           totalRevenue += res.detailReservasi.totalHarga;
         }
@@ -132,16 +128,12 @@ export class ReportService {
 
     for (const res of reservations) {
       const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
-      const isValidStatus =
-        res.status === ReservasiStatus.selesai ||
-        res.status === ReservasiStatus.aktif ||
-        res.status === ReservasiStatus.disetujui;
       const isNotCancelled =
         res.status !== ReservasiStatus.dibatalkan &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
 
-      if ((isPaid || isValidStatus) && isNotCancelled) {
+      if (isPaid && isNotCancelled) {
         const monthIdx = new Date(res.tanggalReservasi).getUTCMonth();
         if (monthIdx >= 0 && monthIdx < 12) {
           monthlyStats[monthIdx].totalBookings += 1;
@@ -235,16 +227,12 @@ export class ReportService {
 
     for (const res of reservations) {
       const isPaid = res.transaksi?.statusPembayaran === PembayaranStatus.lunas;
-      const isValidStatus =
-        res.status === ReservasiStatus.selesai ||
-        res.status === ReservasiStatus.aktif ||
-        res.status === ReservasiStatus.disetujui;
       const isNotCancelled =
         res.status !== ReservasiStatus.dibatalkan &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.refund &&
         res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
 
-      if ((isPaid || isValidStatus) && isNotCancelled) {
+      if (isPaid && isNotCancelled) {
         const spaceType = res.detailReservasi?.space?.tipe;
         if (spaceType && distribution[spaceType]) {
           distribution[spaceType].totalBookings += 1;

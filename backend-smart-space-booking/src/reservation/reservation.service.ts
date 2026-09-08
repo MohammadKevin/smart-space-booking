@@ -366,6 +366,8 @@ export class ReservationService implements OnModuleInit {
       include: {
         member: true,
         owner: true,
+        transaksi: true,
+        review: true,
         detailReservasi: {
           include: {
             space: true,
@@ -392,6 +394,8 @@ export class ReservationService implements OnModuleInit {
       include: {
         member: true,
         owner: true,
+        transaksi: true,
+        review: true,
         detailReservasi: {
           include: {
             space: true,

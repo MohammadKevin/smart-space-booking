@@ -73,9 +73,12 @@ function LoginForm() {
 
       setTimeout(() => {
         const role = response.user.role?.toLowerCase();
+        const isSuperAdmin = role === "super_admin";
         const isOwner = role === "admin_space" || role === "owner";
         const isStaff = role === "staff";
-        const defaultDashboard = isOwner
+        const defaultDashboard = isSuperAdmin
+          ? "/dashboard/super-admin"
+          : isOwner
           ? "/dashboard/owner"
           : isStaff
           ? "/dashboard/staff"
@@ -87,6 +90,10 @@ function LoginForm() {
             return;
           }
           if (!isStaff && redirectParam.startsWith("/dashboard/staff")) {
+            router.push(defaultDashboard);
+            return;
+          }
+          if (!isSuperAdmin && redirectParam.startsWith("/dashboard/super-admin")) {
             router.push(defaultDashboard);
             return;
           }

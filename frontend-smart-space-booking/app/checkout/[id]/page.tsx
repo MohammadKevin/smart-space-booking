@@ -132,24 +132,26 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("bca_va");
   const [paying, setPaying] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const [paySuccess, setPaySuccess] = useState(false);
   const [directPaymentData, setDirectPaymentData] = useState<any | null>(null);
   const [copiedVa, setCopiedVa] = useState(false);
 
-  const fetchReservation = async () => {
-    setLoading(true);
+  const fetchReservation = async (quiet = false) => {
+    if (!quiet) setLoading(true);
     setError(null);
     try {
       const data = await getReservationById(reservationId);
       setReservation(data);
       if (data.transaksi?.statusPembayaran === "lunas") {
         setPaySuccess(true);
+        setDirectPaymentData(null);
       }
     } catch (err: unknown) {
-      setError(getApiErrorMessage(err));
+      if (!quiet) setError(getApiErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   };
 
@@ -159,11 +161,51 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     }
   }, [reservationId]);
 
+  // Polling when waiting for payment to complete (e.g. via Midtrans Simulator or Mobile Banking)
+  useEffect(() => {
+    if (paySuccess || !reservationId) return;
+
+    const isWaiting =
+      Boolean(directPaymentData) ||
+      reservation?.transaksi?.statusPembayaran === "menunggu_pembayaran";
+
+    if (!isWaiting) return;
+
+    const interval = setInterval(async () => {
+      try {
+        if (reservation?.transaksi?.id) {
+          const res = await syncPayment(reservation.transaksi.id);
+          const tx = res?.data || res;
+          if (tx?.statusPembayaran === "lunas") {
+            setPaySuccess(true);
+            setDirectPaymentData(null);
+            await fetchReservation(true);
+            return;
+          }
+        }
+        await fetchReservation(true);
+      } catch {}
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [reservationId, directPaymentData, reservation?.transaksi?.id, reservation?.transaksi?.statusPembayaran, paySuccess]);
+
+  const getSimulatorUrl = () => {
+    const m = (directPaymentData?.paymentMethod || selectedPaymentMethod || "").toLowerCase();
+    if (m.includes("bca")) return "https://simulator.sandbox.midtrans.com/bca/va/index";
+    if (m.includes("bni")) return "https://simulator.sandbox.midtrans.com/bni/va/index";
+    if (m.includes("bri")) return "https://simulator.sandbox.midtrans.com/bri/va/index";
+    if (m.includes("mandiri")) return "https://simulator.sandbox.midtrans.com/mandiri/bill/index";
+    if (m.includes("permata")) return "https://simulator.sandbox.midtrans.com/permata/va/index";
+    if (m.includes("qris") || m.includes("gopay") || m.includes("shopeepay")) return "https://simulator.sandbox.midtrans.com/qris/index";
+    return "https://simulator.sandbox.midtrans.com/";
+  };
+
   const handleCopyVa = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedVa(true);
-    setTimeout(() => setCopiedVa(null as any), 2000);
+    setTimeout(() => setCopiedVa(false), 2000);
   };
 
   const handlePayNow = async () => {
@@ -174,6 +216,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     try {
       const response = await startPayment(reservation.id, selectedPaymentMethod);
       const result = response.data;
+
+      fetchReservation(true);
 
       if (result.directPayment) {
         setDirectPaymentData(result.directPayment);
@@ -193,7 +237,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
           } catch {}
           setPaySuccess(true);
           setPaying(false);
-          await fetchReservation();
+          await fetchReservation(true);
         },
         onPending: async () => {
           try {
@@ -201,7 +245,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
           } catch {}
           setPaySuccess(true);
           setPaying(false);
-          await fetchReservation();
+          await fetchReservation(true);
         },
         onError: () => {
           setPayError("Pembayaran gagal atau dibatalkan oleh gateway Midtrans.");
@@ -209,6 +253,9 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         },
         onClose: () => {
           setPaying(false);
+          if (result.transactionId) {
+            syncPayment(result.transactionId).then(() => fetchReservation(true)).catch(() => {});
+          }
         },
       });
     } catch (err: unknown) {
@@ -219,14 +266,23 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
   const handleCheckDirectPaymentStatus = async () => {
     if (!reservation) return;
-    setPaying(true);
+    setCheckingStatus(true);
+    setPayError(null);
     try {
       if (reservation.transaksi?.id) {
-        await syncPayment(reservation.transaksi.id);
+        const res = await syncPayment(reservation.transaksi.id);
+        const tx = res?.data || res;
+        if (tx?.statusPembayaran === "lunas") {
+          setPaySuccess(true);
+          setDirectPaymentData(null);
+        }
       }
-      await fetchReservation();
-    } catch {}
-    setPaying(false);
+      await fetchReservation(true);
+    } catch (err: unknown) {
+      setPayError(getApiErrorMessage(err));
+    } finally {
+      setCheckingStatus(false);
+    }
   };
 
   if (loading) {
@@ -266,13 +322,15 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const basePrice = space ? space.hargaPerJam * reservation.durasiJam : totalHarga;
   const discountAmount = Math.max(0, basePrice - totalHarga);
 
-  const rawDate = reservation.tanggalReservasi ? reservation.tanggalReservasi.split("T")[0] : "-";
-  const formattedDate = new Date(rawDate + "T00:00:00").toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const rawDate = reservation.tanggalReservasi ? reservation.tanggalReservasi.split("T")[0] : "";
+  const formattedDate = rawDate
+    ? new Date(rawDate + "T00:00:00").toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
 
   return (
     <div className="min-h-screen bg-slate-100/70 pb-28">
@@ -360,6 +418,24 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         ) : (
           <>
             {/* Shopee-Style Section 1: Data Pemesan & Lokasi */}
+            {reservation.status === "pending" && (
+              <div className="bg-sky-50 border-2 border-sky-300 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                      Pemesanan Siap Dibayar
+                    </h4>
+                    <p className="text-[11px] text-slate-600">
+                      Anda dapat langsung menyelesaikan pembayaran untuk mengonfirmasi dan mengaktifkan tiket E-Pass ruangan <strong>{space?.namaSpace}</strong>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
               <div className="h-1.5 w-full bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500" />
               <div className="p-4 sm:p-5 space-y-2">
@@ -591,16 +667,26 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     </div>
                   ) : null}
 
-                  <div className="flex items-center justify-between gap-3 pt-1">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-1">
                     <button
                       type="button"
                       onClick={handleCheckDirectPaymentStatus}
-                      disabled={paying}
-                      className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                      disabled={checkingStatus}
+                      className="w-full sm:flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 ${paying ? "animate-spin" : ""}`} />
-                      <span>Saya Sudah Bayar (Cek Status)</span>
+                      <RefreshCw className={`w-3.5 h-3.5 ${checkingStatus ? "animate-spin" : ""}`} />
+                      <span>{checkingStatus ? "Memeriksa Status..." : "Saya Sudah Bayar (Cek Status)"}</span>
                     </button>
+
+                    <a
+                      href={getSimulatorUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto py-2.5 px-3.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-300 hover:border-slate-400 transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Buka Simulator Midtrans</span>
+                    </a>
                   </div>
                 </div>
               )}

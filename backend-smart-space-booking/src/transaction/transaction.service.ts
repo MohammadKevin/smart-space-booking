@@ -134,9 +134,12 @@ export class TransactionService {
       throw new ForbiddenException('Reservasi ini bukan milik Anda.');
     }
 
-    if (reservation.status !== ReservasiStatus.disetujui) {
+    if (
+      reservation.status !== ReservasiStatus.pending &&
+      reservation.status !== ReservasiStatus.disetujui
+    ) {
       throw new BadRequestException(
-        'Pembayaran hanya dapat dilakukan setelah reservasi disetujui. Saat ini status: ' +
+        'Pembayaran tidak dapat dilakukan karena reservasi berstatus ' +
           reservation.status +
           '.',
       );
@@ -247,6 +250,7 @@ export class TransactionService {
     const grossAmount = String(payload.gross_amount ?? '');
     const signatureKey = payload.signature_key ?? '';
     const transactionStatus = payload.transaction_status;
+    const fraudStatus = payload.fraud_status;
 
     if (
       !orderId ||
@@ -265,6 +269,16 @@ export class TransactionService {
 
     const tx = await this.prisma.transaksi.findUnique({
       where: { midtransOrderId: orderId },
+      include: {
+        reservasi: {
+          include: {
+            member: {
+              include: { user: true },
+            },
+            detailReservasi: { include: { space: true, diskon: true } },
+          },
+        },
+      },
     });
 
     if (!tx) {
@@ -273,8 +287,19 @@ export class TransactionService {
       );
     }
 
+    // Idempotency: if already marked lunas and notification is settlement, skip redundant processing
+    if (
+      tx.statusPembayaran === PembayaranStatus.lunas &&
+      (transactionStatus === 'settlement' || transactionStatus === 'capture')
+    ) {
+      return { success: true };
+    }
+
     let status: PembayaranStatus;
-    if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
+    if (
+      transactionStatus === 'settlement' ||
+      (transactionStatus === 'capture' && (!fraudStatus || fraudStatus === 'accept'))
+    ) {
       status = PembayaranStatus.lunas;
     } else if (transactionStatus === 'pending') {
       status = PembayaranStatus.menunggu_pembayaran;
@@ -282,16 +307,55 @@ export class TransactionService {
       status = PembayaranStatus.gagal;
     }
 
-    await this.prisma.transaksi.update({
+    const isNewlyPaid = status === PembayaranStatus.lunas && !tx.dibayarPada;
+
+    const updated = await this.prisma.transaksi.update({
       where: { id: tx.id },
       data: {
         statusPembayaran: status,
         metodePembayaran: payload.payment_type || tx.metodePembayaran,
         midtransTransId: payload.transaction_id || tx.midtransTransId,
         dibayarPada:
-          status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
+          status === PembayaranStatus.lunas ? (tx.dibayarPada || new Date()) : tx.dibayarPada,
+      },
+      include: {
+        reservasi: {
+          include: {
+            member: {
+              include: { user: true },
+            },
+            detailReservasi: { include: { space: true, diskon: true } },
+          },
+        },
       },
     });
+
+    if (status === PembayaranStatus.lunas && updated.reservasi?.status === ReservasiStatus.pending) {
+      await this.prisma.reservasi.update({
+        where: { id: updated.reservasi.id },
+        data: { status: ReservasiStatus.disetujui },
+      });
+    }
+
+    if (isNewlyPaid && updated.reservasi?.member?.user?.email) {
+      const email = updated.reservasi.member.user.email;
+      const memberName = updated.reservasi.member.namaMember;
+      const spaceName = updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
+      const invoiceNum = updated.nomorInvoice;
+      const totalAmount = updated.jumlah;
+      const method = updated.metodePembayaran || 'Midtrans';
+
+      this.mailService
+        .sendPaymentSuccessEmail(
+          email,
+          memberName,
+          spaceName,
+          invoiceNum,
+          totalAmount,
+          method,
+        )
+        .catch(() => {});
+    }
 
     return { success: true };
   }
@@ -336,6 +400,13 @@ export class TransactionService {
         },
       },
     });
+
+    if (status === PembayaranStatus.lunas && updated.reservasi?.status === ReservasiStatus.pending) {
+      await this.prisma.reservasi.update({
+        where: { id: updated.reservasi.id },
+        data: { status: ReservasiStatus.disetujui },
+      });
+    }
 
     if (status === PembayaranStatus.lunas && updated.reservasi?.member?.user?.email) {
       const email = updated.reservasi.member.user.email;

@@ -282,5 +282,126 @@ export class SuperAdminService {
       };
     });
   }
+
+  async getAllUsers(role?: Role, isVerified?: boolean, search?: string) {
+    const where: any = {};
+
+    if (role) {
+      where.role = role;
+    }
+    if (isVerified !== undefined) {
+      where.isVerified = isVerified;
+    }
+    if (search) {
+      const q = search.trim();
+      where.OR = [
+        { email: { contains: q } },
+        { member: { namaMember: { contains: q } } },
+        { spaceOwner: { namaCoworking: { contains: q } } },
+        { spaceOwner: { namaPemilik: { contains: q } } },
+        { staff: { namaStaff: { contains: q } } },
+      ];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            id: true,
+            namaMember: true,
+            telp: true,
+            instansi: true,
+            alamat: true,
+            foto: true,
+          },
+        },
+        spaceOwner: {
+          select: {
+            id: true,
+            namaCoworking: true,
+            namaPemilik: true,
+            telp: true,
+            alamat: true,
+          },
+        },
+        staff: {
+          select: {
+            id: true,
+            namaStaff: true,
+            telp: true,
+            owner: {
+              select: {
+                id: true,
+                namaCoworking: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return users;
+  }
+
+  async verifyUser(userId: number, verified: boolean = true) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        isVerified: verified,
+        otpCode: null,
+        otpExpires: null,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        isVerified: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: `Status verifikasi akun '${user.email}' berhasil diubah menjadi ${verified ? 'Terverifikasi (Aktif)' : 'Belum Terverifikasi'}.`,
+      user: updated,
+    };
+  }
+
+  async deleteUser(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+    }
+
+    if (user.role === Role.super_admin) {
+      throw new Error('Akun Super Admin tidak dapat dihapus.');
+    }
+
+    await this.prisma.user.delete({
+      where: { id: userId },
+    });
+
+    return {
+      message: `Akun '${user.email}' (${user.role}) berhasil dihapus dari platform.`,
+    };
+  }
 }
 

@@ -2,7 +2,10 @@ import {
   Controller,
   Get,
   Put,
+  Patch,
+  Delete,
   Body,
+  Param,
   Query,
   UseGuards,
   ParseIntPipe,
@@ -105,5 +108,65 @@ export class SuperAdminController {
   getAllTransactions(@Query('limit') limit?: string) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     return this.superAdminService.getAllTransactions(limitNum);
+  }
+
+  @Get('users')
+  @ApiOperation({
+    summary: 'Manajemen Pengguna Global Platform',
+    description:
+      'Super Admin dapat melihat dan mencari seluruh pengguna platform (Member, Space Owner, Staff, Super Admin) beserta status verifikasi emailnya.',
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: Role,
+    description: 'Filter berdasarkan role pengguna',
+  })
+  @ApiQuery({
+    name: 'isVerified',
+    required: false,
+    type: Boolean,
+    description: 'Filter berdasarkan status verifikasi akun',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Cari berdasarkan nama, email, atau nama coworking',
+  })
+  getAllUsers(
+    @Query('role') role?: Role,
+    @Query('isVerified') isVerified?: string,
+    @Query('search') search?: string,
+  ) {
+    const verifiedBool =
+      isVerified === 'true' ? true : isVerified === 'false' ? false : undefined;
+    return this.superAdminService.getAllUsers(role, verifiedBool, search);
+  }
+
+  @Patch('users/:id/verify')
+  @ApiOperation({
+    summary: 'Aktivasi / Verifikasi Akun Pengguna secara Manual',
+    description:
+      'Super Admin dapat mengaktifkan dan memverifikasi email pengguna tanpa perlu kode OTP email.',
+  })
+  verifyUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('isVerified') isVerified?: boolean,
+  ) {
+    return this.superAdminService.verifyUser(
+      id,
+      isVerified !== undefined ? isVerified : true,
+    );
+  }
+
+  @Delete('users/:id')
+  @ApiOperation({
+    summary: 'Hapus Akun Pengguna dari Platform',
+    description:
+      'Super Admin dapat menghapus akun pengguna (Member, Space Owner, Staff) jika melanggar ketentuan.',
+  })
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.superAdminService.deleteUser(id);
   }
 }
