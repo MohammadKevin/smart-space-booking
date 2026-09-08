@@ -10,13 +10,15 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  ArrowLeft,
   Eye,
   EyeOff,
   AlertCircle,
   Loader2,
   CheckCircle2,
-  QrCode,
+  Building2,
+  ShieldCheck,
+  Share2,
+  Link2,
   X,
   KeyRound,
 } from "lucide-react";
@@ -40,6 +42,7 @@ function LoginForm() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
+  const [ssoModalOpen, setSsoModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,15 +51,15 @@ function LoginForm() {
     setUnverifiedEmail(null);
 
     if (!email.trim()) {
-      setErrorMessage("Masukkan email Anda");
+      setErrorMessage("Please enter your work email");
       return;
     }
     if (!password) {
-      setErrorMessage("Masukkan password Anda");
+      setErrorMessage("Please enter your password");
       return;
     }
     if (password.length < 6) {
-      setErrorMessage("Password minimal 6 karakter");
+      setErrorMessage("Password must be at least 6 characters");
       return;
     }
 
@@ -69,7 +72,7 @@ function LoginForm() {
       });
 
       loginUser(response.access_token, response.user);
-      setSuccessMessage("Login berhasil! Mengarahkan ke dashboard...");
+      setSuccessMessage("Authentication successful. Routing to your console...");
 
       setTimeout(() => {
         const role = response.user.role?.toLowerCase();
@@ -121,7 +124,7 @@ function LoginForm() {
   const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail.trim()) {
-      setForgotError("Masukkan alamat email Anda.");
+      setForgotError("Please enter your account email.");
       return;
     }
 
@@ -140,230 +143,226 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-[50px] sm:py-[75px] px-4 sm:px-8 lg:px-12 bg-slate-100/80 relative overflow-hidden">
-      <Link
-        href="/"
-        className="absolute top-5 left-5 sm:top-7 sm:left-8 z-30 inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/95 hover:bg-white text-slate-700 hover:text-cyan-700 font-semibold text-xs border border-slate-200 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all group"
-      >
-        <ArrowLeft className="w-4 h-4 text-slate-500 group-hover:text-cyan-600 transition-transform group-hover:-translate-x-0.5" />
-        <span>Kembali ke Beranda</span>
-      </Link>
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 bg-slate-50/60 relative">
+      {/* Top Protocol Pill */}
+      <div className="mb-6 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200/80 shadow-xs text-[11px] font-mono font-medium tracking-wide text-slate-600">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="uppercase text-slate-500 font-semibold">Identity Gateway</span>
+        <span className="text-slate-300">•</span>
+        <span className="text-slate-600">ID.WORKNEST.IO</span>
+      </div>
 
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-cyan-200/40 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="w-full max-w-5xl lg:max-w-6xl bg-white rounded-xl shadow-2xl shadow-slate-400/25 border border-slate-200/90 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10 lg:h-[640px]">
-        <div className="lg:col-span-6 bg-gradient-to-br from-cyan-50/90 via-sky-50/50 to-blue-50/30 p-8 sm:p-10 lg:p-12 flex flex-col justify-between items-center text-center relative border-b lg:border-b-0 lg:border-r border-cyan-100/90 h-full">
-          <div className="space-y-2 max-w-md">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-800 leading-snug">
-              Permudah interaksi antar{" "}
-              <span className="text-cyan-600 font-extrabold">Member</span> dan{" "}
-              <span className="text-sky-600 font-extrabold">Space Owner</span> secara online!
-            </h2>
+      {/* Main Card */}
+      <div className="w-full max-w-[480px] bg-white rounded-2xl border border-slate-200 shadow-xl shadow-slate-200/50 p-7 sm:p-9 relative">
+        {/* WorkNest Emblem Header */}
+        <div className="flex flex-col items-center text-center mb-7">
+          <div className="w-12 h-12 rounded-xl bg-[#E6F4F2] border border-[#BCE3DE] flex items-center justify-center mb-4 text-[#0D5C63]">
+            <Building2 className="w-6 h-6" />
           </div>
-
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="w-68 h-68 sm:w-76 sm:h-76 rounded-xl overflow-hidden shadow-xl shadow-cyan-900/10 border-2 border-white bg-white">
-              <img
-                src="/auth-login-illustration.jpg"
-                alt="SmartSpace Coworking Illustration"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="absolute -top-3 -left-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-              <QrCode className="w-4 h-4 text-cyan-600" />
-              <span>Tiket QR</span>
-            </div>
-
-            <div className="absolute -bottom-3 -right-3 bg-white/95 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-cyan-200 shadow-md flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Check-in Cepat</span>
-            </div>
-          </div>
-
-          <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 pt-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Sistem Reservasi & Okupansi Fisik Terpadu</span>
-          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-normal text-slate-900 tracking-tight mb-2">
+            Welcome back to WorkNest
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-sm">
+            Sign in to access your digital keys, bookings, and invoices.
+          </p>
         </div>
 
-        <div className="lg:col-span-6 p-8 sm:p-10 lg:p-12 flex flex-col justify-between h-full overflow-y-auto">
-          <div className="space-y-5 max-w-md mx-auto w-full my-auto">
-            <div className="text-center space-y-1.5">
-              <div className="inline-flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-200 shadow-2xs flex items-center justify-center bg-white">
-                  <img src="/icon-web.png" alt="WorkNest" className="w-full h-full object-cover" />
-                </div>
-                <span className="font-extrabold text-slate-900 text-xl tracking-tight">
-                  WorkNest
-                </span>
-              </div>
+        {/* Google Workspace Auth */}
+        <div className="mb-5">
+          <GoogleLoginButton
+            label="Continue with Google Workspace"
+            onError={(err) => setErrorMessage(err)}
+          />
+        </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight pt-1">
-                Hai, selamat datang kembali
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Baru di WorkNest?{" "}
-                <Link
-                  href="/register"
-                  className="font-semibold text-cyan-600 hover:text-cyan-700 hover:underline"
-                >
-                  Daftar Sekarang
-                </Link>
-              </p>
+        {/* Divider */}
+        <div className="relative flex items-center justify-center my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <span className="relative bg-white px-3 text-xs text-slate-400 font-normal">
+            or enter work credentials
+          </span>
+        </div>
+
+        {/* Alert Messages */}
+        {errorMessage && (
+          <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex flex-col gap-2 text-rose-800 text-xs">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+              <span className="font-medium leading-relaxed">{errorMessage}</span>
             </div>
-
-            {errorMessage && (
-              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 flex flex-col gap-2 text-rose-800 text-xs">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-                  <span className="font-medium leading-relaxed">{errorMessage}</span>
-                </div>
-                {unverifiedEmail && (
-                  <Link
-                    href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}&type=register`}
-                    className="inline-flex items-center justify-center gap-1.5 py-1.5 px-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md shadow-2xs transition-colors self-start text-[11px]"
-                  >
-                    <span>Verifikasi Email Sekarang</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                )}
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
-                <span className="font-medium leading-relaxed">{successMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="nama@email.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold text-slate-700">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setForgotEmail(email);
-                      setForgotError(null);
-                      setForgotModalOpen(true);
-                    }}
-                    className="text-xs text-cyan-600 hover:text-cyan-700 font-semibold hover:underline cursor-pointer"
-                  >
-                    Lupa Password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan password kamu"
-                    className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-slate-400" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 sm:py-3 px-4 rounded-lg font-semibold text-xs sm:text-sm text-white bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 disabled:opacity-60 transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-cyan-600/30 cursor-pointer mt-2"
+            {unverifiedEmail && (
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}&type=register`}
+                className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md shadow-2xs transition-colors self-start text-[11px]"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Memverifikasi Akun...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Masuk</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+                <span>Verify Email Now</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
+          </div>
+        )}
 
-              <div className="flex items-center justify-between text-xs pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-slate-600">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-3.5 h-3.5 rounded text-cyan-600 focus:ring-cyan-500 border-slate-300 cursor-pointer"
-                  />
-                  <span>Ingat perangkat ini</span>
-                </label>
-              </div>
+        {successMessage && (
+          <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
+            <span className="font-medium leading-relaxed">{successMessage}</span>
+          </div>
+        )}
 
-              <div className="relative my-3">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative flex justify-center text-[11px] uppercase">
-                  <span className="bg-white px-2 text-slate-400 font-semibold">atau</span>
-                </div>
-              </div>
-
-              <GoogleLoginButton
-                label="Masuk Cepat dengan Google"
-                onError={(err) => setErrorMessage(err)}
+        {/* Credentials Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Work Email */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-700">
+              Work Email
+            </label>
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@company.com"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0D5C63] focus:ring-2 focus:ring-[#0D5C63]/15 transition-all"
               />
-            </form>
+            </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 text-center max-w-md mx-auto w-full">
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Dengan melanjutkan, kamu menyetujui{" "}
-              <span className="text-cyan-600 font-medium">Syarat Penggunaan</span> dan{" "}
-              <span className="text-cyan-600 font-medium">Kebijakan Privasi</span> WorkNest.
-            </p>
+          {/* Password */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-700">
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setForgotEmail(email);
+                  setForgotError(null);
+                  setForgotModalOpen(true);
+                }}
+                className="text-xs text-[#0D5C63] hover:text-[#09474D] font-medium hover:underline cursor-pointer"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0D5C63] focus:ring-2 focus:ring-[#0D5C63]/15 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 p-0.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-slate-400" />}
+              </button>
+            </div>
           </div>
+
+          {/* Auto-routing engine callout */}
+          <div className="p-3 bg-[#F4FAF9] border border-[#CDEAE6] rounded-xl flex items-start gap-2.5 text-[11px] sm:text-xs text-slate-700 leading-relaxed">
+            <Share2 className="w-4 h-4 text-[#0D5C63] shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-[#0D5C63] font-semibold">Auto-routing engine:</strong> Detects Member, Space Host, or Super Admin permissions upon sign-in.
+            </div>
+          </div>
+
+          {/* Remember Me */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <input
+              type="checkbox"
+              id="remember-device"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-[#0D5C63] focus:ring-[#0D5C63] cursor-pointer"
+            />
+            <label htmlFor="remember-device" className="text-xs text-slate-600 cursor-pointer select-none">
+              Remember this device for 30 days
+            </label>
+          </div>
+
+          {/* Submit CTA */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 px-4 rounded-xl font-medium text-xs sm:text-sm text-white bg-[#0D5C63] hover:bg-[#09474D] active:bg-[#07363B] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer mt-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Authenticating Workspace...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In to Workspace</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Footer inside card */}
+        <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-2 text-center text-xs text-slate-500">
+          <p>
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="text-[#0D5C63] font-semibold hover:underline"
+            >
+              Create an account
+            </Link>
+          </p>
+          <button
+            type="button"
+            onClick={() => setSsoModalOpen(true)}
+            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 font-medium py-1 px-2.5 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors cursor-pointer mt-1"
+          >
+            <Link2 className="w-3.5 h-3.5 text-slate-400" />
+            <span>Sign in with SSO / SAML 2.0</span>
+          </button>
         </div>
       </div>
 
+      {/* Under card footer */}
+      <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-400 max-w-[480px] w-full px-2">
+        <div className="flex items-center gap-1.5 font-mono">
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+          <span>256-BIT TLS ENCRYPTED</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="#" className="hover:text-slate-600 transition-colors">Privacy</Link>
+          <span>•</span>
+          <Link href="#" className="hover:text-slate-600 transition-colors">Terms</Link>
+          <span>•</span>
+          <Link href="#" className="hover:text-slate-600 transition-colors">Support</Link>
+        </div>
+      </div>
+
+      {/* Forgot Password Modal */}
       {forgotModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center border border-cyan-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#E6F4F2] text-[#0D5C63] flex items-center justify-center border border-[#BCE3DE]">
                   <KeyRound className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 leading-tight">
-                    Lupa Kata Sandi?
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">
+                    Reset Account Password
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    Kirim kode OTP reset ke email Anda
+                    Send a recovery OTP code to your registered email
                   </p>
                 </div>
               </div>
@@ -377,7 +376,7 @@ function LoginForm() {
             </div>
 
             {forgotError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-center gap-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                 <span>{forgotError}</span>
               </div>
@@ -386,21 +385,21 @@ function LoginForm() {
             <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Alamat Email Akun
+                  Work Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+                  <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
                   <input
                     type="email"
                     required
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    placeholder="nama@email.com"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
+                    placeholder="name@company.com"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 focus:border-[#0D5C63] focus:ring-1 focus:ring-[#0D5C63]/20 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-                  Kami akan mengirimkan 6-digit kode OTP pemulihan kata sandi ke email di atas.
+                  We will send a 6-digit verification code to this address.
                 </p>
               </div>
 
@@ -408,23 +407,69 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setForgotModalOpen(false)}
-                  className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="py-2 px-4 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-xs shadow-cyan-600/20 transition-all cursor-pointer disabled:opacity-60"
+                  className="py-2.5 px-4 bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-60"
                 >
                   {forgotLoading ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
-                    <span>Kirim Kode OTP</span>
+                    <span>Send OTP Code</span>
                   )}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* SSO Info Modal */}
+      {ssoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#E6F4F2] text-[#0D5C63] flex items-center justify-center border border-[#BCE3DE]">
+                  <Link2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">
+                    Enterprise Single Sign-On
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    SAML 2.0 / Okta / Azure AD routing
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSsoModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              WorkNest enterprise accounts are automatically recognized. Simply enter your company work email in the primary sign-in form, or continue with Google Workspace to activate your federated identity session.
+            </p>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-500 font-mono">
+              Supported protocols: SAML 2.0, OIDC, SCIM v2 provisioning
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSsoModalOpen(false)}
+              className="w-full py-2.5 px-4 bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}
@@ -436,8 +481,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100">
-          <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+        <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+          <Loader2 className="w-8 h-8 text-[#0D5C63] animate-spin" />
         </div>
       }
     >

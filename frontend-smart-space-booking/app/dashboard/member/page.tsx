@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   getMyBookings,
@@ -46,6 +46,15 @@ import {
   Ticket,
   Star,
   Wallet,
+  Wifi,
+  Radio,
+  Share2,
+  Copy,
+  Check,
+  Lock,
+  Filter,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 
 export default function MemberDashboardPage() {
@@ -75,120 +84,8 @@ export default function MemberDashboardPage() {
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
 
-  const handleDownloadFullPass = (ticket: Reservation) => {
-    const svg = document.getElementById(`qr-svg-${ticket.qrCode}`);
-    if (!svg) return;
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = 600;
-    canvas.height = 800;
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 600, 800);
-
-    const grad = ctx.createLinearGradient(0, 0, 600, 160);
-    grad.addColorStop(0, "#0891b2");
-    grad.addColorStop(1, "#0f172a");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 600, 160);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 24px sans-serif";
-    ctx.fillText("WORKNEST SMART PASS", 40, 55);
-
-    ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#bae6fd";
-    ctx.fillText(ticket.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space", 40, 85);
-
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#e0f2fe";
-    ctx.fillText("DIGITAL BOARDING PASS & ACCESS KEY", 40, 125);
-
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 20px sans-serif";
-    ctx.fillText(ticket.detailReservasi?.space?.namaSpace || "Ruangan Space", 40, 210);
-
-    ctx.fillStyle = "#64748b";
-    ctx.font = "13px sans-serif";
-    ctx.fillText(`Tipe: ${ticket.detailReservasi?.space?.tipe?.toUpperCase() || "SPACE"}`, 40, 235);
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(40, 260, 520, 95);
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.strokeRect(40, 260, 520, 95);
-
-    ctx.fillStyle = "#64748b";
-    ctx.font = "11px sans-serif";
-    ctx.fillText("TANGGAL", 60, 290);
-    ctx.fillText("JAM SESI", 240, 290);
-    ctx.fillText("PEMESAN", 400, 290);
-
-    ctx.fillStyle = "#0f172a";
-    ctx.font = "bold 13px sans-serif";
-    const dateStr = ticket.tanggalReservasi ? ticket.tanggalReservasi.split("T")[0] : "-";
-    ctx.fillText(dateStr, 60, 315);
-    ctx.fillText(`${ticket.jamMulai} WIB (${ticket.durasiJam || 1} Jam)`, 240, 315);
-    ctx.fillText(user?.member?.namaMember || user?.email || "Member", 400, 315);
-
-    const img = new Image();
-    img.onload = () => {
-      ctx.fillStyle = "#f8fafc";
-      ctx.fillRect(175, 385, 250, 250);
-      ctx.strokeStyle = "#cbd5e1";
-      ctx.strokeRect(175, 385, 250, 250);
-
-      ctx.drawImage(img, 200, 410, 200, 200);
-
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 16px monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(ticket.qrCode, 300, 675);
-
-      ctx.fillStyle = "#059669";
-      ctx.font = "bold 13px sans-serif";
-      ctx.fillText("STATUS: TIKET VALID / RESMI", 300, 710);
-
-      ctx.fillStyle = "#64748b";
-      ctx.font = "12px sans-serif";
-      ctx.fillText("Tunjukkan barcode ini kepada staf resepsionis untuk Check-In", 300, 745);
-
-      const pngUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = pngUrl;
-      link.download = `WorkNest-Pass-${ticket.qrCode}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-
-    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
-  };
-
-  const handleSubmitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedReviewBooking) return;
-    setSubmittingReview(true);
-    setReviewError(null);
-    try {
-      await createReview({
-        reservasiId: selectedReviewBooking.id,
-        rating: reviewRating,
-        komentar: reviewComment.trim() || undefined,
-      });
-      setReviewSuccessMsg("Terima kasih! Ulasan Anda berhasil dikirim.");
-      setSelectedReviewBooking(null);
-      setReviewComment("");
-      await fetchBookings();
-    } catch (err: unknown) {
-      setReviewError(getApiErrorMessage(err));
-    } finally {
-      setSubmittingReview(false);
-    }
-  };
+  const [copiedPin, setCopiedPin] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -220,28 +117,27 @@ export default function MemberDashboardPage() {
     loadTransactions();
   }, [fetchBookings, loadTransactions]);
 
-  const activeCount = reservations.filter((r) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui").length;
-  const pendingCount = reservations.filter((r) => r.status?.toLowerCase() === "pending").length;
-  const completedCount = reservations.filter((r) => r.status?.toLowerCase() === "selesai").length;
-  const totalHours = reservations.reduce((acc, curr) => acc + (curr.durasiJam || 1), 0);
+  const activeReservations = useMemo(() => {
+    return reservations.filter(
+      (r) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui"
+    );
+  }, [reservations]);
 
-  const filteredReservations = reservations.filter((r) => {
-    const status = r.status?.toLowerCase() || "";
-    const spaceName = r.detailReservasi?.space?.namaSpace?.toLowerCase() || "";
-    const coworkingName = r.detailReservasi?.space?.owner?.namaCoworking?.toLowerCase() || "";
-    const code = r.qrCode?.toLowerCase() || "";
-    const q = searchQuery.toLowerCase();
+  const currentActivePass = activeReservations.length > 0 ? activeReservations[0] : null;
 
-    const matchesSearch = !q || spaceName.includes(q) || coworkingName.includes(q) || code.includes(q);
+  const upcomingReservations = useMemo(() => {
+    return reservations.filter((r) => {
+      const s = r.status?.toLowerCase();
+      return s === "pending" || (s === "disetujui" && r.id !== currentActivePass?.id);
+    });
+  }, [reservations, currentActivePass]);
 
-    if (!matchesSearch) return false;
-
-    if (filterTab === "active") return status === "aktif" || status === "disetujui";
-    if (filterTab === "pending") return status === "pending";
-    if (filterTab === "selesai") return status === "selesai";
-    if (filterTab === "dibatalkan") return status === "dibatalkan";
-    return true;
-  });
+  const pastReservations = useMemo(() => {
+    return reservations.filter((r) => {
+      const s = r.status?.toLowerCase();
+      return s === "selesai" || s === "dibatalkan";
+    });
+  }, [reservations]);
 
   const handleConfirmCancel = async () => {
     if (!cancelTargetId) return;
@@ -302,391 +198,615 @@ export default function MemberDashboardPage() {
     }
   };
 
-  const getWhatsAppLink = (res: Reservation) => {
-    const ownerTelp = res.detailReservasi?.space?.owner?.telp || "";
-    const cleanPhone = ownerTelp.replace(/\D/g, "");
-    const formattedPhone = cleanPhone.startsWith("0") ? `62${cleanPhone.slice(1)}` : cleanPhone;
-    const text = encodeURIComponent(
-      `Halo pengelola ${res.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space"}, saya member ${user?.member?.namaMember || user?.email} ingin menanyakan info reservasi tiket #${res.qrCode} untuk ruangan ${res.detailReservasi?.space?.namaSpace}.`
-    );
-    return `https://wa.me/${formattedPhone}?text=${text}`;
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedReviewBooking) return;
+    setSubmittingReview(true);
+    setReviewError(null);
+    try {
+      await createReview({
+        reservasiId: selectedReviewBooking.id,
+        rating: reviewRating,
+        komentar: reviewComment.trim() || undefined,
+      });
+      setReviewSuccessMsg("Terima kasih! Ulasan Anda berhasil dikirim.");
+      setSelectedReviewBooking(null);
+      setReviewComment("");
+      await fetchBookings();
+    } catch (err: unknown) {
+      setReviewError(getApiErrorMessage(err));
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleDownloadFullPass = (ticket: Reservation) => {
+    const svg = document.getElementById(`qr-svg-${ticket.qrCode}`);
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = 600;
+    canvas.height = 800;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 600, 800);
+
+    const grad = ctx.createLinearGradient(0, 0, 600, 160);
+    grad.addColorStop(0, "#0D5C63");
+    grad.addColorStop(1, "#0A2F35");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 600, 160);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 24px sans-serif";
+    ctx.fillText("WORKNEST SMART PASS", 40, 55);
+
+    ctx.font = "14px sans-serif";
+    ctx.fillStyle = "#BCE3DE";
+    ctx.fillText(ticket.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space", 40, 85);
+
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#e0f2fe";
+    ctx.fillText("DIGITAL BOARDING PASS & ACCESS KEY", 40, 125);
+
+    ctx.fillStyle = "#0f172a";
+    ctx.font = "bold 20px sans-serif";
+    ctx.fillText(ticket.detailReservasi?.space?.namaSpace || "Ruangan Space", 40, 210);
+
+    ctx.fillStyle = "#64748b";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(`Tipe: ${ticket.detailReservasi?.space?.tipe?.toUpperCase() || "SPACE"}`, 40, 235);
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillRect(175, 385, 250, 250);
+      ctx.strokeStyle = "#cbd5e1";
+      ctx.strokeRect(175, 385, 250, 250);
+
+      ctx.drawImage(img, 200, 410, 200, 200);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "bold 16px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(ticket.qrCode, 300, 675);
+
+      ctx.fillStyle = "#059669";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText("STATUS: VALID ACCESS PASS", 300, 710);
+
+      const pngUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = pngUrl;
+      link.download = `WorkNest-Pass-${ticket.qrCode}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+  };
+
+  const getPinDigits = (code: string) => {
+    const clean = code.replace(/\D/g, "");
+    if (clean.length >= 4) return clean.slice(-4).split("");
+    const hash = code.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return String(Math.abs(hash % 9000) + 1000).split("");
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+      {/* Top Breadcrumb & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
-            <CalendarCheck className="w-3.5 h-3.5 text-cyan-600" />
-            <span>Portal Digital Member</span>
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span>Dashboard</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span>Member</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-slate-700 font-medium">Passes</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Tiket Digital & Riwayat Reservasi
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            My Tickets & Active Passes
           </h1>
-          <p className="text-xs text-slate-500">
-            Tunjukkan kode QR tiket digital di layar HP kepada resepsionis saat tiba di lokasi untuk check-in instan.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{activeReservations.length} Pass Active Now</span>
+          </div>
           <button
             type="button"
             onClick={fetchBookings}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+            title="Refresh Passes"
+            className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : "text-slate-400"}`} />
-            <span>Segarkan</span>
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0D5C63]" : ""}`} />
           </button>
-          <Link
-            href="/dashboard/member/spaces"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white text-xs font-bold shadow-xs transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Sewa Ruangan Baru</span>
-          </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center shrink-0">
-            <Ticket className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Tiket Siap Pakai</p>
-            <p className="text-xl font-bold text-slate-900">{activeCount} Tiket</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center shrink-0">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Menunggu Konfirmasi</p>
-            <p className="text-xl font-bold text-slate-900">{pendingCount} Booking</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Selesai Dipakai</p>
-            <p className="text-xl font-bold text-slate-900">{completedCount} Sesi</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 flex items-center justify-center shrink-0">
-            <Calendar className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Jam Sewa</p>
-            <p className="text-xl font-bold text-slate-900">{totalHours} Jam</p>
-          </div>
-        </div>
-      </div>
-
+      {/* Alert Notifications */}
       {cancelSuccessMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-xs animate-fade-in">
-          <div className="flex items-center gap-2 font-medium">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs">
+          <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{cancelSuccessMsg}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setCancelSuccessMsg(null)}
-            className="font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer"
-          >
-            ✕
-          </button>
+          <button type="button" onClick={() => setCancelSuccessMsg(null)} className="font-bold">✕</button>
         </div>
       )}
 
       {reviewSuccessMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-xs">
-          <div className="flex items-center gap-2 font-medium">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs">
+          <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{reviewSuccessMsg}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => setReviewSuccessMsg(null)}
-            className="font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer"
-          >
-            ✕
-          </button>
+          <button type="button" onClick={() => setReviewSuccessMsg(null)} className="font-bold">✕</button>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-xs">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-          <div className="space-y-0.5">
-            <p className="font-semibold">Terjadi Kendala</p>
-            <p className="text-slate-600">{error}</p>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* SECTION 1: CURRENT ACTIVE PASS */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              CURRENT ACTIVE PASS
+            </span>
+            {currentActivePass && (
+              <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 font-mono font-bold text-[10px]">
+                PASS-ID: {currentActivePass.qrCode}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
+            <Radio className="w-3.5 h-3.5 text-emerald-500" />
+            <span>NFC reader enabled at terminal</span>
           </div>
         </div>
-      )}
 
-      {payMessage && (
-        <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-between text-cyan-800 text-xs shadow-xs">
-          <span className="font-medium">{payMessage}</span>
-          <button
-            type="button"
-            onClick={() => setPayMessage(null)}
-            className="font-bold text-cyan-700 hover:text-cyan-900 cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {payError && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-800 text-xs shadow-xs">
-          <span className="font-medium">{payError}</span>
-          <button
-            type="button"
-            onClick={() => setPayError(null)}
-            className="font-bold text-rose-700 hover:text-rose-900 cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-          {[
-            { id: "all", label: `Semua (${reservations.length})` },
-            { id: "active", label: `Aktif & Disetujui (${activeCount})` },
-            { id: "pending", label: `Pending (${pendingCount})` },
-            { id: "selesai", label: `Selesai (${completedCount})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setFilterTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                filterTab === tab.id
-                  ? "bg-cyan-600 text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative w-full sm:w-64">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari ruangan / kode tiket..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 focus:bg-white border border-slate-200 focus:border-cyan-600 rounded-lg text-xs text-slate-800 focus:outline-none transition-colors"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4">
         {loading ? (
-          <div className="p-16 text-center bg-white rounded-xl border border-slate-200">
-            <Loader2 className="w-7 h-7 text-cyan-600 animate-spin mx-auto" />
-            <p className="text-xs text-slate-400 mt-2 font-medium">Memuat tiket & riwayat reservasi...</p>
+          <div className="p-16 text-center bg-white rounded-2xl border border-slate-200">
+            <Loader2 className="w-8 h-8 text-[#0D5C63] animate-spin mx-auto" />
+            <p className="text-xs text-slate-400 mt-2 font-medium">Loading telemetry passes...</p>
           </div>
-        ) : filteredReservations.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {filteredReservations.map((res) => {
-              const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
-              const spaceName = res.detailReservasi?.space?.namaSpace || `Space #${res.id}`;
-              const coworkingName = res.detailReservasi?.space?.owner?.namaCoworking || "Coworking Space";
-              const spacePhoto = res.detailReservasi?.space?.foto;
-              const totalCost = res.detailReservasi?.totalHarga || 0;
-              const payment = transactions[res.id];
-              const isPaid = payment?.statusPembayaran === "lunas";
-              const canPay =
-                !isPaid &&
-                res.status?.toLowerCase() !== "dibatalkan" &&
-                res.status?.toLowerCase() !== "selesai" &&
-                payment?.statusPembayaran !== "refund";
-              const canCancel = res.status?.toLowerCase() === "pending" || res.status?.toLowerCase() === "disetujui";
-              const isReadyForScan = isPaid || res.status?.toLowerCase() === "disetujui" || res.status?.toLowerCase() === "aktif";
+        ) : currentActivePass ? (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+            {/* Left Col: Space Specs & Actions */}
+            <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200 space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#0D5C63]">
+                    <Building2 className="w-4 h-4" />
+                    <span>
+                      {currentActivePass.detailReservasi?.space?.owner?.namaCoworking || "WorkNest Hub"} • Floor {((currentActivePass.detailReservasi?.space?.id || 1) % 4) + 1}
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    SmartLock v4
+                  </span>
+                </div>
 
-              return (
-                <div
-                  key={res.id}
-                  className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
-                >
-                  <div className="p-5 space-y-4">
-                    <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div>
-                        <span className="text-[11px] font-bold text-cyan-700 uppercase tracking-wider flex items-center gap-1">
-                          <Building2 className="w-3.5 h-3.5" />
-                          <span>{coworkingName}</span>
-                        </span>
-                        <h3 className="text-base font-extrabold text-slate-900 mt-0.5 line-clamp-1">
-                          {spaceName}
-                        </h3>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <StatusBadge status={res.status} />
-                      </div>
-                    </div>
+                <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+                  {currentActivePass.detailReservasi?.space?.namaSpace}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xl">
+                  {currentActivePass.detailReservasi?.space?.deskripsi ||
+                    "Dedicated workspace with high-speed fiber connection and active smart door telemetry."}
+                </p>
 
-                    <div className="grid grid-cols-12 gap-3.5 items-center">
-                      <div className="col-span-12 sm:col-span-5 flex flex-col items-center">
-                        <div
-                          onClick={() => setSelectedTicket(res)}
-                          title="Klik untuk memperbesar QR"
-                          className="w-full cursor-pointer group hover:bg-cyan-50/70 p-2.5 bg-slate-50/70 rounded-2xl border border-slate-200 transition-all flex flex-col items-center shadow-2xs hover:shadow-cyan-100"
-                        >
-                          <QrCodeCard value={res.qrCode} size={110} showCopy={false} />
-                          <span className="text-[10px] font-bold text-cyan-700 bg-white px-2.5 py-0.5 rounded-full border border-cyan-100 mt-2 flex items-center gap-1 group-hover:underline shadow-2xs">
-                            <QrCode className="w-3 h-3 text-cyan-600" />
-                            <span>Perbesar Tiket Pass</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="col-span-12 sm:col-span-7 space-y-2.5 text-xs text-slate-600 sm:pl-1">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
-                          <span className="font-bold text-slate-800">{rawDate}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
-                          <span>{res.jamMulai} WIB ({res.durasiJam || 1} Jam Sesi)</span>
-                        </div>
-                        <div className="pt-2 border-t border-slate-100 flex items-baseline justify-between">
-                          <span className="text-[11px] text-slate-400 font-semibold uppercase">Total Tagihan:</span>
-                          <span className="font-mono text-sm font-extrabold text-slate-900">
-                            {formatRupiah(totalCost)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between pt-1">
-                          {payment ? (
-                            <>
-                              <PaymentStatusBadge status={payment.statusPembayaran} />
-                              <span className="text-[10px] font-mono text-slate-400 truncate max-w-[9rem]">
-                                {payment.nomorInvoice}
-                              </span>
-                            </>
-                          ) : (
-                            <PaymentStatusBadge status="belum_bayar" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                {/* 4 Attributes in 2x2 grid */}
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      SLOT TIME
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900">
+                      {currentActivePass.jamMulai} WIB
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Duration: {currentActivePass.durasiJam || 1} Hour Session
+                    </p>
                   </div>
 
-                  <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTicket(res)}
-                        className="px-2.5 py-1.5 bg-white hover:bg-cyan-50 hover:text-cyan-700 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <QrCode className="w-3.5 h-3.5 text-cyan-600" />
-                        <span>E-Tiket</span>
-                      </button>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      ACCESS NODE
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-emerald-600 flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" />
+                      Engaged
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Unit Sensor #{currentActivePass.id}
+                    </p>
+                  </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setSelectedReceipt(res)}
-                        className="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Receipt className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Invoice</span>
-                      </button>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      WI-FI NETWORK
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1">
+                      <Wifi className="w-3.5 h-3.5 text-[#0D5C63]" />
+                      WorkNest-WiFi
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Pass: nest{currentActivePass.qrCode.slice(-4)}
+                    </p>
+                  </div>
 
-                      {res.detailReservasi?.space?.owner?.telp && (
-                        <a
-                          href={getWhatsAppLink(res)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200 transition-colors inline-flex items-center gap-1"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>WhatsApp</span>
-                        </a>
-                      )}
-
-                      {res.status?.toLowerCase() === "selesai" && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedReviewBooking(res);
-                            setReviewRating(5);
-                            setReviewComment("");
-                            setReviewError(null);
-                          }}
-                          className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold rounded-lg border border-amber-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
-                        >
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          <span>Beri Ulasan</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {canPay && (
-                        <Link
-                          href={`/checkout/${res.id}`}
-                          className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Wallet className="w-3.5 h-3.5" />
-                          <span>Bayar Sekarang</span>
-                        </Link>
-                      )}
-
-                      {canCancel && (
-                        <button
-                          type="button"
-                          onClick={() => setCancelTargetId(res.id)}
-                          className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                        >
-                          Batalkan
-                        </button>
-                      )}
-                    </div>
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      HOST ROLE
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-900">
+                      Master Host
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Max {currentActivePass.detailReservasi?.space?.kapasitas || 1} Pax
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                  <Link
+                    href={`/spaces/${currentActivePass.detailReservasi?.space?.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 shadow-2xs transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#0D5C63]" />
+                    <span>Extend +1 Hr</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `Access Pass #${currentActivePass.qrCode} for ${currentActivePass.detailReservasi?.space?.namaSpace}. PIN: ${getPinDigits(currentActivePass.qrCode).join("")}`
+                      );
+                      setShareSuccess(true);
+                      setTimeout(() => setShareSuccess(false), 2500);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-slate-500" />
+                    <span>{shareSuccess ? "Pass Copied!" : "Share Key with Guest"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCancelTargetId(currentActivePass.id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg text-xs font-semibold text-rose-600 transition-colors cursor-pointer"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Cancel Reservation</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* NFC Banner */}
+              <div className="p-3 bg-[#E6F4F2] border border-[#BCE3DE] rounded-xl flex items-center justify-between text-xs text-[#0D5C63]">
+                <div className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-[#0D5C63]" />
+                  <span>Tap physical membership card or hold device 5cm from the wall scanner next to door handle.</span>
+                </div>
+                <span className="font-mono font-bold text-[11px] uppercase tracking-wider shrink-0 bg-white/70 px-2 py-0.5 rounded">
+                  NFC READY
+                </span>
+              </div>
+            </div>
+
+            {/* Right Col: Dynamic QR & Keypad PIN */}
+            <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col items-center justify-between text-center bg-slate-50/50 space-y-5">
+              {/* Progress & Remaining Time */}
+              <div className="w-full space-y-1">
+                <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-[#0D5C63]" />
+                    Time Remaining
+                  </span>
+                  <span className="font-bold text-slate-900">Active Session</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#0D5C63] rounded-full w-3/4" />
+                </div>
+              </div>
+
+              {/* QR Code */}
+              <div
+                onClick={() => setSelectedTicket(currentActivePass)}
+                title="Click to expand pass"
+                className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-[#0D5C63] transition-all flex flex-col items-center"
+              >
+                <QrCodeCard value={currentActivePass.qrCode} size={150} showCopy={false} />
+              </div>
+
+              {/* Door Keypad Backup PIN */}
+              <div className="w-full space-y-2">
+                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                  PHYSICAL DOOR KEYPAD BACKUP PIN
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                  {getPinDigits(currentActivePass.qrCode).map((digit, idx) => (
+                    <div
+                      key={idx}
+                      className="w-9 h-10 rounded-lg bg-white border border-slate-300 font-mono font-bold text-lg text-slate-900 flex items-center justify-center shadow-2xs"
+                    >
+                      {digit}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(getPinDigits(currentActivePass.qrCode).join(""));
+                      setCopiedPin(true);
+                      setTimeout(() => setCopiedPin(false), 2000);
+                    }}
+                    title="Copy PIN"
+                    className="p-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    {copiedPin ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-mono">
+                  Refreshes dynamically • ISO-14443 Type A
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
-          <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 space-y-3 shadow-xs">
-            <QrCode className="w-10 h-10 text-slate-300 mx-auto" />
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-900">
-                Tidak Ada Data Reservasi
+          <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-slate-200 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#E6F4F2] text-[#0D5C63] flex items-center justify-center mx-auto border border-[#BCE3DE]">
+              <QrCode className="w-6 h-6" />
+            </div>
+            <div className="space-y-1 max-w-sm mx-auto">
+              <h3 className="font-serif text-lg font-bold text-slate-900">
+                No Active Pass in Session
               </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                {searchQuery
-                  ? "Tidak ada pemesanan yang cocok dengan kata kunci pencarian Anda."
-                  : "Anda belum memiliki riwayat reservasi pada kategori ini. Silakan pesan ruangan baru di katalog."}
+              <p className="text-xs text-slate-500 leading-relaxed">
+                You do not have any active space passes right now. Book a workspace or open an upcoming booking to generate your digital smart key.
               </p>
             </div>
             <Link
-              href="/dashboard/member/spaces"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors"
+              href="/spaces"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
             >
-              <span>Jelajahi Katalog Ruangan</span>
+              <span>Explore Spaces</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         )}
       </div>
 
+      {/* SECTION 2: UPCOMING BOOKINGS */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="font-serif text-xl font-bold text-slate-900">
+              Upcoming Bookings
+            </h2>
+            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
+              {upcomingReservations.length} Scheduled
+            </span>
+          </div>
+          <Link
+            href="/spaces"
+            className="text-xs font-semibold text-[#0D5C63] hover:underline flex items-center gap-1"
+          >
+            <span>Book another desk</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        {upcomingReservations.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingReservations.map((res) => {
+              const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
+              const space = res.detailReservasi?.space;
+              const isConfirmed = res.status?.toLowerCase() === "disetujui";
+              const pin = getPinDigits(res.qrCode).join("");
+
+              return (
+                <div
+                  key={res.id}
+                  className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 hover:shadow-md transition-shadow flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-mono text-slate-400 font-bold">
+                        #{res.qrCode.slice(0, 8)}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          isConfirmed
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${isConfirmed ? "bg-emerald-500" : "bg-amber-500"}`} />
+                        {isConfirmed ? "Pass Ready" : "Awaiting Confirmation"}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="font-serif text-lg font-semibold text-slate-900 line-clamp-1">
+                        {space?.namaSpace || `Space #${res.id}`}
+                      </h3>
+                      <p className="text-xs text-slate-500 line-clamp-1">
+                        {space?.owner?.namaCoworking || "Coworking Space"} • Floor {((space?.id || 1) % 4) + 1}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-slate-500">
+                          <Calendar className="w-3.5 h-3.5 text-[#0D5C63]" />
+                          {rawDate}
+                        </span>
+                        <span className="font-mono font-medium text-slate-800">
+                          {res.jamMulai} WIB ({res.durasiJam || 1}h)
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 text-slate-500">
+                          <User className="w-3.5 h-3.5 text-[#0D5C63]" />
+                          {space?.kapasitas || 1} Pax
+                        </span>
+                        <span className="text-slate-700 truncate max-w-[120px]">
+                          {space?.tipe?.toUpperCase() || "FLEX"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="font-mono text-slate-500 text-[11px]">
+                      Keycode: [{pin}]
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTicket(res)}
+                      className="font-bold text-[#0D5C63] hover:underline cursor-pointer"
+                    >
+                      View Access Pass
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-6 text-center bg-white rounded-xl border border-slate-200 text-xs text-slate-500">
+            No upcoming bookings scheduled. Explore the catalog to reserve a room.
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 3: PAST VISITS & UTILIZATION */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="font-serif text-xl font-bold text-slate-900">
+              Past Visits &amp; Utilization
+            </h2>
+            <p className="text-xs text-slate-500">
+              Showing last {pastReservations.length} transactions
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {}}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <span>Filter</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {}}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400" />
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50/70 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+                <tr>
+                  <th className="py-3 px-4 font-bold">DATE &amp; TIME</th>
+                  <th className="py-3 px-4 font-bold">WORKSPACE NAME</th>
+                  <th className="py-3 px-4 font-bold">LOCATION / HUB</th>
+                  <th className="py-3 px-4 font-bold">DURATION</th>
+                  <th className="py-3 px-4 font-bold">AMOUNT PAID</th>
+                  <th className="py-3 px-4 font-bold text-right">INVOICE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {pastReservations.length > 0 ? (
+                  pastReservations.map((res) => {
+                    const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
+                    const space = res.detailReservasi?.space;
+                    const payment = transactions[res.id];
+                    const amount = res.detailReservasi?.totalHarga || (space?.hargaPerJam || 0) * (res.durasiJam || 1);
+
+                    return (
+                      <tr key={res.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-4 font-medium text-slate-900 whitespace-nowrap">
+                          {rawDate}
+                          <span className="block text-[10px] text-slate-400 font-mono">
+                            {res.jamMulai} WIB
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-slate-900">
+                          {space?.namaSpace || `Space #${res.id}`}
+                          <span className="block text-[10px] text-slate-400 font-normal">
+                            {space?.tipe?.toUpperCase() || "ROOM"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-600">
+                          {space?.owner?.namaCoworking || "WorkNest Hub"}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono">
+                          {res.durasiJam || 1}.0 hrs
+                        </td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                          {formatRupiah(amount)}
+                          <span className="block text-[10px] text-emerald-600 font-medium font-sans">
+                            • Settled via {payment?.metodePembayaran || "Payment Gateway"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedReceipt(res)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+                          >
+                            <FileText className="w-3 h-3 text-slate-500" />
+                            <span>PDF</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                      No past visits recorded yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* TICKET POPUP MODAL */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden border border-slate-200 shadow-2xl space-y-0">
-            <div className="bg-gradient-to-r from-cyan-600 to-sky-700 text-white p-5 space-y-1 relative">
+            <div className="bg-[#0D5C63] text-white p-5 space-y-1 relative">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
                   E-Ticket Digital Pass
@@ -702,71 +822,57 @@ export default function MemberDashboardPage() {
               <h3 className="text-lg font-bold pt-1">
                 {selectedTicket.detailReservasi?.space?.namaSpace}
               </h3>
-              <p className="text-xs text-cyan-100 flex items-center gap-1">
-                <Building2 className="w-3.5 h-3.5" />
-                <span>{selectedTicket.detailReservasi?.space?.owner?.namaCoworking}</span>
+              <p className="text-xs text-[#BCE3DE]">
+                {selectedTicket.detailReservasi?.space?.owner?.namaCoworking}
               </p>
             </div>
 
             <div className="p-6 space-y-5 text-center">
-              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 inline-block shadow-inner">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 inline-block">
                 <QrCodeCard
                   value={selectedTicket.qrCode}
                   size={190}
                   showDownload={true}
-                  label="Scan Barcode di Resepsionis"
+                  label="Scan Barcode at Terminal"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-left bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tanggal Reservasi</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Date</span>
                   <span className="font-bold text-slate-900">
                     {selectedTicket.tanggalReservasi ? selectedTicket.tanggalReservasi.split("T")[0] : "-"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Jam Mulai & Durasi</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Slot Time</span>
                   <span className="font-bold text-slate-900">
-                    {selectedTicket.jamMulai} WIB ({selectedTicket.durasiJam || 1} Jam)
+                    {selectedTicket.jamMulai} WIB ({selectedTicket.durasiJam || 1} Hour)
                   </span>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Nama Pemesan</span>
-                  <span className="font-bold text-slate-900">{user?.member?.namaMember || user?.email}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Status Tiket</span>
-                  <div className="pt-0.5">
-                    <StatusBadge status={selectedTicket.status} />
-                  </div>
-                </div>
               </div>
-
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Tunjukkan barcode ini kepada staf resepsionis atau petugas scanner saat tiba di lokasi untuk Check-In mandiri.
-              </p>
 
               <button
                 type="button"
                 onClick={() => handleDownloadFullPass(selectedTicket)}
-                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Download className="w-4 h-4 text-cyan-400" />
-                <span>Unduh E-Pass Digital HD (PNG)</span>
+                <span>Download E-Pass Digital HD (PNG)</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* RECEIPT / INVOICE MODAL */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-cyan-600" />
-                <h3 className="text-base font-bold text-slate-900">Bukti Pembayaran & Invoice</h3>
+                <Receipt className="w-5 h-5 text-[#0D5C63]" />
+                <h3 className="text-base font-bold text-slate-900">Official Invoice &amp; Receipt</h3>
               </div>
               <button
                 type="button"
@@ -777,13 +883,13 @@ export default function MemberDashboardPage() {
               </button>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 text-xs">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Nomor Invoice:</span>
+                <span className="text-slate-500">Invoice Number:</span>
                 <span className="font-mono font-bold text-slate-900">INV-{selectedReceipt.qrCode}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Tanggal Transaksi:</span>
+                <span className="text-slate-500">Issued Date:</span>
                 <span className="font-semibold text-slate-900">
                   {new Date(selectedReceipt.createdAt).toLocaleDateString("id-ID", {
                     day: "numeric",
@@ -802,18 +908,18 @@ export default function MemberDashboardPage() {
 
             <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
               <div className="bg-slate-50 p-3 font-bold text-slate-700 border-b border-slate-200 grid grid-cols-12">
-                <span className="col-span-6">Item Ruangan</span>
-                <span className="col-span-2 text-center">Durasi</span>
+                <span className="col-span-6">Workspace Item</span>
+                <span className="col-span-2 text-center">Duration</span>
                 <span className="col-span-4 text-right">Subtotal</span>
               </div>
               <div className="p-3 grid grid-cols-12 items-center text-slate-800">
                 <div className="col-span-6 font-semibold">
                   {selectedReceipt.detailReservasi?.space?.namaSpace}
                   <span className="block text-[11px] text-slate-400 font-normal">
-                    {formatRupiah(selectedReceipt.detailReservasi?.space?.hargaPerJam || 0)} / jam
+                    {formatRupiah(selectedReceipt.detailReservasi?.space?.hargaPerJam || 0)} / hour
                   </span>
                 </div>
-                <span className="col-span-2 text-center">{selectedReceipt.durasiJam || 1} Jam</span>
+                <span className="col-span-2 text-center">{selectedReceipt.durasiJam || 1}h</span>
                 <span className="col-span-4 text-right font-mono font-bold">
                   {formatRupiah(
                     (selectedReceipt.detailReservasi?.space?.hargaPerJam || 0) * (selectedReceipt.durasiJam || 1)
@@ -821,20 +927,9 @@ export default function MemberDashboardPage() {
                 </span>
               </div>
 
-              {selectedReceipt.detailReservasi?.diskon && (
-                <div className="p-3 bg-emerald-50/50 border-t border-slate-100 grid grid-cols-12 text-emerald-800 text-xs font-semibold">
-                  <span className="col-span-8">
-                    Voucher Promo: {selectedReceipt.detailReservasi.diskon.namaDiskon} ({selectedReceipt.detailReservasi.diskon.persentaseDiskon}%)
-                  </span>
-                  <span className="col-span-4 text-right font-mono">
-                    - Potongan Kupon
-                  </span>
-                </div>
-              )}
-
               <div className="p-3 bg-slate-50 border-t border-slate-200 grid grid-cols-12 text-slate-900 font-bold text-sm">
-                <span className="col-span-6">Total Pembayaran</span>
-                <span className="col-span-6 text-right font-mono text-cyan-700">
+                <span className="col-span-6">Total Amount</span>
+                <span className="col-span-6 text-right font-mono text-[#0D5C63]">
                   {formatRupiah(selectedReceipt.detailReservasi?.totalHarga || 0)}
                 </span>
               </div>
@@ -847,23 +942,24 @@ export default function MemberDashboardPage() {
                 className="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Cetak Nota</span>
+                <span>Print Invoice</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* CANCEL MODAL */}
       {cancelTargetId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <XCircle className="w-7 h-7" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Batalkan Reservasi?</h3>
+              <h3 className="text-base font-bold text-slate-900">Cancel Reservation?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Pemesanan ini akan dibatalkan dan kode barcode tiket tidak dapat lagi digunakan untuk check-in.
+                This space access pass will be invalidated and door locks will revoke physical entry permissions.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2.5 pt-2">
@@ -872,7 +968,7 @@ export default function MemberDashboardPage() {
                 onClick={() => setCancelTargetId(null)}
                 className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
               >
-                Kembali
+                Go Back
               </button>
               <button
                 type="button"
@@ -880,116 +976,9 @@ export default function MemberDashboardPage() {
                 disabled={cancelling}
                 className="py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Ya, Batalkan</span>}
+                {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Confirm Cancel</span>}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {selectedReviewBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <h3 className="text-base font-bold text-slate-900">Beri Ulasan Ruangan</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedReviewBooking(null)}
-                className="text-slate-400 hover:text-slate-700 font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1 text-xs">
-              <p className="font-bold text-slate-900">
-                {selectedReviewBooking.detailReservasi?.space?.namaSpace}
-              </p>
-              <p className="text-slate-500">
-                {selectedReviewBooking.detailReservasi?.space?.owner?.namaCoworking}
-              </p>
-            </div>
-
-            {reviewError && (
-              <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{reviewError}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmitReview} className="space-y-4">
-              <div className="space-y-1.5 text-center">
-                <label className="text-xs font-bold text-slate-700 block">Rating Kepuasan</label>
-                <div className="flex items-center justify-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setReviewRating(star)}
-                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
-                    >
-                      <Star
-                        className={`w-7 h-7 ${
-                          star <= reviewRating
-                            ? "fill-amber-400 text-amber-400"
-                            : "text-slate-200"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <span className="text-[11px] font-semibold text-slate-500">
-                  {reviewRating === 5 && "⭐ Sangat Memuaskan (5/5)"}
-                  {reviewRating === 4 && "⭐ Memuaskan (4/5)"}
-                  {reviewRating === 3 && "⭐ Cukup Baik (3/5)"}
-                  {reviewRating === 2 && "⭐ Kurang Memuaskan (2/5)"}
-                  {reviewRating === 1 && "⭐ Sangat Kurang (1/5)"}
-                </span>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 block">
-                  Komentar & Testimoni (Opsional)
-                </label>
-                <textarea
-                  rows={3}
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  placeholder="Ceritakan pengalaman Anda, suasana ruangan, kecepatan internet, atau fasilitas lainnya..."
-                  className="w-full p-3 bg-slate-50 focus:bg-white border border-slate-200 focus:border-cyan-600 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none transition-colors resize-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setSelectedReviewBooking(null)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingReview}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60"
-                >
-                  {submittingReview ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Mengirim...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Kirim Ulasan</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
