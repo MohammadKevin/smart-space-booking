@@ -218,17 +218,21 @@ export async function createStaff(dto: CreateStaffDto): Promise<any> {
 
 export async function getSpaces(params?: FilterSpaceDto): Promise<Space[]> {
   const { data } = await api.get<Space[]>("/spaces", { params });
-  return data;
+  return Array.isArray(data) ? data : [];
 }
 
 export async function getBookedSlots(
   id: number | string,
   date?: string
 ): Promise<Array<{ id: number; jamMulai: string; durasiJam: number; jamSelesai: string; status: string }>> {
-  const { data } = await api.get<any>(`/spaces/${id}/booked-slots`, {
-    params: date ? { date } : undefined,
-  });
-  return Array.isArray(data) ? data : [];
+  try {
+    const { data } = await api.get<any>(`/spaces/${id}/booked-slots`, {
+      params: date ? { date } : undefined,
+    });
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getSpaceDetail(id: number | string): Promise<Space> {

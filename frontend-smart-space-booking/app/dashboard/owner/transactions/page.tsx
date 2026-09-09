@@ -22,10 +22,8 @@ import {
   X,
   Eye,
   RotateCcw,
-  Wallet,
-  Clock,
-  ArrowUpRight,
   Download,
+  Building,
 } from "lucide-react";
 
 type PaymentTab = "all" | "lunas" | "menunggu_pembayaran" | "belum_bayar" | "refund" | "gagal";
@@ -45,12 +43,57 @@ export default function OwnerTransactionsPage() {
   const [refunding, setRefunding] = useState(false);
   const [syncingId, setSyncingId] = useState<number | null>(null);
 
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = useCallback(async (autoSync = true) => {
     setLoading(true);
     setError(null);
     try {
       const data = await getTransactions();
-      setTransactions(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setTransactions(list);
+
+      // Auto-sync pending transactions in the background
+      if (autoSync && list.length > 0) {
+        const pendingTxs = list.filter(
+          (t) =>
+            t.statusPembayaran === "menunggu_pembayaran" ||
+            t.statusPembayaran === "belum_bayar"
+        );
+
+        if (pendingTxs.length > 0) {
+          const token =
+            typeof window !== "undefined"
+              ? localStorage.getItem("token") || localStorage.getItem("access_token")
+              : null;
+
+          Promise.all(
+            pendingTxs.map(async (t) => {
+              try {
+                const orderId = t.midtransOrderId || t.nomorInvoice;
+                if (orderId) {
+                  const checkRes = await fetch(
+                    `/api/charge/status?orderId=${encodeURIComponent(orderId)}&transactionId=${t.id}&reservationId=${t.reservasiId}`,
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                  );
+                  const statusData = await checkRes.json();
+                  if (statusData.isPaid) return true;
+                }
+                const syncRes = await syncPayment(t.id);
+                const updated = syncRes?.data || syncRes;
+                if (updated?.statusPembayaran === "lunas") return true;
+              } catch {}
+              return false;
+            })
+          ).then((results) => {
+            if (results.some(Boolean)) {
+              getTransactions()
+                .then((refreshed) => {
+                  if (Array.isArray(refreshed)) setTransactions(refreshed);
+                })
+                .catch(() => {});
+            }
+          });
+        }
+      }
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -83,7 +126,7 @@ export default function OwnerTransactionsPage() {
       transactions
         .filter((t) => t.statusPembayaran === "lunas")
         .reduce((acc, t) => acc + (t.jumlah || 0), 0),
-    [transactions],
+    [transactions]
   );
 
   const isOwner = user?.role?.toLowerCase() === "admin_space" || user?.role?.toLowerCase() === "owner";
@@ -109,9 +152,24 @@ export default function OwnerTransactionsPage() {
     setSyncingId(t.id);
     setError(null);
     try {
+      const orderId = t.midtransOrderId || t.nomorInvoice;
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("token") || localStorage.getItem("access_token")
+          : null;
+
+      if (orderId) {
+        try {
+          await fetch(
+            `/api/charge/status?orderId=${encodeURIComponent(orderId)}&transactionId=${t.id}&reservationId=${t.reservasiId}`,
+            { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+          );
+        } catch {}
+      }
+
       await syncPayment(t.id);
       setActionSuccess(`Status transaksi ${t.nomorInvoice} berhasil disinkronkan.`);
-      await fetchTransactions();
+      await fetchTransactions(false);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -168,7 +226,7 @@ export default function OwnerTransactionsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", `WorkNest_Transactions_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `WorkNest-Transaksi-${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -184,46 +242,52 @@ export default function OwnerTransactionsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="space-y-1">
-          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-            Transaksi & Pembayaran
+    <div className="space-y-6 pb-16">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <span>WORKSPACE OWNER</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500 font-sans font-normal">
+              Buku Kas &amp; Pembayaran Midtrans
+            </span>
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            Transaksi &amp; Pembayaran
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Kelola arus kas masuk, invoice, dan status pembayaran Midtrans.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Kelola arus kas masuk, invoice reservasi, status pembayaran Midtrans, dan rekonsiliasi bagi hasil venue.
           </p>
         </div>
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-          <div className="px-3.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200/80 text-right">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Terbayar</p>
-            <p className="text-sm font-extrabold text-slate-900 font-mono">{formatRupiah(totalLunas)}</p>
+
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap self-start sm:self-auto">
+          <div className="px-3.5 py-1.5 rounded-xs bg-slate-50 border border-slate-200 text-right">
+            <p className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400">Total Terbayar</p>
+            <p className="text-sm font-bold text-slate-900 font-mono">{formatRupiah(totalLunas)}</p>
           </div>
           <button
             type="button"
             onClick={handleExportCsv}
             disabled={loading || filtered.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer disabled:opacity-50"
-            title="Export ke file CSV"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Export CSV</span>
+            <span>Ekspor CSV</span>
           </button>
           <button
             type="button"
-            onClick={fetchTransactions}
+            onClick={() => fetchTransactions(true)}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : "text-slate-400"}`} />
-            <span>Segarkan</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : "text-slate-500"}`} />
+            <span>Perbarui</span>
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs shadow-2xs flex items-center justify-between">
           <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{actionSuccess}</span>
@@ -239,7 +303,7 @@ export default function OwnerTransactionsPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start justify-between gap-3 text-rose-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 text-rose-800 text-xs shadow-2xs flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <div className="space-y-0.5">
@@ -249,22 +313,22 @@ export default function OwnerTransactionsPage() {
           </div>
           <button
             type="button"
-            onClick={fetchTransactions}
-            className="px-2.5 py-1 bg-white border border-rose-200 hover:bg-rose-100/50 text-rose-700 rounded-md font-semibold transition-colors shrink-0 cursor-pointer"
+            onClick={() => fetchTransactions(true)}
+            className="px-2.5 py-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-xs font-semibold transition-colors shrink-0 cursor-pointer"
           >
             Coba Lagi
           </button>
         </div>
       )}
 
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex flex-col lg:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-0.5 bg-slate-100/80 rounded-lg w-full lg:w-auto overflow-x-auto">
+      <div className="bg-white p-4 rounded-xs border border-slate-200 shadow-2xs flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-xs w-full lg:w-auto overflow-x-auto text-xs font-semibold">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xs transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? "bg-white text-slate-900 shadow-2xs font-bold"
                   : "text-slate-600 hover:text-slate-900"
@@ -281,33 +345,33 @@ export default function OwnerTransactionsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nomor invoice / member / ruangan..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+            placeholder="Cari invoice / member / ruangan..."
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-2xs">
         {loading ? (
           <div className="p-16 text-center space-y-2">
-            <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
+            <Loader2 className="w-6 h-6 text-[#006370] animate-spin mx-auto" />
             <p className="text-xs text-slate-500 font-medium">Memuat data transaksi...</p>
           </div>
         ) : filtered.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Invoice</th>
-                  <th className="py-3 px-4">Member</th>
-                  <th className="py-3 px-4">Ruangan</th>
-                  <th className="py-3 px-4">Metode</th>
-                  <th className="py-3 px-4">Nominal</th>
-                  <th className="py-3 px-4">Status Bayar</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
+                  <th className="py-3 px-4 font-bold">INVOICE</th>
+                  <th className="py-3 px-4 font-bold">MEMBER</th>
+                  <th className="py-3 px-4 font-bold">RUANGAN</th>
+                  <th className="py-3 px-4 font-bold">METODE</th>
+                  <th className="py-3 px-4 font-bold">NOMINAL</th>
+                  <th className="py-3 px-4 font-bold">STATUS BAYAR</th>
+                  <th className="py-3 px-4 font-bold text-right">AKSI</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filtered.map((t) => {
                   const memberName = t.reservasi?.member?.namaMember || `Member #${t.reservasi?.memberId}`;
                   const spaceName = t.reservasi?.detailReservasi?.space?.namaSpace || `Space #${t.reservasiId}`;
@@ -319,7 +383,7 @@ export default function OwnerTransactionsPage() {
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
+                          <div className="w-7 h-7 rounded-xs bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
                             {memberName.charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -347,7 +411,7 @@ export default function OwnerTransactionsPage() {
                         <button
                           type="button"
                           onClick={() => setSelected(t)}
-                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-md border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
+                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xs border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5 text-slate-500" />
                           Detail
@@ -356,10 +420,10 @@ export default function OwnerTransactionsPage() {
                           type="button"
                           disabled={syncingId === t.id}
                           onClick={() => handleSync(t)}
-                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-md border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer disabled:opacity-60"
+                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xs border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer disabled:opacity-60"
                         >
                           {syncingId === t.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-600" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#006370]" />
                           ) : (
                             <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
                           )}
@@ -369,7 +433,7 @@ export default function OwnerTransactionsPage() {
                           <button
                             type="button"
                             onClick={() => setRefundTarget(t)}
-                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-md border border-rose-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
+                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xs border border-rose-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
                             Refund
@@ -384,7 +448,7 @@ export default function OwnerTransactionsPage() {
           </div>
         ) : (
           <div className="p-16 text-center max-w-md mx-auto space-y-2.5">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
+            <div className="w-10 h-10 rounded-xs bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
               <ReceiptText className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-slate-900">Tidak Ada Transaksi</h3>
@@ -398,30 +462,30 @@ export default function OwnerTransactionsPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xs max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center border border-[#BCE3DE]">
                   <ReceiptText className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 leading-tight font-mono">{selected.nomorInvoice}</h3>
-                  <p className="text-[11px] text-slate-400">Detail Transaksi & Pembayaran</p>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight font-mono">{selected.nomorInvoice}</h3>
+                  <p className="text-[11px] text-slate-400">Detail Transaksi &amp; Pembayaran</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-xs hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Informasi Pemesan</p>
+              <div className="p-3.5 rounded-xs bg-slate-50 border border-slate-200 space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Informasi Pemesan</p>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-bold text-slate-900 text-sm">{selected.reservasi?.member?.namaMember || "Member"}</p>
@@ -431,13 +495,13 @@ export default function OwnerTransactionsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block">Metode</span>
+                    <span className="text-[10px] font-bold uppercase text-slate-400 block font-mono">Metode</span>
                     <span className="font-semibold text-slate-800 capitalize">
                       {selected.metodePembayaran ? selected.metodePembayaran.replace(/_/g, " ") : "Belum dipilih"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block">Dibayar Pada</span>
+                    <span className="text-[10px] font-bold uppercase text-slate-400 block font-mono">Dibayar Pada</span>
                     <span className="font-semibold text-slate-800">
                       {selected.dibayarPada
                         ? new Date(selected.dibayarPada).toLocaleString("id-ID")
@@ -448,31 +512,31 @@ export default function OwnerTransactionsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ruangan</span>
+                <div className="p-3 rounded-xs bg-slate-50 border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Ruangan</span>
                   <p className="font-bold text-slate-900">{selected.reservasi?.detailReservasi?.space?.namaSpace || "Space"}</p>
                   <p className="text-[11px] text-slate-500">
                     {selected.reservasi?.jamMulai} WIB ({selected.reservasi?.durasiJam} Jam)
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Status Reservasi</span>
+                <div className="p-3 rounded-xs bg-slate-50 border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Status Reservasi</span>
                   <div className="pt-0.5">
                     <StatusBadge status={(selected.reservasi?.status || "") as any} />
                   </div>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Tagihan</span>
-                  <p className="text-lg font-extrabold text-slate-900 font-mono">{formatRupiah(selected.jumlah)}</p>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Total Tagihan</span>
+                  <p className="text-lg font-bold text-slate-900 font-mono">{formatRupiah(selected.jumlah)}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleSync(selected)}
                   disabled={syncingId === selected.id}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-2xs cursor-pointer disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs shadow-2xs cursor-pointer disabled:opacity-60"
                 >
                   {syncingId === selected.id ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -488,13 +552,13 @@ export default function OwnerTransactionsPage() {
       )}
 
       {refundTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xs max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <RotateCcw className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Tandai sebagai Refund?</h3>
+              <h3 className="text-base font-bold text-slate-900 font-serif">Tandai sebagai Refund?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Transaksi <span className="font-mono font-bold text-slate-900">{refundTarget.nomorInvoice}</span> sebesar{" "}
                 <span className="font-bold text-slate-900">{formatRupiah(refundTarget.jumlah)}</span> akan ditandai sebagai refund.
@@ -504,7 +568,7 @@ export default function OwnerTransactionsPage() {
               <button
                 type="button"
                 onClick={() => setRefundTarget(null)}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -512,7 +576,7 @@ export default function OwnerTransactionsPage() {
                 type="button"
                 onClick={handleRefund}
                 disabled={refunding}
-                className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
+                className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
               >
                 {refunding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Konfirmasi Refund</span>}
               </button>

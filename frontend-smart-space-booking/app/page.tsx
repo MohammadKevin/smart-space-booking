@@ -26,6 +26,8 @@ import {
   Armchair,
   Radio,
   VolumeX,
+  Check,
+  Monitor,
 } from "lucide-react";
 
 function formatRupiah(amount: number | string | undefined | null): string {
@@ -70,7 +72,7 @@ function RealSpaceCard({ space }: { space: Space }) {
               (e.target as HTMLImageElement).src = fallbackImage;
             }}
           />
-          {/* Status badge */}
+          
           <div className="absolute top-3 left-3">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 backdrop-blur-xs border shadow-2xs ${status.color}`}>
               {status.ping ? (
@@ -82,7 +84,6 @@ function RealSpaceCard({ space }: { space: Space }) {
             </span>
           </div>
 
-          {/* Capacity */}
           <div className="absolute top-3 right-3">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200 shadow-2xs">
               <Users className="w-3 h-3 text-slate-500" />
@@ -92,7 +93,7 @@ function RealSpaceCard({ space }: { space: Space }) {
         </div>
 
         <div className="p-5 space-y-3">
-          {/* Location & ID */}
+          
           <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
             <div className="flex items-center gap-1 truncate pr-2">
               <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -111,7 +112,6 @@ function RealSpaceCard({ space }: { space: Space }) {
             {space.deskripsi || "Workstation representatif dengan fasilitas lengkap dan konektivitas prima."}
           </p>
 
-          {/* 4 Feature Specs Grid */}
           <div className="pt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-medium border-t border-slate-100">
             <div className="flex items-center gap-1.5">
               <Wifi className="w-3 h-3 text-cyan-600" />
@@ -133,7 +133,6 @@ function RealSpaceCard({ space }: { space: Space }) {
         </div>
       </div>
 
-      {/* Bottom Price & Action */}
       <div className="p-5 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
         <div>
           <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wide">
@@ -160,16 +159,13 @@ function RealSpaceCard({ space }: { space: Space }) {
 export default function HomePage() {
   const router = useRouter();
 
-  // Search card state
   const [activeTab, setActiveTab] = useState<"flex" | "meeting" | "suite" | "all">("flex");
   const [selectedCity, setSelectedCity] = useState("Semua Kota");
   const [selectedDate, setSelectedDate] = useState("Hari Ini, 24 Okt");
   const [selectedDuration, setSelectedDuration] = useState("Seharian Penuh (09:00 - 18:00)");
 
-  // FAQ Accordion state
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Real spaces from API
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
@@ -191,27 +187,25 @@ export default function HomePage() {
     loadSpaces();
   }, []);
 
-  // Compute dynamic rates from real database spaces
   const deskSpaces = useMemo(() => spaces.filter((s) => s.tipe === "desk"), [spaces]);
   const meetingSpaces = useMemo(() => spaces.filter((s) => s.tipe === "meeting_room"), [spaces]);
   const officeSpaces = useMemo(() => spaces.filter((s) => s.tipe === "private_office"), [spaces]);
 
   const minDeskRate = useMemo(() => {
-    if (deskSpaces.length === 0) return 20000;
+    if (deskSpaces.length === 0) return 0;
     return Math.min(...deskSpaces.map((s) => s.hargaPerJam));
   }, [deskSpaces]);
 
   const minMeetingRate = useMemo(() => {
-    if (meetingSpaces.length === 0) return 50000;
+    if (meetingSpaces.length === 0) return 0;
     return Math.min(...meetingSpaces.map((s) => s.hargaPerJam));
   }, [meetingSpaces]);
 
   const minOfficeRate = useMemo(() => {
-    if (officeSpaces.length === 0) return 100000;
+    if (officeSpaces.length === 0) return 0;
     return Math.min(...officeSpaces.map((s) => s.hargaPerJam));
   }, [officeSpaces]);
 
-  // Extract unique cities from real spaces
   const availableCities = useMemo(() => {
     const citySet = new Set<string>();
     spaces.forEach((s) => {
@@ -225,22 +219,27 @@ export default function HomePage() {
     return Array.from(citySet);
   }, [spaces]);
 
-  // Filtered spaces based on selected tab
   const displayedSpaces = useMemo(() => {
+    let result = spaces;
+
     if (activeTab === "flex") {
-      const filtered = spaces.filter((s) => s.tipe === "desk");
-      return filtered.length > 0 ? filtered : spaces;
+      result = result.filter((s) => s.tipe === "desk");
+    } else if (activeTab === "meeting") {
+      result = result.filter((s) => s.tipe === "meeting_room");
+    } else if (activeTab === "suite") {
+      result = result.filter((s) => s.tipe === "private_office");
     }
-    if (activeTab === "meeting") {
-      const filtered = spaces.filter((s) => s.tipe === "meeting_room");
-      return filtered.length > 0 ? filtered : spaces;
+
+    if (selectedCity && selectedCity !== "Semua Kota") {
+      const q = selectedCity.toLowerCase().trim();
+      result = result.filter((s) => {
+        const addr = (s.owner?.alamat || s.owner?.namaCoworking || "").toLowerCase();
+        return addr.includes(q);
+      });
     }
-    if (activeTab === "suite") {
-      const filtered = spaces.filter((s) => s.tipe === "private_office");
-      return filtered.length > 0 ? filtered : spaces;
-    }
-    return spaces;
-  }, [spaces, activeTab]);
+
+    return result;
+  }, [spaces, activeTab, selectedCity]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,6 +251,15 @@ export default function HomePage() {
 
     if (selectedCity && selectedCity !== "Semua Kota") {
       params.set("search", selectedCity);
+      params.set("metro", selectedCity);
+    }
+
+    if (selectedDate) {
+      params.set("date", selectedDate);
+    }
+
+    if (selectedDuration) {
+      params.set("duration", selectedDuration);
     }
 
     router.push(`/spaces?${params.toString()}`);
@@ -282,45 +290,27 @@ export default function HomePage() {
 
   return (
     <div className="bg-white min-h-screen text-slate-900 selection:bg-[#0D5C63] selection:text-white">
-      {/* 1. HERO SECTION */}
-      <section className="pt-10 pb-16 lg:pt-14 lg:pb-20 border-b border-slate-100">
+      <section id="home" className="pt-10 pb-16 lg:pt-14 lg:pb-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-9">
-          {/* Top Announcement Pill */}
-          <div className="flex justify-center">
-            <Link
-              href="/spaces"
-              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/90 shadow-2xs transition-all hover:scale-[1.01]"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
-              <span className="font-semibold text-slate-900">WorkNest 2.0</span>
-              <span className="text-slate-300">•</span>
-              <span>Akses jaringan coworking kini aktif di 14 kota</span>
-              <ArrowRight className="w-3 h-3 text-slate-400 ml-0.5" />
-            </Link>
-          </div>
-
-          {/* Main Headline & Subtitle */}
-          <div className="max-w-3xl mx-auto text-center space-y-4">
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-semibold text-slate-900 tracking-tight leading-[1.12]">
-              Ruang kerja on-demand untuk tim &amp; founder berkinerja tinggi.
+          <div className="max-w-3xl mx-auto text-center space-y-4 pt-8">
+            <h1 className="font-serif text-[48px] sm:text-[48px] md:text-[48px] lg:text-[54px] font-semibold text-slate-900 tracking-tight leading-[1.12]">
+              Ruang kerja siap pakai <br /> kapan saja
             </h1>
-            <p className="text-xs sm:text-sm md:text-[15px] text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
-              Pesan meja ergonomis terverifikasi, suite privat kedap suara, dan ruang rapat berkecepatan fiber di 14 kota di Indonesia. Akses masuk instan dengan kunci pintar digital IoT.
-            </p>
+            <h2 className="text-xs sm:text-sm md:text-[15px] text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
+              Temukan ruang kerja ideal sesuai kebutuhan Anda, mulai dari meja fleksibel, ruang meeting, hingga kantor privat. Cukup pilih lokasi, tanggal, dan durasi. Semua proses, mulai dari pemesanan hingga akses masuk, dapat dilakukan secara instan melalui perangkat Anda.
+            </h2>
           </div>
 
-          {/* Interactive Search Box */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm shadow-slate-100 p-2 sm:p-3">
-              {/* Category Tabs */}
+            <div className="bg-white rounded-[10px] border border-slate-200 shadow-sm shadow-slate-100 p-2 sm:p-3">
               <div className="flex items-center gap-1 sm:gap-2 px-2 pt-1 pb-3 overflow-x-auto text-xs border-b border-slate-100">
                 <button
                   type="button"
                   onClick={() => setActiveTab("flex")}
-                  className={`px-3.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "flex"
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   Flex Desk
@@ -328,10 +318,10 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("meeting")}
-                  className={`px-3.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "meeting"
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   Ruang Rapat
@@ -339,10 +329,10 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("suite")}
-                  className={`px-3.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "suite"
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   Suite Privat
@@ -350,94 +340,88 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("all")}
-                  className={`px-3.5 py-1.5 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "all"
-                      ? "bg-slate-100 text-slate-900 font-semibold"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   Semua Ruangan
                 </button>
               </div>
 
-              {/* Form Input Fields */}
               <form
                 onSubmit={handleSearchSubmit}
-                className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 p-2 sm:p-3 items-center text-left"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 p-2 sm:p-3 items-center text-left"
               >
-                {/* City */}
-                <div className="sm:col-span-4 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
+                <div className="lg:col-span-4 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                    <MapPin className="w-3 h-3 text-slate-400" />
+                    <MapPin className="w-3.5 h-3.5 text-[#006370]" />
                     <span>Kota / Lokasi</span>
                   </label>
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-[13px] font-medium text-slate-900 focus:outline-none cursor-pointer py-1"
-                  >
-                    <option value="Semua Kota">Semua Kota</option>
-                    {availableCities.length > 0 ? (
-                      availableCities.map((city) => (
+                  <div className="relative">
+                    <select
+                      value={selectedCity}
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                      className="w-full bg-transparent text-xs sm:text-[13px] font-semibold text-slate-900 focus:outline-none cursor-pointer py-1 pr-6 truncate appearance-none"
+                    >
+                      <option value="Semua Kota">Semua Kota</option>
+                      {availableCities.map((city) => (
                         <option key={city} value={city}>
                           {city}
                         </option>
-                      ))
-                    ) : (
-                      <>
-                        <option value="Jakarta">Jakarta</option>
-                        <option value="Surabaya">Surabaya</option>
-                        <option value="Malang">Malang</option>
-                        <option value="Bandung">Bandung</option>
-                        <option value="Bali">Bali</option>
-                      </>
-                    )}
-                  </select>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1 top-2 pointer-events-none" />
+                  </div>
                 </div>
 
-                {/* Date */}
-                <div className="sm:col-span-3 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
+                <div className="lg:col-span-3 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                    <Calendar className="w-3 h-3 text-slate-400" />
+                    <Calendar className="w-3.5 h-3.5 text-[#006370]" />
                     <span>Tanggal</span>
                   </label>
-                  <select
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-[13px] font-medium text-slate-900 focus:outline-none cursor-pointer py-1"
-                  >
-                    <option value="Hari Ini, 24 Okt">Hari Ini, 24 Okt</option>
-                    <option value="Besok, 25 Okt">Besok, 25 Okt</option>
-                    <option value="Sabtu, 26 Okt">Sabtu, 26 Okt</option>
-                    <option value="Senin, 28 Okt">Senin, 28 Okt</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="w-full bg-transparent text-xs sm:text-[13px] font-semibold text-slate-900 focus:outline-none cursor-pointer py-1 pr-6 truncate appearance-none"
+                    >
+                      <option value="Hari Ini, 24 Okt">Hari Ini, 24 Okt</option>
+                      <option value="Besok, 25 Okt">Besok, 25 Okt</option>
+                      <option value="Sabtu, 26 Okt">Sabtu, 26 Okt</option>
+                      <option value="Senin, 28 Okt">Senin, 28 Okt</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1 top-2 pointer-events-none" />
+                  </div>
                 </div>
 
-                {/* Duration */}
-                <div className="sm:col-span-3 border-b sm:border-b-0 pb-2 sm:pb-0 sm:pr-2">
+                <div className="lg:col-span-3 border-b sm:border-b-0 lg:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
                   <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                    <Clock className="w-3 h-3 text-slate-400" />
+                    <Clock className="w-3.5 h-3.5 text-[#006370]" />
                     <span>Durasi</span>
                   </label>
-                  <select
-                    value={selectedDuration}
-                    onChange={(e) => setSelectedDuration(e.target.value)}
-                    className="w-full bg-transparent text-xs sm:text-[13px] font-medium text-slate-900 focus:outline-none cursor-pointer py-1"
-                  >
-                    <option value="Seharian Penuh (09:00 - 18:00)">Seharian Penuh (09:00 - 18:00)</option>
-                    <option value="Setengah Hari Pagi (09:00 - 13:00)">Setengah Hari Pagi (09:00 - 13:00)</option>
-                    <option value="Setengah Hari Siang (13:00 - 18:00)">Setengah Hari Siang (13:00 - 18:00)</option>
-                    <option value="Per Jam (2 Jam Sesi)">Per Jam (2 Jam Sesi)</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={selectedDuration}
+                      onChange={(e) => setSelectedDuration(e.target.value)}
+                      className="w-full bg-transparent text-xs sm:text-[13px] font-semibold text-slate-900 focus:outline-none cursor-pointer py-1 pr-6 truncate appearance-none"
+                    >
+                      <option value="Seharian (09:00 - 18:00)">Seharian (09:00 - 18:00)</option>
+                      <option value="Pagi (09:00 - 13:00)">Pagi (09:00 - 13:00)</option>
+                      <option value="Siang (13:00 - 18:00)">Siang (13:00 - 18:00)</option>
+                      <option value="Per Jam (2 Jam Sesi)">Per Jam (2 Jam Sesi)</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1 top-2 pointer-events-none" />
+                  </div>
                 </div>
 
-                {/* Find Spaces Button */}
-                <div className="sm:col-span-2 flex justify-end">
+                <div className="lg:col-span-2 flex justify-end">
                   <button
                     type="submit"
-                    className="w-full py-2.5 px-4 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    className="w-full py-2.5 px-3 bg-[#006370] hover:bg-[#004e58] text-white text-xs font-bold rounded-[10px] transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 whitespace-nowrap"
                   >
-                    <Search className="w-3.5 h-3.5" />
+                    <Search className="w-3.5 h-3.5 shrink-0" />
                     <span>Cari Ruangan</span>
                   </button>
                 </div>
@@ -445,7 +429,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Metrics Strip */}
           <div className="max-w-4xl mx-auto pt-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1">
               <p className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
@@ -459,7 +442,7 @@ export default function HomePage() {
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-1">
                 <span className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
-                  99.98%
+                  89.98%
                 </span>
                 <span className="text-emerald-500 text-sm font-bold">↑</span>
               </div>
@@ -470,7 +453,7 @@ export default function HomePage() {
 
             <div className="space-y-1">
               <p className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
-                15.400+
+                1.500+
               </p>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
                 Engineer &amp; Founder Bergabung
@@ -489,7 +472,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. INSTANT RATES TICKER BAR */}
       <section id="instant-rates" className="border-b border-slate-200/80 bg-slate-50/60 py-3.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6 text-xs text-slate-600">
@@ -500,21 +482,21 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Flex Desks:</strong> mulai {formatRupiah(minDeskRate)}/jam
+                <strong className="font-semibold text-slate-800">Flex Desks:</strong> {deskSpaces.length > 0 ? <>mulai {formatRupiah(minDeskRate)}/jam</> : "Segera hadir"}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Ruang Rapat:</strong> mulai {formatRupiah(minMeetingRate)}/jam
+                <strong className="font-semibold text-slate-800">Ruang Rapat:</strong> {meetingSpaces.length > 0 ? <>mulai {formatRupiah(minMeetingRate)}/jam</> : "Segera hadir"}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Suite Privat:</strong> mulai {formatRupiah(minOfficeRate)}/jam
+                <strong className="font-semibold text-slate-800">Suite Privat:</strong> {officeSpaces.length > 0 ? <>mulai {formatRupiah(minOfficeRate)}/jam</> : "Segera hadir"}
               </span>
             </div>
 
@@ -528,10 +510,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. SECTION: ENGINEERED FOR OUTPUT (REAL SPACES ONLY) */}
-      <section className="py-14 sm:py-20 border-b border-slate-100">
+      <section id="ruang-kerja" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
@@ -551,7 +531,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {/* Real Data Space Cards */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
@@ -601,7 +580,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="p-12 text-center bg-slate-50/60 rounded-2xl border border-slate-200 space-y-4 max-w-lg mx-auto">
+            <div className="py-12 text-center bg-slate-50/60 rounded-2xl border border-slate-200 space-y-4 w-full mx-auto">
               <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center mx-auto text-slate-400 shadow-2xs">
                 <Building2 className="w-6 h-6" />
               </div>
@@ -632,7 +611,170 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. SECTION: THE WORKNEST PROTOCOL */}
+      <section id="tarif" className="py-14 sm:py-20 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="max-w-3xl space-y-2">
+            <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
+              TARIF WORKNEST
+            </p>
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight">
+              Harga transparan untuk setiap kebutuhan Anda.
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+              Tanpa biaya tersembunyi. Semua harga sudah termasuk pajak dan biaya layanan.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                    <Armchair className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-700 uppercase">Populer</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">Flex Desk</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">Meja kerja ergonomis di area open space dengan akses WiFi dan fasilitas bersama.</p>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  {deskSpaces.length > 0 ? (
+                    <>
+                      <span className="text-2xl font-bold font-mono text-slate-900">{formatRupiah(minDeskRate)}</span>
+                      <span className="text-xs text-slate-400">/jam</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-medium text-slate-400">Belum ada ruangan tersedia</span>
+                  )}
+                </div>
+                <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>WiFi kecepatan tinggi</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kursi ergonomis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Akses loker pribadi</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kopi & teh gratis</span>
+                  </div>
+                </div>
+              </div>
+              <Link href="/spaces?tipe=desk" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${deskSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
+                Pesan Flex Desk
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-xl border-2 border-[#006370] p-6 flex flex-col justify-between space-y-5 relative shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#006370] text-white uppercase">Rekomendasi</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">Ruang Rapat</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">Ruang meeting privat dengan layar presentasi, whiteboard, dan koneksi video call.</p>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  {meetingSpaces.length > 0 ? (
+                    <>
+                      <span className="text-2xl font-bold font-mono text-slate-900">{formatRupiah(minMeetingRate)}</span>
+                      <span className="text-xs text-slate-400">/jam</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-medium text-slate-400">Belum ada ruangan tersedia</span>
+                  )}
+                </div>
+                <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kapasitas 4–12 orang</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Layar presentasi 4K</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Whiteboard & alat tulis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kedap suara</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kopi, teh & air mineral</span>
+                  </div>
+                </div>
+              </div>
+              <Link href="/spaces?tipe=meeting_room" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${meetingSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
+                Pesan Ruang Rapat
+              </Link>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 uppercase">Premium</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">Suite Privat</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">Kantor privat eksklusif dengan kunci digital, meja eksekutif, dan fasilitas lengkap.</p>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  {officeSpaces.length > 0 ? (
+                    <>
+                      <span className="text-2xl font-bold font-mono text-slate-900">{formatRupiah(minOfficeRate)}</span>
+                      <span className="text-xs text-slate-400">/jam</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-medium text-slate-400">Belum ada ruangan tersedia</span>
+                  )}
+                </div>
+                <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Ruangan privat terkunci</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Meja & kursi eksekutif</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Monitor eksternal</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Kedap suara penuh</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-600">
+                    <Check className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Akses 24 jam</span>
+                  </div>
+                </div>
+              </div>
+              <Link href="/spaces?tipe=private_office" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${officeSpaces.length > 0 ? "bg-slate-900 hover:bg-slate-800" : "bg-slate-300 pointer-events-none"}`}>
+                Pesan Suite Privat
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="protocol" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="max-w-3xl space-y-2">
@@ -648,7 +790,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Box 1 */}
+            
             <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -668,7 +810,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Box 2 */}
             <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -688,7 +829,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Box 3 */}
             <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -711,12 +851,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. SECTION: COVERAGE INTERACTIVE MAP / HUBS */}
       <section className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left text */}
+              
               <div className="lg:col-span-6 space-y-4">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
                   <MapPin className="w-3 h-3 text-slate-500" />
@@ -748,7 +887,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Right Radar / Telemetry graphic */}
               <div className="lg:col-span-6 bg-slate-50/80 rounded-xl border border-slate-200/80 p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
@@ -781,7 +919,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. SECTION: FAQ */}
       <section id="faq" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="text-center space-y-1.5">
@@ -826,9 +963,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. SECTION: CTA BANNER */}
       <section className="py-14 sm:py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
               Siap meningkatkan produktivitas tim Anda hari ini?

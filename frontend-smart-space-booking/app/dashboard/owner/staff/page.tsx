@@ -24,9 +24,17 @@ import {
   CheckCircle2,
   RefreshCw,
   X,
-  ShieldCheck,
   Search,
-  MessageCircle,
+  Download,
+  Clock,
+  Radio,
+  SlidersHorizontal,
+  Key,
+  ChevronDown,
+  Check,
+  History,
+  Shield,
+  ArrowRight,
 } from "lucide-react";
 
 export default function OwnerStaffPage() {
@@ -38,6 +46,7 @@ export default function OwnerStaffPage() {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -57,7 +66,7 @@ export default function OwnerStaffPage() {
     setError(null);
     try {
       const data = await getStaffs();
-      setStaffs(data);
+      setStaffs(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -78,22 +87,12 @@ export default function OwnerStaffPage() {
     setModalOpen(true);
   };
 
-  const handleSubmitCreate = async (e: React.FormEvent) => {
+  const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
-    if (password.length < 6) {
-      setFormError("Password minimal 6 karakter");
-      return;
-    }
-
-    const cleanTelp = telp.trim();
-    if (!/^(\+62|62|08)\d+$/.test(cleanTelp)) {
-      setFormError("Nomor telepon harus berformat Indonesia (diawali 08, 62, atau +62)");
-      return;
-    }
-    if (cleanTelp.replace(/\D/g, "").length < 12) {
-      setFormError("Nomor telepon minimal 12 digit");
+    if (!email.trim() || !password || !namaStaff.trim() || !telp.trim()) {
+      setFormError("Semua field formulir wajib diisi.");
       return;
     }
 
@@ -105,9 +104,8 @@ export default function OwnerStaffPage() {
         namaStaff: namaStaff.trim(),
         telp: telp.trim(),
       };
-
       await createStaff(dto);
-      setActionSuccess(`Akun Staff "${namaStaff}" berhasil didaftarkan ke sistem.`);
+      setActionSuccess(`Staf baru "${namaStaff}" berhasil diundang ke sistem.`);
       setModalOpen(false);
       await fetchStaffs();
     } catch (err: unknown) {
@@ -121,14 +119,8 @@ export default function OwnerStaffPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const staffDisplayName =
-        deleteTarget.namaStaff ||
-        deleteTarget.staff?.namaStaff ||
-        deleteTarget.user?.email ||
-        deleteTarget.email ||
-        "Staff";
       await deleteStaff(deleteTarget.id);
-      setActionSuccess(`Akun staff "${staffDisplayName}" berhasil dihapus.`);
+      setActionSuccess(`Akses staf "${deleteTarget.namaStaff}" berhasil dicabut.`);
       setDeleteTarget(null);
       await fetchStaffs();
     } catch (err: unknown) {
@@ -140,71 +132,88 @@ export default function OwnerStaffPage() {
   };
 
   const filteredStaffs = useMemo(() => {
-    return staffs.filter((st) => {
-      const name = st.namaStaff || st.staff?.namaStaff || "";
-      const emailVal = st.user?.email || st.email || "";
-      const phone = st.telp || st.staff?.telp || "";
-      const q = searchQuery.toLowerCase();
-      return name.toLowerCase().includes(q) || emailVal.toLowerCase().includes(q) || phone.includes(q);
+    return staffs.filter((s) => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        (s.namaStaff || "").toLowerCase().includes(q) ||
+        (s.user?.email || "").toLowerCase().includes(q) ||
+        (s.telp || "").includes(q);
+
+      return matchSearch;
     });
   }, [staffs, searchQuery]);
 
   return (
-    <div className="space-y-6">
-      
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="space-y-1">
-          <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-            Manajemen Akun Staff
+    <div className="space-y-6 pb-20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <span>WORKSPACE OWNER</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500 font-sans font-normal">
+              Direktori {staffs.length} Staf Operasional
+            </span>
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            Manajemen Staf &amp; Frontdesk
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
-            Daftarkan petugas resepsionis untuk mengoperasikan terminal scanner QR dan check-in tiket pengunjung.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Kelola akun resepsionis, hak akses staf venue, dan verifikasi kehadiran operasional coworking space.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
           <button
             type="button"
             onClick={fetchStaffs}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : "text-slate-400"}`} />
-            <span>Segarkan</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <span>Perbarui</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const csv =
+                "Name,Role,Email,Phone\n" +
+                staffs
+                  .map((s) => `"${s.namaStaff}","Staff","${s.user?.email || ""}","${s.telp}"`)
+                  .join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `worknest-staff-audit-${Date.now()}.csv`;
+              a.click();
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Ekspor CSV</span>
           </button>
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-xs shadow-cyan-600/20 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Tambah Staff Baru</span>
+            <span>Undang Staf Baru</span>
           </button>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-start gap-3 text-xs text-slate-700 shadow-2xs">
-        <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 border border-slate-200">
-          <ShieldCheck className="w-4 h-4" />
-        </div>
-        <div className="space-y-0.5">
-          <p className="font-semibold text-slate-900">Kebijakan Registrasi Internal & Hak Akses</p>
-          <p className="text-slate-500 leading-relaxed">
-            Akun Staff didaftarkan secara internal oleh Space Owner. Setelah didaftarkan, petugas dapat login ke portal untuk memvalidasi tiket masuk dan check-in member di resepsionis.
-          </p>
-        </div>
-      </div>
-
       {actionSuccess && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
-          <div className="flex items-center gap-2 font-medium">
+        <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium shadow-2xs">
+          <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{actionSuccess}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccess(null)}
-            className="font-bold text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
+            className="text-emerald-700 hover:text-emerald-900 p-0.5 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -212,257 +221,270 @@ export default function OwnerStaffPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
-          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-          <div className="space-y-0.5">
-            <p className="font-bold">Terjadi Kendala</p>
-            <p className="text-slate-600">{error}</p>
+        <div className="flex items-center justify-between p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium shadow-2xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{error}</span>
           </div>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-rose-700 hover:text-rose-900 p-0.5 cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama staff, email, atau nomor telepon..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              TOTAL STAF TERDAFTAR
+            </span>
+            <UserCheck className="w-4 h-4 text-[#006370]" />
+          </div>
+          <div className="text-2xl font-bold text-slate-900 font-mono">
+            {staffs.length}
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Akun petugas frontdesk aktif
+          </p>
         </div>
-        <div className="text-xs text-slate-500 font-semibold hidden sm:block">
-          Total: <span className="font-mono text-slate-900 font-bold">{filteredStaffs.length}</span> Petugas
+
+        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              STATUS TERMINAL
+            </span>
+            <Clock className="w-4 h-4 text-emerald-600" />
+          </div>
+          <div className="text-2xl font-bold text-emerald-700 font-mono">
+            Online
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Check-in QR Scanner siap
+          </p>
+        </div>
+
+        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              LINGKUP OTORITAS
+            </span>
+            <Radio className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-xl font-bold text-slate-900">
+            Frontdesk POS
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Validasi tiket &amp; QR check-in
+          </p>
+        </div>
+
+        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+              KEAMANAN AUTENTIKASI
+            </span>
+            <Shield className="w-4 h-4 text-[#006370]" />
+          </div>
+          <div className="text-xl font-bold text-slate-900 font-mono">
+            JWT Token
+          </div>
+          <p className="text-[11px] text-emerald-700 font-medium">
+            Enkripsi bcrypt terverifikasi
+          </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-2xs">
-        {loading ? (
-          <div className="p-16 text-center space-y-2">
-            <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 font-medium">Memuat daftar staff...</p>
-          </div>
-        ) : filteredStaffs.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                <tr>
-                  <th className="py-3 px-4">Nama Petugas</th>
-                  <th className="py-3 px-4">Email Akun</th>
-                  <th className="py-3 px-4">Kontak WhatsApp</th>
-                  <th className="py-3 px-4">Hak Akses Sistem</th>
-                  <th className="py-3 px-4 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredStaffs.map((st) => {
-                  const staffName =
-                    st.namaStaff ||
-                    st.staff?.namaStaff ||
-                    st.user?.email ||
-                    st.email ||
-                    "Staff Operasional";
-                  const staffEmail = st.user?.email || st.email || "-";
-                  const staffTelp = st.telp || st.staff?.telp || "-";
-                  const initialChar = staffName.charAt(0).toUpperCase() || "S";
+      <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            placeholder="Cari nama, email, atau no. telepon..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none text-slate-900 transition-colors"
+          />
+        </div>
 
-                  return (
-                    <tr key={st.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
-                            {initialChar}
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900">{staffName}</p>
-                            <p className="text-[10px] text-slate-400 font-mono">#{st.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-medium text-slate-800">
-                        {staffEmail}
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-700 font-medium">
-                        {staffTelp !== "-" ? (
-                          <a
-                            href={`https://wa.me/${staffTelp.replace(/[^0-9]/g, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 hover:underline bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200"
-                          >
-                            <MessageCircle className="w-3 h-3 text-emerald-600" />
-                            <span>{staffTelp}</span>
-                          </a>
-                        ) : (
-                          <span className="text-slate-400">-</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-50 text-slate-800 border border-slate-200 inline-flex items-center gap-1">
-                          <span>Terminal QR Check-In</span>
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(st)}
-                          className="px-2.5 py-1 hover:bg-rose-50 text-rose-600 rounded-lg border border-rose-200 transition-all inline-flex items-center gap-1 font-semibold cursor-pointer"
-                          title="Hapus Staff"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-                          <span>Hapus</span>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div className="text-xs text-slate-500 font-medium">
+          Menampilkan {filteredStaffs.length} dari {staffs.length} staf
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xs overflow-hidden shadow-2xs">
+        {loading ? (
+          <div className="p-12 text-center">
+            <Loader2 className="w-6 h-6 animate-spin text-[#006370] mx-auto mb-2" />
+            <p className="text-xs text-slate-500">Memuat direktori staf...</p>
+          </div>
+        ) : filteredStaffs.length === 0 ? (
+          <div className="p-12 text-center space-y-3">
+            <UserCheck className="w-8 h-8 text-slate-300 mx-auto" />
+            <p className="text-xs font-bold text-slate-700">Belum ada akun staf terdaftar</p>
+            <p className="text-[11px] text-slate-400">
+              Undang resepsionis atau staf operasional pertama Anda dengan tombol di atas.
+            </p>
           </div>
         ) : (
-          <div className="p-16 text-center max-w-md mx-auto space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-slate-900">Belum Ada Akun Staff</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                {searchQuery ? "Tidak ditemukan staff dengan kata kunci tersebut." : "Tambahkan akun staff untuk membantu proses validasi dan check-in tiket di meja resepsionis."}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleOpenCreate}
-              className="px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg shadow-2xs cursor-pointer"
-            >
-              Tambah Staff Sekarang
-            </button>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                  <th className="py-3 px-4">IDENTITAS STAF</th>
+                  <th className="py-3 px-4">EMAIL LOGIN</th>
+                  <th className="py-3 px-4">TELEPON / WA</th>
+                  <th className="py-3 px-4">HAK AKSES</th>
+                  <th className="py-3 px-4 text-right">AKSI</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {filteredStaffs.map((s) => (
+                  <tr key={s.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold text-xs shrink-0 border border-[#BCE3DE]">
+                          {(s.namaStaff || "ST").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{s.namaStaff || "Staf"}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">ID: #STF-{String(s.id).padStart(3, "0")}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-slate-900">
+                      {s.user?.email || "-"}
+                    </td>
+
+                    <td className="py-3.5 px-4 font-mono text-slate-700">
+                      {s.telp || "-"}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">
+                        Frontdesk Scanner
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(s)}
+                        className="px-2.5 py-1 rounded-xs border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        Cabut Akses
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-5 border border-slate-200 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="bg-white border border-slate-200 rounded-xs max-w-md w-full p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+                <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
                   <UserCheck className="w-4 h-4" />
                 </div>
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900 leading-tight">
-                    Registrasi Akun Staff Baru
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    Akses operasional scanner check-in resepsionis
-                  </p>
-                </div>
+                <h3 className="font-serif text-base font-bold text-slate-900">Undang Anggota Staf Baru</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-lg flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-                <span>{formError}</span>
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xs">
+                {formError}
               </div>
             )}
 
-            <form onSubmit={handleSubmitCreate} className="space-y-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Nama Lengkap Staff
-                </label>
+            <form onSubmit={handleCreateStaff} className="space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Nama Lengkap Staf *</label>
                 <input
                   type="text"
-                  required
+                  placeholder="Contoh: Bayu Pratama"
                   value={namaStaff}
                   onChange={(e) => setNamaStaff(e.target.value)}
-                  placeholder="Contoh: Muhammad Kevin"
-                  className="w-full px-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900"
+                  required
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Email Akun
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Contoh: staff@example.com"
-                    className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
-                  />
-                </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Email Staf *</label>
+                <input
+                  type="email"
+                  placeholder="bayu.front@worknest.id"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900 font-mono"
+                  required
+                />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Password
-                </label>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Nomor WhatsApp / Telp *</label>
+                <input
+                  type="tel"
+                  placeholder="08123456789"
+                  value={telp}
+                  onChange={(e) => setTelp(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900 font-mono"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Kata Sandi Awal *</label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    required
+                    placeholder="Minimal 6 karakter"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 karakter"
-                    className="w-full pl-9 pr-9 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-3 pr-9 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900"
+                    required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold text-slate-700">
-                  No. Telepon / WhatsApp
-                </label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                  <input
-                    type="tel"
-                    required
-                    minLength={12}
-                    value={telp}
-                    onChange={(e) => setTelp(e.target.value)}
-                    placeholder="081234567890 (min. 12 digit)"
-                    className="w-full pl-9 pr-3.5 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  className="px-3.5 py-2 text-slate-600 font-semibold hover:text-slate-900 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="py-2 px-4 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white font-bold rounded-xs shadow-2xs disabled:opacity-50 cursor-pointer"
                 >
-                  {formLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Daftarkan Staff</span>}
+                  {formLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  Kirim Undangan
                 </button>
               </div>
             </form>
@@ -471,22 +493,23 @@ export default function OwnerStaffPage() {
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">
-            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="bg-white border border-slate-200 rounded-xs max-w-sm w-full p-6 shadow-xl space-y-4 text-center animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <Trash2 className="w-5 h-5" />
             </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Hapus Akun Staff?</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Apakah Anda yakin ingin menghapus akun <strong>{deleteTarget.namaStaff || deleteTarget.staff?.namaStaff || deleteTarget.user?.email || deleteTarget.email || "Staff Ini"}</strong>?
+            <div>
+              <h3 className="font-serif text-base font-bold text-slate-900">Cabut Akses Staf?</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Apakah Anda yakin ingin mencabut seluruh kredensial &amp; akses sistem milik{" "}
+                <strong>"{deleteTarget.namaStaff}"</strong>?
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 pt-1">
+            <div className="flex items-center justify-center gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                className="flex-1 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xs cursor-pointer"
               >
                 Batal
               </button>
@@ -494,9 +517,10 @@ export default function OwnerStaffPage() {
                 type="button"
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
-                className="py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs shadow-2xs disabled:opacity-50 cursor-pointer"
               >
-                {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Ya, Hapus</span>}
+                {deleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Cabut Akses
               </button>
             </div>
           </div>

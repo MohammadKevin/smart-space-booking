@@ -14,9 +14,6 @@ import {
   getApiErrorMessage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { StatusBadge } from "@/components/StatusBadge";
-import { PaymentStatusBadge } from "@/components/PaymentStatusBadge";
-import { snapPay } from "@/lib/midtrans-snap";
 import { formatRupiah } from "@/components/SpaceCard";
 import { QrCodeCard } from "@/components/QrCodeCard";
 import {
@@ -33,27 +30,13 @@ import {
   Plus,
   ArrowRight,
   User,
-  Phone,
-  ShieldCheck,
-  Search,
   Receipt,
   Download,
   Printer,
-  ExternalLink,
-  MessageCircle,
-  Sparkles,
-  ChevronRight,
-  Ticket,
-  Star,
-  Wallet,
-  Wifi,
   Radio,
   Share2,
   Copy,
   Check,
-  Lock,
-  Filter,
-  FileSpreadsheet,
   FileText,
 } from "lucide-react";
 
@@ -63,9 +46,6 @@ export default function MemberDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [filterTab, setFilterTab] = useState<"all" | "active" | "pending" | "selesai" | "dibatalkan">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
   const [selectedTicket, setSelectedTicket] = useState<Reservation | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Reservation | null>(null);
   const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
@@ -73,26 +53,71 @@ export default function MemberDashboardPage() {
   const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
 
   const [transactions, setTransactions] = useState<Record<number, Transaksi>>({});
-  const [payingId, setPayingId] = useState<number | null>(null);
-  const [payMessage, setPayMessage] = useState<string | null>(null);
-  const [payError, setPayError] = useState<string | null>(null);
-
-  const [selectedReviewBooking, setSelectedReviewBooking] = useState<Reservation | null>(null);
-  const [reviewRating, setReviewRating] = useState<number>(5);
-  const [reviewComment, setReviewComment] = useState<string>("");
-  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
-  const [reviewError, setReviewError] = useState<string | null>(null);
-  const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
 
   const [copiedPin, setCopiedPin] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = useCallback(async (autoSync = true) => {
     setLoading(true);
     setError(null);
     try {
       const data = await getMyBookings();
-      setReservations(data || []);
+      const list = Array.isArray(data) ? data : [];
+      setReservations(list);
+
+      // Auto-sync in background if there are pending bookings/transactions
+      if (autoSync && list.length > 0) {
+        const pendingItems = list.filter(
+          (r) =>
+            r.status?.toLowerCase() === "pending" ||
+            (r.transaksi && r.transaksi.statusPembayaran !== "lunas")
+        );
+
+        if (pendingItems.length > 0) {
+          const token =
+            typeof window !== "undefined"
+              ? localStorage.getItem("token") || localStorage.getItem("access_token")
+              : null;
+
+          Promise.all(
+            pendingItems.map(async (r) => {
+              try {
+                const orderId =
+                  r.transaksi?.midtransOrderId ||
+                  r.transaksi?.nomorInvoice ||
+                  `INV-RES-${r.id}`;
+
+                if (orderId) {
+                  const checkRes = await fetch(
+                    `/api/charge/status?orderId=${encodeURIComponent(orderId)}&transactionId=${r.transaksi?.id || r.id}&reservationId=${r.id}`,
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                  );
+                  const statusData = await checkRes.json();
+                  if (statusData.isPaid) return true;
+                }
+
+                const syncId = r.transaksi?.id || r.id;
+                if (syncId) {
+                  const syncRes = await syncPayment(syncId);
+                  const updated = syncRes?.data || syncRes;
+                  if (updated?.statusPembayaran === "lunas" || updated?.status === "disetujui") {
+                    return true;
+                  }
+                }
+              } catch {}
+              return false;
+            })
+          ).then((results) => {
+            if (results.some(Boolean)) {
+              getMyBookings()
+                .then((refreshed) => {
+                  if (Array.isArray(refreshed)) setReservations(refreshed);
+                })
+                .catch(() => {});
+            }
+          });
+        }
+      }
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -108,27 +133,35 @@ export default function MemberDashboardPage() {
         map[t.reservasiId] = t;
       }
       setTransactions(map);
-    } catch {
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings(true);
     loadTransactions();
   }, [fetchBookings, loadTransactions]);
 
   const activeReservations = useMemo(() => {
-    return reservations.filter(
-      (r) => r.status?.toLowerCase() === "aktif" || r.status?.toLowerCase() === "disetujui"
-    );
-  }, [reservations]);
+    return reservations.filter((r) => {
+      const isPaid =
+        r.transaksi?.statusPembayaran === "lunas" ||
+        transactions[r.id]?.statusPembayaran === "lunas";
+      const s = r.status?.toLowerCase();
+      if (s === "selesai" || s === "dibatalkan") return false;
+      return s === "aktif" || s === "disetujui" || isPaid;
+    });
+  }, [reservations, transactions]);
 
   const currentActivePass = activeReservations.length > 0 ? activeReservations[0] : null;
 
   const upcomingReservations = useMemo(() => {
     return reservations.filter((r) => {
       const s = r.status?.toLowerCase();
-      return s === "pending" || (s === "disetujui" && r.id !== currentActivePass?.id);
+      if (s === "selesai" || s === "dibatalkan") return false;
+      return (
+        (s === "pending" || s === "disetujui" || s === "aktif") &&
+        r.id !== currentActivePass?.id
+      );
     });
   }, [reservations, currentActivePass]);
 
@@ -146,7 +179,7 @@ export default function MemberDashboardPage() {
       await cancelBooking(cancelTargetId);
       setCancelSuccessMsg("Reservasi berhasil dibatalkan.");
       setCancelTargetId(null);
-      await fetchBookings();
+      await fetchBookings(false);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
       setCancelTargetId(null);
@@ -155,69 +188,11 @@ export default function MemberDashboardPage() {
     }
   };
 
-  const handlePay = async (res: Reservation) => {
-    setPayingId(res.id);
-    setPayError(null);
-    setPayMessage(null);
-    try {
-      const response = await startPayment(res.id);
-      const result = response.data;
-
-      if (result.redirectUrl) {
-        window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
-      }
-
-      await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
-        onSuccess: async () => {
-          setPayMessage(`Pembayaran ${result.nomorInvoice} berhasil. Sedang menyinkronkan status...`);
-          try {
-            await syncPayment(result.transactionId);
-          } catch {}
-          setPayMessage(`Pembayaran invoice ${result.nomorInvoice} telah lunas. Terima kasih!`);
-          await fetchBookings();
-          await loadTransactions();
-        },
-        onPending: async () => {
-          try {
-            await syncPayment(result.transactionId);
-          } catch {}
-          setPayMessage("Pembayaran sedang menunggu konfirmasi. Status telah disinkronkan.");
-          await fetchBookings();
-          await loadTransactions();
-        },
-        onError: () => {
-          setPayError("Pembayaran gagal atau dibatalkan oleh sistem pembayaran.");
-        },
-        onClose: () => {
-          setPayingId(null);
-        },
-      });
-    } catch (err: unknown) {
-      setPayError(getApiErrorMessage(err));
-      setPayingId(null);
-    }
-  };
-
-  const handleSubmitReview = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedReviewBooking) return;
-    setSubmittingReview(true);
-    setReviewError(null);
-    try {
-      await createReview({
-        reservasiId: selectedReviewBooking.id,
-        rating: reviewRating,
-        komentar: reviewComment.trim() || undefined,
-      });
-      setReviewSuccessMsg("Terima kasih! Ulasan Anda berhasil dikirim.");
-      setSelectedReviewBooking(null);
-      setReviewComment("");
-      await fetchBookings();
-    } catch (err: unknown) {
-      setReviewError(getApiErrorMessage(err));
-    } finally {
-      setSubmittingReview(false);
-    }
+  const getPinDigits = (code: string) => {
+    const clean = code.replace(/\D/g, "");
+    if (clean.length >= 4) return clean.slice(-4).split("");
+    const hash = code.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return String(Math.abs(hash % 9000) + 1000).split("");
   };
 
   const handleDownloadFullPass = (ticket: Reservation) => {
@@ -236,14 +211,14 @@ export default function MemberDashboardPage() {
     ctx.fillRect(0, 0, 600, 800);
 
     const grad = ctx.createLinearGradient(0, 0, 600, 160);
-    grad.addColorStop(0, "#0D5C63");
-    grad.addColorStop(1, "#0A2F35");
+    grad.addColorStop(0, "#006370");
+    grad.addColorStop(1, "#004f59");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 600, 160);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText("WORKNEST SMART PASS", 40, 55);
+    ctx.fillText("WORKNEST ACCESS PASS", 40, 55);
 
     ctx.font = "14px sans-serif";
     ctx.fillStyle = "#BCE3DE";
@@ -291,76 +266,68 @@ export default function MemberDashboardPage() {
     img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
   };
 
-  const getPinDigits = (code: string) => {
-    const clean = code.replace(/\D/g, "");
-    if (clean.length >= 4) return clean.slice(-4).split("");
-    const hash = code.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return String(Math.abs(hash % 9000) + 1000).split("");
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Top Breadcrumb & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span>Dashboard</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span>Member</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-slate-700 font-medium">Tiket &amp; Akses</span>
+    <div className="space-y-8 pb-16">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <span>PORTAL MEMBER</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500 font-sans font-normal">
+              Tiket Digital &amp; Akses Ruangan
+            </span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
             Tiket Saya &amp; Akses Aktif
           </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Akses QR code tiket masuk digital, PIN keypad pintu fisik, dan kelola seluruh reservasi ruang kerja Anda.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{activeReservations.length} Akses Aktif Sekarang</span>
+            <span>{activeReservations.length} Akses Aktif</span>
           </div>
           <button
             type="button"
-            onClick={fetchBookings}
+            onClick={() => fetchBookings(true)}
             disabled={loading}
-            title="Perbarui Data"
-            className="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-[#0D5C63]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <span>Perbarui</span>
           </button>
+          <Link
+            href="/dashboard/member/spaces"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Pesan Ruangan</span>
+          </Link>
         </div>
       </div>
 
-      {/* Alert Notifications */}
       {cancelSuccessMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs">
+        <div className="p-4 rounded-xs bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{cancelSuccessMsg}</span>
           </div>
-          <button type="button" onClick={() => setCancelSuccessMsg(null)} className="font-bold">✕</button>
-        </div>
-      )}
-
-      {reviewSuccessMsg && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-emerald-800 text-xs">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{reviewSuccessMsg}</span>
-          </div>
-          <button type="button" onClick={() => setReviewSuccessMsg(null)} className="font-bold">✕</button>
+          <button type="button" onClick={() => setCancelSuccessMsg(null)} className="font-bold cursor-pointer">
+            &times;
+          </button>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
+        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* SECTION 1: CURRENT ACTIVE PASS */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
@@ -368,37 +335,36 @@ export default function MemberDashboardPage() {
               AKSES AKTIF SAAT INI
             </span>
             {currentActivePass && (
-              <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 font-mono font-bold text-[10px]">
+              <span className="px-2 py-0.5 rounded-xs bg-[#E6F4F2] text-[#006370] font-mono font-bold text-[10px] border border-[#BCE3DE]">
                 ID TIKET: {currentActivePass.qrCode}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
-            <Radio className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Pembaca NFC aktif di terminal pintu</span>
+          <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[11px]">
+            <Radio className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+            <span>Check-in QR &amp; PIN aktif di terminal</span>
           </div>
         </div>
 
         {loading ? (
-          <div className="p-16 text-center bg-white rounded-2xl border border-slate-200">
-            <Loader2 className="w-8 h-8 text-[#0D5C63] animate-spin mx-auto" />
+          <div className="p-16 text-center bg-white rounded-xs border border-slate-200 shadow-2xs">
+            <Loader2 className="w-8 h-8 text-[#006370] animate-spin mx-auto" />
             <p className="text-xs text-slate-400 mt-2 font-medium">Memuat tiket &amp; akses aktif...</p>
           </div>
         ) : currentActivePass ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-            {/* Left Col: Space Specs & Actions */}
+          <div className="bg-white rounded-xs border border-slate-200 shadow-2xs overflow-hidden grid grid-cols-1 lg:grid-cols-12">
             <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200 space-y-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#0D5C63]">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#006370]">
                     <Building2 className="w-4 h-4" />
                     <span>
-                      {currentActivePass.detailReservasi?.space?.owner?.namaCoworking || "WorkNest Hub"} • Lantai {((currentActivePass.detailReservasi?.space?.id || 1) % 4) + 1}
+                      {currentActivePass.detailReservasi?.space?.owner?.namaCoworking || "WorkNest Hub"}
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    SmartLock v4
+                    Tiket Aktif
                   </span>
                 </div>
 
@@ -407,72 +373,61 @@ export default function MemberDashboardPage() {
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xl">
                   {currentActivePass.detailReservasi?.space?.deskripsi ||
-                    "Ruang kerja terdedikasi dengan koneksi fiber optik berkecepatan tinggi dan telemetri akses pintu pintar aktif."}
+                    "Ruang kerja terdedikasi dengan koneksi internet berkecepatan tinggi dan akses pintu otomatis."}
                 </p>
 
-                {/* 4 Attributes in 2x2 grid */}
                 <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                  <div className="p-3 bg-slate-50 rounded-xs border border-slate-200/80 space-y-0.5">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                       WAKTU SESI
                     </p>
-                    <p className="text-xs sm:text-sm font-bold text-slate-900">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 font-mono">
                       {currentActivePass.jamMulai} WIB
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      Durasi: Sesi {currentActivePass.durasiJam || 1} Jam
+                      Durasi: {currentActivePass.durasiJam || 1} Jam
                     </p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                  <div className="p-3 bg-slate-50 rounded-xs border border-slate-200/80 space-y-0.5">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                      STATUS KUNCI
+                      STATUS CHECK-IN
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-emerald-600 flex items-center gap-1">
-                      <Lock className="w-3.5 h-3.5" />
-                      Terhubung
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      QR Siap Digunakan
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      Sensor Unit #{currentActivePass.id}
+                      ID Reservasi #{currentActivePass.id}
                     </p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                  <div className="p-3 bg-slate-50 rounded-xs border border-slate-200/80 space-y-0.5">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                      JARINGAN WI-FI
+                      KODE TIKET
                     </p>
-                    <p className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1">
-                      <Wifi className="w-3.5 h-3.5 text-[#0D5C63]" />
-                      WorkNest-WiFi
+                    <p className="text-xs sm:text-sm font-bold text-[#006370] font-mono">
+                      {currentActivePass.qrCode}
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      Sandi: nest{currentActivePass.qrCode.slice(-4)}
+                      Tunjukkan di frontdesk
                     </p>
                   </div>
 
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-0.5">
+                  <div className="p-3 bg-slate-50 rounded-xs border border-slate-200/80 space-y-0.5">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                      PERAN PENGGUNA
+                      KAPASITAS
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-slate-900">
-                      Pemegang Akses Utama
+                      {currentActivePass.detailReservasi?.space?.kapasitas || 1} Kursi
                     </p>
-                    <p className="text-[10px] text-slate-500">
-                      Maks. {currentActivePass.detailReservasi?.space?.kapasitas || 1} Orang
+                    <p className="text-[10px] text-slate-500 uppercase font-mono">
+                      {currentActivePass.detailReservasi?.space?.tipe || "ROOM"}
                     </p>
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                  <Link
-                    href={`/spaces/${currentActivePass.detailReservasi?.space?.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 shadow-2xs transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-[#0D5C63]" />
-                    <span>Tambah +1 Jam</span>
-                  </Link>
-
                   <button
                     type="button"
                     onClick={() => {
@@ -482,16 +437,16 @@ export default function MemberDashboardPage() {
                       setShareSuccess(true);
                       setTimeout(() => setShareSuccess(false), 2500);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xs text-xs font-semibold text-slate-700 shadow-2xs transition-colors cursor-pointer"
                   >
                     <Share2 className="w-3.5 h-3.5 text-slate-500" />
-                    <span>{shareSuccess ? "Kunci Berhasil Disalin!" : "Bagikan Kunci ke Tamu"}</span>
+                    <span>{shareSuccess ? "Kunci Berhasil Disalin!" : "Bagikan Kunci Akses"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setCancelTargetId(currentActivePass.id)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg text-xs font-semibold text-rose-600 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-xs text-xs font-semibold text-rose-600 transition-colors cursor-pointer"
                   >
                     <XCircle className="w-3.5 h-3.5" />
                     <span>Batalkan Reservasi</span>
@@ -499,44 +454,23 @@ export default function MemberDashboardPage() {
                 </div>
               </div>
 
-              {/* NFC Banner */}
-              <div className="p-3 bg-[#E6F4F2] border border-[#BCE3DE] rounded-xl flex items-center justify-between text-xs text-[#0D5C63]">
+              <div className="p-3 bg-[#E6F4F2]/50 border border-[#BCE3DE] rounded-xs flex items-center justify-between text-xs text-[#006370]">
                 <div className="flex items-center gap-2">
-                  <Radio className="w-4 h-4 text-[#0D5C63]" />
-                  <span>Tempelkan kartu member fisik atau dekatkan smartphone sekitar 5 cm dari pemindai sensor pintu.</span>
+                  <QrCode className="w-4 h-4 text-[#006370]" />
+                  <span>Tunjukkan QR Code di samping kepada resepsionis saat tiba di lokasi untuk konfirmasi kedatangan.</span>
                 </div>
-                <span className="font-mono font-bold text-[11px] uppercase tracking-wider shrink-0 bg-white/70 px-2 py-0.5 rounded">
-                  SIAP NFC
-                </span>
               </div>
             </div>
 
-            {/* Right Col: Dynamic QR & Keypad PIN */}
             <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col items-center justify-between text-center bg-slate-50/50 space-y-5">
-              {/* Progress & Remaining Time */}
-              <div className="w-full space-y-1">
-                <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-[#0D5C63]" />
-                    Sisa Waktu Sesi
-                  </span>
-                  <span className="font-bold text-slate-900">Sesi Sedang Berjalan</span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#0D5C63] rounded-full w-3/4" />
-                </div>
-              </div>
-
-              {/* QR Code */}
               <div
                 onClick={() => setSelectedTicket(currentActivePass)}
                 title="Klik untuk memperbesar tiket"
-                className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-[#0D5C63] transition-all flex flex-col items-center"
+                className="p-4 bg-white rounded-xs border border-slate-200 shadow-2xs cursor-pointer hover:border-[#006370] transition-all flex flex-col items-center"
               >
                 <QrCodeCard value={currentActivePass.qrCode} size={150} showCopy={false} />
               </div>
 
-              {/* Door Keypad Backup PIN */}
               <div className="w-full space-y-2">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                   PIN CADANGAN KEYPAD PINTU FISIK
@@ -545,7 +479,7 @@ export default function MemberDashboardPage() {
                   {getPinDigits(currentActivePass.qrCode).map((digit, idx) => (
                     <div
                       key={idx}
-                      className="w-9 h-10 rounded-lg bg-white border border-slate-300 font-mono font-bold text-lg text-slate-900 flex items-center justify-center shadow-2xs"
+                      className="w-9 h-10 rounded-xs bg-white border border-slate-300 font-mono font-bold text-lg text-slate-900 flex items-center justify-center shadow-2xs"
                     >
                       {digit}
                     </div>
@@ -558,20 +492,17 @@ export default function MemberDashboardPage() {
                       setTimeout(() => setCopiedPin(false), 2000);
                     }}
                     title="Salin PIN"
-                    className="p-2 bg-white border border-slate-200 hover:border-slate-300 rounded-lg text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-2xs"
+                    className="p-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xs text-slate-500 hover:text-slate-800 transition-colors cursor-pointer shadow-2xs"
                   >
                     {copiedPin ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-400 font-mono">
-                  Diperbarui otomatis • Standar Keamanan ISO-14443 Tipe A
-                </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-slate-200 space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#E6F4F2] text-[#0D5C63] flex items-center justify-center mx-auto border border-[#BCE3DE]">
+          <div className="p-8 sm:p-12 text-center bg-white rounded-xs border border-slate-200 space-y-4 shadow-2xs">
+            <div className="w-12 h-12 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center mx-auto border border-[#BCE3DE]">
               <QrCode className="w-6 h-6" />
             </div>
             <div className="space-y-1 max-w-sm mx-auto">
@@ -579,12 +510,12 @@ export default function MemberDashboardPage() {
                 Tidak Ada Akses Aktif Saat Ini
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Anda belum memiliki tiket akses yang aktif saat ini. Pesan ruangan baru atau buka jadwal mendatang untuk mengakses kunci digital Anda.
+                Anda belum memiliki tiket akses yang aktif. Pesan ruangan baru untuk mendapatkan kunci digital &amp; PIN Anda.
               </p>
             </div>
             <Link
-              href="/spaces"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+              href="/dashboard/member/spaces"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs shadow-2xs transition-colors"
             >
               <span>Jelajahi Ruangan</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -593,23 +524,22 @@ export default function MemberDashboardPage() {
         )}
       </div>
 
-      {/* SECTION 2: UPCOMING BOOKINGS */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="font-serif text-xl font-bold text-slate-900">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div>
+            <h2 className="font-serif text-lg font-bold text-slate-900">
               Reservasi Mendatang
             </h2>
-            <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold border border-slate-200">
-              {upcomingReservations.length} Terjadwal
-            </span>
+            <p className="text-xs text-slate-500">
+              Jadwal pemesanan ruang kerja yang siap digunakan
+            </p>
           </div>
           <Link
-            href="/spaces"
-            className="text-xs font-semibold text-[#0D5C63] hover:underline flex items-center gap-1"
+            href="/dashboard/member/spaces"
+            className="text-xs font-semibold text-[#006370] hover:underline flex items-center gap-1"
           >
             <span>Pesan ruangan lain</span>
-            <ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -618,13 +548,17 @@ export default function MemberDashboardPage() {
             {upcomingReservations.map((res) => {
               const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
               const space = res.detailReservasi?.space;
-              const isConfirmed = res.status?.toLowerCase() === "disetujui";
+              const isConfirmed =
+                res.status?.toLowerCase() === "disetujui" ||
+                res.status?.toLowerCase() === "aktif" ||
+                res.transaksi?.statusPembayaran === "lunas" ||
+                transactions[res.id]?.statusPembayaran === "lunas";
               const pin = getPinDigits(res.qrCode).join("");
 
               return (
                 <div
                   key={res.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 hover:shadow-md transition-shadow flex flex-col justify-between"
+                  className="bg-white rounded-xs border border-slate-200 p-5 space-y-4 shadow-2xs hover:border-slate-300 transition-colors flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
@@ -632,7 +566,7 @@ export default function MemberDashboardPage() {
                         #{res.qrCode.slice(0, 8)}
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-[10px] font-bold ${
                           isConfirmed
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : "bg-amber-50 text-amber-700 border border-amber-200"
@@ -644,18 +578,18 @@ export default function MemberDashboardPage() {
                     </div>
 
                     <div>
-                      <h3 className="font-serif text-lg font-semibold text-slate-900 line-clamp-1">
+                      <h3 className="font-serif text-base font-bold text-slate-900 line-clamp-1">
                         {space?.namaSpace || `Ruangan #${res.id}`}
                       </h3>
                       <p className="text-xs text-slate-500 line-clamp-1">
-                        {space?.owner?.namaCoworking || "Coworking Space"} • Lantai {((space?.id || 1) % 4) + 1}
+                        {space?.owner?.namaCoworking || "Coworking Space"}
                       </p>
                     </div>
 
                     <div className="space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
-                          <Calendar className="w-3.5 h-3.5 text-[#0D5C63]" />
+                          <Calendar className="w-3.5 h-3.5 text-[#006370]" />
                           {rawDate}
                         </span>
                         <span className="font-mono font-medium text-slate-800">
@@ -664,11 +598,11 @@ export default function MemberDashboardPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
-                          <User className="w-3.5 h-3.5 text-[#0D5C63]" />
+                          <User className="w-3.5 h-3.5 text-[#006370]" />
                           {space?.kapasitas || 1} Orang
                         </span>
-                        <span className="text-slate-700 truncate max-w-[120px]">
-                          {space?.tipe?.toUpperCase() || "FLEX"}
+                        <span className="text-slate-700 truncate max-w-[120px] uppercase font-mono text-[11px]">
+                          {space?.tipe || "FLEX"}
                         </span>
                       </div>
                     </div>
@@ -676,14 +610,14 @@ export default function MemberDashboardPage() {
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                     <span className="font-mono text-slate-500 text-[11px]">
-                      PIN Pintu: [{pin}]
+                      PIN: [{pin}]
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelectedTicket(res)}
-                      className="font-bold text-[#0D5C63] hover:underline cursor-pointer"
+                      className="font-bold text-[#006370] hover:underline cursor-pointer"
                     >
-                      Lihat Tiket Masuk
+                      Lihat Tiket
                     </button>
                   </div>
                 </div>
@@ -691,48 +625,26 @@ export default function MemberDashboardPage() {
             })}
           </div>
         ) : (
-          <div className="p-6 text-center bg-white rounded-xl border border-slate-200 text-xs text-slate-500">
+          <div className="p-6 text-center bg-white rounded-xs border border-slate-200 text-xs text-slate-500 shadow-2xs">
             Belum ada jadwal reservasi mendatang. Buka katalog untuk memesan ruangan.
           </div>
         )}
       </div>
 
-      {/* SECTION 3: PAST VISITS & UTILIZATION */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="font-serif text-xl font-bold text-slate-900">
-              Riwayat Kunjungan &amp; Penggunaan
-            </h2>
-            <p className="text-xs text-slate-500">
-              Menampilkan {pastReservations.length} transaksi terakhir
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {}}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-            >
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
-              <span>Filter</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {}}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-slate-400" />
-              <span>Ekspor CSV</span>
-            </button>
-          </div>
+        <div className="border-b border-slate-200 pb-3">
+          <h2 className="font-serif text-lg font-bold text-slate-900">
+            Riwayat Kunjungan &amp; Penggunaan
+          </h2>
+          <p className="text-xs text-slate-500">
+            Daftar seluruh sesi reservasi yang telah selesai atau dibatalkan
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xs border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/70 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4 font-bold">TANGGAL &amp; WAKTU</th>
                   <th className="py-3 px-4 font-bold">NAMA RUANGAN</th>
@@ -760,27 +672,27 @@ export default function MemberDashboardPage() {
                         </td>
                         <td className="py-3.5 px-4 font-semibold text-slate-900">
                           {space?.namaSpace || `Ruangan #${res.id}`}
-                          <span className="block text-[10px] text-slate-400 font-normal">
-                            {space?.tipe?.toUpperCase() || "ROOM"}
+                          <span className="block text-[10px] text-slate-400 font-normal uppercase font-mono">
+                            {space?.tipe || "ROOM"}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-slate-600">
                           {space?.owner?.namaCoworking || "WorkNest Hub"}
                         </td>
                         <td className="py-3.5 px-4 font-mono">
-                          {res.durasiJam || 1}.0 Jam
+                          {res.durasiJam || 1} Jam
                         </td>
                         <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
                           {formatRupiah(amount)}
                           <span className="block text-[10px] text-emerald-600 font-medium font-sans">
-                            • Lunas via {payment?.metodePembayaran || "Midtrans Gateway"}
+                            • Lunas
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-right">
                           <button
                             type="button"
                             onClick={() => setSelectedReceipt(res)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer border border-slate-200"
                           >
                             <FileText className="w-3 h-3 text-slate-500" />
                             <span>PDF</span>
@@ -802,24 +714,23 @@ export default function MemberDashboardPage() {
         </div>
       </div>
 
-      {/* TICKET POPUP MODAL */}
       {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden border border-slate-200 shadow-2xl space-y-0">
-            <div className="bg-[#0D5C63] text-white p-5 space-y-1 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xs max-w-md w-full overflow-hidden border border-slate-200 shadow-2xl space-y-0 animate-in fade-in zoom-in-95">
+            <div className="bg-[#006370] text-white p-5 space-y-1 relative">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-xs">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-xs">
                   Tiket Masuk Digital
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedTicket(null)}
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center font-bold text-sm cursor-pointer"
+                  className="p-1 text-white hover:bg-white/20 rounded-xs cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
-              <h3 className="text-lg font-bold pt-1">
+              <h3 className="text-base font-bold pt-1">
                 {selectedTicket.detailReservasi?.space?.namaSpace}
               </h3>
               <p className="text-xs text-[#BCE3DE]">
@@ -828,24 +739,24 @@ export default function MemberDashboardPage() {
             </div>
 
             <div className="p-6 space-y-5 text-center">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 inline-block">
+              <div className="p-4 bg-slate-50 rounded-xs border border-slate-200 inline-block">
                 <QrCodeCard
                   value={selectedTicket.qrCode}
-                  size={190}
+                  size={180}
                   showDownload={true}
                   label="Pindai Barcode di Terminal Pintu"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3 text-left bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+              <div className="grid grid-cols-2 gap-3 text-left bg-slate-50 p-4 rounded-xs border border-slate-200 text-xs">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Tanggal</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block font-mono">Tanggal</span>
                   <span className="font-bold text-slate-900">
                     {selectedTicket.tanggalReservasi ? selectedTicket.tanggalReservasi.split("T")[0] : "-"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Waktu Sesi</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase block font-mono">Waktu Sesi</span>
                   <span className="font-bold text-slate-900">
                     {selectedTicket.jamMulai} WIB ({selectedTicket.durasiJam || 1} Jam)
                   </span>
@@ -855,9 +766,9 @@ export default function MemberDashboardPage() {
               <button
                 type="button"
                 onClick={() => handleDownloadFullPass(selectedTicket)}
-                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xs shadow-2xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Download className="w-4 h-4 text-cyan-400" />
+                <Download className="w-4 h-4 text-[#BCE3DE]" />
                 <span>Unduh E-Pass Digital HD (PNG)</span>
               </button>
             </div>
@@ -865,25 +776,24 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
-      {/* RECEIPT / INVOICE MODAL */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xs max-w-lg w-full p-6 border border-slate-200 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Receipt className="w-5 h-5 text-[#0D5C63]" />
-                <h3 className="text-base font-bold text-slate-900">Faktur &amp; Bukti Pembayaran Resmi</h3>
+                <Receipt className="w-5 h-5 text-[#006370]" />
+                <h3 className="font-serif text-base font-bold text-slate-900">Faktur &amp; Bukti Pembayaran Resmi</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedReceipt(null)}
-                className="text-slate-400 hover:text-slate-700 font-bold cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2 text-xs">
+            <div className="p-4 bg-slate-50 rounded-xs border border-slate-200 space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-500">Nomor Faktur:</span>
                 <span className="font-mono font-bold text-slate-900">INV-{selectedReceipt.qrCode}</span>
@@ -906,7 +816,7 @@ export default function MemberDashboardPage() {
               </div>
             </div>
 
-            <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+            <div className="border border-slate-200 rounded-xs overflow-hidden text-xs">
               <div className="bg-slate-50 p-3 font-bold text-slate-700 border-b border-slate-200 grid grid-cols-12">
                 <span className="col-span-6">Item Ruangan</span>
                 <span className="col-span-2 text-center">Durasi</span>
@@ -929,7 +839,7 @@ export default function MemberDashboardPage() {
 
               <div className="p-3 bg-slate-50 border-t border-slate-200 grid grid-cols-12 text-slate-900 font-bold text-sm">
                 <span className="col-span-6">Total Pembayaran</span>
-                <span className="col-span-6 text-right font-mono text-[#0D5C63]">
+                <span className="col-span-6 text-right font-mono text-[#006370]">
                   {formatRupiah(selectedReceipt.detailReservasi?.totalHarga || 0)}
                 </span>
               </div>
@@ -939,7 +849,7 @@ export default function MemberDashboardPage() {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="py-2 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2 px-4 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold rounded-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
                 <Printer className="w-3.5 h-3.5" />
                 <span>Cetak Faktur</span>
@@ -949,24 +859,23 @@ export default function MemberDashboardPage() {
         </div>
       )}
 
-      {/* CANCEL MODAL */}
       {cancelTargetId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
-              <XCircle className="w-7 h-7" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white rounded-xs max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+              <XCircle className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900">Batalkan Reservasi Ini?</h3>
+              <h3 className="font-serif text-base font-bold text-slate-900">Batalkan Reservasi?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Tiket akses ruangan ini akan dinonaktifkan dan hak akses pintu fisik akan dicabut otomatis.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-2.5 pt-2">
+            <div className="grid grid-cols-2 gap-2.5 pt-1">
               <button
                 type="button"
                 onClick={() => setCancelTargetId(null)}
-                className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Kembali
               </button>
@@ -974,7 +883,7 @@ export default function MemberDashboardPage() {
                 type="button"
                 onClick={handleConfirmCancel}
                 disabled={cancelling}
-                className="py-2.5 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shadow-2xs"
               >
                 {cancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Ya, Batalkan</span>}
               </button>

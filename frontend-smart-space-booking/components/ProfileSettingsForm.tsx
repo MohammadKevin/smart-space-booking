@@ -78,8 +78,8 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
         setErrorMessage("Nomor telepon harus berformat Indonesia (diawali 08, 62, atau +62).");
         return;
       }
-      if (cleanTelp.replace(/\D/g, "").length < 12) {
-        setErrorMessage("Nomor telepon minimal 12 digit.");
+      if (cleanTelp.replace(/\D/g, "").length < 10) {
+        setErrorMessage("Nomor telepon minimal 10 digit.");
         return;
       }
     }
@@ -189,7 +189,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
 
             <div className="p-4 rounded-xl bg-slate-900 text-white space-y-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-400 text-slate-950 uppercase tracking-wide">
+                <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#006370] text-white uppercase tracking-wide">
                   Platform CEO & Administrator
                 </span>
                 <span className="text-xs text-slate-300 font-mono">{user?.email}</span>
@@ -238,7 +238,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={nama}
                     onChange={(e) => setNama(e.target.value)}
                     placeholder="Nama lengkap Anda"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -256,7 +256,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={namaCoworking}
                       onChange={(e) => setNamaCoworking(e.target.value)}
                       placeholder="Contoh: SpaceWorks Hub Surabaya"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -274,7 +274,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={instansi}
                       onChange={(e) => setInstansi(e.target.value)}
                       placeholder="Nama instansi atau Umum / Personal"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -289,11 +289,11 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   <input
                     type="tel"
                     required
-                    minLength={12}
+                    minLength={10}
                     value={telp}
                     onChange={(e) => setTelp(e.target.value)}
-                    placeholder="081234567890 (min. 12 digit)"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
+                    placeholder="081234567890"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={alamat}
                       onChange={(e) => setAlamat(e.target.value)}
                       placeholder="Alamat jalan, gedung, atau kota domisili"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -341,7 +341,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nama@email.com"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
                 />
               </div>
             </div>
@@ -361,7 +361,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="Kata sandi lama"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -382,7 +382,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min. 6 karakter"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -403,7 +403,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Ulangi sandi baru"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white text-xs font-semibold rounded-lg shadow-xs shadow-cyan-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            className="px-4 py-2.5 bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] text-white text-xs font-semibold rounded-[10px] shadow-sm shadow-[#006370]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
           >
             {loading ? (
               <>

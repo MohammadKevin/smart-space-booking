@@ -283,36 +283,11 @@ export class MidtransService {
           }
         } catch {}
       }
-    } catch {}
 
-    const bankTag = method.includes('bri')
-      ? 'BRI'
-      : method.includes('bca')
-      ? 'BCA'
-      : method.includes('bni')
-      ? 'BNI'
-      : method.includes('mandiri')
-      ? 'MANDIRI'
-      : method.includes('permata')
-      ? 'PERMATA'
-      : 'BANK';
-
-    return {
-      success: true,
-      transactionId: orderId,
-      orderId,
-      grossAmount,
-      paymentType: payload.payment_type,
-      paymentMethod: method,
-      bank: bankTag,
-      vaNumber: `88012${Math.floor(100000000 + Math.random() * 900000000)}`,
-      billerCode: method.includes('mandiri') ? '70012' : null,
-      billKey: method.includes('mandiri') ? `${Math.floor(10000000 + Math.random() * 90000000)}` : null,
-      paymentCode: `${Math.floor(1000000000 + Math.random() * 9000000000)}`,
-      qrString: `00020101021226590014ID.LINKAJA.WWW0118936000000000000000${Math.floor(100000 + Math.random() * 900000)}5204581253033605406${grossAmount}5802ID5912WORKNEST6007JAKARTA62070703A016304`,
-      qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('WORKNEST-QRIS-' + orderId)}`,
-      expiryTime: new Date(Date.now() + 24 * 3600000).toISOString(),
-    };
+      throw new Error(resData.status_message || 'Gagal memproses charge payment gateway Midtrans.');
+    } catch (err: any) {
+      throw err;
+    }
   }
 
   private formatDirectPaymentResponse(

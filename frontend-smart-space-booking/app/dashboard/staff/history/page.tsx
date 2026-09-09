@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getAllBookings,
   updateReservationStatus,
+  processCheckIn,
   Reservation,
-  ReservationStatus,
   getApiErrorMessage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -26,9 +26,9 @@ import {
   Building,
 } from "lucide-react";
 
-export default function OwnerReservationsPage() {
+export default function StaffReservationHistoryPage() {
   const { user } = useAuth();
-  const [realReservations, setRealReservations] = useState<Reservation[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +44,7 @@ export default function OwnerReservationsPage() {
     setError(null);
     try {
       const data = await getAllBookings();
-      setRealReservations(Array.isArray(data) ? data : []);
+      setReservations(Array.isArray(data) ? data : []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -56,12 +56,15 @@ export default function OwnerReservationsPage() {
     fetchReservations();
   }, [fetchReservations]);
 
-  const handleStatusChange = async (numericId: number, newStatus: ReservationStatus) => {
-    setActionLoadingId(numericId);
+  const handleManualCheckIn = async (qrCode: string, id: number) => {
+    setActionLoadingId(id);
     setActionSuccess(null);
     try {
-      await updateReservationStatus(numericId, newStatus);
-      setActionSuccess(`Status reservasi #${numericId} berhasil diperbarui menjadi ${newStatus}.`);
+      await processCheckIn({
+        qrCode,
+        action: "checkin",
+      });
+      setActionSuccess(`Check-in reservasi #${id} (${qrCode}) berhasil divalidasi.`);
       await fetchReservations();
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -71,7 +74,7 @@ export default function OwnerReservationsPage() {
   };
 
   const filteredItems = useMemo(() => {
-    return realReservations.filter((item) => {
+    return reservations.filter((item) => {
       if (activeTab !== "all" && item.status !== activeTab) {
         return false;
       }
@@ -91,34 +94,28 @@ export default function OwnerReservationsPage() {
       }
       return true;
     });
-  }, [realReservations, activeTab, searchQuery]);
+  }, [reservations, activeTab, searchQuery]);
 
   const counts = useMemo(() => {
     return {
-      all: realReservations.length,
-      pending: realReservations.filter((i) => i.status === "pending").length,
-      aktif: realReservations.filter((i) => i.status === "aktif").length,
-      selesai: realReservations.filter((i) => i.status === "selesai").length,
-      dibatalkan: realReservations.filter((i) => i.status === "dibatalkan").length,
+      all: reservations.length,
+      pending: reservations.filter((i) => i.status === "pending").length,
+      aktif: reservations.filter((i) => i.status === "aktif").length,
+      selesai: reservations.filter((i) => i.status === "selesai").length,
+      dibatalkan: reservations.filter((i) => i.status === "dibatalkan").length,
     };
-  }, [realReservations]);
-
-  const totalRevenue = useMemo(() => {
-    return realReservations
-      .filter((r) => r.transaksi?.statusPembayaran === "lunas" || r.status === "selesai")
-      .reduce((acc, curr) => acc + (curr.detailReservasi?.totalHarga || 0), 0);
-  }, [realReservations]);
+  }, [reservations]);
 
   const handleExportCsv = () => {
-    const headers = "ID,Tanggal,Member,Ruangan,Mulai,Durasi Jam,Total Harga,Status,Status Pembayaran\n";
+    const headers = "ID,Tanggal,Member,Telepon,Ruangan,Mulai,Durasi Jam,Status,Status Pembayaran,QR Code\n";
     const rows = filteredItems
       .map((r) => {
         const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
         const member = r.member?.namaMember || "Member";
+        const telp = r.member?.telp || "-";
         const space = r.detailReservasi?.space?.namaSpace || "Ruangan";
-        const total = r.detailReservasi?.totalHarga || 0;
         const payment = r.transaksi?.statusPembayaran || "belum_bayar";
-        return `"${r.id}","${date}","${member}","${space}","${r.jamMulai}",${r.durasiJam},${total},"${r.status}","${payment}"`;
+        return `"${r.id}","${date}","${member}","${telp}","${space}","${r.jamMulai}",${r.durasiJam},"${r.status}","${payment}","${r.qrCode}"`;
       })
       .join("\n");
 
@@ -126,31 +123,31 @@ export default function OwnerReservationsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `worknest-reservasi-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `worknest-staff-log-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="space-y-6 text-slate-900 pb-16">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <div className="space-y-6 pb-16">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
-            <span>WORKSPACE OWNER</span>
+            <span>TERMINAL FRONTDESK</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
-              Buku Reservasi &amp; Validasi Sesi
+              Buku Log &amp; Riwayat Tamu
             </span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-            Manajemen Reservasi Tamu
+            Log Reservasi &amp; Tamu
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Pantau reservasi ruangan masuk secara real-time, jadwal sewa, status pembayaran, dan validasi check-in member.
+            Arsip lengkap seluruh pemesanan ruang kerja, data tamu yang hadir, dan rekonsiliasi status check-in.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap self-start lg:self-auto">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
           <button
             type="button"
             onClick={fetchReservations}
@@ -213,66 +210,57 @@ export default function OwnerReservationsPage() {
             </span>
             <Calendar className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 font-mono">
-              {counts.all}
-            </span>
-            <span className="text-xs text-slate-500 font-medium font-sans">Sesi</span>
+          <div className="text-2xl font-bold text-slate-900 font-mono">
+            {counts.all}
           </div>
-          <div className="text-[11px] text-slate-400">
-            Akumulasi seluruh pemesanan
-          </div>
+          <p className="text-[11px] text-slate-500">
+            Sesi tercatat pada venue
+          </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              RESERVASI AKTIF
+              SESI AKTIF
             </span>
             <Users className="w-4 h-4 text-[#006370]" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[#006370] font-mono">
-              {counts.aktif}
-            </span>
-            <span className="text-xs text-slate-500 font-medium font-sans">Sedang Berlangsung</span>
+          <div className="text-2xl font-bold text-[#006370] font-mono">
+            {counts.aktif}
           </div>
-          <div className="text-[11px] text-emerald-600 font-medium">
-            Tamu telah check-in di ruangan
-          </div>
+          <p className="text-[11px] text-emerald-600 font-medium">
+            Tamu sedang berada di ruangan
+          </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              MENUNGGU KONFIRMASI
+              MENUNGGU VERIFIKASI
             </span>
             <Clock className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-amber-600 font-mono">
-              {counts.pending}
-            </span>
-            <span className="text-xs text-slate-500 font-medium font-sans">Pending</span>
+          <div className="text-2xl font-bold text-amber-600 font-mono">
+            {counts.pending}
           </div>
-          <div className="text-[11px] text-slate-400">
-            Perlu verifikasi pembayaran
-          </div>
+          <p className="text-[11px] text-slate-500">
+            Belum divalidasi staf
+          </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              PENDAPATAN TERSELESAIKAN
+              SESI SELESAI
             </span>
             <Building className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-xl font-bold text-slate-900 font-mono">
-            {formatRupiah(totalRevenue)}
+          <div className="text-2xl font-bold text-slate-900 font-mono">
+            {counts.selesai}
           </div>
-          <div className="text-[11px] text-slate-400">
-            {counts.selesai} sesi selesai
-          </div>
+          <p className="text-[11px] text-slate-500">
+            Reservasi selesai
+          </p>
         </div>
       </div>
 
@@ -327,30 +315,29 @@ export default function OwnerReservationsPage() {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-[10px] font-mono font-bold uppercase text-slate-400 bg-slate-50/80">
-                <th className="py-3 px-3">KODE RESERVASI</th>
+                <th className="py-3 px-3">KODE TIKET</th>
                 <th className="py-3 px-3">TAMU / MEMBER</th>
                 <th className="py-3 px-3">RUANGAN</th>
-                <th className="py-3 px-3">JADWAL SEWA</th>
-                <th className="py-3 px-3">TOTAL BIAYA</th>
-                <th className="py-3 px-3">STATUS RESERVASI</th>
+                <th className="py-3 px-3">JADWAL</th>
+                <th className="py-3 px-3">STATUS SESI</th>
                 <th className="py-3 px-3 text-right">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-[#006370]" />
-                    <span>Memuat data reservasi...</span>
+                    <span>Memuat log reservasi...</span>
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <Calendar className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                     <p className="font-semibold text-slate-700">Belum ada data reservasi</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      Reservasi yang dilakukan oleh member akan muncul di tabel ini.
+                      Reservasi tamu akan muncul di tabel log ini.
                     </p>
                   </td>
                 </tr>
@@ -360,7 +347,6 @@ export default function OwnerReservationsPage() {
                   const memberName = r.member?.namaMember || `Member #${r.memberId}`;
                   const roomName = space?.namaSpace || `Ruang #${r.id}`;
                   const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
-                  const total = r.detailReservasi?.totalHarga || 0;
                   const isPending = r.status === "pending";
                   const isAktif = r.status === "aktif";
                   const isSelesai = r.status === "selesai";
@@ -372,45 +358,23 @@ export default function OwnerReservationsPage() {
                         <div className="font-mono font-bold text-slate-900">
                           #{r.id}
                         </div>
-                        <span className="text-[10px] font-mono text-slate-400">
+                        <span className="text-[10px] font-mono text-[#006370] font-bold">
                           {r.qrCode || "QR-PENDING"}
                         </span>
                       </td>
 
                       <td className="py-3.5 px-3">
-                        <div className="font-semibold text-slate-900">{memberName}</div>
-                        <div className="text-[10px] text-slate-400">
-                          {r.member?.instansi || r.member?.telp || "-"}
-                        </div>
+                        <p className="font-semibold text-slate-900">{memberName}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">{r.member?.telp || "-"}</p>
                       </td>
 
-                      <td className="py-3.5 px-3">
-                        <div className="font-semibold text-slate-900">{roomName}</div>
-                        <div className="text-[10px] text-slate-400">
-                          {space?.kapasitas ? `${space.kapasitas} Kursi` : "-"}
-                        </div>
+                      <td className="py-3.5 px-3 font-medium text-slate-700">
+                        {roomName}
                       </td>
 
-                      <td className="py-3.5 px-3">
-                        <div className="font-medium text-slate-800">{date}</div>
-                        <div className="text-[10px] text-slate-500 font-mono">
-                          {r.jamMulai} WIB &bull; {r.durasiJam} Jam
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-3">
-                        <div className="font-mono font-bold text-slate-900">
-                          {formatRupiah(total)}
-                        </div>
-                        <span
-                          className={`inline-block px-1.5 py-0.2 rounded-xs text-[9px] font-bold ${
-                            r.transaksi?.statusPembayaran === "lunas"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-amber-50 text-amber-700 border border-amber-200"
-                          }`}
-                        >
-                          {r.transaksi?.statusPembayaran === "lunas" ? "Lunas" : "Belum Lunas"}
-                        </span>
+                      <td className="py-3.5 px-3 font-mono">
+                        <p className="font-semibold text-slate-900">{date}</p>
+                        <p className="text-[10px] text-slate-400">{r.jamMulai} WIB ({r.durasiJam} Jam)</p>
                       </td>
 
                       <td className="py-3.5 px-3">
@@ -420,7 +384,7 @@ export default function OwnerReservationsPage() {
                           </span>
                         )}
                         {isAktif && (
-                          <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 w-fit">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 font-semibold text-[10px] border border-emerald-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Aktif
                           </span>
@@ -448,34 +412,13 @@ export default function OwnerReservationsPage() {
                         </button>
 
                         {isPending && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(r.id, "aktif")}
-                              disabled={actionLoadingId === r.id}
-                              className="px-2.5 py-1 rounded-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10px] transition-colors cursor-pointer disabled:opacity-50"
-                            >
-                              Konfirmasi
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleStatusChange(r.id, "dibatalkan")}
-                              disabled={actionLoadingId === r.id}
-                              className="px-2.5 py-1 rounded-xs border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-[10px] transition-colors cursor-pointer disabled:opacity-50"
-                            >
-                              Tolak
-                            </button>
-                          </>
-                        )}
-
-                        {isAktif && (
                           <button
                             type="button"
-                            onClick={() => handleStatusChange(r.id, "selesai")}
+                            onClick={() => handleManualCheckIn(r.qrCode, r.id)}
                             disabled={actionLoadingId === r.id}
                             className="px-2.5 py-1 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white font-semibold text-[10px] transition-colors cursor-pointer disabled:opacity-50"
                           >
-                            Selesaikan
+                            {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Validasi Check-In"}
                           </button>
                         )}
                       </td>
@@ -516,8 +459,8 @@ export default function OwnerReservationsPage() {
                   <strong className="text-slate-900">{selectedDetail.member?.namaMember || "Member"}</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Instansi / Kontak:</span>
-                  <span className="text-slate-700">{selectedDetail.member?.instansi || selectedDetail.member?.telp || "-"}</span>
+                  <span className="text-slate-400">Nomor Telepon:</span>
+                  <span className="text-slate-700 font-mono">{selectedDetail.member?.telp || "-"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Ruangan:</span>

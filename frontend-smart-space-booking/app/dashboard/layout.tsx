@@ -18,22 +18,17 @@ import {
   X,
   ShieldCheck,
   Loader2,
-  Activity,
   TicketPercent,
   CalendarClock,
-  ClipboardList,
   User,
   UserCog,
   ReceiptText,
-  Wallet,
   AlertCircle,
-  Radio,
-  Wifi,
   ChevronDown,
   Layers,
-  Sparkles,
   Ticket,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -47,6 +42,24 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loadingTimedOut, setLoadingTimedOut] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }) + " WIB"
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isLoading) {
@@ -80,6 +93,15 @@ export default function DashboardLayout({
         else if (role === "owner") router.replace("/dashboard/owner");
         else if (role === "staff") router.replace("/dashboard/staff");
         else router.replace("/dashboard/member");
+        return;
+      }
+
+      const isSharedRoute =
+        pathname.startsWith("/booking") ||
+        pathname.startsWith("/checkout") ||
+        pathname.startsWith("/spaces");
+
+      if (isSharedRoute) {
         return;
       }
 
@@ -126,7 +148,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-[#FDFBF7]">
         <div className="flex flex-col items-center gap-3 text-slate-500 max-w-xs text-center">
           {loadingTimedOut ? (
             <>
@@ -142,14 +164,14 @@ export default function DashboardLayout({
                     logoutUser();
                     router.push("/login");
                   }}
-                  className="px-4 py-2 bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xl transition-colors"
                 >
                   Login Ulang
                 </button>
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors"
                 >
                   Muat Ulang
                 </button>
@@ -157,7 +179,7 @@ export default function DashboardLayout({
             </>
           ) : (
             <>
-              <Loader2 className="w-6 h-6 text-[#0D5C63] animate-spin" />
+              <Loader2 className="w-6 h-6 text-[#006370] animate-spin" />
               <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
             </>
           )}
@@ -187,9 +209,9 @@ export default function DashboardLayout({
   };
 
   const isLinkActive = (href: string) => {
-    if (href === "/dashboard/owner") return pathname === "/dashboard/owner";
-    if (href === "/dashboard/member") return pathname === "/dashboard/member";
-    return pathname.startsWith(href);
+    if (pathname === href) return true;
+    if (href === "/dashboard/member/spaces" && (pathname === "/dashboard/member/spaces" || pathname === "/dashboard/member/space")) return true;
+    return false;
   };
 
   const handleLogout = () => {
@@ -198,61 +220,38 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50/70 text-slate-900 font-sans">
-      {/* Desktop Sidebar */}
+    <div className="min-h-screen flex bg-[#FDFBF7] text-slate-900 font-sans">
+      
       <aside className="hidden lg:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0 sticky top-0 h-screen z-30">
         <div className="flex flex-col h-full overflow-hidden">
-          {/* Sidebar Top Header */}
-          {role === "owner" ? (
-            <div className="p-3 border-b border-slate-200">
-              <div className="p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-slate-50/50 flex items-center justify-between cursor-pointer transition-colors">
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <div className="w-7 h-7 rounded-lg bg-[#E6F4F2] text-[#0D5C63] flex items-center justify-center shrink-0 border border-[#BCE3DE]">
-                    <Building2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="truncate text-left">
-                    <p className="text-xs font-bold text-slate-900 truncate">
-                      {user.spaceOwner?.namaCoworking || "Senopati Prime Suite"}
-                    </p>
-                    <p className="text-[10px] text-slate-400 truncate">
-                      {user.spaceOwner?.alamat || "Jakarta Selatan"}
-                    </p>
-                  </div>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          
+          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-xs bg-[#006370] flex items-center justify-center text-white shadow-xs">
+                <Building2 className="w-4 h-4" />
               </div>
-            </div>
-          ) : role === "member" ? (
-            <div className="h-14 px-4 flex items-center justify-between border-b border-slate-200 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                <span className="text-[11px] font-mono font-bold tracking-wider text-slate-700 uppercase">
-                  PORTAL V2.4
-                </span>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium">
-                IDN-MLG
-              </span>
-            </div>
-          ) : (
-            <div className="h-14 px-4 flex items-center border-b border-slate-200 shrink-0">
-              <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="w-7 h-7 rounded-lg bg-[#0D5C63] flex items-center justify-center text-white">
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <span className="font-extrabold text-slate-900 text-base tracking-tight">
+              <div>
+                <span className="font-serif font-bold text-slate-900 text-base tracking-tight block leading-none">
                   WorkNest
                 </span>
-              </Link>
-            </div>
-          )}
+                <span className="text-[10px] text-slate-400 font-medium tracking-wide block mt-0.5">
+                  {role === "super_admin"
+                    ? "Super Admin"
+                    : role === "owner"
+                    ? "Owner Portal"
+                    : role === "staff"
+                    ? "Staff Terminal"
+                    : "Member Portal"}
+                </span>
+              </div>
+            </Link>
+          </div>
 
-          {/* Nav List */}
           <div className="p-3.5 space-y-4 overflow-y-auto flex-1">
             {role === "owner" && (
               <div className="space-y-1">
                 <p className="px-2.5 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  KONSOL OPERASIONAL
+                  WORKSPACE OWNER
                 </p>
                 {[
                   { label: "Ringkasan", href: "/dashboard/owner", icon: LayoutDashboard },
@@ -270,13 +269,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#E6F4F2] text-[#0D5C63] font-bold shadow-2xs"
+                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#0D5C63]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -286,12 +285,14 @@ export default function DashboardLayout({
 
             {role === "member" && (
               <div className="space-y-1">
+                <p className="px-2.5 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                  PORTAL MEMBER
+                </p>
                 {[
-                  { label: "Tiket Saya", href: "/dashboard/member", icon: Ticket },
-                  { label: "Transaksi Saya", href: "/dashboard/member/transactions", icon: ReceiptText },
-                  { label: "Jelajahi Ruangan", href: "/spaces", icon: Compass },
-                  { label: "Hub Tersimpan", href: "/spaces?saved=true", icon: Building2 },
-                  { label: "Profil & Pengaturan", href: "/dashboard/member/profile", icon: UserCog },
+                  { label: "Tiket & QR Akses", href: "/dashboard/member", icon: Ticket },
+                  { label: "Riwayat Transaksi", href: "/dashboard/member/transactions", icon: ReceiptText },
+                  { label: "Jelajahi Ruangan", href: "/dashboard/member/spaces", icon: Compass },
+                  { label: "Profil Saya", href: "/dashboard/member/profile", icon: UserCog },
                 ].map((item) => {
                   const Icon = item.icon;
                   const active = isLinkActive(item.href);
@@ -299,13 +300,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#D8F3F7] text-[#0E7490] font-bold shadow-2xs"
+                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#0E7490]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -331,13 +332,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
                         active
-                          ? "bg-slate-900 text-white font-bold"
+                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-white" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -348,12 +349,12 @@ export default function DashboardLayout({
             {role === "staff" && (
               <div className="space-y-1">
                 <p className="px-2.5 pb-1 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  KONSOL STAF
+                  TERMINAL FRONTDESK
                 </p>
                 {[
                   { label: "Terminal Check-In", href: "/dashboard/staff", icon: QrCode },
-                  { label: "Transaksi & Pembayaran", href: "/dashboard/owner/transactions", icon: ReceiptText },
-                  { label: "Pengaturan Akun", href: "/dashboard/staff/profile", icon: UserCog },
+                  { label: "Log Reservasi", href: "/dashboard/staff/history", icon: CalendarCheck },
+                  { label: "Profil Staf", href: "/dashboard/staff/profile", icon: UserCog },
                 ].map((item) => {
                   const Icon = item.icon;
                   const active = isLinkActive(item.href);
@@ -361,13 +362,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
                         active
-                          ? "bg-emerald-600 text-white font-bold"
+                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-white" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -375,117 +376,123 @@ export default function DashboardLayout({
               </div>
             )}
           </div>
-        </div>
 
-        {/* Sidebar Bottom Telemetry / User Card */}
-        <div className="p-3 border-t border-slate-200 bg-white space-y-2">
-          {role === "owner" ? (
-            <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-[11px] font-mono">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500">API Kunci Pintar</span>
-                <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Aktif
-                </span>
+          <div className="p-3 border-t border-slate-200 space-y-2">
+            <div className="flex items-center gap-2.5 p-2 rounded-xs bg-slate-50 border border-slate-100">
+              <div className="w-8 h-8 rounded-full bg-[#006370] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                {getInitials()}
               </div>
-              <p className="text-[10px] text-slate-400 mt-0.5">
-                Node: JKT-SEN-09 • Ping 19ms
-              </p>
-            </div>
-          ) : role === "member" ? (
-            <div>
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pb-2">
-                <span className="flex items-center gap-1">
-                  <Radio className="w-3 h-3 text-emerald-500" />
-                  NFC Hub
-                </span>
-                <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Terhubung
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5 pt-1">
-                <div className="w-8 h-8 rounded-full bg-[#0D5C63] text-white font-bold text-xs flex items-center justify-center shrink-0">
-                  {getInitials()}
-                </div>
-                <div className="truncate flex-1">
-                  <p className="text-xs font-bold text-slate-900 truncate">
-                    {getDisplayName()}
-                  </p>
-                  <p className="text-[10px] text-slate-400 truncate">
-                    Nomad Pro • #{user.id || 4819}
-                  </p>
-                </div>
+              <div className="truncate flex-1">
+                <p className="text-xs font-semibold text-slate-900 truncate">
+                  {getDisplayName()}
+                </p>
+                <p className="text-[10px] text-slate-400 truncate font-mono">
+                  {user.email}
+                </p>
               </div>
             </div>
-          ) : null}
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5 text-rose-500" />
-            <span>Keluar Akun</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xs transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-500" />
+              <span>Keluar Akun</span>
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navbar */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer"
+              className="lg:hidden p-1.5 rounded-xs text-slate-600 hover:bg-slate-100 cursor-pointer"
+              aria-label="Toggle Menu"
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[#0D5C63] flex items-center justify-center text-white">
+            <Link href="/" className="flex items-center gap-2 lg:hidden">
+              <div className="w-7 h-7 rounded-xs bg-[#006370] flex items-center justify-center text-white">
                 <Building2 className="w-3.5 h-3.5" />
               </div>
-              <span className="font-extrabold text-slate-900 text-sm tracking-tight hidden sm:inline">
+              <span className="font-serif font-bold text-slate-900 text-sm tracking-tight">
                 WorkNest
               </span>
             </Link>
-          </div>
 
-          <div className="hidden md:flex items-center gap-6 text-xs text-slate-600 font-medium">
-            <Link href="/spaces" className="hover:text-slate-900 transition-colors">Ruangan</Link>
-            <Link href="/#instant-rates" className="hover:text-slate-900 transition-colors">Tarif</Link>
-            <Link href="/register?role=owner" className="hover:text-slate-900 transition-colors">Pemilik Ruangan</Link>
-            <Link href="/#protocol" className="hover:text-slate-900 transition-colors">Tentang Kami</Link>
+            <div className="hidden lg:flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xs bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold shadow-2xs font-mono">
+                <Clock className="w-3.5 h-3.5 text-[#006370]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{currentTime || "00:00:00 WIB"}</span>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/spaces"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0D5C63] hover:bg-[#09474D] text-white text-xs font-semibold shadow-2xs transition-colors"
-            >
-              <span>Pesan Ruangan</span>
-            </Link>
-
-            <div className="w-8 h-8 rounded-full bg-[#0D5C63] text-white font-bold text-xs flex items-center justify-center">
-              {getInitials()}
-            </div>
+            {role === "owner" ? (
+              <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold text-xs shrink-0 border border-[#BCE3DE]">
+                  <Building className="w-4 h-4" />
+                </div>
+                <div className="hidden md:block text-left max-w-[240px]">
+                  <p className="text-xs font-bold text-slate-900 leading-tight truncate">
+                    {user.spaceOwner?.namaCoworking || "Coworking Space"}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-medium truncate flex items-center gap-1 mt-0.5">
+                    <span className="truncate">{user.spaceOwner?.alamat || "Mitra Resmi"}</span>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+                <div className="w-8 h-8 rounded-full bg-[#006370] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                  {getInitials()}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-xs font-bold text-slate-900 leading-tight">
+                    {getDisplayName()}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {role === "super_admin"
+                      ? "Super Admin"
+                      : role === "staff"
+                      ? "Staff Frontdesk"
+                      : "Member"}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Mobile Sidebar Dropdown */}
         {sidebarOpen && (
           <div className="lg:hidden bg-white border-b border-slate-200 p-4 space-y-3 shadow-lg">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-900">{getDisplayName()}</span>
+              <div>
+                <span className="text-xs font-bold text-slate-900 block">
+                  {role === "owner"
+                    ? user.spaceOwner?.namaCoworking || getDisplayName()
+                    : getDisplayName()}
+                </span>
+                <span className="text-[10px] text-slate-500 block">
+                  {role === "owner"
+                    ? user.spaceOwner?.alamat || user.email
+                    : user.email}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={handleLogout}
                 className="text-xs text-rose-600 font-semibold"
               >
-                Keluar Akun
+                Keluar
               </button>
             </div>
             <nav className="space-y-1">
@@ -510,10 +517,42 @@ export default function DashboardLayout({
               ))}
 
               {role === "member" && [
-                { label: "Tiket Saya", href: "/dashboard/member" },
-                { label: "Transaksi Saya", href: "/dashboard/member/transactions" },
-                { label: "Jelajahi Ruangan", href: "/spaces" },
-                { label: "Profil & Pengaturan", href: "/dashboard/member/profile" },
+                { label: "Tiket & QR Akses", href: "/dashboard/member" },
+                { label: "Riwayat Transaksi", href: "/dashboard/member/transactions" },
+                { label: "Jelajahi Ruangan", href: "/dashboard/member/spaces" },
+                { label: "Profil Saya", href: "/dashboard/member/profile" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg"
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              {role === "super_admin" && [
+                { label: "Overview Platform", href: "/dashboard/super-admin" },
+                { label: "Mitra Space Owner", href: "/dashboard/super-admin/owners" },
+                { label: "Komisi Platform", href: "/dashboard/super-admin/commission" },
+                { label: "Transaksi Global", href: "/dashboard/super-admin/transactions" },
+                { label: "Pengaturan Akun", href: "/dashboard/super-admin/profile" },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-lg"
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              {role === "staff" && [
+                { label: "Terminal Check-In", href: "/dashboard/staff" },
+                { label: "Log Reservasi", href: "/dashboard/staff/history" },
+                { label: "Profil Staf", href: "/dashboard/staff/profile" },
               ].map((link) => (
                 <Link
                   key={link.href}
@@ -528,29 +567,9 @@ export default function DashboardLayout({
           </div>
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 w-full">
           {children}
         </main>
-
-        {/* Footer */}
-        <footer className="border-t border-slate-200 bg-white py-6 px-4 sm:px-8 mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-            <div className="flex items-center gap-2.5">
-              <div className="w-5 h-5 rounded bg-[#0D5C63] flex items-center justify-center text-white">
-                <Building2 className="w-3 h-3" />
-              </div>
-              <span className="font-bold text-slate-800">WorkNest</span>
-              <span>© {new Date().getFullYear()} WorkNest Technologies Inc. Hak cipta dilindungi.</span>
-            </div>
-            <div className="flex items-center gap-4 text-[11px]">
-              <Link href="/spaces" className="hover:text-slate-900">Ruangan</Link>
-              <Link href="/#instant-rates" className="hover:text-slate-900">Tarif</Link>
-              <Link href="/register?role=owner" className="hover:text-slate-900">Daftarkan Ruangan</Link>
-              <Link href="/#faq" className="hover:text-slate-900">Keamanan &amp; Privasi</Link>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );

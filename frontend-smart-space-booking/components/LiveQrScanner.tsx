@@ -40,8 +40,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
 
       osc.start();
       osc.stop(ctx.currentTime + 0.15);
-    } catch {
-    }
+    } catch {}
   };
 
   useEffect(() => {
@@ -53,11 +52,12 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             label: d.label || `Kamera ${d.id.slice(0, 5)}`,
           }));
           setCameras(list);
-          const backCam = list.find((c) =>
-            c.label.toLowerCase().includes("back") ||
-            c.label.toLowerCase().includes("rear") ||
-            c.label.toLowerCase().includes("belakang") ||
-            c.label.toLowerCase().includes("environment")
+          const backCam = list.find(
+            (c) =>
+              c.label.toLowerCase().includes("back") ||
+              c.label.toLowerCase().includes("rear") ||
+              c.label.toLowerCase().includes("belakang") ||
+              c.label.toLowerCase().includes("environment")
           );
           setSelectedCameraId(backCam ? backCam.id : list[0].id);
         } else {
@@ -116,8 +116,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         (decodedText) => {
           handleScan(decodedText);
         },
-        () => {
-        }
+        () => {}
       );
 
       setIsScanning(true);
@@ -141,11 +140,11 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
   };
 
   return (
-    <div className="bg-slate-900 text-white rounded-xl overflow-hidden border border-slate-800 shadow-md">
-      <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-slate-900 text-white rounded-xs overflow-hidden border border-slate-800 shadow-md">
+      <div className="p-3 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <div className={`w-2.5 h-2.5 rounded-full ${isScanning ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+          <div className={`w-2 h-2 rounded-full ${isScanning ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-300">
             {isScanning ? "Live Scanner Aktif" : "Scanner Siaga"}
           </span>
         </div>
@@ -156,7 +155,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
               value={selectedCameraId}
               disabled={isScanning}
               onChange={(e) => setSelectedCameraId(e.target.value)}
-              className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 focus:outline-none disabled:opacity-60"
+              className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-xs border border-slate-700 focus:outline-none disabled:opacity-60 cursor-pointer"
             >
               {cameras.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -170,7 +169,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={stopScanner}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs transition-colors cursor-pointer"
             >
               <CameraOff className="w-3.5 h-3.5" />
               <span>Matikan Kamera</span>
@@ -179,7 +178,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={startScanner}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors shadow-xs cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Nyalakan Kamera</span>
@@ -188,13 +187,13 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         </div>
       </div>
 
-      <div className="relative bg-black min-h-[300px] flex items-center justify-center overflow-hidden">
+      <div className="relative bg-black min-h-[280px] flex items-center justify-center overflow-hidden">
         <div id={scannerElementId} className="w-full max-w-[420px]" />
 
         {!isScanning && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-900/90 backdrop-blur-xs">
-            <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
-              <Camera className="w-7 h-7" />
+            <div className="w-12 h-12 rounded-xs bg-[#006370]/20 border border-[#006370]/40 text-[#006370] flex items-center justify-center">
+              <Camera className="w-6 h-6 text-cyan-400" />
             </div>
             <div className="space-y-1 max-w-xs">
               <h4 className="text-sm font-bold text-slate-200">Kamera Belum Aktif</h4>
@@ -205,7 +204,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={startScanner}
-              className="py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              className="py-2 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-cyan-200" />
               <span>Mulai Scan Kamera</span>
@@ -215,20 +214,19 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
 
         {isScanning && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-56 h-56 border-2 border-cyan-400/80 rounded-2xl relative shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-              <div className="absolute -top-1 -left-1 w-5 h-5 border-t-4 border-l-4 border-cyan-400 rounded-tl-md" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 border-t-4 border-r-4 border-cyan-400 rounded-tr-md" />
-              <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-4 border-l-4 border-cyan-400 rounded-bl-md" />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-4 border-r-4 border-cyan-400 rounded-br-md" />
-
-              <div className="w-full h-0.5 bg-cyan-400/90 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+            <div className="w-52 h-52 border-2 border-[#006370] rounded-xs relative shadow-[0_0_20px_rgba(0,99,112,0.4)]">
+              <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
+              <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-cyan-400" />
+              <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-cyan-400" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
+              <div className="w-full h-0.5 bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
             </div>
           </div>
         )}
 
         {isProcessing && (
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-10 space-y-2">
-            <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl flex items-center gap-3 shadow-xl">
+            <div className="bg-slate-900 border border-slate-700 p-4 rounded-xs flex items-center gap-3 shadow-xl">
               <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
               <span className="text-xs font-bold text-slate-100">Memvalidasi Tiket...</span>
             </div>

@@ -75,35 +75,38 @@ export default function MemberSpacesPage() {
   const hasActiveFilters = Boolean(searchQuery || selectedType || minCapacity);
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5 sm:pb-6">
-        <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-sky-50 text-sky-800 border border-sky-200">
-            <Compass className="w-3.5 h-3.5 text-sky-600" />
-            <span>Katalog Inventaris Ruangan</span>
+    <div className="space-y-6 pb-16">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <span>PORTAL MEMBER</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500 font-sans font-normal">
+              Katalog &amp; Ketersediaan Ruangan
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Pencarian & Ketersediaan Ruang Kerja
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            Cari &amp; Reservasi Ruang Kerja
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
             Eksplorasi ruang kerja berstandar profesional sesuai kebutuhan kapasitas dan durasi jam pemakaian.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
           <button
             type="button"
             onClick={fetchSpacesData}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-400"}`} />
-            <span>Segarkan Data</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : "text-slate-500"}`} />
+            <span>Perbarui</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4 shadow-xs">
+      <div className="bg-white rounded-xs border border-slate-200 p-4 shadow-2xs space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-6 relative">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
@@ -112,13 +115,13 @@ export default function MemberSpacesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama ruangan, coworking space, atau fasilitas..."
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -130,7 +133,7 @@ export default function MemberSpacesPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
               >
                 <option value="">Semua Tipe</option>
                 <option value="desk">Hot Desk / Workstation</option>
@@ -143,7 +146,7 @@ export default function MemberSpacesPage() {
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 focus:bg-white border border-slate-200 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
               >
                 <option value="">Semua Kapasitas</option>
                 <option value="1">Min. 1 Orang</option>
@@ -168,9 +171,9 @@ export default function MemberSpacesPage() {
                 key={pill.id}
                 type="button"
                 onClick={() => setSelectedType(pill.id)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+                className={`px-2.5 py-1 rounded-xs text-xs font-semibold transition-colors cursor-pointer ${
                   selectedType === pill.id
-                    ? "bg-slate-900 text-white"
+                    ? "bg-[#006370] text-white shadow-2xs font-bold"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
@@ -187,7 +190,7 @@ export default function MemberSpacesPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                className="font-semibold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
               >
                 Reset Filter
               </button>
@@ -197,7 +200,7 @@ export default function MemberSpacesPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs">
+        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <div className="space-y-0.5">
             <p className="font-semibold">Gagal Memuat Inventaris Ruangan</p>
@@ -207,26 +210,9 @@ export default function MemberSpacesPage() {
       )}
 
       {loading ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-center gap-2.5 py-3.5 px-5 bg-gradient-to-r from-cyan-50/80 via-white to-sky-50/80 rounded-xl border border-cyan-200/80 text-cyan-800 text-xs font-bold shadow-2xs">
-            <Loader2 className="w-4 h-4 text-cyan-600 animate-spin shrink-0" />
-            <span>Memuat Katalog & Ketersediaan Ruangan...</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-xl border border-slate-200 overflow-hidden animate-pulse shadow-xs"
-              >
-                <div className="aspect-[16/10] bg-slate-200/70" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-slate-200 rounded w-3/4" />
-                  <div className="h-3 bg-slate-100 rounded w-1/2" />
-                  <div className="h-8 bg-slate-100 rounded w-full mt-4" />
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="py-20 flex flex-col items-center justify-center text-slate-400">
+          <Loader2 className="w-7 h-7 animate-spin text-[#006370] mb-2" />
+          <p className="text-xs">Memuat katalog ruangan...</p>
         </div>
       ) : filteredSpaces.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -235,12 +221,12 @@ export default function MemberSpacesPage() {
           ))}
         </div>
       ) : (
-        <div className="p-10 sm:p-14 text-center bg-white rounded-xl border border-slate-200 space-y-4 max-w-md mx-auto shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+        <div className="p-10 sm:p-14 text-center bg-white rounded-xs border border-slate-200 shadow-2xs space-y-4 max-w-md mx-auto">
+          <div className="w-12 h-12 rounded-xs bg-slate-100 text-slate-400 flex items-center justify-center mx-auto border border-slate-200">
             <Building2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="font-serif text-base font-bold text-slate-900">
               {spaces.length === 0 ? "Belum Ada Ruangan Terdaftar" : "Tidak Ada Ruangan yang Sesuai"}
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -255,7 +241,7 @@ export default function MemberSpacesPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors"
+                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Hapus Semua Filter
               </button>

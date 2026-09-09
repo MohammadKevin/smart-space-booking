@@ -27,23 +27,25 @@ function SpacesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = searchParams.get("tipe") || "";
-  const initialSearch = searchParams.get("search") || "";
+  const initialMetro = searchParams.get("metro") || "";
+  const initialSearch =
+    searchParams.get("search") && searchParams.get("search") !== initialMetro
+      ? searchParams.get("search") || ""
+      : "";
   const initialCapacity = searchParams.get("kapasitas") || "";
 
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedType, setSelectedType] = useState(initialType);
-  const [selectedMetro, setSelectedMetro] = useState("");
+  const [selectedMetro, setSelectedMetro] = useState(initialMetro);
   const [minCapacity, setMinCapacity] = useState(initialCapacity);
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [selectedAmenity, setSelectedAmenity] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"rating" | "price_asc" | "price_desc">("rating");
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
@@ -64,7 +66,17 @@ function SpacesContent() {
     fetchSpacesData();
   }, []);
 
-  // Extract real cities / metros from space locations
+  useEffect(() => {
+    const t = searchParams.get("tipe");
+    const m = searchParams.get("metro");
+    const s = searchParams.get("search");
+    const c = searchParams.get("kapasitas");
+    if (t !== null) setSelectedType(t);
+    if (m !== null) setSelectedMetro(m);
+    if (s !== null && s !== m) setSearchQuery(s);
+    if (c !== null) setMinCapacity(c);
+  }, [searchParams]);
+
   const availableMetros = useMemo(() => {
     const metros = new Set<string>();
     spaces.forEach((space) => {
@@ -80,26 +92,26 @@ function SpacesContent() {
 
   const filteredSpaces = useMemo(() => {
     let result = spaces.filter((space) => {
-      // Type filter
+      
       if (selectedType && space.tipe !== selectedType) {
         return false;
       }
-      // Capacity filter
+      
       if (minCapacity && (space.kapasitas || 0) < parseInt(minCapacity, 10)) {
         return false;
       }
-      // Max price filter
+      
       if (maxPrice && space.hargaPerJam > parseInt(maxPrice, 10)) {
         return false;
       }
-      // Metro filter
+      
       if (selectedMetro) {
         const addr = (space.owner?.alamat || space.owner?.namaCoworking || "").toLowerCase();
         if (!addr.includes(selectedMetro.toLowerCase())) {
           return false;
         }
       }
-      // Search query
+      
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = space.namaSpace?.toLowerCase().includes(query);
@@ -113,7 +125,6 @@ function SpacesContent() {
       return true;
     });
 
-    // Sort
     if (sortBy === "price_asc") {
       result = [...result].sort((a, b) => a.hargaPerJam - b.hargaPerJam);
     } else if (sortBy === "price_desc") {
@@ -144,7 +155,7 @@ function SpacesContent() {
 
   return (
     <div className="bg-[#fcfdfd] min-h-screen text-slate-900 pb-20">
-      {/* 1. TOP ANNOUNCEMENT BAR */}
+      
       <div className="border-b border-slate-200/80 bg-white py-2.5 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2 text-slate-700">
@@ -152,13 +163,13 @@ function SpacesContent() {
             <span className="font-semibold text-slate-900">Ketersediaan Real-Time</span>
             <span className="text-slate-300">|</span>
             <span className="text-slate-500">
-              {spaces.length > 0 ? `${spaces.length} Hub Terverifikasi di Seluruh Indonesia` : "48 Hub Terverifikasi di Seluruh Indonesia"}
+              {spaces.length > 0 ? `${spaces.length} Ruangan Terdaftar di 14 Kota Indonesia` : "Katalog Ruangan di Seluruh Indonesia"}
             </span>
           </div>
 
           <div className="flex items-center gap-5 text-slate-500 font-medium">
             <div className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-cyan-600" />
+              <Zap className="w-3.5 h-3.5 text-[#006370]" />
               <span>Konfirmasi Instan</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -170,11 +181,11 @@ function SpacesContent() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* 2. FILTERS CONTAINER */}
+        
         <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3.5 shadow-2xs">
-          {/* Main search and dropdowns */}
+          
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            {/* Search Input */}
+            
             <div className="md:col-span-4 relative">
               <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
               <input
@@ -182,7 +193,7 @@ function SpacesContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari berdasarkan nama hub, distrik, atau lokasi (cth. SCBD, Senopati, Klojen)..."
-                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -195,52 +206,39 @@ function SpacesContent() {
               )}
             </div>
 
-            {/* Metro Selector */}
             <div className="md:col-span-2">
               <select
                 value={selectedMetro}
                 onChange={(e) => setSelectedMetro(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kota: Semua Lokasi</option>
-                {availableMetros.length > 0 ? (
-                  availableMetros.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="Jakarta">Jakarta</option>
-                    <option value="Surabaya">Surabaya</option>
-                    <option value="Malang">Malang</option>
-                    <option value="Bandung">Bandung</option>
-                    <option value="Bali">Bali</option>
-                  </>
-                )}
+                {availableMetros.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Type Selector */}
             <div className="md:col-span-2">
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tipe: Semua Ruangan</option>
-                <option value="desk">Flex Desk / Workstation</option>
+                <option value="desk">Flex Desk / Meja</option>
                 <option value="meeting_room">Ruang Rapat</option>
                 <option value="private_office">Suite Privat</option>
               </select>
             </div>
 
-            {/* Capacity Selector */}
             <div className="md:col-span-2">
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kapasitas: Semua</option>
                 <option value="1">1 Orang</option>
@@ -250,12 +248,11 @@ function SpacesContent() {
               </select>
             </div>
 
-            {/* Max Price */}
             <div className="md:col-span-2">
               <select
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#0D5C63] rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tarif: Semua</option>
                 <option value="50000">Rp 50.000 / jam</option>
@@ -266,43 +263,7 @@ function SpacesContent() {
             </div>
           </div>
 
-          {/* Amenities Bar & Sort */}
           <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1">
-                FASILITAS:
-              </span>
-              {[
-                "Wi-Fi 500+ Mbps",
-                "Monitor 4K",
-                "Whiteboard",
-                "Kopi Artisan",
-                "Phone Booth",
-                "Akses 24/7",
-              ].map((amenity) => {
-                const isSelected = selectedAmenity === amenity;
-                return (
-                  <button
-                    key={amenity}
-                    type="button"
-                    onClick={() => setSelectedAmenity(isSelected ? null : amenity)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors cursor-pointer border ${
-                      isSelected
-                        ? "bg-[#0D5C63] text-white border-[#0D5C63]"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isSelected ? "bg-white" : "bg-cyan-600"
-                      }`}
-                    />
-                    <span>{amenity}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 text-slate-500">
                 <span>Urutkan:</span>
@@ -324,13 +285,12 @@ function SpacesContent() {
                 aria-label="Segarkan Ruangan"
                 className="p-1.5 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-cyan-600" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : ""}`} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* 3. SECTION HEADING */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">
           <div>
             <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
@@ -346,7 +306,7 @@ function SpacesContent() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-cyan-700 hover:text-cyan-900 font-semibold underline underline-offset-4 cursor-pointer"
+                className="text-[#006370] hover:text-[#004f59] font-semibold underline underline-offset-4 cursor-pointer"
               >
                 Reset Filter
               </button>
@@ -357,7 +317,6 @@ function SpacesContent() {
           </div>
         </div>
 
-        {/* 4. REAL DATA SPACES GRID */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -389,7 +348,7 @@ function SpacesContent() {
             <button
               type="button"
               onClick={fetchSpacesData}
-              className="mt-2 px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg"
+              className="mt-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-[10px] transition-colors"
             >
               Coba Lagi
             </button>
@@ -401,7 +360,7 @@ function SpacesContent() {
             ))}
           </div>
         ) : (
-          <div className="p-14 text-center bg-white rounded-2xl border border-slate-200 space-y-4 max-w-lg mx-auto">
+          <div className="p-14 text-center bg-white rounded-2xl border border-slate-200 space-y-4 w-full mx-auto">
             <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
               <Building2 className="w-6 h-6" />
             </div>
@@ -427,18 +386,17 @@ function SpacesContent() {
           </div>
         )}
 
-        {/* 5. DISTRICT GEO-FENCING BANNER */}
         <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-[#006370] tracking-wider uppercase">
               <Building2 className="w-3.5 h-3.5" />
-              <span>GEO-FENCING DISTRIK</span>
+              <span>JARINGAN WORKNEST INDONESIA</span>
             </div>
             <h3 className="font-serif text-xl sm:text-2xl font-semibold text-slate-900 leading-tight">
-              Butuh ruangan di dekat stasiun MRT atau KRL tertentu?
+              Butuh ruangan di lokasi spesifik tim Anda?
             </h3>
             <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
-              Jelajahi peta interaktif kami untuk melihat kepadatan meja dan ruangan dalam radius jalan kaki 5 menit di Jakarta, Malang, Surabaya, dan Bandung.
+              Jelajahi jaringan coworking space kami di Jakarta, Surabaya, Malang, Bandung, Bali, dan kota-kota lainnya dengan akses instan kunci digital.
             </p>
           </div>
 
@@ -447,11 +405,10 @@ function SpacesContent() {
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
           >
             <Compass className="w-3.5 h-3.5 text-slate-600" />
-            <span>Buka Peta Geo</span>
+            <span>Pelajari Alur Akses</span>
           </Link>
         </div>
 
-        {/* 6. PAGINATION */}
         {filteredSpaces.length > itemsPerPage && (
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <p>
@@ -484,7 +441,7 @@ function SpacesContent() {
                   onClick={() => setCurrentPage(page)}
                   className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                     currentPage === page
-                      ? "bg-[#0D5C63] text-white"
+                      ? "bg-[#006370] text-white"
                       : "bg-white border border-slate-200 hover:bg-slate-50 text-slate-700"
                   }`}
                 >

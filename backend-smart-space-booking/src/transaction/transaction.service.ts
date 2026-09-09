@@ -43,8 +43,10 @@ export class TransactionService {
   }
 
   private async findScoped(id: number, user: any) {
-    const tx = await this.prisma.transaksi.findUnique({
-      where: { id },
+    const tx = await this.prisma.transaksi.findFirst({
+      where: {
+        OR: [{ id }, { reservasiId: id }],
+      },
       include: {
         reservasi: {
           include: {
@@ -58,7 +60,7 @@ export class TransactionService {
     });
 
     if (!tx) {
-      throw new NotFoundException(`Transaksi dengan ID ${id} tidak ditemukan.`);
+      throw new NotFoundException(`Transaksi dengan ID / Reservasi ID ${id} tidak ditemukan.`);
     }
 
     if (
@@ -165,7 +167,8 @@ export class TransactionService {
       );
     }
 
-    const orderId = tx.nomorInvoice;
+    const paymentMethodClean = (paymentMethod || 'qris').toLowerCase();
+    const orderId = `${tx.nomorInvoice}-${Date.now()}`;
     const ownerId = reservation.ownerId;
     const coworkingName = reservation.owner?.namaCoworking || 'Coworking Space';
     const spaceId = reservation.detailReservasi?.spaceId || 0;
@@ -267,8 +270,25 @@ export class TransactionService {
       );
     }
 
-    const tx = await this.prisma.transaksi.findUnique({
-      where: { midtransOrderId: orderId },
+    const tx = await this.prisma.transaksi.findFirst({
+      where: {
+        OR: [
+          { midtransOrderId: orderId },
+          { nomorInvoice: orderId },
+          {
+            nomorInvoice: orderId
+              .split('-BCA')[0]
+              .split('-BNI')[0]
+              .split('-BRI')[0]
+              .split('-MANDIRI')[0]
+              .split('-QRIS')[0]
+              .split('-PERMATA')[0]
+              .split('-GOPAY')[0]
+              .split('-SHOPEEPAY')[0],
+          },
+          { midtransOrderId: { startsWith: orderId.slice(0, 18) } },
+        ],
+      },
       include: {
         reservasi: {
           include: {

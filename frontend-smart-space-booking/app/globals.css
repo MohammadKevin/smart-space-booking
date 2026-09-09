@@ -24,13 +24,11 @@ body {
   letter-spacing: -0.011em;
 }
 
-/* Crisp architectural hairline borders */
 .border-hairline {
   border-width: 1px;
   border-color: #e2e8f0;
 }
 
-/* Clean minimal scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -49,7 +47,6 @@ body {
   background: #94a3b8;
 }
 
-/* Remove default number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -59,7 +56,6 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Print Stylesheet for E-Tickets and Digital Invoices */
 @media print {
   nav,
   footer,
@@ -83,4 +79,8 @@ input[type="number"] {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }

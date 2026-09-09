@@ -8,13 +8,7 @@ import { QrCode } from "lucide-react";
 export function Footer() {
   const pathname = usePathname();
 
-  if (
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/member") ||
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/verify-email"
-  ) {
+  if (!pathname || pathname !== "/") {
     return null;
   }
 
@@ -43,14 +37,14 @@ export function Footer() {
             <Link href="/spaces" className="hover:text-slate-900 transition-colors">
               Ruangan
             </Link>
-            <Link href="/#instant-rates" className="hover:text-slate-900 transition-colors">
+            <Link href="/#tarif" className="hover:text-slate-900 transition-colors">
               Tarif
             </Link>
             <Link href="/register?role=owner" className="hover:text-slate-900 transition-colors">
               Daftarkan Ruangan
             </Link>
-            <Link href="/#faq" className="hover:text-slate-900 transition-colors">
-              Keamanan &amp; Privasi
+            <Link href="/#protocol" className="hover:text-slate-900 transition-colors">
+              Teknologi &amp; Keamanan
             </Link>
           </div>
         </div>

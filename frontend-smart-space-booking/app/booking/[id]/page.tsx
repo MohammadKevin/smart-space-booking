@@ -1,347 +1,369 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useState, use, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   getSpaceDetail,
   getBookedSlots,
-  getSpaces,
   createReservation,
   checkDiscount,
-  startPayment,
-  syncPayment,
   Space,
-  Discount,
   getApiErrorMessage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
-import { QrCodeCard } from "@/components/QrCodeCard";
-import { snapPay } from "@/lib/midtrans-snap";
+import DashboardLayout from "@/app/dashboard/layout";
 import {
   Calendar,
-  Tag,
+  Clock,
   Users,
-  Building2,
-  ShieldCheck,
   ArrowRight,
   ArrowLeft,
   Loader2,
   AlertCircle,
-  CheckCircle2,
-  QrCode,
-  Percent,
-  Wallet,
-  Sparkles,
+  Tag,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 
 interface BookingPageProps {
   params: Promise<{ id: string }>;
 }
 
+const MONTH_NAMES = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
+const DAY_NAMES = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+const STANDARD_HOURS = [
+  "08:00",
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+  "18:00",
+  "19:00",
+  "20:00",
+];
+
 export default function BookingPage({ params }: BookingPageProps) {
   const resolvedParams = use(params);
   const spaceId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+  const { user, isAuthenticated } = useAuth();
 
   const [space, setSpace] = useState<Space | null>(null);
   const [loadingSpace, setLoadingSpace] = useState(true);
   const [spaceError, setSpaceError] = useState<string | null>(null);
 
-  const getLocalTodayStr = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+  const today = useMemo(() => new Date(), []);
+  const initialDateParam = searchParams.get("tanggal");
+  const initialStartParam = searchParams.get("jamMulai");
+  const initialDurasiParam = searchParams.get("durasi");
 
-  const todayStr = getLocalTodayStr();
-  const [tanggalReservasi, setTanggalReservasi] = useState(todayStr);
-  const [jamMulai, setJamMulai] = useState("09:00");
-  const [durasiJam, setDurasiJam] = useState(2);
-
-  const SERVICE_START = 8;
-  const SERVICE_END = 20;
-  const TIME_SLOTS: string[] = [];
-  for (let h = SERVICE_START; h <= SERVICE_END; h++) {
-    TIME_SLOTS.push(`${String(h).padStart(2, "0")}:00`);
-    if (h < SERVICE_END) {
-      TIME_SLOTS.push(`${String(h).padStart(2, "0")}:30`);
+  const [viewYear, setViewYear] = useState(() => {
+    if (initialDateParam) {
+      const d = new Date(initialDateParam);
+      if (!isNaN(d.getTime())) return d.getFullYear();
     }
-  }
+    return today.getFullYear();
+  });
 
-  const [availability, setAvailability] = useState<Record<string, boolean>>({});
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
+  const [viewMonth, setViewMonth] = useState(() => {
+    if (initialDateParam) {
+      const d = new Date(initialDateParam);
+      if (!isNaN(d.getTime())) return d.getMonth();
+    }
+    return today.getMonth();
+  });
+
+  const [selectedDate, setSelectedDate] = useState(() => {
+    if (initialDateParam) {
+      const d = new Date(initialDateParam);
+      if (!isNaN(d.getTime())) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+    }
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  });
+
+  const [selectedHours, setSelectedHours] = useState<string[]>(() => {
+    if (initialStartParam && initialDurasiParam) {
+      const start = initialStartParam;
+      const count = parseInt(initialDurasiParam, 10) || 1;
+      const idx = STANDARD_HOURS.indexOf(start);
+      if (idx !== -1) {
+        return STANDARD_HOURS.slice(idx, idx + count);
+      }
+    }
+    return ["09:00", "10:00"];
+  });
+
+  const [bookedSlotList, setBookedSlotList] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [promoInput, setPromoInput] = useState("");
-  const [checkingPromo, setCheckingPromo] = useState(false);
-  const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
-  const [promoMessage, setPromoMessage] = useState<{
-    type: "success" | "error";
-    text: string;
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    percent: number;
+    discountId?: number;
   } | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoMessage, setPromoMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [bookingSuccessData, setBookingSuccessData] = useState<any | null>(null);
 
-  const [payingDirect, setPayingDirect] = useState(false);
-  const [directPaySuccess, setDirectPaySuccess] = useState(false);
-  const [directPayError, setDirectPayError] = useState<string | null>(null);
+  useEffect(() => {
+    if (user) {
+      if (user.member?.namaMember) setFullName(user.member.namaMember);
+      else if (user.spaceOwner?.namaPemilik) setFullName(user.spaceOwner.namaPemilik);
+      if (user.email) setEmail(user.email);
+      if (user.member?.telp) setPhone(user.member.telp);
+      else if (user.spaceOwner?.telp) setPhone(user.spaceOwner.telp);
+    }
+  }, [user]);
 
   useEffect(() => {
     async function loadSpace() {
+      if (!spaceId || isNaN(spaceId)) {
+        setSpaceError("ID Ruangan tidak valid.");
+        setLoadingSpace(false);
+        return;
+      }
+
       setLoadingSpace(true);
       setSpaceError(null);
       try {
         const data = await getSpaceDetail(spaceId);
         setSpace(data);
-      } catch (err: unknown) {
-        setSpaceError(getApiErrorMessage(err));
+      } catch (err) {
+        setSpaceError(getApiErrorMessage(err) || "Ruangan tidak ditemukan.");
       } finally {
         setLoadingSpace(false);
       }
     }
-    if (spaceId) {
-      loadSpace();
-    }
+    loadSpace();
   }, [spaceId]);
 
-  useEffect(() => {
-    if (!tanggalReservasi) return;
-    let cancelled = false;
-    setCheckingAvailability(true);
-    setAvailability({});
-
-    async function checkAvailability() {
-      const result: Record<string, boolean> = {};
-      try {
-        const bookedSlots = await getBookedSlots(spaceId, tanggalReservasi);
-        
-        for (const slot of TIME_SLOTS) {
-          const [sh, sm] = slot.split(":").map(Number);
-          const startMins = sh * 60 + sm;
-          const endMins = startMins + durasiJam * 60;
-
-          const hasConflict = bookedSlots.some((b) => {
-            const [bh, bm] = b.jamMulai.split(":").map(Number);
-            const bStart = bh * 60 + bm;
-            const bEnd = bStart + b.durasiJam * 60;
-            
-            return Math.max(startMins, bStart) < Math.min(endMins, bEnd);
-          });
-
-          result[slot] = !hasConflict;
-        }
-      } catch {
-        
-        for (const slot of TIME_SLOTS) {
-          result[slot] = true;
-        }
-      } finally {
-        if (!cancelled) {
-          setAvailability(result);
-          setCheckingAvailability(false);
-        }
-      }
+  const loadSlots = useCallback(async () => {
+    if (!spaceId || isNaN(spaceId) || !selectedDate) return;
+    setLoadingSlots(true);
+    try {
+      const data = await getBookedSlots(spaceId, selectedDate);
+      const booked = Array.isArray(data) ? data.map((s) => s.jamMulai) : [];
+      setBookedSlotList(booked);
+    } catch {
+      setBookedSlotList([]);
+    } finally {
+      setLoadingSlots(false);
     }
+  }, [spaceId, selectedDate]);
 
-    checkAvailability();
-    return () => {
-      cancelled = true;
-    };
-  }, [tanggalReservasi, spaceId, durasiJam]);
+  useEffect(() => {
+    loadSlots();
+  }, [loadSlots]);
+
+  const daysInMonth = useMemo(() => {
+    return new Date(viewYear, viewMonth + 1, 0).getDate();
+  }, [viewYear, viewMonth]);
+
+  const firstDayOfWeek = useMemo(() => {
+    return new Date(viewYear, viewMonth, 1).getDay();
+  }, [viewYear, viewMonth]);
+
+  const handlePrevMonth = () => {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else {
+      setViewMonth((m) => m - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  };
+
+  const handleSelectDay = (day: number) => {
+    const formatted = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    setSelectedDate(formatted);
+  };
+
+  const toggleHour = (hour: string) => {
+    if (bookedSlotList.includes(hour)) return;
+
+    if (selectedHours.includes(hour)) {
+      if (selectedHours.length === 1) return;
+      setSelectedHours((prev) => prev.filter((h) => h !== hour));
+    } else {
+      const sorted = [...selectedHours, hour].sort(
+        (a, b) => STANDARD_HOURS.indexOf(a) - STANDARD_HOURS.indexOf(b)
+      );
+      setSelectedHours(sorted);
+    }
+  };
+
+  const durationHours = selectedHours.length || 1;
+  const startHour = selectedHours[0] || "09:00";
+  const spaceRental = (space?.hargaPerJam || 0) * durationHours;
+
+  const discountAmount = appliedPromo
+    ? Math.round((spaceRental * appliedPromo.percent) / 100)
+    : 0;
+
+  const totalPayable = Math.max(0, spaceRental - discountAmount);
+
+  const formattedSelectedDate = useMemo(() => {
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    const dateObj = new Date(y, m - 1, d);
+    return dateObj.toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }, [selectedDate]);
 
   const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!promoInput.trim()) return;
 
-    setCheckingPromo(true);
+    setPromoLoading(true);
     setPromoMessage(null);
+
     try {
-      const res = await checkDiscount(promoInput.trim());
-      const validDiscount = res.data || res.diskon;
-      if (res.isValid && validDiscount) {
-        setAppliedDiscount(validDiscount);
+      const res = await checkDiscount(promoInput.trim().toUpperCase(), spaceId);
+      if (res.isValid) {
+        const discObj = res.diskon || res.data;
+        const pct = discObj?.persentaseDiskon || 10;
+        setAppliedPromo({
+          code: discObj?.kodeDiskon || promoInput.toUpperCase(),
+          percent: pct,
+          discountId: discObj?.id,
+        });
         setPromoMessage({
+          text: `Kode "${discObj?.kodeDiskon || promoInput}" aktif! Hemat ${pct}%.`,
           type: "success",
-          text: `Kupon "${validDiscount.kodeDiskon || validDiscount.namaDiskon}" berhasil diterapkan (${validDiscount.persentaseDiskon}% OFF)`,
         });
       } else {
-        setAppliedDiscount(null);
+        setAppliedPromo(null);
         setPromoMessage({
+          text: res.message || "Kode promo tidak valid atau telah kadaluarsa.",
           type: "error",
-          text: res.message || "Kode promo tidak valid atau telah kedaluwarsa.",
         });
       }
     } catch (err: unknown) {
-      setAppliedDiscount(null);
+      setAppliedPromo(null);
       setPromoMessage({
+        text: getApiErrorMessage(err) || "Gagal memeriksa kode promo.",
         type: "error",
-        text: getApiErrorMessage(err),
       });
     } finally {
-      setCheckingPromo(false);
+      setPromoLoading(false);
     }
   };
 
-  const handleRemovePromo = () => {
-    setAppliedDiscount(null);
-    setPromoInput("");
-    setPromoMessage(null);
-  };
-
-  const isTodayIso = (d: string) => d === todayStr;
-  const nowMinutes = new Date().getHours() * 60 + new Date().getMinutes();
-
-  const timeToMinutes = (t: string) => {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  };
-
-  const slotCanFit = (slot: string) => {
-    const startMins = timeToMinutes(slot);
-    return startMins + durasiJam * 60 <= SERVICE_END * 60;
-  };
-
-  const slotIsPast = (slot: string) => {
-    return isTodayIso(tanggalReservasi) && timeToMinutes(slot) <= nowMinutes;
-  };
-
-  const toggleSlot = (start: string) => {
-    setJamMulai((prev) => (prev === start ? "" : start));
-  };
-
-  const handleDirectPay = async () => {
-    if (!bookingSuccessData) return;
-    setPayingDirect(true);
-    setDirectPayError(null);
-    try {
-      const response = await startPayment(bookingSuccessData.id);
-      const result = response.data;
-
-      if (result.redirectUrl) {
-        window.open(result.redirectUrl, "_blank", "noopener,noreferrer");
-      }
-
-      await snapPay(result.clientKey, result.snapScriptUrl, result.snapToken, {
-        onSuccess: async () => {
-          try {
-            await syncPayment(result.transactionId);
-          } catch {}
-          setDirectPaySuccess(true);
-          setPayingDirect(false);
-        },
-        onPending: async () => {
-          try {
-            await syncPayment(result.transactionId);
-          } catch {}
-          setDirectPaySuccess(true);
-          setPayingDirect(false);
-        },
-        onError: () => {
-          setDirectPayError("Pembayaran gagal atau dibatalkan oleh gateway.");
-          setPayingDirect(false);
-        },
-        onClose: () => {
-          setPayingDirect(false);
-        },
-      });
-    } catch (err: unknown) {
-      setDirectPayError(getApiErrorMessage(err));
-      setPayingDirect(false);
-    }
-  };
-
-  const hourlyRate = space?.hargaPerJam || 0;
-  const subtotal = hourlyRate * durasiJam;
-  const discountPercent = appliedDiscount ? appliedDiscount.persentaseDiskon : 0;
-  const discountAmount = Math.round((subtotal * discountPercent) / 100);
-  const finalTotal = Math.max(0, subtotal - discountAmount);
-
-  const handleCreateReservation = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError(null);
-
+  const handleProceedCheckout = async () => {
     if (!isAuthenticated) {
-      router.push(`/login?redirect=/booking/${spaceId}`);
+      const returnUrl = `/booking/${spaceId}?tanggal=${selectedDate}&jamMulai=${startHour}&durasi=${durationHours}`;
+      router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return;
     }
 
-    if (!tanggalReservasi) {
-      setSubmitError("Pilih tanggal reservasi terlebih dahulu.");
+    if (!fullName.trim() || !email.trim() || !phone.trim()) {
+      setSubmitError("Lengkapi nama, email, dan nomor telepon pemesan.");
       return;
     }
-    if (!jamMulai) {
-      setSubmitError("Pilih jam mulai reservasi pada slot waktu yang tersedia.");
-      return;
-    }
-    if (!durasiJam || Number(durasiJam) < 1) {
-      setSubmitError("Durasi sewa minimal 1 jam.");
+
+    if (selectedHours.length === 0) {
+      setSubmitError("Pilih minimal satu slot jam pemakaian.");
       return;
     }
 
     setSubmitting(true);
+    setSubmitError(null);
+
     try {
-      const payload: any = {
-        spaceId: Number(spaceId),
-        tanggalReservasi: tanggalReservasi,
-        jamMulai: jamMulai,
-        durasiJam: Number(durasiJam),
-      };
+      const res = await createReservation({
+        spaceId,
+        tanggalReservasi: selectedDate,
+        jamMulai: startHour,
+        durasiJam: durationHours,
+        kodeDiskon: appliedPromo?.code,
+      });
 
-      if (appliedDiscount?.id) {
-        payload.diskonId = Number(appliedDiscount.id);
+      const resId = res.data?.id || (res as any).id || (res as any).reservasiId;
+      if (resId) {
+        router.push(`/checkout/${resId}`);
+      } else {
+        router.push("/dashboard/member/transactions");
       }
-      if (appliedDiscount?.kodeDiskon) {
-        payload.kodeDiskon = String(appliedDiscount.kodeDiskon).toUpperCase();
-      }
-
-      const res = await createReservation(payload);
-      const reservationData = (res as any)?.data || res;
-      if (reservationData?.id) {
-        router.push(`/checkout/${reservationData.id}`);
-        return;
-      }
-      setBookingSuccessData(reservationData);
     } catch (err: unknown) {
-      const errorMsg = getApiErrorMessage(err);
-      setSubmitError(errorMsg);
-    } finally {
+      setSubmitError(getApiErrorMessage(err) || "Gagal memproses reservasi.");
       setSubmitting(false);
     }
   };
 
   if (loadingSpace) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-2 text-slate-500">
-          <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
-          <p className="text-xs font-semibold">Memuat rincian ruangan...</p>
+      <DashboardLayout>
+        <div className="py-24 flex flex-col items-center justify-center text-slate-400">
+          <Loader2 className="w-8 h-8 text-[#006370] animate-spin mb-2" />
+          <p className="text-xs">Memuat formulir pemesanan...</p>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   if (spaceError || !space) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
-          <AlertCircle className="w-6 h-6" />
+      <DashboardLayout>
+        <div className="max-w-md mx-auto py-16 text-center space-y-4">
+          <div className="w-12 h-12 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <h2 className="font-serif text-lg font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
+          <p className="text-xs text-slate-500">{spaceError || "Ruangan tidak tersedia atau telah dihapus."}</p>
+          <Link
+            href="/dashboard/member/spaces"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Kembali ke Katalog</span>
+          </Link>
         </div>
-        <h2 className="text-lg font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
-        <p className="text-xs text-slate-500">{spaceError || "Ruangan ini tidak tersedia atau telah dihapus."}</p>
-        <Link
-          href="/dashboard/member/spaces"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-sky-600 text-white text-xs font-semibold rounded-lg hover:bg-sky-700 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Katalog</span>
-        </Link>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -353,21 +375,39 @@ export default function BookingPage({ params }: BookingPageProps) {
       : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      <div>
-        <Link
-          href={`/spaces/${space.id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kembali ke Rincian Ruangan</span>
-        </Link>
-      </div>
+    <DashboardLayout>
+      <div className="space-y-6 pb-16">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+              <span>RESERVASI RUANGAN</span>
+              <span className="text-slate-300">•</span>
+              <span className="text-slate-500 font-sans font-normal">
+                {space.owner?.namaCoworking || "WorkNest Hub"}
+              </span>
+            </div>
+            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+              Pesan Ruang Kerja
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+              Pilih tanggal, tentukan durasi jam sewa, dan konfirmasikan pemesanan ruangan Anda.
+            </p>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="relative aspect-[16/10] bg-slate-100 border-b border-slate-200">
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            <Link
+              href="/dashboard/member/spaces"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Kembali</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xs border border-slate-200 p-5 flex flex-col md:flex-row items-center justify-between gap-5 shadow-2xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+            <div className="relative w-full sm:w-44 h-28 rounded-xs overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
               <img
                 src={space.foto || fallbackImage}
                 alt={space.namaSpace}
@@ -376,463 +416,378 @@ export default function BookingPage({ params }: BookingPageProps) {
                   (e.target as HTMLImageElement).src = fallbackImage;
                 }}
               />
-              <div className="absolute top-2.5 left-2.5">
-                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-sky-800 border border-sky-200">
-                  {space.tipe === "desk"
-                    ? "Hot Desk"
-                    : space.tipe === "meeting_room"
-                    ? "Meeting Room"
-                    : "Private Office"}
-                </span>
-              </div>
+              <span className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-xs text-white font-mono text-[10px] px-2 py-0.5 rounded-xs font-bold uppercase">
+                {space.tipe?.replace(/_/g, " ")}
+              </span>
             </div>
 
-            <div className="p-5 space-y-3">
-              <div>
-                {space.owner?.namaCoworking && (
-                  <p className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{space.owner.namaCoworking}</span>
-                  </p>
-                )}
-                <h1 className="text-xl font-bold text-slate-900">{space.namaSpace}</h1>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-serif text-xl font-bold text-slate-900">
+                  {space.namaSpace}
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span>Siap Dipesan</span>
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100 text-xs">
-                <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                  <p className="text-slate-400 text-[10px] uppercase font-bold">Kapasitas</p>
-                  <p className="font-semibold text-slate-800">{space.kapasitas} Orang</p>
-                </div>
-                <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                  <p className="text-slate-400 text-[10px] uppercase font-bold">Tarif Dasar</p>
-                  <p className="font-semibold text-slate-800 font-mono">
-                    {formatRupiah(space.hargaPerJam)}/jam
-                  </p>
-                </div>
+              <p className="text-xs text-slate-500 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>{space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Hub"}</span>
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-600 pt-0.5">
+                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                  👥 {space.kapasitas} Orang
+                </span>
+                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                  📶 Wi-Fi Fiber
+                </span>
+                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                  🔑 Kunci Digital QR
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5 text-xs text-slate-700">
-            <ShieldCheck className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <p className="font-semibold text-slate-900">Validasi Check-In Otomatis</p>
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Tiket QR mandiri akan diterbitkan otomatis setelah formulir pemesanan dikonfirmasi.
-              </p>
+          <div className="text-right self-end md:self-center border-t md:border-t-0 pt-3 md:pt-0 w-full md:w-auto">
+            <span className="text-[10px] text-slate-400 block font-mono uppercase tracking-wider">Tarif Sewa</span>
+            <div className="text-xl font-bold text-[#006370] font-mono">
+              {formatRupiah(space.hargaPerJam)} <span className="text-xs font-normal text-slate-500 font-sans">/ jam</span>
             </div>
           </div>
         </div>
 
-        <div className="lg:col-span-7">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h2 className="text-base font-bold text-slate-900">
-                Konfigurasi Jadwal & Durasi
-              </h2>
-              <p className="text-xs text-slate-500">
-                Tentukan tanggal, jam mulai, serta durasi jam pemakaian ruangan.
-              </p>
-            </div>
-
-            {submitError && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-start justify-between gap-2.5 text-rose-800 text-xs shadow-xs animate-shake">
-                <div className="flex items-start gap-2.5">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <p className="font-bold text-rose-900">Reservasi Belum Dapat Diproses</p>
-                    <p className="font-medium leading-relaxed">{submitError}</p>
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-5 shadow-2xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-xs bg-[#006370] text-white flex items-center justify-center text-xs font-bold font-mono">
+                    1
+                  </span>
+                  <h3 className="font-serif text-base font-bold text-slate-900">
+                    Pilih Tanggal &amp; Jam Pemakaian
+                  </h3>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSubmitError(null)}
-                  className="text-rose-500 hover:text-rose-800 font-bold text-sm cursor-pointer p-0.5"
-                >
-                  ✕
-                </button>
+                <span className="text-xs font-semibold text-[#006370] font-mono">
+                  WIB (GMT+7)
+                </span>
               </div>
-            )}
 
-            <form onSubmit={handleCreateReservation} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-slate-700">
-                    Tanggal Pemakaian
-                  </label>
-                  <div className="relative">
-                    <Calendar className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                    <input
-                      type="date"
-                      required
-                      min={todayStr}
-                      value={tanggalReservasi}
-                      onChange={(e) => setTanggalReservasi(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 focus:bg-white border border-slate-300 focus:border-sky-600 rounded-lg text-xs font-medium text-slate-900 focus:outline-none"
-                    />
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div className="md:col-span-5 bg-slate-50 p-4 rounded-xs border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>
+                      {MONTH_NAMES[viewMonth]} {viewYear}
+                    </span>
+                    <div className="flex items-center gap-1 text-slate-400">
+                      <button
+                        type="button"
+                        onClick={handlePrevMonth}
+                        className="p-1 hover:text-slate-700 cursor-pointer rounded-xs"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextMonth}
+                        className="p-1 hover:text-slate-700 cursor-pointer rounded-xs"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-700">
-                      Jam Mulai (WIB)
-                    </label>
-                    {checkingAvailability && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        Cek ketersediaan...
+                  <div className="grid grid-cols-7 gap-1 text-center text-[11px]">
+                    {DAY_NAMES.map((d) => (
+                      <span key={d} className="font-semibold text-slate-400 py-1 font-mono">
+                        {d}
                       </span>
-                    )}
-                  </div>
+                    ))}
 
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                    {TIME_SLOTS.map((slot) => {
-                      const confirmedTaken = checkingAvailability
-                        ? false
-                        : availability[slot] === false;
-                      const unknown =
-                        checkingAvailability || availability[slot] === undefined;
-                      const cannotFit = !slotCanFit(slot);
-                      const isPast = slotIsPast(slot);
-                      const disabled = confirmedTaken || cannotFit || isPast;
-                      const selected = jamMulai === slot;
+                    {Array.from({ length: firstDayOfWeek }, (_, i) => (
+                      <span key={`blank-${i}`} className="py-1.5" />
+                    ))}
+
+                    {Array.from({ length: daysInMonth }, (_, i) => {
+                      const day = i + 1;
+                      const thisDate = new Date(viewYear, viewMonth, day);
+                      const isPast =
+                        thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                      const isSelected =
+                        selectedDate ===
+                        `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
                       return (
                         <button
-                          key={slot}
+                          key={day}
                           type="button"
-                          disabled={disabled}
-                          onClick={() => toggleSlot(slot)}
-                          aria-pressed={selected}
-                          title={
-                            confirmedTaken
-                              ? "Slot ini telah dibooking member lain"
-                              : cannotFit
-                              ? "Durasi melebihi jam operasional (20:00)"
-                              : `Pilih pukul ${slot} WIB`
-                          }
-                          className={`relative py-1.5 rounded-lg text-xs font-semibold transition-colors border ${
-                            cannotFit
-                              ? "opacity-35 bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed"
+                          disabled={isPast}
+                          onClick={() => handleSelectDay(day)}
+                          className={`py-1.5 rounded-xs font-semibold transition-all cursor-pointer text-xs ${
+                            isSelected
+                              ? "bg-[#006370] text-white font-bold shadow-xs"
                               : isPast
-                              ? "opacity-35 bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed"
-                              : selected
-                              ? "bg-sky-600 text-white border-sky-600 shadow-xs font-bold"
-                              : confirmedTaken
-                              ? "bg-rose-50 text-rose-400 border-rose-100 cursor-not-allowed"
-                              : unknown
-                              ? "bg-slate-100 text-slate-500 border-slate-200"
-                              : "bg-white text-slate-800 border-slate-300 hover:border-sky-500 hover:text-sky-700"
+                              ? "text-slate-300 cursor-not-allowed"
+                              : "text-slate-700 hover:bg-slate-200"
                           }`}
                         >
-                          {slot}
-                          {confirmedTaken && (
-                            <span className="block text-[9px] font-normal text-rose-500">
-                              Penuh
-                            </span>
-                          )}
+                          {day}
                         </button>
                       );
                     })}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 rounded bg-sky-600 inline-block" /> Terpilih
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-200">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-xs bg-[#006370]" /> Terpilih
                     </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 rounded bg-rose-500 inline-block" /> Terisi
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-xs bg-slate-300" /> Terisi
                     </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 rounded bg-slate-200 inline-block" /> Tersedia
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2.5 h-2.5 rounded bg-slate-100 inline-block" /> Melewati operasional
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-xs bg-slate-200 border" /> Tersedia
                     </span>
                   </div>
                 </div>
+
+                <div className="md:col-span-7 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900">
+                      Slot Jam: {formattedSelectedDate}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#E6F4F2] text-[#006370] border border-[#BCE3DE]">
+                      {durationHours} Jam Dipilih
+                    </span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Klik pada slot jam yang ingin Anda pesan. Anda dapat memilih beberapa jam berturut-turut.
+                  </p>
+
+                  {loadingSlots ? (
+                    <div className="py-8 text-center text-xs text-slate-400">
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-[#006370] mb-1" />
+                      <span>Memeriksa ketersediaan jam...</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                      {STANDARD_HOURS.map((hour) => {
+                        const isBooked = bookedSlotList.includes(hour);
+                        const isSelected = selectedHours.includes(hour);
+                        const endHourNum = parseInt(hour.split(":")[0], 10) + 1;
+                        const label = `${hour} - ${String(endHourNum).padStart(2, "0")}:00`;
+
+                        return (
+                          <button
+                            key={hour}
+                            type="button"
+                            disabled={isBooked}
+                            onClick={() => toggleHour(hour)}
+                            className={`py-2 px-2.5 rounded-xs text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${
+                              isSelected
+                                ? "bg-[#006370] text-white font-bold shadow-2xs"
+                                : isBooked
+                                ? "bg-slate-50 text-slate-300 line-through border border-dashed border-slate-200 cursor-not-allowed"
+                                : "bg-white text-slate-700 border border-slate-200 hover:border-[#006370] hover:bg-slate-50"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="mt-3 p-3 rounded-xs bg-[#E6F4F2]/50 border border-[#BCE3DE] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 text-slate-800 font-semibold">
+                      <Clock className="w-4 h-4 text-[#006370]" />
+                      <span>
+                        Durasi: {selectedHours[0] || "09:00"} &mdash;{" "}
+                        {selectedHours[selectedHours.length - 1]
+                          ? `${String(parseInt(selectedHours[selectedHours.length - 1].split(":")[0], 10) + 1).padStart(2, "0")}:00`
+                          : "10:00"}{" "}
+                        ({durationHours} Jam)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-4 shadow-2xs">
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <span className="w-5 h-5 rounded-xs bg-[#006370] text-white flex items-center justify-center text-xs font-bold font-mono">
+                  2
+                </span>
+                <div>
+                  <h3 className="font-serif text-base font-bold text-slate-900">
+                    Informasi Kontak Pemesan
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Tiket digital dan kode akses QR akan dikirimkan ke kontak ini.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-semibold text-slate-700">
-                    Durasi Pemakaian: <span className="text-sky-600 font-bold">{durasiJam} Jam</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="block font-bold text-slate-700">
+                    Nama Lengkap Pemesan *
                   </label>
-                  <span className="text-[11px] text-slate-400">Min. 1 jam - Maks. 8 jam</span>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nama lengkap Anda"
+                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors"
+                  />
                 </div>
 
-                <div className="grid grid-cols-6 gap-1.5">
-                  {[1, 2, 3, 4, 6, 8].map((h) => (
-                    <button
-                      key={h}
-                      type="button"
-                      onClick={() => setDurasiJam(h)}
-                      className={`py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        durasiJam === h
-                          ? "bg-slate-900 text-white"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                      }`}
-                    >
-                      {h} Jam
-                    </button>
-                  ))}
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700">
+                    Email Kontak *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="nama@email.com"
+                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block font-bold text-slate-700">
+                    Nomor WhatsApp / HP *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="081234567890"
+                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-20">
+            <div className="bg-white rounded-xs border border-slate-200 p-5 space-y-4 shadow-2xs">
+              <h3 className="font-serif text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+                Ringkasan Pemesanan
+              </h3>
+
+              <div className="space-y-2 border-b border-slate-100 pb-3 text-xs text-slate-600">
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-800">Ruangan</span>
+                  <span className="font-semibold text-slate-900">{space.namaSpace}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tanggal</span>
+                  <span className="font-medium text-slate-900">{formattedSelectedDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Durasi</span>
+                  <span className="font-medium text-slate-900">{durationHours} Jam</span>
                 </div>
               </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Kode Promo Diskon (Opsional)
+              <div className="space-y-2 text-xs text-slate-600">
+                <div className="flex justify-between">
+                  <span>
+                    Sewa ({formatRupiah(space.hargaPerJam)} &times; {durationHours} jam)
+                  </span>
+                  <span className="font-mono font-semibold text-slate-900">
+                    {formatRupiah(spaceRental)}
+                  </span>
+                </div>
+
+                {appliedPromo && (
+                  <div className="flex justify-between text-emerald-700 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5" />
+                      <span>{appliedPromo.code} (-{appliedPromo.percent}%)</span>
+                    </span>
+                    <span className="font-mono">-{formatRupiah(discountAmount)}</span>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-sm">Total Bayar</span>
+                  <span className="text-lg font-bold text-[#006370] font-mono">
+                    {formatRupiah(totalPayable)}
+                  </span>
+                </div>
+              </div>
+
+              <form onSubmit={handleApplyPromo} className="space-y-2 pt-2 border-t border-slate-100">
+                <label className="block text-[11px] font-bold text-slate-700">
+                  Punya Kode Voucher?
                 </label>
                 <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
-                    <input
-                      type="text"
-                      disabled={!!appliedDiscount || checkingPromo}
-                      value={promoInput}
-                      onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                      placeholder="Masukkan kode promo"
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-sky-600 rounded-lg text-xs font-mono uppercase text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:opacity-60"
-                    />
-                  </div>
-
-                  {appliedDiscount ? (
-                    <button
-                      type="button"
-                      onClick={handleRemovePromo}
-                      className="px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors"
-                    >
-                      Hapus
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleApplyPromo}
-                      disabled={checkingPromo || !promoInput.trim()}
-                      className="px-3.5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 disabled:opacity-60 rounded-lg transition-colors flex items-center gap-1"
-                    >
-                      {checkingPromo ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Percent className="w-3.5 h-3.5" />
-                      )}
-                      <span>Terapkan</span>
-                    </button>
-                  )}
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    placeholder="KODE PROMO"
+                    className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-mono font-bold text-slate-900 focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={promoLoading || !promoInput.trim()}
+                    className="px-3 py-1.5 rounded-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    {promoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Gunakan"}
+                  </button>
                 </div>
 
                 {promoMessage && (
                   <p
-                    className={`text-xs font-medium flex items-center gap-1 mt-1 ${
-                      promoMessage.type === "success" ? "text-emerald-700" : "text-rose-700"
+                    className={`text-[11px] font-medium ${
+                      promoMessage.type === "success" ? "text-emerald-700" : "text-rose-600"
                     }`}
                   >
-                    {promoMessage.type === "success" ? (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    ) : (
-                      <AlertCircle className="w-3.5 h-3.5" />
-                    )}
-                    <span>{promoMessage.text}</span>
+                    {promoMessage.text}
                   </p>
                 )}
-              </div>
+              </form>
 
-              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-2 text-xs">
-                <p className="font-bold text-slate-900 uppercase tracking-wide text-[10px]">
-                  Rincian Biaya Pemakaian
-                </p>
-
-                <div className="flex justify-between text-slate-600">
-                  <span>
-                    Tarif Dasar ({durasiJam} jam × {formatRupiah(hourlyRate)})
-                  </span>
-                  <span className="font-mono font-medium text-slate-900">{formatRupiah(subtotal)}</span>
+              {submitError && (
+                <div className="p-3 rounded-xs bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                  <span>{submitError}</span>
                 </div>
-
-                {appliedDiscount && (
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span>Diskon Kupon ({appliedDiscount.persentaseDiskon}%)</span>
-                    <span className="font-mono">- {formatRupiah(discountAmount)}</span>
-                  </div>
-                )}
-
-                <div className="pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                  <span className="font-bold text-slate-900 text-sm">Total Pembayaran</span>
-                  <span className="text-xl font-bold text-slate-900 font-mono">
-                    {formatRupiah(finalTotal)}
-                  </span>
-                </div>
-              </div>
+              )}
 
               <button
-                type="submit"
+                type="button"
+                onClick={handleProceedCheckout}
                 disabled={submitting}
-                className="w-full py-2.5 px-4 rounded-lg font-semibold text-xs text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-60 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                className="w-full py-2.5 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Memproses Reservasi...</span>
                   </>
                 ) : (
                   <>
-                    <span>Lanjut ke Review & Pembayaran</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>Lanjut ke Pembayaran</span>
+                    <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
-
-      {bookingSuccessData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-5 text-center border border-slate-200 shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-
-            {bookingSuccessData.status === "disetujui" ? (
-              <div className="space-y-3">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Instant Booking — Langsung Disetujui!</span>
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Pemesanan Disetujui Otomatis
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Reservasi <span className="font-bold text-slate-700">#{bookingSuccessData.id}</span> telah disetujui. Selesaikan pembayaran sekarang untuk mengaktifkan kode QR check-in Anda.
-                </p>
-
-                {directPayError && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs text-left">
-                    {directPayError}
-                  </div>
-                )}
-
-                {directPaySuccess ? (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Pembayaran Berhasil! Tiket QR Anda sekarang aktif dan siap dipakai.</span>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleDirectPay}
-                    disabled={payingDirect}
-                    className="w-full py-3 px-4 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-                  >
-                    {payingDirect ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Membuka Snap Payment...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Wallet className="w-4 h-4" />
-                        <span>Bayar Sekarang (Midtrans Snap)</span>
-                      </>
-                    )}
-                  </button>
-                )}
-
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center space-y-2">
-                  <QrCodeCard
-                    value={bookingSuccessData.qrCode}
-                    size={118}
-                    label="E-Tiket Siap Pakai"
-                  />
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Pemesanan Terkirim & Menunggu Persetujuan
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Nomor reservasi{" "}
-                    <span className="font-bold text-slate-700">
-                      #{bookingSuccessData.id}
-                    </span>{" "}
-                    telah tercatat. Pemilik ruangan akan memverifikasi permintaan Anda.
-                  </p>
-                </div>
-
-                <div className="w-full space-y-2 text-left">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-sky-600 text-white text-[10px] font-bold flex items-center justify-center">
-                      1
-                    </div>
-                    <span className="text-xs font-semibold text-slate-900">
-                      Menunggu Persetujuan
-                    </span>
-                    <div className="flex-1 h-px bg-slate-200" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold flex items-center justify-center">
-                      2
-                    </div>
-                    <span className="text-xs font-semibold text-slate-400">
-                      Tiket QR Aktif
-                    </span>
-                    <div className="flex-1 h-px bg-slate-200" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold flex items-center justify-center">
-                      3
-                    </div>
-                    <span className="text-xs font-semibold text-slate-400">
-                      Check-In di Lokasi
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5 flex items-start gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                  <span>
-                    Kode QR Anda baru aktif dan dapat digunakan untuk check-in{" "}
-                    <span className="font-semibold">setelah pemesanan disetujui</span>{" "}
-                    oleh pemilik ruangan.
-                  </span>
-                </p>
-
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col items-center justify-center space-y-2">
-                  <QrCodeCard
-                    value={bookingSuccessData.qrCode}
-                    size={118}
-                    label="Tiket Terbit — Menunggu Persetujuan"
-                  />
-                  <p className="text-[11px] text-slate-500 pt-1">
-                    Pantau status di "Tiket Saya". Anda dapat menunjukkan kode QR ini
-                    setelah status disetujui.
-                  </p>
-                </div>
-              </>
-            )}
-
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/member")}
-                className="py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-              >
-                Lihat Tiket Saya
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard/member/spaces")}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-              >
-                Katalog Ruangan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </DashboardLayout>
   );
 }

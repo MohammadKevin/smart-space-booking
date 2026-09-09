@@ -48,7 +48,6 @@ export function GoogleLoginButton({
         throw new Error("Token autentikasi Google tidak ditemukan.");
       }
 
-      // Decode payload client-side for immediate name/avatar fallback
       let name: string | undefined;
       let email: string | undefined;
       let avatar: string | undefined;
@@ -115,7 +114,7 @@ export function GoogleLoginButton({
 
       google.accounts.id.prompt((notification: any) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // If One Tap is blocked or not displayed, open Google OAuth popup
+          
           initiateOAuthRedirect();
         }
       });
@@ -125,7 +124,7 @@ export function GoogleLoginButton({
   };
 
   const initiateOAuthRedirect = () => {
-    // Standard Google OAuth 2.0 Auth URL for web client
+    
     const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       googleClientId
     )}&redirect_uri=${encodeURIComponent(
@@ -143,7 +142,6 @@ export function GoogleLoginButton({
       `width=${width},height=${height},left=${left},top=${top},status=no,toolbar=no,menubar=no`
     );
 
-    // Monitor popup hash for response
     const interval = setInterval(() => {
       try {
         if (!popup || popup.closed) {
@@ -165,7 +163,7 @@ export function GoogleLoginButton({
           }
         }
       } catch {
-        // Cross-origin access error while popup is on google.com is expected until redirect
+        
       }
     }, 500);
   };
