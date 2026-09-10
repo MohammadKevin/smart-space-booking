@@ -18,6 +18,8 @@ export class PrismaService
       `ALTER TABLE Transaksi ADD COLUMN komisiPlatform DOUBLE DEFAULT 0;`,
       `ALTER TABLE transaksi ADD COLUMN pendapatanOwner DOUBLE DEFAULT 0;`,
       `ALTER TABLE Transaksi ADD COLUMN pendapatanOwner DOUBLE DEFAULT 0;`,
+      `ALTER TABLE diskon ADD COLUMN spaceId INT NULL;`,
+      `ALTER TABLE Diskon ADD COLUMN spaceId INT NULL;`,
     ];
 
     for (const sql of sqlStatements) {
