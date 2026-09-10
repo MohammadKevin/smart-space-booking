@@ -18,7 +18,9 @@ export class WaitlistService {
     });
 
     if (!member) {
-      throw new ForbiddenException('Hanya member yang dapat bergabung ke daftar tunggu (waitlist).');
+      throw new ForbiddenException(
+        'Hanya member yang dapat bergabung ke daftar tunggu (waitlist).',
+      );
     }
 
     const space = await this.prisma.space.findUnique({
@@ -26,7 +28,9 @@ export class WaitlistService {
     });
 
     if (!space) {
-      throw new NotFoundException(`Space dengan ID ${dto.spaceId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Space dengan ID ${dto.spaceId} tidak ditemukan.`,
+      );
     }
 
     const targetDate = normalizeDateToStartOfDay(dto.tanggal);
@@ -42,7 +46,9 @@ export class WaitlistService {
     });
 
     if (existingWaitlist) {
-      throw new BadRequestException('Anda sudah terdaftar di waitlist untuk slot dan jadwal ini.');
+      throw new BadRequestException(
+        'Anda sudah terdaftar di waitlist untuk slot dan jadwal ini.',
+      );
     }
 
     return this.prisma.waitlist.create({
@@ -98,11 +104,15 @@ export class WaitlistService {
     });
 
     if (!item) {
-      throw new NotFoundException(`Item waitlist #${waitlistId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Item waitlist #${waitlistId} tidak ditemukan.`,
+      );
     }
 
     if (item.memberId !== member.id) {
-      throw new ForbiddenException('Anda tidak memiliki izin membatalkan waitlist ini.');
+      throw new ForbiddenException(
+        'Anda tidak memiliki izin membatalkan waitlist ini.',
+      );
     }
 
     return this.prisma.waitlist.update({

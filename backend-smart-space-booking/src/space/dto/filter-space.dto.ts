@@ -112,4 +112,3 @@ export class FilterSpaceDto {
   @Min(1)
   limit?: number;
 }
-

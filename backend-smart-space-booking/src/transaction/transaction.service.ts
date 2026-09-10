@@ -20,7 +20,10 @@ export class TransactionService {
     private readonly mailService: MailService,
   ) {}
 
-  private generateInvoiceNumber(reservationId: number, ownerId?: number): string {
+  private generateInvoiceNumber(
+    reservationId: number,
+    ownerId?: number,
+  ): string {
     const stamp = Date.now().toString().slice(-6);
     const ownerTag = ownerId ? `OWNER${ownerId}-` : '';
     return `INV-${ownerTag}RES${reservationId}-${stamp}`;
@@ -63,7 +66,9 @@ export class TransactionService {
     });
 
     if (!tx) {
-      throw new NotFoundException(`Transaksi dengan ID / Reservasi ID ${id} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Transaksi dengan ID / Reservasi ID ${id} tidak ditemukan.`,
+      );
     }
 
     if (
@@ -197,7 +202,8 @@ export class TransactionService {
     const ownerId = reservation.ownerId;
     const coworkingName = reservation.owner?.namaCoworking || 'Coworking Space';
     const spaceId = reservation.detailReservasi?.spaceId || 0;
-    const spaceName = reservation.detailReservasi?.space?.namaSpace || 'Ruangan';
+    const spaceName =
+      reservation.detailReservasi?.space?.namaSpace || 'Ruangan';
     const durasiJam = reservation.durasiJam || 1;
 
     const itemDetails = [
@@ -211,15 +217,22 @@ export class TransactionService {
     ];
     const customField1 = `OwnerID:${ownerId}|${coworkingName}`.slice(0, 255);
     const customField2 = `SpaceID:${spaceId}|${spaceName}`.slice(0, 255);
-    const customField3 = `MemberID:${member.id}|UserID:${memberUserId}`.slice(0, 255);
+    const customField3 = `MemberID:${member.id}|UserID:${memberUserId}`.slice(
+      0,
+      255,
+    );
 
     let directChargeResult: any = null;
-    if (paymentMethod && paymentMethod !== 'snap' && paymentMethod !== 'credit_card') {
+    if (
+      paymentMethodClean &&
+      paymentMethodClean !== 'snap' &&
+      paymentMethodClean !== 'credit_card'
+    ) {
       try {
         directChargeResult = await this.midtrans.chargeDirectPayment({
           orderId,
           grossAmount: tx.jumlah,
-          paymentMethod,
+          paymentMethod: paymentMethodClean,
           firstName: member.namaMember,
           email: member.user?.email || undefined,
           phone: member.telp,
@@ -229,7 +242,9 @@ export class TransactionService {
           customField3,
         });
       } catch (err) {
-        this.logger.warn(`Could not create direct charge payment: ${(err as Error).message}`);
+        this.logger.warn(
+          `Could not create direct charge payment: ${(err as Error).message}`,
+        );
       }
     }
 
@@ -307,10 +322,7 @@ export class TransactionService {
     // Exact match orderId against midtransOrderId or nomorInvoice (remove fuzzy slice(0, 18) match)
     const tx = await this.prisma.transaksi.findFirst({
       where: {
-        OR: [
-          { midtransOrderId: orderId },
-          { nomorInvoice: orderId },
-        ],
+        OR: [{ midtransOrderId: orderId }, { nomorInvoice: orderId }],
       },
       include: {
         reservasi: {
@@ -337,7 +349,7 @@ export class TransactionService {
     if (incomingGrossAmount !== expectedAmount) {
       this.logger.error(
         `[SECURITY ALERT] Manipulasi nominal terdeteksi pada notifikasi Midtrans! ` +
-        `Order: '${orderId}', Expected: Rp ${expectedAmount}, Received: Rp ${incomingGrossAmount}`,
+          `Order: '${orderId}', Expected: Rp ${expectedAmount}, Received: Rp ${incomingGrossAmount}`,
       );
       throw new BadRequestException(
         `Nominal pembayaran (Rp ${incomingGrossAmount}) tidak sesuai dengan tagihan (Rp ${expectedAmount}).`,
@@ -355,7 +367,8 @@ export class TransactionService {
     let status: PembayaranStatus;
     if (
       transactionStatus === 'settlement' ||
-      (transactionStatus === 'capture' && (!fraudStatus || fraudStatus === 'accept'))
+      (transactionStatus === 'capture' &&
+        (!fraudStatus || fraudStatus === 'accept'))
     ) {
       status = PembayaranStatus.lunas;
     } else if (transactionStatus === 'pending') {
@@ -376,7 +389,9 @@ export class TransactionService {
         metodePembayaran: payload.payment_type || tx.metodePembayaran,
         midtransTransId: payload.transaction_id || tx.midtransTransId,
         dibayarPada:
-          status === PembayaranStatus.lunas ? (tx.dibayarPada || new Date()) : tx.dibayarPada,
+          status === PembayaranStatus.lunas
+            ? tx.dibayarPada || new Date()
+            : tx.dibayarPada,
         persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
         komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
         pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
@@ -393,7 +408,10 @@ export class TransactionService {
       },
     });
 
-    if (status === PembayaranStatus.lunas && updated.reservasi?.status === ReservasiStatus.pending) {
+    if (
+      status === PembayaranStatus.lunas &&
+      updated.reservasi?.status === ReservasiStatus.pending
+    ) {
       await this.prisma.reservasi.update({
         where: { id: updated.reservasi.id },
         data: { status: ReservasiStatus.disetujui },
@@ -403,7 +421,8 @@ export class TransactionService {
     if (isNewlyPaid && updated.reservasi?.member?.user?.email) {
       const email = updated.reservasi.member.user.email;
       const memberName = updated.reservasi.member.namaMember;
-      const spaceName = updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
+      const spaceName =
+        updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
       const invoiceNum = updated.nomorInvoice;
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
@@ -418,7 +437,9 @@ export class TransactionService {
           method,
         )
         .catch((err) => {
-          this.logger.error(`Gagal mengirim email konfirmasi pembayaran: ${(err as Error).message}`);
+          this.logger.error(
+            `Gagal mengirim email konfirmasi pembayaran: ${(err as Error).message}`,
+          );
         });
     }
 
@@ -436,7 +457,11 @@ export class TransactionService {
     const mt = await this.midtrans.getTransactionStatus(tx.midtransOrderId);
     const transactionStatus = mt.transaction_status;
 
-    if (!mt || mt.status_code === '500' || transactionStatus === 'unconfigured') {
+    if (
+      !mt ||
+      mt.status_code === '500' ||
+      transactionStatus === 'unconfigured'
+    ) {
       throw new BadRequestException(
         'Status pembayaran belum dapat diverifikasi dari gateway Midtrans.',
       );
@@ -449,7 +474,7 @@ export class TransactionService {
       if (incomingAmount !== expectedAmount) {
         this.logger.error(
           `[SECURITY ALERT] Nominal mismatch pada syncPayment order '${tx.midtransOrderId}'! ` +
-          `Expected: Rp ${expectedAmount}, Received: Rp ${incomingAmount}`,
+            `Expected: Rp ${expectedAmount}, Received: Rp ${incomingAmount}`,
         );
         throw new BadRequestException(
           'Nominal pembayaran pada gateway tidak cocok dengan tagihan reservasi.',
@@ -477,7 +502,9 @@ export class TransactionService {
         metodePembayaran: mt.payment_type || tx.metodePembayaran,
         midtransTransId: mt.transaction_id || tx.midtransTransId,
         dibayarPada:
-          status === PembayaranStatus.lunas ? (tx.dibayarPada || new Date()) : tx.dibayarPada,
+          status === PembayaranStatus.lunas
+            ? tx.dibayarPada || new Date()
+            : tx.dibayarPada,
         persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
         komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
         pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
@@ -494,17 +521,24 @@ export class TransactionService {
       },
     });
 
-    if (status === PembayaranStatus.lunas && updated.reservasi?.status === ReservasiStatus.pending) {
+    if (
+      status === PembayaranStatus.lunas &&
+      updated.reservasi?.status === ReservasiStatus.pending
+    ) {
       await this.prisma.reservasi.update({
         where: { id: updated.reservasi.id },
         data: { status: ReservasiStatus.disetujui },
       });
     }
 
-    if (status === PembayaranStatus.lunas && updated.reservasi?.member?.user?.email) {
+    if (
+      status === PembayaranStatus.lunas &&
+      updated.reservasi?.member?.user?.email
+    ) {
       const email = updated.reservasi.member.user.email;
       const memberName = updated.reservasi.member.namaMember;
-      const spaceName = updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
+      const spaceName =
+        updated.reservasi.detailReservasi?.space?.namaSpace || 'Space';
       const invoiceNum = updated.nomorInvoice;
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
@@ -519,7 +553,9 @@ export class TransactionService {
           method,
         )
         .catch((err) => {
-          this.logger.error(`Gagal mengirim email konfirmasi pembayaran sync: ${(err as Error).message}`);
+          this.logger.error(
+            `Gagal mengirim email konfirmasi pembayaran sync: ${(err as Error).message}`,
+          );
         });
     }
 

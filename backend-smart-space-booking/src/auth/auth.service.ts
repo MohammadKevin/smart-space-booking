@@ -38,7 +38,10 @@ export class AuthService {
   }
 
   private getDevOtp(otpCode: string): string | undefined {
-    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_DEV_OTP !== 'true') {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.ENABLE_DEV_OTP !== 'true'
+    ) {
       return undefined;
     }
     return otpCode;
@@ -108,7 +111,12 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(payload);
-    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+    const {
+      password: _,
+      otpCode: _o,
+      resetOtpCode: _r,
+      ...sanitizedUser
+    } = user;
 
     return {
       message: 'Login berhasil',
@@ -264,7 +272,12 @@ export class AuthService {
         role: user.role,
       };
       const token = this.jwtService.sign(payload);
-      const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+      const {
+        password: _,
+        otpCode: _o,
+        resetOtpCode: _r,
+        ...sanitizedUser
+      } = user;
 
       return {
         message: 'Email sudah terverifikasi sebelumnya.',
@@ -305,7 +318,12 @@ export class AuthService {
       role: updatedUser.role,
     };
     const token = this.jwtService.sign(payload);
-    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = updatedUser;
+    const {
+      password: _,
+      otpCode: _o,
+      resetOtpCode: _r,
+      ...sanitizedUser
+    } = updatedUser;
 
     return {
       message: 'Verifikasi email berhasil! Selamat datang di WorkNest.',
@@ -326,7 +344,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Akun dengan email tersebut tidak ditemukan.');
+      throw new NotFoundException(
+        'Akun dengan email tersebut tidak ditemukan.',
+      );
     }
 
     const recipientName =
@@ -499,7 +519,7 @@ export class AuthService {
           email: cleanEmail,
           password: hashedPassword,
           role: Role.staff,
-          isVerified: true, 
+          isVerified: true,
         },
       });
 
@@ -533,7 +553,9 @@ export class AuthService {
     const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
 
     if (!configuredSecret || dto.secretKey !== configuredSecret) {
-      throw new ForbiddenException('Kunci rahasia Super Admin salah atau tidak terkonfigurasi pada server.');
+      throw new ForbiddenException(
+        'Kunci rahasia Super Admin salah atau tidak terkonfigurasi pada server.',
+      );
     }
 
     try {
@@ -541,7 +563,9 @@ export class AuthService {
         `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`,
       );
     } catch (err) {
-      this.logger.warn(`Could not alter users table role enum: ${(err as Error).message}`);
+      this.logger.warn(
+        `Could not alter users table role enum: ${(err as Error).message}`,
+      );
     }
 
     const cleanEmail = dto.email.trim().toLowerCase();
@@ -585,7 +609,9 @@ export class AuthService {
         userId,
       );
     } catch (err) {
-      this.logger.warn(`Could not execute raw role update to super_admin: ${(err as Error).message}`);
+      this.logger.warn(
+        `Could not execute raw role update to super_admin: ${(err as Error).message}`,
+      );
     }
 
     const user = await this.prisma.user.findUnique({
@@ -603,7 +629,12 @@ export class AuthService {
       role: user!.role,
     };
     const token = this.jwtService.sign(payload);
-    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user!;
+    const {
+      password: _,
+      otpCode: _o,
+      resetOtpCode: _r,
+      ...sanitizedUser
+    } = user!;
 
     return {
       message: 'Akun Super Admin (Platform CEO) berhasil diaktifkan.',
@@ -626,7 +657,10 @@ export class AuthService {
           const googleData = await googleRes.json();
           if (googleData.email) {
             email = googleData.email.trim().toLowerCase();
-            name = googleData.name || name || (email ? email.split('@')[0] : 'Member');
+            name =
+              googleData.name ||
+              name ||
+              (email ? email.split('@')[0] : 'Member');
             avatar = googleData.picture || avatar;
           }
         } else {
@@ -640,13 +674,18 @@ export class AuthService {
             const userinfoData = await userinfoRes.json();
             if (userinfoData.email) {
               email = userinfoData.email.trim().toLowerCase();
-              name = userinfoData.name || name || (email ? email.split('@')[0] : 'Member');
+              name =
+                userinfoData.name ||
+                name ||
+                (email ? email.split('@')[0] : 'Member');
               avatar = userinfoData.picture || avatar;
             }
           }
         }
       } catch (err) {
-        this.logger.warn(`Failed verifying Google token: ${(err as Error).message}`);
+        this.logger.warn(
+          `Failed verifying Google token: ${(err as Error).message}`,
+        );
       }
     }
 
@@ -691,7 +730,12 @@ export class AuthService {
         role: user.role,
       };
       const token = this.jwtService.sign(payload);
-      const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+      const {
+        password: _,
+        otpCode: _o,
+        resetOtpCode: _r,
+        ...sanitizedUser
+      } = user;
 
       return {
         message: 'Login dengan Google berhasil!',
@@ -771,7 +815,12 @@ export class AuthService {
       throw new NotFoundException('Pengguna tidak ditemukan.');
     }
 
-    const { password: _, otpCode: _o, resetOtpCode: _r, ...sanitizedUser } = user;
+    const {
+      password: _,
+      otpCode: _o,
+      resetOtpCode: _r,
+      ...sanitizedUser
+    } = user;
     return sanitizedUser;
   }
 }

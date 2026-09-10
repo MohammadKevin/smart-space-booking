@@ -5,7 +5,8 @@ import { Type } from 'class-transformer';
 export class UpdateCommissionDto {
   @ApiProperty({
     example: 5.0,
-    description: 'Persentase komisi platform dari setiap transaksi sewa (0% - 50%)',
+    description:
+      'Persentase komisi platform dari setiap transaksi sewa (0% - 50%)',
   })
   @Type(() => Number)
   @IsNumber({}, { message: 'Persentase komisi harus berupa angka' })

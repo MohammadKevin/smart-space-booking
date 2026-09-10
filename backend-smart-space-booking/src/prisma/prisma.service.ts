@@ -10,7 +10,7 @@ export class PrismaService
     await this.$connect();
     try {
       await this.$executeRawUnsafe(
-        `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`
+        `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`,
       );
     } catch {}
   }

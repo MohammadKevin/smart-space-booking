@@ -52,10 +52,15 @@ export class SuperAdminService {
       await this.prisma.platformSetting.upsert({
         where: { key: 'PLATFORM_COMMISSION_PERCENT' },
         update: { value: percent.toString() },
-        create: { key: 'PLATFORM_COMMISSION_PERCENT', value: percent.toString() },
+        create: {
+          key: 'PLATFORM_COMMISSION_PERCENT',
+          value: percent.toString(),
+        },
       });
     } catch (err: any) {
-      this.logger.warn(`Failed to persist commission rate to DB, using in-memory: ${err.message}`);
+      this.logger.warn(
+        `Failed to persist commission rate to DB, using in-memory: ${err.message}`,
+      );
     }
 
     this.logger.log(`Platform commission rate updated to: ${percent}%`);
@@ -79,16 +84,16 @@ export class SuperAdminService {
       (acc, t) =>
         acc +
         (t.komisiPlatform ??
-          ((t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100)),
+          (t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100),
       0,
     );
     const totalOwnersPayout = transactions.reduce(
       (acc, t) =>
         acc +
         (t.pendapatanOwner ??
-          (t.jumlah -
+          t.jumlah -
             (t.komisiPlatform ??
-              ((t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100)))),
+              (t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100)),
       0,
     );
 
@@ -166,10 +171,8 @@ export class SuperAdminService {
         const amt = tx.jumlah || 0;
         const profit =
           tx.komisiPlatform ??
-          ((amt * (tx.persentaseKomisiPlatform ?? rate)) / 100);
-        const payout =
-          tx.pendapatanOwner ??
-          (amt - profit);
+          (amt * (tx.persentaseKomisiPlatform ?? rate)) / 100;
+        const payout = tx.pendapatanOwner ?? amt - profit;
 
         monthlyStats[monthIdx].gmv += amt;
         monthlyStats[monthIdx].platformProfit += profit;
@@ -178,7 +181,10 @@ export class SuperAdminService {
       }
     }
 
-    const totalGmvAnnual = monthlyStats.reduce((acc, curr) => acc + curr.gmv, 0);
+    const totalGmvAnnual = monthlyStats.reduce(
+      (acc, curr) => acc + curr.gmv,
+      0,
+    );
     const totalPlatformProfitAnnual = monthlyStats.reduce(
       (acc, curr) => acc + curr.platformProfit,
       0,
@@ -232,7 +238,7 @@ export class SuperAdminService {
     return owners.map((o) => {
       let gmv = 0;
       let platformFee = 0;
-      let totalBookings = o.reservasi.length;
+      const totalBookings = o.reservasi.length;
       let paidBookings = 0;
 
       for (const res of o.reservasi) {
@@ -245,7 +251,7 @@ export class SuperAdminService {
           paidBookings += 1;
           const fee =
             res.transaksi.komisiPlatform ??
-            ((amt * (res.transaksi.persentaseKomisiPlatform ?? rate)) / 100);
+            (amt * (res.transaksi.persentaseKomisiPlatform ?? rate)) / 100;
           platformFee += fee;
         } else if (
           res.status === ReservasiStatus.selesai ||
@@ -387,7 +393,9 @@ export class SuperAdminService {
     });
 
     if (!user) {
-      throw new NotFoundException(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Pengguna dengan ID ${userId} tidak ditemukan.`,
+      );
     }
 
     const updated = await this.prisma.user.update({
@@ -418,7 +426,9 @@ export class SuperAdminService {
     });
 
     if (!user) {
-      throw new NotFoundException(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+      throw new NotFoundException(
+        `Pengguna dengan ID ${userId} tidak ditemukan.`,
+      );
     }
 
     if (user.role === Role.super_admin) {
@@ -434,4 +444,3 @@ export class SuperAdminService {
     };
   }
 }
-

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Prisma, ReservasiStatus } from '@prisma/client';
@@ -8,7 +12,6 @@ export class ReviewService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateReviewDto, memberUserId: number) {
-    
     const reservasi = await this.prisma.reservasi.findUnique({
       where: { id: dto.reservasiId },
       include: {
@@ -26,11 +29,15 @@ export class ReviewService {
     }
 
     if (reservasi.member.userId !== memberUserId) {
-      throw new ForbiddenException('Hanya pemilik reservasi yang dapat memberikan ulasan.');
+      throw new ForbiddenException(
+        'Hanya pemilik reservasi yang dapat memberikan ulasan.',
+      );
     }
 
     if (reservasi.status !== ReservasiStatus.selesai) {
-      throw new ForbiddenException('Ulasan hanya dapat diberikan setelah reservasi selesai.');
+      throw new ForbiddenException(
+        'Ulasan hanya dapat diberikan setelah reservasi selesai.',
+      );
     }
 
     const existingReview = await this.prisma.review.findUnique({
@@ -38,7 +45,9 @@ export class ReviewService {
     });
 
     if (existingReview) {
-      throw new ForbiddenException('Anda sudah memberikan ulasan untuk reservasi ini.');
+      throw new ForbiddenException(
+        'Anda sudah memberikan ulasan untuk reservasi ini.',
+      );
     }
 
     const review = await this.prisma.review.create({

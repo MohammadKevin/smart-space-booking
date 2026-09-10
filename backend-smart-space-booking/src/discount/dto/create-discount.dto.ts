@@ -50,7 +50,8 @@ export class CreateDiscountDto {
 
   @ApiPropertyOptional({
     example: 1,
-    description: 'ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)',
+    description:
+      'ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)',
   })
   @IsOptional()
   @Type(() => Number)

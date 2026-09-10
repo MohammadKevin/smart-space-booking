@@ -33,7 +33,9 @@ export class CreateReservationDto {
     example: '2026-09-10',
     description: 'Tanggal reservasi (format YYYY-MM-DD atau ISO string)',
   })
-  @Transform(({ value, obj }) => value ?? obj?.tanggal_reservasi ?? obj?.tanggal)
+  @Transform(
+    ({ value, obj }) => value ?? obj?.tanggal_reservasi ?? obj?.tanggal,
+  )
   @IsDateString(
     {},
     { message: 'Tanggal reservasi harus berformat YYYY-MM-DD atau ISO string' },

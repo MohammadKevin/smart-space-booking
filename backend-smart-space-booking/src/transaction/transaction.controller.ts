@@ -37,7 +37,10 @@ export class TransactionController {
     description:
       'Member membuat token Snap atau langsung mendapatkan VA/QRIS Midtrans untuk menyelesaikan pembayaran reservasi.',
   })
-  @ApiResponse({ status: 201, description: 'Pembayaran berhasil diinisialisasi.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Pembayaran berhasil diinisialisasi.',
+  })
   startPayment(
     @Param('reservationId', ParseIntPipe) reservationId: number,
     @GetUser('id') memberUserId: number,

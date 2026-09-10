@@ -52,13 +52,20 @@ export class UserController {
     description:
       'Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.',
   })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Halaman data (opsional)' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Batas data per halaman (opsional)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Halaman data (opsional)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Batas data per halaman (opsional)',
+  })
   @ApiResponse({ status: 200, description: 'Daftar member berhasil dimuat.' })
-  getAllMembers(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  getAllMembers(@Query('page') page?: string, @Query('limit') limit?: string) {
     const p = page ? Math.max(1, parseInt(page, 10)) : undefined;
     const l = limit ? Math.max(1, parseInt(limit, 10)) : undefined;
     return this.userService.getAllMembers(p, l);

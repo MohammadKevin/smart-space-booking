@@ -30,12 +30,17 @@ export class UserService {
 
     const userDataToUpdate: any = {};
 
-    if (dto.email && dto.email.trim().toLowerCase() !== user.email.toLowerCase()) {
+    if (
+      dto.email &&
+      dto.email.trim().toLowerCase() !== user.email.toLowerCase()
+    ) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: dto.email.trim().toLowerCase() },
       });
       if (existingUser && existingUser.id !== userId) {
-        throw new ConflictException(`Email '${dto.email}' sudah terdaftar pada akun lain.`);
+        throw new ConflictException(
+          `Email '${dto.email}' sudah terdaftar pada akun lain.`,
+        );
       }
       userDataToUpdate.email = dto.email.trim().toLowerCase();
     }
@@ -48,7 +53,9 @@ export class UserService {
       }
       const isOldValid = await bcrypt.compare(dto.oldPassword, user.password);
       if (!isOldValid) {
-        throw new BadRequestException('Kata sandi saat ini (lama) tidak sesuai.');
+        throw new BadRequestException(
+          'Kata sandi saat ini (lama) tidak sesuai.',
+        );
       }
       userDataToUpdate.password = await bcrypt.hash(dto.password, 10);
     }
@@ -71,8 +78,10 @@ export class UserService {
       await this.prisma.member.update({
         where: { userId },
         data: {
-          namaMember: dto.nama !== undefined ? dto.nama.trim() : member.namaMember,
-          instansi: dto.instansi !== undefined ? dto.instansi.trim() : member.instansi,
+          namaMember:
+            dto.nama !== undefined ? dto.nama.trim() : member.namaMember,
+          instansi:
+            dto.instansi !== undefined ? dto.instansi.trim() : member.instansi,
           alamat: dto.alamat !== undefined ? dto.alamat.trim() : member.alamat,
           telp: dto.telp !== undefined ? dto.telp.trim() : member.telp,
           foto: dto.foto !== undefined ? dto.foto : member.foto,
@@ -95,7 +104,8 @@ export class UserService {
             dto.namaCoworking !== undefined
               ? dto.namaCoworking.trim()
               : owner.namaCoworking,
-          namaPemilik: dto.nama !== undefined ? dto.nama.trim() : owner.namaPemilik,
+          namaPemilik:
+            dto.nama !== undefined ? dto.nama.trim() : owner.namaPemilik,
           alamat: dto.alamat !== undefined ? dto.alamat.trim() : owner.alamat,
           telp: dto.telp !== undefined ? dto.telp.trim() : owner.telp,
         },

@@ -41,10 +41,7 @@ export class DiscountController {
       'Hanya dapat diakses oleh admin_space untuk membuat kode promo baru pada coworking space miliknya.',
   })
   @ApiResponse({ status: 201, description: 'Diskon berhasil dibuat.' })
-  create(
-    @Body() createDiscountDto: CreateDiscountDto,
-    @GetUser() user: any,
-  ) {
+  create(@Body() createDiscountDto: CreateDiscountDto, @GetUser() user: any) {
     return this.discountService.create(createDiscountDto, user);
   }
 
@@ -91,7 +88,8 @@ export class DiscountController {
   @ApiResponse({ status: 200, description: 'Kode promo valid.' })
   @ApiResponse({
     status: 400,
-    description: 'Kode promo kedaluwarsa, tidak aktif, atau tidak berlaku untuk ruangan ini.',
+    description:
+      'Kode promo kedaluwarsa, tidak aktif, atau tidak berlaku untuk ruangan ini.',
   })
   @ApiResponse({ status: 404, description: 'Kode promo tidak ditemukan.' })
   checkValidity(
@@ -113,7 +111,10 @@ export class DiscountController {
     description:
       'Hanya dapat diakses oleh admin_space untuk melihat daftar promo yang dibuat untuk coworking spacenya.',
   })
-  @ApiResponse({ status: 200, description: 'Daftar diskon milik owner berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daftar diskon milik owner berhasil dimuat.',
+  })
   getMyDiscounts(@GetUser('id') ownerUserId: number) {
     return this.discountService.getMyDiscounts(ownerUserId);
   }
@@ -139,7 +140,10 @@ export class DiscountController {
       'Hanya dapat diakses oleh admin_space pemilik promo untuk mengubah parameter diskon.',
   })
   @ApiResponse({ status: 200, description: 'Diskon berhasil diperbarui.' })
-  @ApiResponse({ status: 403, description: 'Tidak memiliki hak akses atas promo ini.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Tidak memiliki hak akses atas promo ini.',
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDiscountDto: UpdateDiscountDto,
@@ -154,10 +158,14 @@ export class DiscountController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Menghapus Promo / Diskon',
-    description: 'Hanya dapat diakses oleh admin_space pemilik promo untuk menghapus promo.',
+    description:
+      'Hanya dapat diakses oleh admin_space pemilik promo untuk menghapus promo.',
   })
   @ApiResponse({ status: 200, description: 'Diskon berhasil dihapus.' })
-  @ApiResponse({ status: 403, description: 'Tidak memiliki hak akses atas promo ini.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Tidak memiliki hak akses atas promo ini.',
+  })
   remove(@Param('id', ParseIntPipe) id: number, @GetUser() user: any) {
     return this.discountService.remove(id, user);
   }

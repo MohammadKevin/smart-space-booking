@@ -94,7 +94,9 @@ export class SpaceService {
         },
         orderBy: { createdAt: 'desc' },
       }),
-      (page !== undefined || limit !== undefined) ? this.prisma.space.count({ where }) : Promise.resolve(0),
+      page !== undefined || limit !== undefined
+        ? this.prisma.space.count({ where })
+        : Promise.resolve(0),
     ]);
 
     const targetTanggal = filter.tanggal || filter.date;

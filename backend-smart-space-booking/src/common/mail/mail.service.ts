@@ -33,7 +33,9 @@ export class MailService {
         this.transporter = nodemailer.createTransport(config);
         this.logger.log(`SMTP Mail Transporter ready (${host}:${port})`);
       } catch (err: any) {
-        this.logger.warn(`Failed to initialize SMTP transporter: ${err.message}`);
+        this.logger.warn(
+          `Failed to initialize SMTP transporter: ${err.message}`,
+        );
       }
     } else {
       this.logger.log(
@@ -43,7 +45,8 @@ export class MailService {
   }
 
   async sendVerificationOtp(email: string, name: string, otp: string) {
-    const from = process.env.SMTP_FROM || '"WorkNest Coworking" <no-reply@worknest.app>';
+    const from =
+      process.env.SMTP_FROM || '"WorkNest Coworking" <no-reply@worknest.app>';
     const subject = `[WorkNest] Kode Verifikasi Email Anda: ${otp}`;
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
@@ -72,7 +75,9 @@ export class MailService {
       </div>
     `;
 
-    this.logger.log(`\n======================================================\n📨 [VERIFIKASI EMAIL OTP]\nKepada : ${email} (${name})\nKode OTP : ${otp}\nBerlaku  : 15 Menit\n======================================================\n`);
+    this.logger.log(
+      `\n======================================================\n📨 [VERIFIKASI EMAIL OTP]\nKepada : ${email} (${name})\nKode OTP : ${otp}\nBerlaku  : 15 Menit\n======================================================\n`,
+    );
 
     if (this.transporter) {
       try {
@@ -89,7 +94,8 @@ export class MailService {
   }
 
   async sendResetPasswordOtp(email: string, name: string, otp: string) {
-    const from = process.env.SMTP_FROM || '"WorkNest Security" <security@worknest.app>';
+    const from =
+      process.env.SMTP_FROM || '"WorkNest Security" <security@worknest.app>';
     const subject = `[WorkNest] Kode Reset Kata Sandi Anda: ${otp}`;
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
@@ -118,7 +124,9 @@ export class MailService {
       </div>
     `;
 
-    this.logger.log(`\n======================================================\n🔑 [RESET PASSWORD OTP]\nKepada : ${email} (${name})\nKode OTP : ${otp}\nBerlaku  : 15 Menit\n======================================================\n`);
+    this.logger.log(
+      `\n======================================================\n🔑 [RESET PASSWORD OTP]\nKepada : ${email} (${name})\nKode OTP : ${otp}\nBerlaku  : 15 Menit\n======================================================\n`,
+    );
 
     if (this.transporter) {
       try {
@@ -129,7 +137,9 @@ export class MailService {
           html,
         });
       } catch (err: any) {
-        this.logger.error(`Failed to send reset email via SMTP: ${err.message}`);
+        this.logger.error(
+          `Failed to send reset email via SMTP: ${err.message}`,
+        );
       }
     }
   }
@@ -144,7 +154,8 @@ export class MailService {
     invoiceNumber: string,
     total: number,
   ) {
-    const from = process.env.SMTP_FROM || '"WorkNest Booking" <booking@worknest.app>';
+    const from =
+      process.env.SMTP_FROM || '"WorkNest Booking" <booking@worknest.app>';
     const subject = `[WorkNest] Reservasi #${qrCode} Disetujui! - ${spaceName}`;
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
@@ -170,7 +181,9 @@ export class MailService {
       </div>
     `;
 
-    this.logger.log(`[EMAIL NOTIFICATION] Booking approved for ${email}: ${spaceName} (${qrCode})`);
+    this.logger.log(
+      `[EMAIL NOTIFICATION] Booking approved for ${email}: ${spaceName} (${qrCode})`,
+    );
 
     if (this.transporter) {
       try {
@@ -189,7 +202,8 @@ export class MailService {
     total: number,
     method: string,
   ) {
-    const from = process.env.SMTP_FROM || '"WorkNest Payments" <billing@worknest.app>';
+    const from =
+      process.env.SMTP_FROM || '"WorkNest Payments" <billing@worknest.app>';
     const subject = `[WorkNest] Pembayaran Berhasil - Invoice ${invoiceNumber}`;
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
@@ -203,7 +217,9 @@ export class MailService {
       </div>
     `;
 
-    this.logger.log(`[EMAIL NOTIFICATION] Payment success for ${email}: ${invoiceNumber}`);
+    this.logger.log(
+      `[EMAIL NOTIFICATION] Payment success for ${email}: ${invoiceNumber}`,
+    );
 
     if (this.transporter) {
       try {

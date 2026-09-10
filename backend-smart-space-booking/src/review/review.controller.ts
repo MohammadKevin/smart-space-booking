@@ -91,7 +91,10 @@ export class ReviewController {
     summary: 'Ringkasan Rating & Total Review untuk Space',
     description: 'Mendapatkan nilai rata-rata rating dan total jumlah ulasan.',
   })
-  @ApiResponse({ status: 200, description: 'Statistik rating berhasil dimuat.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistik rating berhasil dimuat.',
+  })
   getAverageRating(@Param('spaceId', ParseIntPipe) spaceId: number) {
     return this.reviewService.getAverageRating(spaceId);
   }

@@ -474,11 +474,16 @@ export class ReservationService implements OnModuleInit {
       },
     });
 
-    if (dto.status === ReservasiStatus.disetujui && updated.member?.user?.email) {
+    if (
+      dto.status === ReservasiStatus.disetujui &&
+      updated.member?.user?.email
+    ) {
       const email = updated.member.user.email;
       const memberName = updated.member.namaMember;
       const spaceName = updated.detailReservasi?.space?.namaSpace || 'Space';
-      const rawDate = updated.tanggalReservasi ? updated.tanggalReservasi.toISOString().split('T')[0] : '';
+      const rawDate = updated.tanggalReservasi
+        ? updated.tanggalReservasi.toISOString().split('T')[0]
+        : '';
       const invoiceNum = updated.transaksi?.nomorInvoice || `INV-${updated.id}`;
       const totalCost = updated.detailReservasi?.totalHarga || 0;
 
@@ -553,7 +558,8 @@ export class ReservationService implements OnModuleInit {
           });
         } else if (
           res.transaksi.statusPembayaran === PembayaranStatus.belum_bayar ||
-          res.transaksi.statusPembayaran === PembayaranStatus.menunggu_pembayaran
+          res.transaksi.statusPembayaran ===
+            PembayaranStatus.menunggu_pembayaran
         ) {
           await tx.transaksi.update({
             where: { id: res.transaksi.id },

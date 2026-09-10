@@ -196,7 +196,9 @@ export class DiscountService {
     }
 
     if (!diskon) {
-      throw new NotFoundException(`Kupon diskon '${codeOrId}' tidak ditemukan.`);
+      throw new NotFoundException(
+        `Kupon diskon '${codeOrId}' tidak ditemukan.`,
+      );
     }
 
     const now = new Date();
@@ -219,7 +221,9 @@ export class DiscountService {
       });
 
       if (!space) {
-        throw new NotFoundException(`Ruangan dengan ID ${spaceId} tidak ditemukan.`);
+        throw new NotFoundException(
+          `Ruangan dengan ID ${spaceId} tidak ditemukan.`,
+        );
       }
 
       if (diskon.ownerId && space.ownerId !== diskon.ownerId) {
@@ -261,7 +265,9 @@ export class DiscountService {
       updateData.persentaseDiskon = Number(dto.persentaseDiskon);
     }
     if (dto.kodeDiskon !== undefined) {
-      updateData.kodeDiskon = dto.kodeDiskon ? dto.kodeDiskon.toUpperCase().trim() : null;
+      updateData.kodeDiskon = dto.kodeDiskon
+        ? dto.kodeDiskon.toUpperCase().trim()
+        : null;
     }
     if (dto.tanggalAwal) {
       updateData.tanggalAwal = new Date(dto.tanggalAwal);
@@ -276,10 +282,14 @@ export class DiscountService {
           where: { id: dto.spaceId },
         });
         if (!space) {
-          throw new NotFoundException(`Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`);
+          throw new NotFoundException(
+            `Ruangan dengan ID ${dto.spaceId} tidak ditemukan.`,
+          );
         }
         if (space.ownerId !== owner.id) {
-          throw new ForbiddenException('Ruangan ini bukan milik coworking space Anda.');
+          throw new ForbiddenException(
+            'Ruangan ini bukan milik coworking space Anda.',
+          );
         }
         updateData.spaceId = space.id;
       } else {

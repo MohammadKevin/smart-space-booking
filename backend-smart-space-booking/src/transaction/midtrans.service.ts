@@ -96,7 +96,9 @@ export class MidtransService {
         secure: true,
       },
       customer_details: customerDetails,
-      ...(itemDetails && itemDetails.length > 0 ? { item_details: itemDetails } : {}),
+      ...(itemDetails && itemDetails.length > 0
+        ? { item_details: itemDetails }
+        : {}),
       ...(customField1 ? { custom_field1: customField1 } : {}),
       ...(customField2 ? { custom_field2: customField2 } : {}),
       ...(customField3 ? { custom_field3: customField3 } : {}),
@@ -154,7 +156,9 @@ export class MidtransService {
 
       return {
         token: data.token,
-        redirect_url: data.redirect_url || `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.token}`,
+        redirect_url:
+          data.redirect_url ||
+          `https://app.sandbox.midtrans.com/snap/v2/vtweb/${data.token}`,
       };
     } catch {
       return {
@@ -212,7 +216,9 @@ export class MidtransService {
         gross_amount: Math.round(grossAmount),
       },
       customer_details: customerDetails,
-      ...(itemDetails && itemDetails.length > 0 ? { item_details: itemDetails } : {}),
+      ...(itemDetails && itemDetails.length > 0
+        ? { item_details: itemDetails }
+        : {}),
       ...(customField1 ? { custom_field1: customField1 } : {}),
       ...(customField2 ? { custom_field2: customField2 } : {}),
       ...(customField3 ? { custom_field3: customField3 } : {}),
@@ -258,37 +264,48 @@ export class MidtransService {
       payload.qris = { acquirer: 'gopay' };
     }
 
-    try {
-      const res = await fetch(chargeUrl, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: this.authHeader(),
-        },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch(chargeUrl, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: this.authHeader(),
+      },
+      body: JSON.stringify(payload),
+    });
 
-      const resData = (await res.json()) as Record<string, any>;
+    const resData = (await res.json()) as Record<string, any>;
 
-      if (res.ok && Number(resData.status_code || '400') < 300) {
-        return this.formatDirectPaymentResponse(resData, orderId, grossAmount, method, payload.payment_type);
-      }
-
-      // If duplicate order ID (406), fetch the existing transaction status from Midtrans
-      if (resData.status_code === '406' || res.status === 406) {
-        try {
-          const statusData = await this.getTransactionStatus(orderId);
-          if (statusData && Number(statusData.status_code || '400') < 300) {
-            return this.formatDirectPaymentResponse(statusData, orderId, grossAmount, method, payload.payment_type);
-          }
-        } catch {}
-      }
-
-      throw new Error(resData.status_message || 'Gagal memproses charge payment gateway Midtrans.');
-    } catch (err: any) {
-      throw err;
+    if (res.ok && Number(resData.status_code || '400') < 300) {
+      return this.formatDirectPaymentResponse(
+        resData,
+        orderId,
+        grossAmount,
+        method,
+        payload.payment_type,
+      );
     }
+
+    // If duplicate order ID (406), fetch the existing transaction status from Midtrans
+    if (resData.status_code === '406' || res.status === 406) {
+      try {
+        const statusData = await this.getTransactionStatus(orderId);
+        if (statusData && Number(statusData.status_code || '400') < 300) {
+          return this.formatDirectPaymentResponse(
+            statusData,
+            orderId,
+            grossAmount,
+            method,
+            payload.payment_type,
+          );
+        }
+      } catch {}
+    }
+
+    throw new Error(
+      resData.status_message ||
+        'Gagal memproses charge payment gateway Midtrans.',
+    );
   }
 
   private formatDirectPaymentResponse(
@@ -315,12 +332,16 @@ export class MidtransService {
     const qrString = resData.qr_string || null;
     const qrImageUrl = qrString
       ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrString)}`
-      : (resData.actions && resData.actions.find((a: any) => a.name === 'generate-qr-code')?.url) ||
+      : (resData.actions &&
+          resData.actions.find((a: any) => a.name === 'generate-qr-code')
+            ?.url) ||
         (resData.actions && resData.actions[0]?.url) ||
         null;
 
     const deepLink =
-      (resData.actions && resData.actions.find((a: any) => a.name === 'deeplink-redirect')?.url) ||
+      (resData.actions &&
+        resData.actions.find((a: any) => a.name === 'deeplink-redirect')
+          ?.url) ||
       null;
 
     return {
@@ -338,7 +359,9 @@ export class MidtransService {
       qrString,
       qrImageUrl,
       deepLink,
-      expiryTime: resData.expiry_time || new Date(Date.now() + 24 * 3600000).toISOString(),
+      expiryTime:
+        resData.expiry_time ||
+        new Date(Date.now() + 24 * 3600000).toISOString(),
       statusMessage: resData.status_message,
       transactionStatus: resData.transaction_status,
     };

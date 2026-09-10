@@ -68,7 +68,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Login atau pendaftaran Google berhasil, mengembalikan access_token.',
+    description:
+      'Login atau pendaftaran Google berhasil, mengembalikan access_token.',
   })
   googleAuth(@Body() googleDto: GoogleLoginDto) {
     return this.authService.googleAuth(googleDto);

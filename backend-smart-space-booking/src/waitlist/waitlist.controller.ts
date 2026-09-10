@@ -33,13 +33,11 @@ export class WaitlistController {
   @Roles(Role.member)
   @ApiOperation({
     summary: 'Bergabung ke Antrean / Waitlist Ruangan',
-    description: 'Member mendaftarkan diri ke antrean ruangan saat jadwal penuh.',
+    description:
+      'Member mendaftarkan diri ke antrean ruangan saat jadwal penuh.',
   })
   @ApiResponse({ status: 201, description: 'Berhasil bergabung ke waitlist.' })
-  joinWaitlist(
-    @GetUser('id') userId: number,
-    @Body() dto: CreateWaitlistDto,
-  ) {
+  joinWaitlist(@GetUser('id') userId: number, @Body() dto: CreateWaitlistDto) {
     return this.waitlistService.joinWaitlist(userId, dto);
   }
 
@@ -47,7 +45,8 @@ export class WaitlistController {
   @Roles(Role.member)
   @ApiOperation({
     summary: 'Melihat Antrean Waitlist Saya',
-    description: 'Menampilkan seluruh antrean waitlist milik member yang sedang login.',
+    description:
+      'Menampilkan seluruh antrean waitlist milik member yang sedang login.',
   })
   @ApiResponse({ status: 200, description: 'Daftar waitlist berhasil dimuat.' })
   getMyWaitlists(@GetUser('id') userId: number) {
