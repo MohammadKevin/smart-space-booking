@@ -17,8 +17,8 @@ export default function GlobalErrorPage({
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center p-6 bg-slate-50/50">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 text-center space-y-5 shadow-xs">
-        <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+      <div className="max-w-md w-full bg-white p-8 rounded-xs border border-slate-200 text-center space-y-5 shadow-xs">
+        <div className="w-12 h-12 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
           <AlertCircle className="w-6 h-6" />
         </div>
 
@@ -33,14 +33,14 @@ export default function GlobalErrorPage({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full sm:w-auto px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            className="w-full sm:w-auto px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Coba Lagi</span>
           </button>
           <Link
             href="/"
-            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 text-center"
+            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xs transition-colors flex items-center justify-center gap-1.5 text-center"
           >
             <Home className="w-3.5 h-3.5" />
             <span>Ke Beranda</span>

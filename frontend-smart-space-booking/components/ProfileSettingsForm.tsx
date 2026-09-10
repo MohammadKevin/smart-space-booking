@@ -140,7 +140,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
   return (
     <div className="space-y-6 max-w-4xl">
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/90 shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-xs border border-slate-200/90 shadow-2xs">
         <div className="space-y-1">
           <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
             Pengaturan Akun & Profil
@@ -151,14 +151,14 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
         </div>
 
         <div className="shrink-0">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800 border border-slate-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs text-xs font-semibold bg-slate-50 text-slate-800 border border-slate-200">
             <span>{getRoleLabel()}</span>
           </span>
         </div>
       </div>
 
       {successMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
+        <div className="p-3.5 rounded-xs bg-emerald-50 border border-emerald-200/80 flex items-center justify-between text-emerald-800 text-xs shadow-2xs">
           <div className="flex items-center gap-2 font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMessage}</span>
@@ -167,7 +167,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
       )}
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-rose-800 text-xs shadow-2xs">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <div className="space-y-0.5">
             <p className="font-bold">Gagal Menyimpan Perubahan</p>
@@ -178,7 +178,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {role === "super_admin" ? (
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="bg-white rounded-xs border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-slate-900">Hak Akses & Otoritas Eksekutif</h2>
@@ -187,9 +187,9 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
               <User className="w-4 h-4 text-slate-400" />
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-900 text-white space-y-2">
+            <div className="p-4 rounded-xs bg-slate-900 text-white space-y-2">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#006370] text-white uppercase tracking-wide">
+                <span className="px-2.5 py-1 rounded-xs text-[10px] font-bold bg-[#006370] text-white uppercase tracking-wide">
                   Platform CEO & Administrator
                 </span>
                 <span className="text-xs text-slate-300 font-mono">{user?.email}</span>
@@ -200,7 +200,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+          <div className="bg-white rounded-xs border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-slate-900">Informasi Profil & Kontak</h2>
@@ -238,7 +238,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={nama}
                     onChange={(e) => setNama(e.target.value)}
                     placeholder="Nama lengkap Anda"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -256,7 +256,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={namaCoworking}
                       onChange={(e) => setNamaCoworking(e.target.value)}
                       placeholder="Contoh: SpaceWorks Hub Surabaya"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -274,7 +274,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={instansi}
                       onChange={(e) => setInstansi(e.target.value)}
                       placeholder="Nama instansi atau Umum / Personal"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                     value={telp}
                     onChange={(e) => setTelp(e.target.value)}
                     placeholder="081234567890"
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs text-slate-900 focus:outline-none transition-all font-mono"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={alamat}
                       onChange={(e) => setAlamat(e.target.value)}
                       placeholder="Alamat jalan, gedung, atau kota domisili"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
+        <div className="bg-white rounded-xs border border-slate-200/90 p-5 sm:p-6 space-y-4 shadow-2xs">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-slate-900">Email & Kata Sandi</h2>
@@ -341,7 +341,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="nama@email.com"
-                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all font-mono"
+                  className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all font-mono"
                 />
               </div>
             </div>
@@ -361,12 +361,12 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="Kata sandi lama"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowOldPassword(!showOldPassword)}
-                      className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded"
+                      className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded-xs"
                     >
                       {showOldPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
@@ -382,12 +382,12 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Min. 6 karakter"
-                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-8 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded"
+                      className="absolute right-2 top-2 p-0.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded-xs"
                     >
                       {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
@@ -403,7 +403,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Ulangi sandi baru"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-lg text-xs text-slate-900 focus:outline-none transition-all"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 focus:border-[#006370] focus:ring-1 focus:ring-[#006370]/20 rounded-xs text-xs text-slate-900 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export function ProfileSettingsForm({ role }: ProfileSettingsFormProps) {
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2.5 bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] text-white text-xs font-semibold rounded-[10px] shadow-sm shadow-[#006370]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            className="px-4 py-2.5 bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] text-white text-xs font-semibold rounded-xs shadow-sm shadow-[#006370]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60"
           >
             {loading ? (
               <>

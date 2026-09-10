@@ -135,7 +135,7 @@ function RealSpaceCard({ space }: { space: Space }) {
         </div>
         <Link
           href={`/booking/${space.id}`}
-          className="px-4 py-1.5 rounded-lg bg-[#0D5C63] hover:bg-[#094348] text-xs font-semibold text-white transition-colors shadow-2xs"
+          className="px-4 py-1.5 rounded-xs bg-[#0D5C63] hover:bg-[#094348] text-xs font-semibold text-white transition-colors shadow-2xs"
         >
           {space.tipe === "meeting_room" ? "Pesan Ruangan" : "Pesan Kursi"}
         </Link>

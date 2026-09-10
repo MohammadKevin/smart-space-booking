@@ -159,7 +159,7 @@ export default function SuperAdminOverviewPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium flex items-center gap-2.5">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -366,7 +366,7 @@ export default function SuperAdminOverviewPage() {
                 return (
                   <div key={item.monthIndex} className="flex flex-col items-center justify-end h-full gap-1 group relative">
                     
-                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-lg shadow-lg z-20 whitespace-nowrap">
+                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-xs shadow-lg z-20 whitespace-nowrap">
                       <span>{item.monthName}</span>
                       <span>GMV: {formatRupiah(item.gmv)}</span>
                       <span>Komisi: {formatRupiah(item.platformProfit)}</span>
@@ -375,7 +375,7 @@ export default function SuperAdminOverviewPage() {
                     <div className="w-full max-w-[28px] flex items-end justify-center gap-1 h-full">
                       <div
                         style={{ height: `${gmvHeight}%` }}
-                        className="w-full bg-[#006370] rounded-t-md hover:opacity-90 transition-all"
+                        className="w-full bg-[#006370] rounded-t-xs hover:opacity-90 transition-all"
                       />
                     </div>
 
@@ -456,7 +456,7 @@ export default function SuperAdminOverviewPage() {
               href="/dashboard/super-admin/owners"
               className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
                 <Building className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
@@ -471,7 +471,7 @@ export default function SuperAdminOverviewPage() {
               href="/dashboard/super-admin/commission"
               className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
                 <TicketPercent className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
@@ -486,7 +486,7 @@ export default function SuperAdminOverviewPage() {
               href="/dashboard/super-admin/transactions"
               className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
                 <ReceiptText className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
@@ -501,7 +501,7 @@ export default function SuperAdminOverviewPage() {
               href="/dashboard/super-admin/profile"
               className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
                 <Users className="w-4 h-4" />
               </div>
               <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
@@ -553,7 +553,7 @@ export default function SuperAdminOverviewPage() {
                   <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0">
                           <Building className="w-4 h-4" />
                         </div>
                         <div>

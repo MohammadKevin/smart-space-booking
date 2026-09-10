@@ -173,7 +173,7 @@ export function GoogleLoginButton({
       type="button"
       onClick={handleManualPopup}
       disabled={loading}
-      className="w-full py-2.5 px-4 rounded-lg font-semibold text-xs sm:text-sm text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-300 hover:border-slate-400 shadow-2xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
+      className="w-full py-2.5 px-4 rounded-xs font-semibold text-xs sm:text-sm text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-300 hover:border-slate-400 shadow-2xs transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
     >
       {loading ? (
         <Loader2 className="w-4 h-4 animate-spin text-cyan-600" />

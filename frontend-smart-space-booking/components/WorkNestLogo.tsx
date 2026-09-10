@@ -28,7 +28,7 @@ export function WorkNestLogo({
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <div
-        className={`${iconDimensions} rounded-[8px] bg-gradient-to-br from-[#0284C7] via-[#0284C7] to-[#0D9488] flex items-center justify-center shadow-xs shrink-0 p-1.5`}
+        className={`${iconDimensions} rounded-xs bg-gradient-to-br from-[#0284C7] via-[#0284C7] to-[#0D9488] flex items-center justify-center shadow-xs shrink-0 p-1.5`}
       >
         <svg
           viewBox="0 0 24 24"

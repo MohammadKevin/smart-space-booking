@@ -24,7 +24,7 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-[#0D5C63] flex items-center justify-center text-white shrink-0 shadow-2xs">
+              <div className="w-5 h-5 rounded-xs bg-[#0D5C63] flex items-center justify-center text-white shrink-0 shadow-2xs">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />

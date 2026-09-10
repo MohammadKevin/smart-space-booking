@@ -141,10 +141,10 @@ function LoginForm() {
         <span>Kembali</span>
       </Link>
 
-      <div className="w-full max-w-[480px] bg-white rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/60 p-7 sm:p-9 transition-all">
+      <div className="w-full max-w-[480px] bg-white rounded-xs border border-slate-100 shadow-xl shadow-slate-200/60 p-7 sm:p-9 transition-all">
         
         <div className="flex flex-col items-center text-center">
-          <div className="w-13 h-13 rounded-2xl bg-[#E0F2FE]/80 border border-[#BAE6FD] flex items-center justify-center text-[#0284C7] shadow-xs">
+          <div className="w-13 h-13 rounded-xs bg-[#E0F2FE]/80 border border-[#BAE6FD] flex items-center justify-center text-[#0284C7] shadow-xs">
             <Building2 className="w-6 h-6" />
           </div>
 
@@ -159,7 +159,7 @@ function LoginForm() {
         <div className="pt-4" />
 
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-[10px] bg-rose-50 border border-rose-200 flex flex-col gap-2 text-rose-800 text-xs">
+          <div className="mb-4 p-3 rounded-xs bg-rose-50 border border-rose-200 flex flex-col gap-2 text-rose-800 text-xs">
             <div className="flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
               <span className="font-medium leading-relaxed">{errorMessage}</span>
@@ -167,7 +167,7 @@ function LoginForm() {
             {unverifiedEmail && (
               <Link
                 href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}&type=register`}
-                className="inline-flex items-center gap-1.5 py-1 px-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-md shadow-2xs transition-colors self-start text-[11px]"
+                className="inline-flex items-center gap-1.5 py-1 px-2.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xs shadow-2xs transition-colors self-start text-[11px]"
               >
                 <span>Verify Email Now</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -177,7 +177,7 @@ function LoginForm() {
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded-[10px] bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
+          <div className="mb-4 p-3 rounded-xs bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
             <span className="font-medium leading-relaxed">{successMessage}</span>
           </div>
@@ -197,7 +197,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
               />
             </div>
           </div>
@@ -227,12 +227,12 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded"
+                className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded-xs"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -240,7 +240,7 @@ function LoginForm() {
             </div>
           </div>
 
-          <div className="p-3 rounded-[10px] bg-[#F0F9FF] border border-[#E0F2FE] flex items-start gap-2.5 text-xs text-slate-600">
+          <div className="p-3 rounded-xs bg-[#F0F9FF] border border-[#E0F2FE] flex items-start gap-2.5 text-xs text-slate-600">
             <Network className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" />
             <span className="text-[11px] leading-relaxed">
               <strong className="text-slate-800">Auto-routing engine:</strong> Detects Member, Space Host, or Super Admin permissions upon sign-in.
@@ -253,7 +253,7 @@ function LoginForm() {
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-[#006370] focus:ring-[#006370] cursor-pointer"
+              className="w-4 h-4 rounded-xs border-slate-300 text-[#006370] focus:ring-[#006370] cursor-pointer"
             />
             <label
               htmlFor="remember-me"
@@ -266,7 +266,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-[10px] font-bold text-xs sm:text-sm text-white bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#006370]/25 cursor-pointer mt-2"
+            className="w-full py-3 px-4 rounded-xs font-bold text-xs sm:text-sm text-white bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#006370]/25 cursor-pointer mt-2"
           >
             {loading ? (
               <>
@@ -317,7 +317,7 @@ function LoginForm() {
 
       {forgotModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 border border-slate-200 shadow-2xl relative">
+          <div className="bg-white rounded-xs max-w-sm w-full p-6 space-y-4 border border-slate-200 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-extrabold text-slate-900 text-sm">
                 Reset Account Password
@@ -332,7 +332,7 @@ function LoginForm() {
             </div>
 
             {forgotError && (
-              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              <div className="p-2.5 rounded-xs bg-rose-50 border border-rose-200 text-rose-800 text-xs">
                 {forgotError}
               </div>
             )}
@@ -348,7 +348,7 @@ function LoginForm() {
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 focus:border-[#006370] rounded-xl text-xs text-slate-900 focus:outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 focus:outline-none"
                 />
               </div>
 
@@ -356,14 +356,14 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setForgotModalOpen(false)}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="px-3 py-1.5 rounded-xs border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="px-4 py-1.5 rounded-lg bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-1.5 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
                 >
                   {forgotLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>Send OTP</span>

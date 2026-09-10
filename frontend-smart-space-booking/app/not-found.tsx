@@ -14,9 +14,7 @@ import {
   ShieldCheck,
   ExternalLink,
   Lock,
-  Radio,
   FileQuestion,
-  HelpCircle,
 } from "lucide-react";
 
 export default function NotFoundPage() {
@@ -74,7 +72,7 @@ export default function NotFoundPage() {
             404
           </span>
 
-          <div className="absolute bg-white rounded-2xl border border-slate-200/90 shadow-xl p-4 w-44 space-y-2 transform -rotate-2 hover:rotate-0 transition-transform">
+          <div className="absolute bg-white rounded-xs border border-slate-200/90 shadow-xl p-4 w-44 space-y-2 transform -rotate-2 hover:rotate-0 transition-transform">
             <div className="flex items-center justify-between">
               <div className="flex gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
@@ -83,11 +81,11 @@ export default function NotFoundPage() {
               <FileQuestion className="w-4 h-4 text-slate-400" />
             </div>
             <div className="space-y-1 py-1">
-              <div className="h-2 bg-slate-100 rounded w-3/4" />
-              <div className="h-2 bg-slate-100 rounded w-1/2" />
+              <div className="h-2 bg-slate-100 rounded-xs w-3/4" />
+              <div className="h-2 bg-slate-100 rounded-xs w-1/2" />
             </div>
             <div className="pt-1">
-              <span className="block text-center py-1 rounded-[6px] bg-rose-50 text-rose-600 font-extrabold text-[10px] tracking-widest border border-rose-200">
+              <span className="block text-center py-1 rounded-xs bg-rose-50 text-rose-600 font-extrabold text-[10px] tracking-widest border border-rose-200">
                 ACCESS DENIED
               </span>
             </div>
@@ -95,7 +93,7 @@ export default function NotFoundPage() {
         </div>
 
         <div className="space-y-3 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-xs text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             <span>Error Code: 404 • Page or Workspace Not Found</span>
           </div>
@@ -117,9 +115,9 @@ export default function NotFoundPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search active spaces, hubs, or documentation..."
-              className="w-full pl-10 pr-12 py-2.5 bg-white border border-slate-200 rounded-[10px] text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 shadow-2xs transition-all"
+              className="w-full pl-10 pr-12 py-2.5 bg-white border border-slate-200 rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 shadow-2xs transition-all"
             />
-            <kbd className="absolute right-3 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-[10px] font-mono text-slate-400">
+            <kbd className="absolute right-3 px-1.5 py-0.5 rounded-xs bg-slate-100 border border-slate-200 text-[10px] font-mono text-slate-400">
               ⌘K
             </kbd>
           </form>
@@ -128,7 +126,7 @@ export default function NotFoundPage() {
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold transition-all shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold transition-all shadow-xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Homepage</span>
@@ -136,7 +134,7 @@ export default function NotFoundPage() {
 
           <Link
             href="/spaces"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-semibold transition-colors shadow-2xs"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-semibold transition-colors shadow-2xs"
           >
             <Compass className="w-3.5 h-3.5 text-slate-500" />
             <span>Browse Available Spaces (/spaces)</span>
@@ -144,7 +142,7 @@ export default function NotFoundPage() {
 
           <Link
             href="/dashboard/member"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[10px] bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-semibold transition-colors shadow-2xs"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xs bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 text-xs font-semibold transition-colors shadow-2xs"
           >
             <CalendarCheck className="w-3.5 h-3.5 text-slate-500" />
             <span>Open Member Dashboard</span>
@@ -160,15 +158,15 @@ export default function NotFoundPage() {
             <span className="font-mono text-[10px]">WorkNest Automated Redirect Node 04</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
             
             <Link
               href="/spaces"
-              className="bg-white rounded-2xl border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between"
+              className="bg-white rounded-xs border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between h-full"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-[8px] bg-cyan-50 text-[#006370] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xs bg-cyan-50 text-[#006370] flex items-center justify-center">
                     <Compass className="w-4 h-4" />
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#006370] transition-colors" />
@@ -188,11 +186,11 @@ export default function NotFoundPage() {
 
             <Link
               href="/dashboard/member"
-              className="bg-white rounded-2xl border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between"
+              className="bg-white rounded-xs border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between h-full"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-[8px] bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xs bg-blue-50 text-blue-600 flex items-center justify-center">
                     <CalendarCheck className="w-4 h-4" />
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
@@ -205,7 +203,7 @@ export default function NotFoundPage() {
                 </p>
               </div>
               <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 font-mono text-[10px] font-bold text-slate-500">
-                <Lock className="w-3 h-3 text-slate-400" />
+                <Lock className="w-3.5 h-3.5 text-slate-400" />
                 <span>AUTH PROTOCOL</span>
               </div>
             </Link>
@@ -214,11 +212,11 @@ export default function NotFoundPage() {
               href="https://wa.me/6281234567890?text=Halo,%20halaman%20ruangan%20tidak%20dapat%20ditemukan"
               target="_blank"
               rel="noreferrer"
-              className="bg-white rounded-2xl border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between"
+              className="bg-white rounded-xs border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between h-full"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-[8px] bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xs bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <Headphones className="w-4 h-4" />
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
@@ -235,10 +233,10 @@ export default function NotFoundPage() {
               </div>
             </a>
 
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-4 space-y-3 hover:border-slate-300 hover:shadow-md transition-all group flex flex-col justify-between h-full">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-[8px] bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xs bg-emerald-50 text-emerald-600 flex items-center justify-center">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-slate-400" />

@@ -147,7 +147,7 @@ export function Navbar() {
               className="flex items-center gap-2 group focus:outline-none"
               onClick={() => setMobileMenuOpen(false)}
             >
-              <div className="w-6 h-6 rounded-md bg-[#0D5C63] flex items-center justify-center text-white shrink-0 shadow-xs">
+              <div className="w-6 h-6 rounded-xs bg-[#0D5C63] flex items-center justify-center text-white shrink-0 shadow-xs">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z" />
                   <path d="M2 17l10 5 10-5" />
@@ -245,7 +245,7 @@ export function Navbar() {
                   }
                 }}
                 placeholder="Cari ruangan..."
-                className="w-60 lg:w-72 pl-9 pr-7 py-2 rounded-[10px] border border-slate-200 bg-slate-50/80 hover:bg-white focus:bg-white focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 transition-all text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none shadow-2xs"
+                className="w-60 lg:w-72 pl-9 pr-7 py-2 rounded-xs border border-slate-200 bg-slate-50/80 hover:bg-white focus:bg-white focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 transition-all text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none shadow-2xs"
               />
               {searchQuery && (
                 <button
@@ -255,7 +255,7 @@ export function Navbar() {
                     setSearchResults([]);
                     setSearchDropdownOpen(false);
                   }}
-                  className="absolute right-2.5 p-0.5 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                  className="absolute right-2.5 p-0.5 text-slate-400 hover:text-slate-600 rounded-xs cursor-pointer"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -263,7 +263,7 @@ export function Navbar() {
             </form>
 
             {searchDropdownOpen && searchQuery.trim() && (
-              <div className="absolute left-0 top-full mt-1.5 w-80 lg:w-96 bg-white rounded-[10px] border border-slate-200 shadow-xl p-2 z-50 space-y-1">
+              <div className="absolute left-0 top-full mt-1.5 w-80 lg:w-96 bg-white rounded-xs border border-slate-200 shadow-xl p-2 z-50 space-y-1">
                 {searchLoading ? (
                   <div className="p-4 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-[#006370]" />
@@ -279,9 +279,9 @@ export function Navbar() {
                         key={space.id}
                         href={`/spaces/${space.id}`}
                         onClick={() => setSearchDropdownOpen(false)}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors group cursor-pointer"
+                        className="flex items-center gap-3 p-2 rounded-xs hover:bg-slate-50 transition-colors group cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                        <div className="w-10 h-10 rounded-xs overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                           <img
                             src={
                               space.foto ||
@@ -327,7 +327,7 @@ export function Navbar() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/spaces"
-                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#006370] hover:bg-[#004e58] rounded-[10px] transition-colors shadow-2xs"
+                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#006370] hover:bg-[#004e58] rounded-xs transition-colors shadow-2xs"
                 >
                   Pesan Ruangan
                 </Link>
@@ -336,9 +336,9 @@ export function Navbar() {
                   <button
                     type="button"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+                    className="flex items-center gap-2 px-2 py-1 rounded-xs border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
                   >
-                    <div className="w-6 h-6 rounded-md bg-[#0D5C63] text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                    <div className="w-6 h-6 rounded-xs bg-[#0D5C63] text-white font-bold text-xs flex items-center justify-center shadow-xs">
                       {(getDisplayName() || "U").charAt(0).toUpperCase()}
                     </div>
                     <div className="text-left hidden lg:block">
@@ -350,7 +350,7 @@ export function Navbar() {
                   </button>
 
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-50 animate-fadeIn">
+                  <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-xs shadow-xl border border-slate-200 py-1.5 z-50 animate-fadeIn">
                     <div className="px-3.5 py-2.5 border-b border-slate-100 bg-slate-50/50">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                         Masuk sebagai ({getRoleLabel()})
@@ -561,7 +561,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#006370] hover:bg-[#004e58] rounded-[10px] transition-colors shadow-2xs"
+                  className="inline-flex items-center justify-center px-3.5 py-1.5 text-xs font-semibold text-white bg-[#006370] hover:bg-[#004e58] rounded-xs transition-colors shadow-2xs"
                 >
                   Daftar
                 </Link>
@@ -573,7 +573,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none cursor-pointer"
+              className="p-1.5 rounded-xs text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none cursor-pointer"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -587,28 +587,28 @@ export function Navbar() {
             <Link
               href="/spaces"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xs bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               Ruangan
             </Link>
             <Link
               href="/#instant-rates"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xs bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               Tarif
             </Link>
             <Link
               href="/register?role=owner"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xs bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               Pemilik Ruangan
             </Link>
             <Link
               href="/#protocol"
               onClick={() => setMobileMenuOpen(false)}
-              className="px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors"
+              className="px-3 py-2 rounded-xs bg-slate-50 hover:bg-slate-100 transition-colors"
             >
               Tentang Kami
             </Link>
@@ -616,7 +616,7 @@ export function Navbar() {
 
           {isAuthenticated && user ? (
             <div className="space-y-2 pt-1 border-t border-slate-100">
-              <div className="px-3 py-2 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="px-3 py-2 bg-slate-50 rounded-xs border border-slate-200">
                 <p className="text-xs font-bold text-slate-900">{getDisplayName()}</p>
                 <p className="text-[11px] text-cyan-700 font-medium">Peran: {getRoleLabel()}</p>
               </div>
@@ -626,7 +626,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/super-admin"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <LayoutDashboard className="w-4 h-4 text-slate-500" />
                     <span>Overview Platform</span>
@@ -634,7 +634,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/super-admin/owners"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <Building className="w-4 h-4 text-slate-500" />
                     <span>Mitra Space Owner</span>
@@ -642,7 +642,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/super-admin/commission"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <TicketPercent className="w-4 h-4 text-slate-500" />
                     <span>Komisi Platform</span>
@@ -650,7 +650,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/super-admin/transactions"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <ReceiptText className="w-4 h-4 text-slate-500" />
                     <span>Transaksi Global</span>
@@ -663,7 +663,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/owner"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <LayoutDashboard className="w-4 h-4 text-slate-500" />
                     <span>Dashboard Owner</span>
@@ -671,7 +671,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/owner/reservations"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <CalendarClock className="w-4 h-4 text-slate-500" />
                     <span>Manajemen Reservasi</span>
@@ -679,7 +679,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/owner/spaces"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <Building className="w-4 h-4 text-slate-500" />
                     <span>Inventory Ruangan</span>
@@ -687,7 +687,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/owner/transactions"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <ReceiptText className="w-4 h-4 text-slate-500" />
                     <span>Transaksi & Finansial</span>
@@ -700,7 +700,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/staff"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <QrCode className="w-4 h-4 text-emerald-600" />
                     <span>Terminal Check-In</span>
@@ -708,7 +708,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/owner/transactions"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <ReceiptText className="w-4 h-4 text-slate-500" />
                     <span>Transaksi</span>
@@ -721,7 +721,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/member"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <CalendarCheck className="w-4 h-4 text-cyan-600" />
                     <span>Tiket & Jadwal Saya</span>
@@ -729,7 +729,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/member/transactions"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <Wallet className="w-4 h-4 text-cyan-600" />
                     <span>Transaksi & Invoice</span>
@@ -737,7 +737,7 @@ export function Navbar() {
                   <Link
                     href="/dashboard/member/profile"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xs"
                   >
                     <UserCog className="w-4 h-4 text-slate-500" />
                     <span>Profil Saya</span>
@@ -748,7 +748,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 rounded-lg cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 rounded-xs cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Keluar Akun</span>
@@ -759,7 +759,7 @@ export function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-slate-800 bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 border border-slate-300 rounded-lg transition-colors"
+                className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-slate-800 bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 border border-slate-300 rounded-xs transition-colors"
               >
                 <User className="w-3.5 h-3.5 text-slate-500" />
                 <span>Masuk</span>
@@ -767,7 +767,7 @@ export function Navbar() {
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 rounded-lg shadow-sm shadow-cyan-600/30 transition-all"
+                className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 rounded-xs shadow-sm shadow-cyan-600/30 transition-all"
               >
                 <span>Daftar</span>
                 <ArrowRight className="w-3.5 h-3.5" />

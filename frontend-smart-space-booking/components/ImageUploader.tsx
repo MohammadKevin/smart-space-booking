@@ -166,12 +166,12 @@ export function ImageUploader({
       />
 
       {preview ? (
-        <div className="relative group rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+        <div className="relative group rounded-xs border border-slate-200 bg-slate-50 overflow-hidden">
           <div className="relative aspect-[16/9] w-full max-h-44 bg-slate-900/5">
             <img
               src={preview}
               alt="Preview Foto"
-              className="w-full h-full object-cover rounded-t-xl"
+              className="w-full h-full object-cover rounded-t-xs"
             />
           </div>
 
@@ -190,7 +190,7 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition-colors flex items-center gap-1 text-[11px]"
+                className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xs transition-colors flex items-center gap-1 text-[11px]"
               >
                 <RefreshCw className="w-3 h-3" />
                 <span>Ganti</span>
@@ -198,7 +198,7 @@ export function ImageUploader({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-lg transition-colors flex items-center gap-1 text-[11px]"
+                className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xs transition-colors flex items-center gap-1 text-[11px]"
               >
                 <X className="w-3 h-3" />
                 <span>Hapus</span>
@@ -215,7 +215,7 @@ export function ImageUploader({
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
+          className={`border-2 border-dashed rounded-xs p-5 text-center cursor-pointer transition-all ${
             isDragging
               ? "border-sky-500 bg-sky-50/50"
               : "border-slate-300 hover:border-sky-500 bg-slate-50/60 hover:bg-slate-50"

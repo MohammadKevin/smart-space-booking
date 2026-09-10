@@ -161,7 +161,7 @@ export default function SuperAdminTransactionsPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium flex items-center gap-2.5">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -241,7 +241,7 @@ export default function SuperAdminTransactionsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari no. invoice, nama member, venue..."
-              className="w-full pl-10 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+              className="w-full pl-10 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -254,7 +254,7 @@ export default function SuperAdminTransactionsPage() {
             )}
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold self-stretch sm:self-auto overflow-x-auto">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xs text-xs font-semibold self-stretch sm:self-auto overflow-x-auto">
             {[
               { key: "all", label: "Semua" },
               { key: "lunas", label: "Lunas" },
@@ -265,7 +265,7 @@ export default function SuperAdminTransactionsPage() {
                 key={tab.key}
                 type="button"
                 onClick={() => setStatusTab(tab.key as any)}
-                className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xs whitespace-nowrap transition-colors cursor-pointer ${
                   statusTab === tab.key
                     ? "bg-white text-[#006370] font-bold shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -325,7 +325,7 @@ export default function SuperAdminTransactionsPage() {
                           {tx.nomorInvoice || `INV-${tx.id}`}
                         </p>
                         <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Clock className="w-3 h-3 text-slate-400" />
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>{dateStr}</span>
                         </p>
                       </td>
@@ -371,7 +371,7 @@ export default function SuperAdminTransactionsPage() {
                             e.stopPropagation();
                             setSelectedTx(tx);
                           }}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                          className="px-3 py-1.5 rounded-xs border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
                         >
                           Detail
                         </button>
@@ -395,10 +395,10 @@ export default function SuperAdminTransactionsPage() {
 
       {selectedTx && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xs border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
                   <ReceiptText className="w-4 h-4" />
                 </div>
                 <div>
@@ -413,7 +413,7 @@ export default function SuperAdminTransactionsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedTx(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                className="p-1 rounded-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -421,7 +421,7 @@ export default function SuperAdminTransactionsPage() {
 
             <div className="space-y-4 text-xs">
               
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xs border border-slate-100">
                 <div>
                   <span className="text-slate-400 block text-[11px]">Status Pembayaran</span>
                   <PaymentStatusBadge status={selectedTx.statusPembayaran} />
@@ -434,7 +434,7 @@ export default function SuperAdminTransactionsPage() {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-slate-50 rounded-xl space-y-2 border border-slate-100">
+              <div className="p-3.5 bg-slate-50 rounded-xs space-y-2 border border-slate-100">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                   INFORMASI RESERVASI &amp; RUANGAN
                 </p>
@@ -474,7 +474,7 @@ export default function SuperAdminTransactionsPage() {
                 </div>
               </div>
 
-              <div className="p-3.5 bg-[#E6F4F2]/30 rounded-xl border border-[#BCE3DE] space-y-2">
+              <div className="p-3.5 bg-[#E6F4F2]/30 rounded-xs border border-[#BCE3DE] space-y-2">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#006370]">
                   RINCIAN PEMBAGIAN DANA
                 </p>
@@ -508,7 +508,7 @@ export default function SuperAdminTransactionsPage() {
               <button
                 type="button"
                 onClick={() => setSelectedTx(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Tutup
               </button>

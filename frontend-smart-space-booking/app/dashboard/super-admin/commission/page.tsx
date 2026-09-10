@@ -135,13 +135,13 @@ export default function SuperAdminCommissionPage() {
       </div>
 
       {successMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium flex items-center gap-2.5 shadow-2xs">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5 shadow-2xs">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -244,7 +244,7 @@ export default function SuperAdminCommissionPage() {
                 step="0.5"
                 value={commissionRate}
                 onChange={(e) => setCommissionRate(parseFloat(e.target.value))}
-                className="w-full accent-[#006370] cursor-pointer h-2 bg-slate-100 rounded-lg"
+                className="w-full accent-[#006370] cursor-pointer h-2 bg-slate-100 rounded-xs"
               />
               <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
                 <span>0% (Bebas Biaya)</span>
@@ -314,7 +314,7 @@ export default function SuperAdminCommissionPage() {
         <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-6">
           <div className="border-b border-slate-100 pb-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-xs bg-emerald-50 text-emerald-700 flex items-center justify-center">
                 <Coins className="w-3.5 h-3.5" />
               </div>
               <h2 className="font-serif text-lg font-bold text-slate-900">
@@ -334,7 +334,7 @@ export default function SuperAdminCommissionPage() {
               <select
                 value={simulationAmount}
                 onChange={(e) => setSimulationAmount(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-x[8px]l text-xs font-bold font-mono text-slate-900 focus:outline-none cursor-pointer"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xs text-xs font-bold font-mono text-slate-900 focus:outline-none cursor-pointer"
               >
                 <option value={50000}>Rp 50.000 (Sewa Meja Flex Desk 1 Jam)</option>
                 <option value={150000}>Rp 150.000 (Sewa Meja Seharian)</option>
@@ -416,7 +416,7 @@ export default function SuperAdminCommissionPage() {
           </div>
 
           <div className="p-4 rounded-xs bg-slate-50/70 border border-slate-100 space-y-2">
-            <div className="w-7 h-7 rounded-lg bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
+            <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
               2
             </div>
             <h3 className="font-bold text-slate-900 text-xs">Pemisahan Komisi Otomatis</h3>
@@ -426,7 +426,7 @@ export default function SuperAdminCommissionPage() {
           </div>
 
           <div className="p-4 rounded-xs bg-slate-50/70 border border-slate-100 space-y-2">
-            <div className="w-7 h-7 rounded-lg bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
+            <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
               3
             </div>
             <h3 className="font-bold text-slate-900 text-xs">Settlement &amp; Payout Mitra</h3>

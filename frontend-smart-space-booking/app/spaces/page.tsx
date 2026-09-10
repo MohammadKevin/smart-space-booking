@@ -249,7 +249,7 @@ function SpacesContent() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3.5 shadow-2xs">
+        <div className="bg-white rounded-xs border border-slate-200 p-4 space-y-3.5 shadow-2xs">
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             
@@ -260,7 +260,7 @@ function SpacesContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari berdasarkan nama hub, distrik, atau lokasi (cth. SCBD, Senopati, Klojen)..."
-                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -277,7 +277,7 @@ function SpacesContent() {
               <select
                 value={selectedMetro}
                 onChange={(e) => setSelectedMetro(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kota: Semua Lokasi</option>
                 {availableMetros.map((m) => (
@@ -292,7 +292,7 @@ function SpacesContent() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tipe: Semua Ruangan</option>
                 <option value="desk">Flex Desk / Meja</option>
@@ -305,7 +305,7 @@ function SpacesContent() {
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kapasitas: Semua</option>
                 <option value="1">1 Orang</option>
@@ -319,7 +319,7 @@ function SpacesContent() {
               <select
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tarif: Semua</option>
                 <option value="50000">Rp 50.000 / jam</option>
@@ -343,7 +343,7 @@ function SpacesContent() {
                   key={amenity.label}
                   type="button"
                   onClick={() => setSelectedAmenity(amenity.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-xs text-xs font-medium transition-colors cursor-pointer ${
                     selectedAmenity === amenity.id
                       ? "bg-[#006370] text-white shadow-xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -360,7 +360,7 @@ function SpacesContent() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 rounded-xs px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
                 >
                   <option value="rating">Rating Tertinggi</option>
                   <option value="price_asc">Harga Terendah</option>
@@ -373,7 +373,7 @@ function SpacesContent() {
                 onClick={fetchSpacesData}
                 disabled={loading}
                 aria-label="Segarkan Ruangan"
-                className="p-1.5 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xs border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : ""}`} />
               </button>
@@ -384,12 +384,12 @@ function SpacesContent() {
             <div className="pt-2 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-600">
               <span className="font-semibold text-slate-700">Filter Jadwal Aktif:</span>
               {selectedDate && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
                   📅 {selectedDate}
                 </span>
               )}
               {selectedDuration && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200 font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-cyan-50 text-cyan-800 border border-cyan-200 font-medium">
                   ⏱️ {selectedDuration}
                 </span>
               )}
@@ -438,10 +438,10 @@ function SpacesContent() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
+                className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3 h-full flex flex-col justify-between"
               >
                 <div className="aspect-[16/10] bg-slate-200/70" />
-                <div className="p-5 space-y-3">
+                <div className="p-5 space-y-3 flex-1">
                   <div className="h-5 bg-slate-200 rounded w-2/3" />
                   <div className="h-3 bg-slate-100 rounded w-1/2" />
                   <div className="flex gap-2 pt-2">
@@ -457,27 +457,29 @@ function SpacesContent() {
             ))}
           </div>
         ) : error ? (
-          <div className="p-12 text-center bg-white rounded-2xl border border-rose-200 space-y-3">
+          <div className="p-12 text-center bg-white rounded-xs border border-rose-200 space-y-3">
             <Building2 className="w-8 h-8 text-rose-400 mx-auto" />
             <p className="text-sm font-semibold text-slate-800">Gagal Memuat Katalog Ruangan</p>
             <p className="text-xs text-slate-500">{error}</p>
             <button
               type="button"
               onClick={fetchSpacesData}
-              className="mt-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-[10px] transition-colors"
+              className="mt-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
             >
               Coba Lagi
             </button>
           </div>
         ) : paginatedSpaces.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2 items-stretch">
             {paginatedSpaces.map((space) => (
-              <SpaceCard key={space.id} space={space} />
+              <div key={space.id} className="h-full">
+                <SpaceCard space={space} />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="p-14 text-center bg-white rounded-2xl border border-slate-200 space-y-4 w-full mx-auto">
-            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
+          <div className="p-14 text-center bg-white rounded-xs border border-slate-200 space-y-4 w-full mx-auto">
+            <div className="w-12 h-12 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
               <Building2 className="w-6 h-6" />
             </div>
             <div className="space-y-1">
@@ -494,7 +496,7 @@ function SpacesContent() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Reset Semua Filter
               </button>
@@ -502,7 +504,7 @@ function SpacesContent() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
+        <div className="bg-white rounded-xs border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[11px] font-bold text-[#006370] tracking-wider uppercase">
               <Building2 className="w-3.5 h-3.5" />
@@ -518,7 +520,7 @@ function SpacesContent() {
 
           <Link
             href="/#protocol"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xs border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
           >
             <Compass className="w-3.5 h-3.5 text-slate-600" />
             <span>Pelajari Alur Akses</span>
@@ -545,7 +547,7 @@ function SpacesContent() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 &lt;
               </button>
@@ -555,7 +557,7 @@ function SpacesContent() {
                   key={page}
                   type="button"
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`w-8 h-8 rounded-xs text-xs font-semibold transition-colors cursor-pointer ${
                     currentPage === page
                       ? "bg-[#006370] text-white"
                       : "bg-white border border-slate-200 hover:bg-slate-50 text-slate-700"
@@ -569,7 +571,7 @@ function SpacesContent() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 &gt;
               </button>

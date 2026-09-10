@@ -30,7 +30,7 @@ export function SpaceCard({ space }: SpaceCardProps) {
   const locationText = space.owner?.alamat || space.owner?.namaCoworking || "Klojen, Malang";
 
   return (
-    <div className="bg-white rounded-xs border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-md transition-all group">
+    <div className="bg-white rounded-xs border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-md transition-all group h-full">
       <div>
         <div className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden">
           <img

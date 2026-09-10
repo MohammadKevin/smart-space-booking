@@ -152,7 +152,7 @@ export default function SuperAdminOwnersPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-medium flex items-center gap-2.5">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -294,7 +294,7 @@ export default function SuperAdminOwnersPage() {
                   >
                     <td className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0 border border-[#BCE3DE]">
+                        <div className="w-9 h-9 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0 border border-[#BCE3DE]">
                           <Building className="w-4 h-4" />
                         </div>
                         <div>
@@ -361,7 +361,7 @@ export default function SuperAdminOwnersPage() {
                           e.stopPropagation();
                           setSelectedOwner(o);
                         }}
-                        className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xs border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Detail
                       </button>
@@ -384,10 +384,10 @@ export default function SuperAdminOwnersPage() {
 
       {selectedOwner && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xs border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
                   <Building className="w-4 h-4" />
                 </div>
                 <div>
@@ -402,7 +402,7 @@ export default function SuperAdminOwnersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOwner(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                className="p-1 rounded-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -410,7 +410,7 @@ export default function SuperAdminOwnersPage() {
 
             <div className="space-y-4 text-xs">
               
-              <div className="p-3.5 bg-slate-50 rounded-xl space-y-2 border border-slate-100">
+              <div className="p-3.5 bg-slate-50 rounded-xs space-y-2 border border-slate-100">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                   INFORMASI PEMILIK &amp; KONTAK
                 </p>
@@ -441,7 +441,7 @@ export default function SuperAdminOwnersPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-[#E6F4F2]/50 border border-[#BCE3DE] space-y-1">
+                <div className="p-3.5 rounded-xs bg-[#E6F4F2]/50 border border-[#BCE3DE] space-y-1">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#006370]">
                     TOTAL GMV TRANSAKSI
                   </span>
@@ -453,7 +453,7 @@ export default function SuperAdminOwnersPage() {
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-1">
+                <div className="p-3.5 rounded-xs bg-emerald-50/60 border border-emerald-200 space-y-1">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800">
                     NET PAYOUT MITRA
                   </span>
@@ -467,12 +467,12 @@ export default function SuperAdminOwnersPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
+                <div className="p-3 bg-slate-50 rounded-xs border border-slate-100 space-y-0.5">
                   <span className="text-slate-400 text-[11px] block">Inventaris Ruangan</span>
                   <span className="text-base font-bold text-slate-900">{selectedOwner.totalSpaces || 0} Unit Ruangan</span>
                   <span className="text-[10px] text-slate-500 block">{selectedOwner.totalStaffs || 0} Staff Terdaftar</span>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
+                <div className="p-3 bg-slate-50 rounded-xs border border-slate-100 space-y-0.5">
                   <span className="text-slate-400 text-[11px] block">Performa Reservasi</span>
                   <span className="text-base font-bold text-slate-900">{selectedOwner.totalBookings || 0} Total Pesanan</span>
                   <span className="text-[10px] text-emerald-600 font-semibold block">{selectedOwner.paidBookings || 0} Berhasil Lunas</span>
@@ -484,7 +484,7 @@ export default function SuperAdminOwnersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOwner(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
               >
                 Tutup
               </button>

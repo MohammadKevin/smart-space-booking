@@ -150,7 +150,7 @@ function RegisterForm() {
         <span>Kembali</span>
       </Link>
 
-      <div className="w-full max-w-[500px] bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-100 p-7 sm:p-9 transition-all">
+      <div className="w-full max-w-[500px] bg-white rounded-xs shadow-xl shadow-slate-200/70 border border-slate-100 p-7 sm:p-9 transition-all">
         
         <div className="flex flex-col items-center text-center">
           <WorkNestLogo size="md" />
@@ -163,14 +163,14 @@ function RegisterForm() {
           </p>
         </div>
 
-        <div className="mt-6 bg-[#F1F5F9] p-1 rounded-[10px] grid grid-cols-2 gap-1 text-xs font-semibold">
+        <div className="mt-6 bg-[#F1F5F9] p-1 rounded-xs grid grid-cols-2 gap-1 text-xs font-semibold">
           <button
             type="button"
             onClick={() => {
               setRole("member");
               setErrorMessage(null);
             }}
-            className={`py-2.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
               role === "member"
                 ? "bg-white text-slate-900 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-900"
@@ -190,7 +190,7 @@ function RegisterForm() {
               setRole("owner");
               setErrorMessage(null);
             }}
-            className={`py-2.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
               role === "owner"
                 ? "bg-white text-slate-900 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-900"
@@ -208,14 +208,14 @@ function RegisterForm() {
         <div className="pt-2" />
 
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-[10px] bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
+          <div className="mb-4 p-3 rounded-xs bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <span className="font-medium leading-relaxed">{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded-[10px] bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
+          <div className="mb-4 p-3 rounded-xs bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
             <span className="font-medium leading-relaxed">{successMessage}</span>
           </div>
@@ -233,7 +233,7 @@ function RegisterForm() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Bambang Wicaksono"
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
             />
           </div>
 
@@ -247,7 +247,7 @@ function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@company.co.id"
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
             />
           </div>
 
@@ -257,7 +257,7 @@ function RegisterForm() {
                 WhatsApp / Phone Number
               </label>
             </div>
-            <div className="flex items-stretch border border-slate-200 rounded-[10px] bg-white overflow-hidden focus-within:border-[#006370] focus-within:ring-2 focus-within:ring-[#006370]/15 transition-all">
+            <div className="flex items-stretch border border-slate-200 rounded-xs bg-white overflow-hidden focus-within:border-[#006370] focus-within:ring-2 focus-within:ring-[#006370]/15 transition-all">
               <span className="bg-slate-50 text-slate-700 font-mono text-xs font-semibold px-3.5 py-2.5 border-r border-slate-200 select-none shrink-0 flex items-center">
                 +62
               </span>
@@ -273,7 +273,7 @@ function RegisterForm() {
           </div>
 
           {role === "owner" && (
-            <div className="space-y-3.5 p-3.5 bg-slate-50 rounded-[10px] border border-slate-200/90 text-xs">
+            <div className="space-y-3.5 p-3.5 bg-slate-50 rounded-xs border border-slate-200/90 text-xs">
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-800">
                   Coworking Space / Commercial Brand Name
@@ -286,7 +286,7 @@ function RegisterForm() {
                     value={namaCoworking}
                     onChange={(e) => setNamaCoworking(e.target.value)}
                     placeholder="e.g. Malang Creative Hub"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -303,7 +303,7 @@ function RegisterForm() {
                     value={alamat}
                     onChange={(e) => setAlamat(e.target.value)}
                     placeholder="Jl. Ijen No. 88, Oro-oro Dowo, Malang"
-                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+                    className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                   />
                 </div>
               </div>
@@ -321,12 +321,12 @@ function RegisterForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a robust passphrase"
-                className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-[10px] text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
+                className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded"
+                className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded-xs"
                 aria-label="Toggle password visibility"
               >
                 {showPassword ? (
@@ -348,7 +348,7 @@ function RegisterForm() {
               type="checkbox"
               checked={agreedToTerms}
               onChange={(e) => setAgreedToTerms(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded border-slate-300 text-[#006370] focus:ring-[#006370] cursor-pointer"
+              className="mt-0.5 w-4 h-4 rounded-xs border-slate-300 text-[#006370] focus:ring-[#006370] cursor-pointer"
             />
             <label
               htmlFor="terms"
@@ -375,7 +375,7 @@ function RegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-[10px] font-bold text-xs sm:text-sm text-white bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#006370]/25 cursor-pointer mt-2"
+            className="w-full py-3 px-4 rounded-xs font-bold text-xs sm:text-sm text-white bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#006370]/25 cursor-pointer mt-2"
           >
             {loading ? (
               <>
