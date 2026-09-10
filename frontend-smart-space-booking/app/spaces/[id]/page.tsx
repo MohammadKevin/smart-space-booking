@@ -89,7 +89,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   if (error || !space) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] py-24 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center space-y-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-xs border border-slate-200 shadow-sm text-center space-y-4">
           <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
             <AlertCircle className="w-6 h-6" />
           </div>
@@ -98,7 +98,7 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           <div className="pt-2">
             <Link
               href="/spaces"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Kembali ke Katalog Ruangan</span>
@@ -142,14 +142,14 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <Link
               href="/spaces"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Kembali ke Katalog</span>
             </Link>
             <Link
               href={`/booking/${space.id}`}
-              className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-lg shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-all cursor-pointer"
             >
               <span>Pesan Ruangan</span>
               <ArrowRight className="w-3.5 h-3.5" />
