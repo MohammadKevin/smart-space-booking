@@ -42,7 +42,7 @@ export class ReservationService implements OnModuleInit {
     });
   }
 
-  @Cron(CronExpression.EVERY_15_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async cleanupExpiredReservations() {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const now = new Date();
