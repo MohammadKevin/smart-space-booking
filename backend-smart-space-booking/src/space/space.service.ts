@@ -75,25 +75,56 @@ export class SpaceService {
       ];
     }
 
-    const spaces = await this.prisma.space.findMany({
-      where,
-      include: {
-        owner: true,
-        detailReservasi: {
-          include: {
-            reservasi: true,
+    const page = filter.page ? Math.max(1, filter.page) : undefined;
+    const limit = filter.limit ? Math.max(1, filter.limit) : undefined;
+    const skip = page && limit ? (page - 1) * limit : undefined;
+
+    const [spaces, total] = await Promise.all([
+      this.prisma.space.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          owner: true,
+          detailReservasi: {
+            include: {
+              reservasi: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+      }),
+      (page !== undefined || limit !== undefined) ? this.prisma.space.count({ where }) : Promise.resolve(0),
+    ]);
 
-    if (filter.tanggal && filter.jamMulai && filter.durasiJam) {
-      const targetDate = normalizeDateToStartOfDay(filter.tanggal);
-      const newStartMinutes = timeStringToMinutes(filter.jamMulai);
-      const newEndMinutes = newStartMinutes + filter.durasiJam * 60;
+    const targetTanggal = filter.tanggal || filter.date;
+    let jamMulai = filter.jamMulai;
+    let durasiJam = filter.durasiJam;
 
-      return spaces.map((space) => {
+    if (!jamMulai && filter.duration) {
+      if (filter.duration.includes('09:00 - 18:00')) {
+        jamMulai = '09:00';
+        durasiJam = 9;
+      } else if (filter.duration.includes('09:00 - 13:00')) {
+        jamMulai = '09:00';
+        durasiJam = 4;
+      } else if (filter.duration.includes('13:00 - 17:00')) {
+        jamMulai = '13:00';
+        durasiJam = 4;
+      } else if (filter.duration.includes('17:00 - 21:00')) {
+        jamMulai = '17:00';
+        durasiJam = 4;
+      }
+    }
+
+    let processedSpaces: any[];
+
+    if (targetTanggal && jamMulai && durasiJam) {
+      const targetDate = normalizeDateToStartOfDay(targetTanggal);
+      const newStartMinutes = timeStringToMinutes(jamMulai);
+      const newEndMinutes = newStartMinutes + durasiJam * 60;
+
+      processedSpaces = spaces.map((space) => {
         const hasConflict = space.detailReservasi.some((detail) => {
           const res = detail.reservasi;
           if (!res) return false;
@@ -128,12 +159,49 @@ export class SpaceService {
           isAvailable: !hasConflict,
         };
       });
+    } else if (targetTanggal) {
+      const targetDate = normalizeDateToStartOfDay(targetTanggal);
+      processedSpaces = spaces.map((space) => {
+        const activeResCount = space.detailReservasi.filter((detail) => {
+          const res = detail.reservasi;
+          if (!res) return false;
+          const isActiveStatus = (
+            [
+              ReservasiStatus.pending,
+              ReservasiStatus.disetujui,
+              ReservasiStatus.aktif,
+            ] as ReservasiStatus[]
+          ).includes(res.status);
+          if (!isActiveStatus) return false;
+          const resDate = normalizeDateToStartOfDay(res.tanggalReservasi);
+          return resDate.getTime() === targetDate.getTime();
+        }).length;
+
+        const { detailReservasi: _, ...spaceData } = space;
+        return {
+          ...spaceData,
+          isAvailable: activeResCount < 5,
+        };
+      });
+    } else {
+      processedSpaces = spaces.map((space) => {
+        const { detailReservasi: _, ...spaceData } = space;
+        return spaceData;
+      });
     }
 
-    return spaces.map((space) => {
-      const { detailReservasi: _, ...spaceData } = space;
-      return spaceData;
-    });
+    if (page !== undefined || limit !== undefined) {
+      const l = limit || 10;
+      return {
+        data: processedSpaces,
+        total,
+        page: page || 1,
+        limit: l,
+        totalPages: Math.ceil(total / l),
+      };
+    }
+
+    return processedSpaces;
   }
 
   async findOne(id: number) {

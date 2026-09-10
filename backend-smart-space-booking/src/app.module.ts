@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
@@ -16,12 +17,15 @@ import { TransactionModule } from './transaction/transaction.module';
 import { ReviewModule } from './review/review.module';
 import { MailModule } from './common/mail/mail.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
+import { NotificationModule } from './notification/notification.module';
+import { WaitlistModule } from './waitlist/waitlist.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
         name: 'default',
@@ -41,6 +45,8 @@ import { SuperAdminModule } from './super-admin/super-admin.module';
     ReportModule,
     TransactionModule,
     ReviewModule,
+    NotificationModule,
+    WaitlistModule,
   ],
   controllers: [AppController],
   providers: [

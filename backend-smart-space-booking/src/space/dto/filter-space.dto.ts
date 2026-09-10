@@ -75,4 +75,41 @@ export class FilterSpaceDto {
   @IsInt()
   @Min(1)
   durasiJam?: number;
+
+  @ApiPropertyOptional({
+    description: 'Alias untuk tanggal (YYYY-MM-DD)',
+    example: '2026-09-10',
+  })
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @ApiPropertyOptional({
+    description: 'String durasi dari UI (misal: "09:00 - 18:00")',
+    example: '09:00 - 18:00',
+  })
+  @IsOptional()
+  @IsString()
+  duration?: string;
+
+  @ApiPropertyOptional({
+    description: 'Halaman data untuk pagination (1-indexed)',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Batas data per halaman untuk pagination',
+    example: 10,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
 }
+

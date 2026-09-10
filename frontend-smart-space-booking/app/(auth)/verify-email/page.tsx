@@ -69,7 +69,7 @@ function VerifyEmailContent() {
   }, []);
 
   const maskEmail = (str: string) => {
-    if (!str || !str.includes("@")) return "adrian.w**@worknest.id";
+    if (!str || !str.includes("@")) return "-";
     const [name, domain] = str.split("@");
     if (name.length <= 3) return `${name}***@${domain}`;
     const visibleStart = name.slice(0, Math.min(8, Math.floor(name.length * 0.7)));
@@ -130,7 +130,13 @@ function VerifyEmailContent() {
     setSuccessMessage(null);
 
     const fullOtp = otp.join("");
-    const targetEmail = email.trim() || "adrian.w@worknest.id";
+    const targetEmail = email.trim();
+
+    if (!targetEmail) {
+      setErrorMessage("Alamat email tidak ditemukan. Mengalihkan ke halaman login...");
+      setTimeout(() => router.push("/login"), 1500);
+      return;
+    }
 
     if (fullOtp.length !== 6) {
       setErrorMessage("Please enter the complete 6-digit security code.");
@@ -188,9 +194,15 @@ function VerifyEmailContent() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    const targetEmail = email.trim();
+    if (!targetEmail) {
+      setErrorMessage("Alamat email tidak ditemukan. Silakan kembali ke halaman login atau registrasi.");
+      return;
+    }
+
     try {
       const res = await resendOtp({
-        email: email.trim() || "adrian.w@worknest.id",
+        email: targetEmail,
         type: typeParam === "reset" ? "forgot_password" : "register",
       });
 

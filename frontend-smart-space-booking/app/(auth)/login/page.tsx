@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { login, forgotPassword, getApiErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import {
   Lock,
   Mail,
@@ -62,7 +63,7 @@ function LoginForm() {
         password,
       });
 
-      loginUser(response.access_token, response.user);
+      loginUser(response.access_token, response.user, rememberMe);
       setSuccessMessage("Authentication successful. Routing to workspace...");
 
       setTimeout(() => {
@@ -280,6 +281,20 @@ function LoginForm() {
             )}
           </button>
         </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-2 text-slate-400 font-medium">atau masuk dengan</span>
+          </div>
+        </div>
+
+        <GoogleLoginButton
+          label="Lanjutkan dengan Google"
+          onError={(err) => setErrorMessage(err)}
+        />
 
         <div className="mt-6 text-center text-xs text-slate-500">
           Don&apos;t have an account?{" "}

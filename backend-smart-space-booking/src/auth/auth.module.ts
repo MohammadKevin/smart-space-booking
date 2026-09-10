@@ -16,9 +16,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         const expiresInRaw =
           configService.get<string>('JWT_EXPIRES_IN') || '7d';
         return {
-          secret:
-            configService.get<string>('JWT_SECRET') ||
-            'smart-space-booking-super-secret-jwt-key-ukk-2026-2027',
+          secret: configService.getOrThrow<string>('JWT_SECRET'),
           signOptions: {
             expiresIn: expiresInRaw as any,
           },

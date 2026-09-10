@@ -29,6 +29,7 @@ import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { GetUser } from './decorators/get-user.decorator';
 import { Role } from '@prisma/client';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Authentication & Authorization')
 @Controller('auth')
@@ -137,6 +138,7 @@ export class AuthController {
     return this.authService.resendOtp(resendOtpDto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -175,6 +177,7 @@ export class AuthController {
     return this.authService.resetPassword(resetPasswordDto);
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('secret-super-admin-provision')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

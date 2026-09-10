@@ -417,11 +417,12 @@ export class AuthService {
       resetOtp,
     );
 
+    const devOtp = this.getDevOtp(resetOtp);
     return {
       message:
         'Kode OTP reset kata sandi telah dikirimkan ke email Anda. Silakan cek kotak masuk email.',
       email: cleanEmail,
-      devOtp: resetOtp,
+      ...(devOtp ? { devOtp } : {}),
     };
   }
 
@@ -526,18 +527,19 @@ export class AuthService {
   }
 
   async provisionSuperAdmin(dto: SecretProvisionDto) {
-    const configuredSecret =
-      process.env.SUPER_ADMIN_SECRET_KEY || 'WorkNest_CEO_SuperAdmin_Secret_Key_2026*';
+    const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
 
-    if (dto.secretKey !== configuredSecret) {
-      throw new ForbiddenException('Kunci rahasia Super Admin salah atau tidak valid.');
+    if (!configuredSecret || dto.secretKey !== configuredSecret) {
+      throw new ForbiddenException('Kunci rahasia Super Admin salah atau tidak terkonfigurasi pada server.');
     }
 
     try {
       await this.prisma.$executeRawUnsafe(
         `ALTER TABLE users MODIFY COLUMN role ENUM('super_admin', 'admin_space', 'staff', 'member') NOT NULL DEFAULT 'member';`,
       );
-    } catch {}
+    } catch (err) {
+      this.logger.warn(`Could not alter users table role enum: ${(err as Error).message}`);
+    }
 
     const cleanEmail = dto.email.trim().toLowerCase();
     const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -548,6 +550,11 @@ export class AuthService {
 
     let userId: number;
     if (existing) {
+      if (existing.role !== Role.super_admin) {
+        throw new ForbiddenException(
+          `Email '${cleanEmail}' sudah terdaftar sebagai akun ${existing.role}. Operasi dibatalkan demi keamanan.`,
+        );
+      }
       await this.prisma.user.update({
         where: { id: existing.id },
         data: {
@@ -574,7 +581,9 @@ export class AuthService {
         `UPDATE users SET role = 'super_admin' WHERE id = ?;`,
         userId,
       );
-    } catch {}
+    } catch (err) {
+      this.logger.warn(`Could not execute raw role update to super_admin: ${(err as Error).message}`);
+    }
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -633,7 +642,9 @@ export class AuthService {
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        this.logger.warn(`Failed verifying Google token: ${(err as Error).message}`);
+      }
     }
 
     if (!email) {

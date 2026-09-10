@@ -139,7 +139,45 @@ export class UserService {
     return sanitized;
   }
 
-  async getAllMembers() {
+  async getAllMembers(page?: number, limit?: number) {
+    if (page !== undefined || limit !== undefined) {
+      const p = Math.max(1, page || 1);
+      const l = Math.max(1, limit || 20);
+      const skip = (p - 1) * l;
+
+      const [members, total] = await Promise.all([
+        this.prisma.member.findMany({
+          skip,
+          take: l,
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                role: true,
+                createdAt: true,
+              },
+            },
+            _count: {
+              select: {
+                reservasi: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        }),
+        this.prisma.member.count(),
+      ]);
+
+      return {
+        data: members,
+        total,
+        page: p,
+        limit: l,
+        totalPages: Math.ceil(total / l),
+      };
+    }
+
     return this.prisma.member.findMany({
       include: {
         user: {

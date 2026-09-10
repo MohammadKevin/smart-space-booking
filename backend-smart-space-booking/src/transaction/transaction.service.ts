@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MidtransService, SnapTokenResult } from './midtrans.service';
@@ -11,6 +12,8 @@ import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
+  private readonly logger = new Logger(TransactionService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly midtrans: MidtransService,
@@ -203,7 +206,9 @@ export class TransactionService {
           customField2,
           customField3,
         });
-      } catch {}
+      } catch (err) {
+        this.logger.warn(`Could not create direct charge payment: ${(err as Error).message}`);
+      }
     }
 
     const snap: SnapTokenResult = await this.midtrans.createSnapToken({
@@ -374,7 +379,9 @@ export class TransactionService {
           totalAmount,
           method,
         )
-        .catch(() => {});
+        .catch((err) => {
+          this.logger.error(`Gagal mengirim email konfirmasi pembayaran: ${(err as Error).message}`);
+        });
     }
 
     return { success: true };
@@ -445,7 +452,9 @@ export class TransactionService {
           totalAmount,
           method,
         )
-        .catch(() => {});
+        .catch((err) => {
+          this.logger.error(`Gagal mengirim email konfirmasi pembayaran sync: ${(err as Error).message}`);
+        });
     }
 
     return { message: 'Status pembayaran diperbarui.', data: updated };

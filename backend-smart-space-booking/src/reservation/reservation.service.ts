@@ -4,7 +4,9 @@ import {
   BadRequestException,
   ForbiddenException,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../common/mail/mail.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -27,20 +29,20 @@ import {
 
 @Injectable()
 export class ReservationService implements OnModuleInit {
+  private readonly logger = new Logger(ReservationService.name);
+
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
   ) {}
 
   onModuleInit() {
-    this.cleanupExpiredReservations().catch(() => {});
-    setInterval(() => {
-      this.cleanupExpiredReservations().catch((err) => {
-        console.error('Error cleaning up expired reservations:', err);
-      });
-    }, 15 * 60 * 1000);
+    this.cleanupExpiredReservations().catch((err) => {
+      this.logger.error('Error during initial reservation cleanup:', err);
+    });
   }
 
+  @Cron(CronExpression.EVERY_15_MINUTES)
   async cleanupExpiredReservations() {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const now = new Date();
@@ -100,11 +102,6 @@ export class ReservationService implements OnModuleInit {
         });
       }
     }
-  }
-
-  private generateInvoiceNumber(reservationId: number): string {
-    const stamp = Date.now().toString().slice(-6);
-    return `INV-${reservationId}-${stamp}`;
   }
 
   async create(dto: CreateReservationDto, memberUserId: number) {
@@ -184,6 +181,12 @@ export class ReservationService implements OnModuleInit {
       : ReservasiStatus.pending;
 
     const res = await this.prisma.$transaction(async (tx) => {
+      // Row-level lock on the space record to prevent race conditions & double-booking (BUG-009)
+      await tx.$executeRawUnsafe(
+        'SELECT id FROM spaces WHERE id = ? FOR UPDATE;',
+        space.id,
+      );
+
       const existingReservations = await tx.reservasi.findMany({
         where: {
           detailReservasi: {

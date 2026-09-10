@@ -11,6 +11,7 @@ import {
   getApiErrorMessage,
 } from "@/lib/api";
 import { WorkNestLogo } from "@/components/WorkNestLogo";
+import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import {
   Lock,
   ArrowRight,
@@ -389,6 +390,20 @@ function RegisterForm() {
             )}
           </button>
         </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-2 text-slate-400 font-medium">atau daftar dengan</span>
+          </div>
+        </div>
+
+        <GoogleLoginButton
+          label="Daftar Akun dengan Google"
+          onError={(err) => setErrorMessage(err)}
+        />
 
         <div className="mt-6 text-center text-xs text-slate-500">
           Sudah punya akun?{" "}

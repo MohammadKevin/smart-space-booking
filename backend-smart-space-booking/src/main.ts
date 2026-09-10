@@ -15,8 +15,16 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+    : [
+        'https://booking.corecraft.my.id',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+      ];
+
   app.enableCors({
-    origin: true,
+    origin: allowedOrigins,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: [

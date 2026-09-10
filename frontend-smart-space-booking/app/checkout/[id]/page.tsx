@@ -318,12 +318,12 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     return false;
   }, [paymentDetails?.orderId, reservation?.transaksi?.midtransOrderId, reservation?.transaksi?.id, reservationId]);
 
-  // Real-time auto-polling every 2 seconds while modal is open
+  // Real-time auto-polling every 6 seconds while modal is open (BUG-013)
   useEffect(() => {
     if (modalOpen && !paySuccess) {
       pollingRef.current = setInterval(async () => {
         await verifyStatus(paymentDetails?.orderId);
-      }, 2000);
+      }, 6000);
     } else {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
@@ -773,24 +773,39 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handlePayNow}
-                  disabled={paying}
-                  className="w-full py-2.5 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  {paying ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Menyiapkan Nomor VA...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="w-3.5 h-3.5" />
-                      <span>Bayar Sekarang ({formatRupiah(amountDue)})</span>
-                    </>
-                  )}
-                </button>
+                {holdTimer <= 0 && !paySuccess ? (
+                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xs text-xs text-amber-900 space-y-2 text-center">
+                    <p className="font-semibold">Sesi Pembayaran Telah Berakhir</p>
+                    <p className="text-[11px] text-amber-700 leading-relaxed">Batas waktu penahanan slot (15 menit) telah habis. Slot ruangan telah dilepaskan kembali.</p>
+                    <div className="pt-1">
+                      <Link
+                        href={`/booking/${reservation?.detailReservasi?.spaceId || ""}`}
+                        className="inline-block px-3.5 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white rounded-xs text-xs font-bold transition-colors"
+                      >
+                        Pesan Ulang Ruangan
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handlePayNow}
+                    disabled={paying || holdTimer <= 0}
+                    className="w-full py-2.5 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {paying ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Menyiapkan Nomor VA...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-3.5 h-3.5" />
+                        <span>Bayar Sekarang ({formatRupiah(amountDue)})</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>

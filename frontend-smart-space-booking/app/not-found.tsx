@@ -265,9 +265,9 @@ export default function NotFoundPage() {
       <footer className="bg-white border-t border-slate-200/90 py-3 px-4 sm:px-6 lg:px-8 text-xs font-mono text-slate-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-4">
-            <span>CLIENT_IP: 192.168.1.44</span>
+            <span>GATEWAY: CLOUD_EDGE_ACTIVE</span>
             <span className="text-slate-300">•</span>
-            <span>LOCATION: DOWNTOWN_HUB_TOWER_A</span>
+            <span>SYSTEM: WORKNEST_CORE</span>
           </div>
           <div className="flex items-center gap-2">
             <span>Need manual assistance?</span>

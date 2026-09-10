@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -50,9 +52,16 @@ export class UserController {
     description:
       'Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.',
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Halaman data (opsional)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Batas data per halaman (opsional)' })
   @ApiResponse({ status: 200, description: 'Daftar member berhasil dimuat.' })
-  getAllMembers() {
-    return this.userService.getAllMembers();
+  getAllMembers(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = page ? Math.max(1, parseInt(page, 10)) : undefined;
+    const l = limit ? Math.max(1, parseInt(limit, 10)) : undefined;
+    return this.userService.getAllMembers(p, l);
   }
 
   @Get('staffs')

@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 
@@ -357,7 +362,7 @@ export class SuperAdminService {
     });
 
     if (!user) {
-      throw new Error(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+      throw new NotFoundException(`Pengguna dengan ID ${userId} tidak ditemukan.`);
     }
 
     const updated = await this.prisma.user.update({
@@ -388,11 +393,11 @@ export class SuperAdminService {
     });
 
     if (!user) {
-      throw new Error(`Pengguna dengan ID ${userId} tidak ditemukan.`);
+      throw new NotFoundException(`Pengguna dengan ID ${userId} tidak ditemukan.`);
     }
 
     if (user.role === Role.super_admin) {
-      throw new Error('Akun Super Admin tidak dapat dihapus.');
+      throw new ForbiddenException('Akun Super Admin tidak dapat dihapus.');
     }
 
     await this.prisma.user.delete({

@@ -64,15 +64,19 @@ export async function POST(req: NextRequest) {
       payload.payment_type = "cstore";
       payload.cstore = { store: "alfamart", message: "WorkNest" };
     } else if (method.includes("shopeepay")) {
+      const origin = req.headers.get("origin") || req.nextUrl.origin || "https://booking.corecraft.my.id";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
       payload.payment_type = "shopeepay";
       payload.shopeepay = {
-        callback_url: "https://booking.corecraft.my.id/dashboard/member",
+        callback_url: `${appUrl}/dashboard/member`,
       };
     } else if (method.includes("gopay")) {
+      const origin = req.headers.get("origin") || req.nextUrl.origin || "https://booking.corecraft.my.id";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
       payload.payment_type = "gopay";
       payload.gopay = {
         enable_callback: true,
-        callback_url: "https://booking.corecraft.my.id/dashboard/member",
+        callback_url: `${appUrl}/dashboard/member`,
       };
     } else {
       payload.payment_type = "qris";

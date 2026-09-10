@@ -13,7 +13,6 @@ import {
   getApiErrorMessage,
 } from "@/lib/api";
 import { formatRupiah } from "@/components/SpaceCard";
-import DashboardLayout from "@/app/dashboard/layout";
 import {
   MapPin,
   Star,
@@ -80,33 +79,33 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="py-24 flex flex-col items-center justify-center text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-[#006370] mb-2" />
-          <p className="text-xs">Memuat data ruangan...</p>
-        </div>
-      </DashboardLayout>
+      <div className="min-h-screen bg-[#FDFBF7] py-24 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 className="w-8 h-8 animate-spin text-[#006370] mb-2" />
+        <p className="text-xs font-medium text-slate-600">Memuat data ruangan...</p>
+      </div>
     );
   }
 
   if (error || !space) {
     return (
-      <DashboardLayout>
-        <div className="max-w-md mx-auto py-16 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+      <div className="min-h-screen bg-[#FDFBF7] py-24 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-xl border border-slate-200 shadow-sm text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="font-serif text-lg font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
-          <p className="text-xs text-slate-500">{error || "Data ruangan tidak tersedia atau telah dihapus."}</p>
-          <Link
-            href="/dashboard/member/spaces"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Katalog</span>
-          </Link>
+          <h2 className="font-serif text-xl font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
+          <p className="text-xs text-slate-500 leading-relaxed">{error || "Data ruangan tidak tersedia atau telah dihapus."}</p>
+          <div className="pt-2">
+            <Link
+              href="/spaces"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Kembali ke Katalog Ruangan</span>
+            </Link>
+          </div>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
@@ -121,8 +120,8 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
   const totalReviewsCount = ratingSummary?.totalReviews || reviews.length || 0;
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6 pb-16">
+    <div className="min-h-screen bg-[#FDFBF7] py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
@@ -142,15 +141,15 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <Link
-              href="/dashboard/member/spaces"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
+              href="/spaces"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Kembali</span>
+              <span>Kembali ke Katalog</span>
             </Link>
             <Link
               href={`/booking/${space.id}`}
-              className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-lg shadow-2xs transition-all cursor-pointer"
             >
               <span>Pesan Ruangan</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -281,6 +280,6 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

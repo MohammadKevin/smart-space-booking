@@ -30,14 +30,7 @@ import {
   Monitor,
 } from "lucide-react";
 
-function formatRupiah(amount: number | string | undefined | null): string {
-  const num = typeof amount === "number" ? amount : parseFloat(String(amount || 0)) || 0;
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(num);
-}
+import { formatRupiah } from "@/lib/utils";
 
 function RealSpaceCard({ space }: { space: Space }) {
   const fallbackImage =
@@ -61,7 +54,7 @@ function RealSpaceCard({ space }: { space: Space }) {
   const locationText = space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Mitra Hub";
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all">
+    <div className="bg-white rounded-xs border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all">
       <div>
         <div className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden">
           <img
@@ -159,10 +152,35 @@ function RealSpaceCard({ space }: { space: Space }) {
 export default function HomePage() {
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<"flex" | "meeting" | "suite" | "all">("flex");
+  const dateOptions = useMemo(() => {
+    const dates: Array<{ label: string; value: string }> = [];
+    const now = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() + i);
+      const iso = d.toISOString().split("T")[0];
+      const dayName =
+        i === 0
+          ? "Hari Ini"
+          : i === 1
+          ? "Besok"
+          : d.toLocaleDateString("id-ID", { weekday: "long" });
+      const label = `${dayName}, ${d.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+      })}`;
+      dates.push({ label, value: iso });
+    }
+    return dates;
+  }, []);
+
+  const [activeTab, setActiveTab] = useState<"flex" | "meeting" | "suite" | "all">("all");
   const [selectedCity, setSelectedCity] = useState("Semua Kota");
-  const [selectedDate, setSelectedDate] = useState("Hari Ini, 24 Okt");
-  const [selectedDuration, setSelectedDuration] = useState("Seharian Penuh (09:00 - 18:00)");
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    return now.toISOString().split("T")[0];
+  });
+  const [selectedDuration, setSelectedDuration] = useState("Seharian (09:00 - 18:00)");
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -302,12 +320,23 @@ export default function HomePage() {
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-[10px] border border-slate-200 shadow-sm shadow-slate-100 p-2 sm:p-3">
+            <div className="bg-white rounded-xs border border-slate-200 shadow-sm shadow-slate-100 p-2 sm:p-3">
               <div className="flex items-center gap-1 sm:gap-2 px-2 pt-1 pb-3 overflow-x-auto text-xs border-b border-slate-100">
                 <button
                   type="button"
+                  onClick={() => setActiveTab("all")}
+                  className={`px-3.5 py-1.5 rounded-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                    activeTab === "all"
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  Semua ({spaces.length > 0 ? spaces.length : "Ruangan"})
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveTab("flex")}
-                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "flex"
                       ? "bg-[#006370] text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -318,7 +347,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("meeting")}
-                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "meeting"
                       ? "bg-[#006370] text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -329,24 +358,13 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("suite")}
-                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1.5 rounded-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === "suite"
                       ? "bg-[#006370] text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
                   Suite Privat
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("all")}
-                  className={`px-3.5 py-1.5 rounded-[8px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
-                    activeTab === "all"
-                      ? "bg-[#006370] text-white shadow-xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                  }`}
-                >
-                  Semua Ruangan
                 </button>
               </div>
 
@@ -387,10 +405,11 @@ export default function HomePage() {
                       onChange={(e) => setSelectedDate(e.target.value)}
                       className="w-full bg-transparent text-xs sm:text-[13px] font-semibold text-slate-900 focus:outline-none cursor-pointer py-1 pr-6 truncate appearance-none"
                     >
-                      <option value="Hari Ini, 24 Okt">Hari Ini, 24 Okt</option>
-                      <option value="Besok, 25 Okt">Besok, 25 Okt</option>
-                      <option value="Sabtu, 26 Okt">Sabtu, 26 Okt</option>
-                      <option value="Senin, 28 Okt">Senin, 28 Okt</option>
+                      {dateOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1 top-2 pointer-events-none" />
                   </div>
@@ -419,7 +438,7 @@ export default function HomePage() {
                 <div className="lg:col-span-2 flex justify-end">
                   <button
                     type="submit"
-                    className="w-full py-2.5 px-3 bg-[#006370] hover:bg-[#004e58] text-white text-xs font-bold rounded-[10px] transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 whitespace-nowrap"
+                    className="w-full py-2.5 px-3 bg-[#006370] hover:bg-[#004e58] text-white text-xs font-bold rounded-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 whitespace-nowrap"
                   >
                     <Search className="w-3.5 h-3.5 shrink-0" />
                     <span>Cari Ruangan</span>
@@ -526,7 +545,7 @@ export default function HomePage() {
               href="/spaces"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors"
             >
-              <span>Lihat semua {spaces.length} ruangan di seluruh Indonesia</span>
+              <span>Lihat semua {spaces.length > 0 ? `${spaces.length} ` : ""}ruangan di seluruh Indonesia</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -536,7 +555,7 @@ export default function HomePage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
+                  className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
                 >
                   <div className="aspect-[16/10] bg-slate-200/70" />
                   <div className="p-5 space-y-3">
@@ -552,7 +571,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : fetchError ? (
-            <div className="p-10 text-center bg-white rounded-xl border border-rose-200 space-y-3">
+            <div className="p-10 text-center bg-white rounded-xs border border-rose-200 space-y-3">
               <Building2 className="w-8 h-8 text-rose-400 mx-auto" />
               <p className="text-sm font-semibold text-slate-800">Gagal Memuat Data Ruangan</p>
               <p className="text-xs text-slate-500">
@@ -568,7 +587,7 @@ export default function HomePage() {
                     .catch(() => setFetchError(true))
                     .finally(() => setLoading(false));
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xs transition-colors"
               >
                 <span>Coba Lagi</span>
               </button>
@@ -580,8 +599,8 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center bg-slate-50/60 rounded-2xl border border-slate-200 space-y-4 w-full mx-auto">
-              <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center mx-auto text-slate-400 shadow-2xs">
+            <div className="py-12 text-center bg-slate-50/60 rounded-xs border border-slate-200 space-y-4 w-full mx-auto">
+              <div className="w-12 h-12 rounded-xs bg-white border border-slate-200 flex items-center justify-center mx-auto text-slate-400 shadow-2xs">
                 <Building2 className="w-6 h-6" />
               </div>
               <div className="space-y-1">
@@ -595,13 +614,13 @@ export default function HomePage() {
               <div className="pt-2 flex items-center justify-center gap-3">
                 <Link
                   href="/register?role=owner"
-                  className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                  className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xs transition-colors shadow-xs"
                 >
                   Daftar Sebagai Space Owner
                 </Link>
                 <Link
                   href="/spaces"
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xs transition-colors"
                 >
                   Buka Katalog
                 </Link>
@@ -626,10 +645,10 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Armchair className="w-4 h-4" />
                   </div>
                   <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-700 uppercase">Populer</span>
@@ -667,15 +686,15 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <Link href="/spaces?tipe=desk" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${deskSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
+              <Link href="/spaces?tipe=desk" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-xs transition-colors shadow-xs text-center ${deskSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
                 Pesan Flex Desk
               </Link>
             </div>
 
-            <div className="bg-white rounded-xl border-2 border-[#006370] p-6 flex flex-col justify-between space-y-5 relative shadow-sm">
+            <div className="bg-white rounded-xs border-2 border-[#006370] p-6 flex flex-col justify-between space-y-5 relative shadow-sm">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Users className="w-4 h-4" />
                   </div>
                   <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#006370] text-white uppercase">Rekomendasi</span>
@@ -717,15 +736,15 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <Link href="/spaces?tipe=meeting_room" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${meetingSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
+              <Link href="/spaces?tipe=meeting_room" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-xs transition-colors shadow-xs text-center ${meetingSpaces.length > 0 ? "bg-[#006370] hover:bg-[#004e58]" : "bg-slate-300 pointer-events-none"}`}>
                 Pesan Ruang Rapat
               </Link>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Building2 className="w-4 h-4" />
                   </div>
                   <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 uppercase">Premium</span>
@@ -767,7 +786,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <Link href="/spaces?tipe=private_office" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-[10px] transition-colors shadow-xs text-center ${officeSpaces.length > 0 ? "bg-slate-900 hover:bg-slate-800" : "bg-slate-300 pointer-events-none"}`}>
+              <Link href="/spaces?tipe=private_office" className={`w-full py-2.5 px-4 text-white text-xs font-semibold rounded-xs transition-colors shadow-xs text-center ${officeSpaces.length > 0 ? "bg-slate-900 hover:bg-slate-800" : "bg-slate-300 pointer-events-none"}`}>
                 Pesan Suite Privat
               </Link>
             </div>
@@ -791,9 +810,9 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
-                <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <Cpu className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
@@ -810,9 +829,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
-                <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
@@ -829,9 +848,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
               <div className="space-y-3.5">
-                <div className="w-9 h-9 rounded-lg bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <Users className="w-4 h-4" />
                 </div>
                 <h3 className="font-bold text-sm text-slate-900">
@@ -853,7 +872,7 @@ export default function HomePage() {
 
       <section className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xs">
+          <div className="rounded-xs border border-slate-200/90 bg-white p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               
               <div className="lg:col-span-6 space-y-4">
@@ -873,7 +892,7 @@ export default function HomePage() {
                 <div className="pt-2 flex flex-wrap items-center gap-4">
                   <Link
                     href="/spaces"
-                    className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-2xs"
+                    className="px-4 py-2 rounded-xs bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors shadow-2xs"
                   >
                     Buka Peta &amp; Katalog
                   </Link>
@@ -887,7 +906,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-6 bg-slate-50/80 rounded-xl border border-slate-200/80 p-6 space-y-4">
+              <div className="lg:col-span-6 bg-slate-50/80 rounded-xs border border-slate-200/80 p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
                     <span className="relative flex h-2 w-2">
@@ -899,10 +918,10 @@ export default function HomePage() {
                   <span className="text-[11px] font-mono text-slate-400">Sinkronisasi v2.4</span>
                 </div>
 
-                <div className="p-4 bg-white rounded-lg border border-slate-200/90 text-xs space-y-2">
+                <div className="p-4 bg-white rounded-xs border border-slate-200/90 text-xs space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-900">Total Ruangan Terverifikasi</span>
-                    <span className="font-mono font-bold text-cyan-800">{spaces.length} Ruangan Aktif</span>
+                    <span className="font-mono font-bold text-cyan-800">{spaces.length > 0 ? `${spaces.length} Ruangan Aktif` : "Katalog Ruangan"}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-500 text-[11px]">
                     <span>Cakupan Wilayah</span>
@@ -936,7 +955,7 @@ export default function HomePage() {
               return (
                 <div
                   key={index}
-                  className="rounded-xl border border-slate-200/90 bg-white transition-all"
+                  className="rounded-xs border border-slate-200/90 bg-white transition-all"
                 >
                   <button
                     type="button"
@@ -965,7 +984,7 @@ export default function HomePage() {
 
       <section className="py-14 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
+          <div className="rounded-xs border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
               Siap meningkatkan produktivitas tim Anda hari ini?
             </h2>
@@ -977,13 +996,13 @@ export default function HomePage() {
             <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/spaces"
-                className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-[13px] font-semibold transition-colors shadow-xs"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xs bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-[13px] font-semibold transition-colors shadow-xs"
               >
                 Pesan Ruangan Sekarang
               </Link>
               <Link
                 href="/register?role=owner"
-                className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-[13px] font-semibold transition-colors"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xs border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-[13px] font-semibold transition-colors"
               >
                 Daftar Sebagai Pengelola Ruangan
               </Link>

@@ -92,31 +92,28 @@ export function ImageUploader({
       return;
     }
 
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran gambar maksimal adalah 5MB.");
+      return;
+    }
+
     setProcessing(true);
     setFileName(file.name);
 
     try {
-      const { uploadDirectToCloudinary } = await import("@/lib/cloudinary");
-      const res = await uploadDirectToCloudinary(file);
+      const { uploadSpaceImage } = await import("@/lib/api");
+      const res = await uploadSpaceImage(file);
       if (res && res.url) {
         setPreview(res.url);
         setFileSize(`${Math.round(file.size / 1024)} KB (Cloudinary CDN)`);
         onChange(res.url);
-        setProcessing(false);
-        return;
+      } else {
+        throw new Error("Respons upload tidak valid");
       }
-    } catch {
-      try {
-        const base64 = await compressImageLocally(file);
-        setPreview(base64);
-        const approxBytes = Math.round((base64.length * 3) / 4);
-        setFileSize(`${Math.round(approxBytes / 1024)} KB (Lokal)`);
-        onChange(base64);
-      } catch {
-        alert("Gagal memproses file gambar.");
-      } finally {
-        setProcessing(false);
-      }
+    } catch (err: any) {
+      alert("Gagal mengunggah gambar ke server: " + (err?.message || "Silakan coba lagi."));
+    } finally {
+      setProcessing(false);
     }
   };
 

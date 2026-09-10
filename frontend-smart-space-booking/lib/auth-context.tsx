@@ -8,7 +8,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  loginUser: (token: string, user: UserProfile) => void;
+  loginUser: (token: string, user: UserProfile, rememberMe?: boolean) => void;
   logoutUser: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -22,7 +22,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const storedToken = localStorage.getItem("token") || localStorage.getItem("access_token");
+      const storedToken =
+        localStorage.getItem("token") ||
+        localStorage.getItem("access_token") ||
+        sessionStorage.getItem("token") ||
+        sessionStorage.getItem("access_token");
+
       if (storedToken) {
         setToken(storedToken);
         const profile = await getProfile();
@@ -37,27 +42,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("token");
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("user");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token") || localStorage.getItem("access_token");
-    const storedUser = localStorage.getItem("user");
+    const storedToken =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token") ||
+      sessionStorage.getItem("token") ||
+      sessionStorage.getItem("access_token");
+    const storedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
 
     if (storedToken) {
       setToken(storedToken);
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser));
-        } catch {
-        }
+        } catch {}
       }
 
       const timeout = setTimeout(() => {
         setIsLoading(false);
-      }, 10000);
+      }, 3500);
 
       refreshUser().finally(() => clearTimeout(timeout));
     } else {
@@ -65,12 +76,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const loginUser = (newToken: string, newUser: UserProfile) => {
+  const loginUser = (newToken: string, newUser: UserProfile, rememberMe: boolean = true) => {
     setToken(newToken);
     setUser(newUser);
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("access_token", newToken);
-    localStorage.setItem("user", JSON.stringify(newUser));
+
+    if (rememberMe) {
+      localStorage.setItem("token", newToken);
+      localStorage.setItem("access_token", newToken);
+      localStorage.setItem("user", JSON.stringify(newUser));
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("user");
+    } else {
+      sessionStorage.setItem("token", newToken);
+      sessionStorage.setItem("access_token", newToken);
+      sessionStorage.setItem("user", JSON.stringify(newUser));
+      localStorage.removeItem("token");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+    }
   };
 
   const logoutUser = () => {
@@ -80,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("user");
   };
 
   return (

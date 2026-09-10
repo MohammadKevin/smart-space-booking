@@ -33,6 +33,8 @@ function SpacesContent() {
       ? searchParams.get("search") || ""
       : "";
   const initialCapacity = searchParams.get("kapasitas") || "";
+  const initialDate = searchParams.get("date") || searchParams.get("tanggal") || "";
+  const initialDuration = searchParams.get("duration") || "";
 
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,8 @@ function SpacesContent() {
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [selectedType, setSelectedType] = useState(initialType);
   const [selectedMetro, setSelectedMetro] = useState(initialMetro);
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [selectedDuration, setSelectedDuration] = useState(initialDuration);
   const [minCapacity, setMinCapacity] = useState(initialCapacity);
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [selectedAmenity, setSelectedAmenity] = useState<string | null>(null);
@@ -53,7 +57,31 @@ function SpacesContent() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getSpaces();
+      let jamMulai: string | undefined;
+      let durasiJam: number | undefined;
+
+      if (selectedDuration) {
+        if (selectedDuration.includes("09:00 - 18:00")) {
+          jamMulai = "09:00";
+          durasiJam = 9;
+        } else if (selectedDuration.includes("09:00 - 13:00")) {
+          jamMulai = "09:00";
+          durasiJam = 4;
+        } else if (selectedDuration.includes("13:00 - 17:00")) {
+          jamMulai = "13:00";
+          durasiJam = 4;
+        } else if (selectedDuration.includes("17:00 - 21:00")) {
+          jamMulai = "17:00";
+          durasiJam = 4;
+        }
+      }
+
+      const filterParams: any = {};
+      if (selectedDate) filterParams.tanggal = selectedDate;
+      if (jamMulai) filterParams.jamMulai = jamMulai;
+      if (durasiJam) filterParams.durasiJam = durasiJam;
+
+      const data = await getSpaces(Object.keys(filterParams).length > 0 ? filterParams : undefined);
       setSpaces(data || []);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err));
@@ -64,17 +92,21 @@ function SpacesContent() {
 
   useEffect(() => {
     fetchSpacesData();
-  }, []);
+  }, [selectedDate, selectedDuration]);
 
   useEffect(() => {
     const t = searchParams.get("tipe");
     const m = searchParams.get("metro");
     const s = searchParams.get("search");
     const c = searchParams.get("kapasitas");
+    const d = searchParams.get("date") || searchParams.get("tanggal");
+    const dur = searchParams.get("duration");
     if (t !== null) setSelectedType(t);
     if (m !== null) setSelectedMetro(m);
     if (s !== null && s !== m) setSearchQuery(s);
     if (c !== null) setMinCapacity(c);
+    if (d !== null) setSelectedDate(d);
+    if (dur !== null) setSelectedDuration(dur);
   }, [searchParams]);
 
   const availableMetros = useMemo(() => {
@@ -92,26 +124,52 @@ function SpacesContent() {
 
   const filteredSpaces = useMemo(() => {
     let result = spaces.filter((space) => {
-      
       if (selectedType && space.tipe !== selectedType) {
         return false;
       }
-      
+
       if (minCapacity && (space.kapasitas || 0) < parseInt(minCapacity, 10)) {
         return false;
       }
-      
+
       if (maxPrice && space.hargaPerJam > parseInt(maxPrice, 10)) {
         return false;
       }
-      
+
       if (selectedMetro) {
         const addr = (space.owner?.alamat || space.owner?.namaCoworking || "").toLowerCase();
         if (!addr.includes(selectedMetro.toLowerCase())) {
           return false;
         }
       }
-      
+
+      if (selectedAmenity) {
+        const desc = (space.deskripsi || "").toLowerCase();
+        if (selectedAmenity === "proyektor") {
+          if (
+            space.tipe !== "meeting_room" &&
+            !desc.includes("proyektor") &&
+            !desc.includes("layar") &&
+            !desc.includes("screen")
+          ) {
+            return false;
+          }
+        } else if (selectedAmenity === "ergonomis") {
+          if (!desc.includes("ergonomis") && space.tipe === "meeting_room") {
+            return false;
+          }
+        } else if (selectedAmenity === "pantry") {
+          if (
+            !desc.includes("kopi") &&
+            !desc.includes("teh") &&
+            !desc.includes("pantry") &&
+            !desc.includes("snack")
+          ) {
+            return false;
+          }
+        }
+      }
+
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = space.namaSpace?.toLowerCase().includes(query);
@@ -132,7 +190,7 @@ function SpacesContent() {
     }
 
     return result;
-  }, [spaces, selectedType, selectedMetro, minCapacity, maxPrice, searchQuery, sortBy]);
+  }, [spaces, selectedType, selectedMetro, minCapacity, maxPrice, searchQuery, sortBy, selectedAmenity]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -140,11 +198,20 @@ function SpacesContent() {
     setSelectedMetro("");
     setMinCapacity("");
     setMaxPrice("");
+    setSelectedDate("");
+    setSelectedDuration("");
     setSelectedAmenity(null);
   };
 
   const hasActiveFilters = Boolean(
-    searchQuery || selectedType || selectedMetro || minCapacity || maxPrice || selectedAmenity
+    searchQuery ||
+      selectedType ||
+      selectedMetro ||
+      minCapacity ||
+      maxPrice ||
+      selectedAmenity ||
+      selectedDate ||
+      selectedDuration
   );
 
   const totalPages = Math.ceil(filteredSpaces.length / itemsPerPage) || 1;
@@ -264,6 +331,29 @@ function SpacesContent() {
           </div>
 
           <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-slate-500 mr-1">Fasilitas:</span>
+              {[
+                { id: null, label: "Semua" },
+                { id: "proyektor", label: "📽️ Proyektor / Layar" },
+                { id: "ergonomis", label: "🪑 Kursi Ergonomis" },
+                { id: "pantry", label: "☕ Free Coffee & Tea" },
+              ].map((amenity) => (
+                <button
+                  key={amenity.label}
+                  type="button"
+                  onClick={() => setSelectedAmenity(amenity.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                    selectedAmenity === amenity.id
+                      ? "bg-[#006370] text-white shadow-xs"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {amenity.label}
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 text-slate-500">
                 <span>Urutkan:</span>
@@ -289,6 +379,32 @@ function SpacesContent() {
               </button>
             </div>
           </div>
+
+          {(selectedDate || selectedDuration) && (
+            <div className="pt-2 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-600">
+              <span className="font-semibold text-slate-700">Filter Jadwal Aktif:</span>
+              {selectedDate && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                  📅 {selectedDate}
+                </span>
+              )}
+              {selectedDuration && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200 font-medium">
+                  ⏱️ {selectedDuration}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDate("");
+                  setSelectedDuration("");
+                }}
+                className="text-slate-400 hover:text-slate-600 ml-1 underline cursor-pointer"
+              >
+                Hapus Jadwal
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">

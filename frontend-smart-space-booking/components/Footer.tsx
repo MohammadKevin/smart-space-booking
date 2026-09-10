@@ -8,7 +8,13 @@ import { QrCode } from "lucide-react";
 export function Footer() {
   const pathname = usePathname();
 
-  if (!pathname || pathname !== "/") {
+  const isDashboard = pathname?.startsWith("/dashboard");
+  const isAuthPage =
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/register") ||
+    pathname?.startsWith("/verify-email");
+
+  if (!pathname || isDashboard || isAuthPage) {
     return null;
   }
 

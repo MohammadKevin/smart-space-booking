@@ -9,16 +9,13 @@ export const CloudinaryProvider = {
     return cloudinary.config({
       cloud_name:
         configService.get<string>('CLOUDINARY_CLOUD_NAME') ||
-        process.env.CLOUDINARY_CLOUD_NAME ||
-        'n2q3f6uz',
+        process.env.CLOUDINARY_CLOUD_NAME,
       api_key:
         configService.get<string>('CLOUDINARY_API_KEY') ||
-        process.env.CLOUDINARY_API_KEY ||
-        '998714454127672',
+        process.env.CLOUDINARY_API_KEY,
       api_secret:
         configService.get<string>('CLOUDINARY_API_SECRET') ||
-        process.env.CLOUDINARY_API_SECRET ||
-        'znTPktUS-hVwZQGLcZXc_qZ4aoE',
+        process.env.CLOUDINARY_API_SECRET,
     });
   },
   inject: [ConfigService],

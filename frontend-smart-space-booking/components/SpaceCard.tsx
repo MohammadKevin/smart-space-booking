@@ -10,14 +10,8 @@ interface SpaceCardProps {
   priority?: boolean;
 }
 
-export function formatRupiah(amount: number | string | undefined | null): string {
-  const num = typeof amount === "number" ? amount : parseFloat(String(amount || 0)) || 0;
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(num);
-}
+import { formatRupiah } from "@/lib/utils";
+export { formatRupiah };
 
 export function SpaceCard({ space }: SpaceCardProps) {
   const fallbackImage =

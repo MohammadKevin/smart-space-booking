@@ -125,6 +125,8 @@ model Space {
   waitlist        Waitlist[]
   diskon          Diskon[]
 
+  @@index([ownerId])
+  @@index([tipe])
   @@map("spaces")
 }
 
@@ -165,6 +167,9 @@ model Reservasi {
   transaksi        Transaksi?
   review           Review?
 
+  @@index([tanggalReservasi, status])
+  @@index([ownerId])
+  @@index([memberId])
   @@map("reservasi")
 }
 
@@ -199,6 +204,7 @@ model DetailReservasi {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  @@index([spaceId])
   @@map("detail_reservasi")
 }
 
