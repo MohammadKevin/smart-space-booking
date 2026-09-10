@@ -6,7 +6,7 @@ import {
   OnModuleInit,
   Logger,
 } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../common/mail/mail.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -42,7 +42,7 @@ export class ReservationService implements OnModuleInit {
     });
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron('*/15 * * * *')
   async cleanupExpiredReservations() {
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const now = new Date();
@@ -248,6 +248,15 @@ export class ReservationService implements OnModuleInit {
           ) {
             throw new BadRequestException(
               `Kupon promo '${selectedDiskon.namaDiskon}' tidak berlaku untuk coworking space ini.`,
+            );
+          }
+
+          if (
+            selectedDiskon.spaceId !== null &&
+            selectedDiskon.spaceId !== space.id
+          ) {
+            throw new BadRequestException(
+              `Kupon promo '${selectedDiskon.namaDiskon}' hanya berlaku untuk unit ruangan tertentu.`,
             );
           }
 

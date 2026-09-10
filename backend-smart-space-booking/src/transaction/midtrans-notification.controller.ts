@@ -19,4 +19,13 @@ export class MidtransNotificationController {
   handleNotification(@Body() payload: Record<string, any>) {
     return this.transactionService.handleNotification(payload);
   }
+
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Alias Webhook Notifikasi Pembayaran dari Midtrans',
+  })
+  handleWebhook(@Body() payload: Record<string, any>) {
+    return this.transactionService.handleNotification(payload);
+  }
 }

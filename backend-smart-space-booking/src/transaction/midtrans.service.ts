@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -9,6 +9,7 @@ export interface SnapTokenResult {
 
 @Injectable()
 export class MidtransService {
+  private readonly logger = new Logger(MidtransService.name);
   private readonly isProduction: boolean;
   private readonly serverKey: string;
 
@@ -345,10 +346,13 @@ export class MidtransService {
 
   async getTransactionStatus(orderId: string): Promise<Record<string, any>> {
     if (!this.serverKey) {
+      this.logger.warn(
+        `[SECURITY] MIDTRANS_SERVER_KEY belum dikonfigurasi. Tidak dapat memverifikasi status order '${orderId}'.`,
+      );
       return {
-        status_code: '200',
-        transaction_status: 'settlement',
-        payment_type: 'qris',
+        status_code: '500',
+        transaction_status: 'unconfigured',
+        payment_type: 'unknown',
       };
     }
 
@@ -370,7 +374,8 @@ export class MidtransService {
       }
 
       return (await res.json()) as Record<string, any>;
-    } catch {
+    } catch (err: any) {
+      this.logger.error(`Error querying Midtrans status: ${err?.message}`);
       return {
         status_code: '500',
         transaction_status: 'pending',
@@ -385,6 +390,12 @@ export class MidtransService {
     grossAmount: string,
     signatureKey: string,
   ): boolean {
+    if (!this.serverKey) {
+      this.logger.error(
+        '[SECURITY] MIDTRANS_SERVER_KEY kosong. Verifikasi signature notifikasi webhook ditolak.',
+      );
+      return false;
+    }
     const payload = `${orderId}${statusCode}${grossAmount}${this.serverKey}`;
     const expected = crypto.createHash('sha512').update(payload).digest('hex');
     return expected === signatureKey;

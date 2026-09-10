@@ -75,8 +75,22 @@ export class SuperAdminService {
     });
 
     const totalGmv = transactions.reduce((acc, t) => acc + (t.jumlah || 0), 0);
-    const platformProfit = (totalGmv * rate) / 100;
-    const totalOwnersPayout = totalGmv - platformProfit;
+    const platformProfit = transactions.reduce(
+      (acc, t) =>
+        acc +
+        (t.komisiPlatform ??
+          ((t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100)),
+      0,
+    );
+    const totalOwnersPayout = transactions.reduce(
+      (acc, t) =>
+        acc +
+        (t.pendapatanOwner ??
+          (t.jumlah -
+            (t.komisiPlatform ??
+              ((t.jumlah * (t.persentaseKomisiPlatform ?? rate)) / 100)))),
+      0,
+    );
 
     const totalOwners = await this.prisma.spaceOwner.count();
     const totalSpaces = await this.prisma.space.count();
@@ -150,8 +164,12 @@ export class SuperAdminService {
       const monthIdx = new Date(date).getUTCMonth();
       if (monthIdx >= 0 && monthIdx < 12) {
         const amt = tx.jumlah || 0;
-        const profit = (amt * rate) / 100;
-        const payout = amt - profit;
+        const profit =
+          tx.komisiPlatform ??
+          ((amt * (tx.persentaseKomisiPlatform ?? rate)) / 100);
+        const payout =
+          tx.pendapatanOwner ??
+          (amt - profit);
 
         monthlyStats[monthIdx].gmv += amt;
         monthlyStats[monthIdx].platformProfit += profit;
@@ -213,6 +231,7 @@ export class SuperAdminService {
 
     return owners.map((o) => {
       let gmv = 0;
+      let platformFee = 0;
       let totalBookings = o.reservasi.length;
       let paidBookings = 0;
 
@@ -221,20 +240,26 @@ export class SuperAdminService {
           res.transaksi &&
           res.transaksi.statusPembayaran === PembayaranStatus.lunas
         ) {
-          gmv += res.transaksi.jumlah || 0;
+          const amt = res.transaksi.jumlah || 0;
+          gmv += amt;
           paidBookings += 1;
+          const fee =
+            res.transaksi.komisiPlatform ??
+            ((amt * (res.transaksi.persentaseKomisiPlatform ?? rate)) / 100);
+          platformFee += fee;
         } else if (
           res.status === ReservasiStatus.selesai ||
           res.status === ReservasiStatus.aktif
         ) {
           if (res.detailReservasi?.totalHarga) {
-            gmv += res.detailReservasi.totalHarga;
+            const amt = res.detailReservasi.totalHarga;
+            gmv += amt;
             paidBookings += 1;
+            platformFee += (amt * rate) / 100;
           }
         }
       }
 
-      const platformFee = (gmv * rate) / 100;
       const netPayout = gmv - platformFee;
 
       const { reservasi: _, ...rest } = o;

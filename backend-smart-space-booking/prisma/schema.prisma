@@ -184,10 +184,13 @@ model Transaksi {
   snapRedirectUrl  String?
   midtransOrderId  String?          @unique
   midtransTransId  String?
-  statusPembayaran PembayaranStatus @default(belum_bayar)
-  dibayarPada      DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  statusPembayaran         PembayaranStatus @default(belum_bayar)
+  dibayarPada              DateTime?
+  persentaseKomisiPlatform Float?           @default(10)
+  komisiPlatform           Float?           @default(0)
+  pendapatanOwner          Float?           @default(0)
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
 
   @@map("transaksi")
 }

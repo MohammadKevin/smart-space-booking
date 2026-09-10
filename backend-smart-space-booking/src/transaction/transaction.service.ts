@@ -79,6 +79,21 @@ export class TransactionService {
     return tx;
   }
 
+  private async getActiveCommissionRate(): Promise<number> {
+    try {
+      const setting = await this.prisma.platformSetting.findUnique({
+        where: { key: 'PLATFORM_COMMISSION_PERCENT' },
+      });
+      if (setting?.value) {
+        const parsed = parseFloat(setting.value);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return 10;
+  }
+
   private async ensureTransaction(
     reservationId: number,
     jumlah: number,
@@ -89,11 +104,18 @@ export class TransactionService {
     });
 
     if (!tx) {
+      const rate = await this.getActiveCommissionRate();
+      const komisiPlatform = (jumlah * rate) / 100;
+      const pendapatanOwner = jumlah - komisiPlatform;
+
       tx = await this.prisma.transaksi.create({
         data: {
           nomorInvoice: this.generateInvoiceNumber(reservationId, ownerId),
           reservasiId: reservationId,
           jumlah,
+          persentaseKomisiPlatform: rate,
+          komisiPlatform,
+          pendapatanOwner,
           statusPembayaran: PembayaranStatus.menunggu_pembayaran,
         },
       });
@@ -223,6 +245,10 @@ export class TransactionService {
       customField3,
     });
 
+    const rate = await this.getActiveCommissionRate();
+    const komisiPlatform = (tx.jumlah * rate) / 100;
+    const pendapatanOwner = tx.jumlah - komisiPlatform;
+
     await this.prisma.transaksi.update({
       where: { id: tx.id },
       data: {
@@ -231,6 +257,9 @@ export class TransactionService {
         midtransOrderId: orderId,
         metodePembayaran: paymentMethod || tx.metodePembayaran,
         statusPembayaran: PembayaranStatus.menunggu_pembayaran,
+        persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
+        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
+        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
       },
     });
 
@@ -275,23 +304,12 @@ export class TransactionService {
       );
     }
 
+    // Exact match orderId against midtransOrderId or nomorInvoice (remove fuzzy slice(0, 18) match)
     const tx = await this.prisma.transaksi.findFirst({
       where: {
         OR: [
           { midtransOrderId: orderId },
           { nomorInvoice: orderId },
-          {
-            nomorInvoice: orderId
-              .split('-BCA')[0]
-              .split('-BNI')[0]
-              .split('-BRI')[0]
-              .split('-MANDIRI')[0]
-              .split('-QRIS')[0]
-              .split('-PERMATA')[0]
-              .split('-GOPAY')[0]
-              .split('-SHOPEEPAY')[0],
-          },
-          { midtransOrderId: { startsWith: orderId.slice(0, 18) } },
         ],
       },
       include: {
@@ -309,6 +327,20 @@ export class TransactionService {
     if (!tx) {
       throw new NotFoundException(
         `Transaksi dengan order ID '${orderId}' tidak ditemukan.`,
+      );
+    }
+
+    // Strict nominal check: incoming gross_amount must match tx.jumlah in database
+    const incomingGrossAmount = Math.round(Number(grossAmount || 0));
+    const expectedAmount = Math.round(Number(tx.jumlah || 0));
+
+    if (incomingGrossAmount !== expectedAmount) {
+      this.logger.error(
+        `[SECURITY ALERT] Manipulasi nominal terdeteksi pada notifikasi Midtrans! ` +
+        `Order: '${orderId}', Expected: Rp ${expectedAmount}, Received: Rp ${incomingGrossAmount}`,
+      );
+      throw new BadRequestException(
+        `Nominal pembayaran (Rp ${incomingGrossAmount}) tidak sesuai dengan tagihan (Rp ${expectedAmount}).`,
       );
     }
 
@@ -333,6 +365,9 @@ export class TransactionService {
     }
 
     const isNewlyPaid = status === PembayaranStatus.lunas && !tx.dibayarPada;
+    const rate = await this.getActiveCommissionRate();
+    const komisiPlatform = (tx.jumlah * rate) / 100;
+    const pendapatanOwner = tx.jumlah - komisiPlatform;
 
     const updated = await this.prisma.transaksi.update({
       where: { id: tx.id },
@@ -342,6 +377,9 @@ export class TransactionService {
         midtransTransId: payload.transaction_id || tx.midtransTransId,
         dibayarPada:
           status === PembayaranStatus.lunas ? (tx.dibayarPada || new Date()) : tx.dibayarPada,
+        persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
+        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
+        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
       },
       include: {
         reservasi: {
@@ -398,6 +436,27 @@ export class TransactionService {
     const mt = await this.midtrans.getTransactionStatus(tx.midtransOrderId);
     const transactionStatus = mt.transaction_status;
 
+    if (!mt || mt.status_code === '500' || transactionStatus === 'unconfigured') {
+      throw new BadRequestException(
+        'Status pembayaran belum dapat diverifikasi dari gateway Midtrans.',
+      );
+    }
+
+    // Strict nominal check on sync
+    if (mt.gross_amount) {
+      const incomingAmount = Math.round(Number(mt.gross_amount));
+      const expectedAmount = Math.round(Number(tx.jumlah));
+      if (incomingAmount !== expectedAmount) {
+        this.logger.error(
+          `[SECURITY ALERT] Nominal mismatch pada syncPayment order '${tx.midtransOrderId}'! ` +
+          `Expected: Rp ${expectedAmount}, Received: Rp ${incomingAmount}`,
+        );
+        throw new BadRequestException(
+          'Nominal pembayaran pada gateway tidak cocok dengan tagihan reservasi.',
+        );
+      }
+    }
+
     let status: PembayaranStatus;
     if (transactionStatus === 'settlement' || transactionStatus === 'capture') {
       status = PembayaranStatus.lunas;
@@ -407,6 +466,10 @@ export class TransactionService {
       status = PembayaranStatus.gagal;
     }
 
+    const rate = await this.getActiveCommissionRate();
+    const komisiPlatform = (tx.jumlah * rate) / 100;
+    const pendapatanOwner = tx.jumlah - komisiPlatform;
+
     const updated = await this.prisma.transaksi.update({
       where: { id: tx.id },
       data: {
@@ -414,7 +477,10 @@ export class TransactionService {
         metodePembayaran: mt.payment_type || tx.metodePembayaran,
         midtransTransId: mt.transaction_id || tx.midtransTransId,
         dibayarPada:
-          status === PembayaranStatus.lunas ? new Date() : tx.dibayarPada,
+          status === PembayaranStatus.lunas ? (tx.dibayarPada || new Date()) : tx.dibayarPada,
+        persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
+        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
+        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
       },
       include: {
         reservasi: {

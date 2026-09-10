@@ -344,44 +344,36 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     setPaying(true);
     setPayError(null);
 
-    const space = reservation.detailReservasi?.space;
-    const amountDue =
-      reservation.detailReservasi?.totalHarga ||
-      (space?.hargaPerJam || 50000) * (reservation.durasiJam || 1);
-
     try {
-      try {
-        await startPayment(reservation.id, selectedMethod);
-      } catch {}
-
-      const chargeRes = await fetch("/api/charge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationId: reservation.id,
-          invoiceNumber: reservation.transaksi?.nomorInvoice || `INV-RES-${reservation.id}`,
-          amount: amountDue,
-          paymentMethod: selectedMethod,
-          customerName: user?.member?.namaMember || user?.email || "Member WorkNest",
-          customerEmail: user?.email || "member@worknest.id",
-          customerPhone: user?.member?.telp || "081234567890",
-        }),
-      });
-
-      const chargeData = await chargeRes.json();
-
-      if (!chargeRes.ok || !chargeData.success) {
-        throw new Error(chargeData.message || "Gagal menghasilkan nomor tagihan dari gateway.");
-      }
+      const paymentRes = await startPayment(reservation.id, selectedMethod);
+      const paymentData = paymentRes.data;
+      const direct = paymentData?.directPayment;
 
       setPaymentDetails({
-        vaNumber: chargeData.vaNumber || undefined,
-        qrString: chargeData.qrString || reservation.qrCode,
-        billerCode: chargeData.billerCode || (selectedMethod === "mandiri_bill" ? "70012" : undefined),
-        billKey: chargeData.billKey || undefined,
-        paymentCode: chargeData.paymentCode || undefined,
-        orderId: chargeData.orderId,
+        vaNumber: direct?.vaNumber || undefined,
+        qrString: direct?.qrString || reservation.qrCode,
+        billerCode: direct?.billerCode || (selectedMethod === "mandiri_bill" ? "70012" : undefined),
+        billKey: direct?.billKey || undefined,
+        paymentCode: direct?.paymentCode || undefined,
+        orderId: direct?.orderId || paymentData?.nomorInvoice || String(paymentData?.transactionId),
       });
+
+      if (paymentData?.transactionId) {
+        setReservation((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            transaksi: {
+              ...(prev.transaksi as any),
+              id: paymentData.transactionId,
+              nomorInvoice: paymentData.nomorInvoice,
+              jumlah: paymentData.jumlah,
+              snapToken: paymentData.snapToken,
+              snapRedirectUrl: paymentData.redirectUrl,
+            },
+          };
+        });
+      }
 
       setModalOpen(true);
     } catch (err: any) {
