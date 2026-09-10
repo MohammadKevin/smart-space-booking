@@ -67,12 +67,7 @@ function RealSpaceCard({ space }: { space: Space }) {
           />
           
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 backdrop-blur-xs border shadow-2xs ${status.color}`}>
-              {status.ping ? (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              ) : (
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-              )}
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[11px] font-semibold bg-white/95 backdrop-blur-xs border shadow-2xs ${status.color}`}>
               <span>{status.label}</span>
             </span>
           </div>
@@ -651,7 +646,7 @@ export default function HomePage() {
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Armchair className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-700 uppercase">Populer</span>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-xs bg-cyan-50 border border-cyan-100 text-cyan-700 uppercase">Populer</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">Flex Desk</h3>
@@ -697,7 +692,7 @@ export default function HomePage() {
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Users className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#006370] text-white uppercase">Rekomendasi</span>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-xs bg-[#006370] text-white uppercase">Rekomendasi</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">Ruang Rapat</h3>
@@ -747,7 +742,7 @@ export default function HomePage() {
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                     <Building2 className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 uppercase">Premium</span>
+                  <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-xs bg-amber-50 border border-amber-200 text-amber-700 uppercase">Premium</span>
                 </div>
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">Suite Privat</h3>
