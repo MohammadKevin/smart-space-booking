@@ -83,7 +83,21 @@ export class DiscountService {
     });
   }
 
+  private async ensureColumn() {
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `ALTER TABLE diskon ADD COLUMN spaceId INT NULL;`,
+      );
+    } catch {}
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `ALTER TABLE Diskon ADD COLUMN spaceId INT NULL;`,
+      );
+    } catch {}
+  }
+
   async getMyDiscounts(ownerUserId: number) {
+    await this.ensureColumn();
     const owner = await this.getOwner(ownerUserId);
     if (!owner) {
       throw new NotFoundException('Data coworking space tidak ditemukan.');
@@ -117,6 +131,7 @@ export class DiscountService {
   }
 
   async findAll(ownerId?: number, spaceId?: number) {
+    await this.ensureColumn();
     const where: Prisma.DiskonWhereInput = {};
 
     let targetOwnerId = ownerId;
