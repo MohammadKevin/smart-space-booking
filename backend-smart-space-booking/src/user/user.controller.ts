@@ -46,11 +46,11 @@ export class UserController {
   }
 
   @Get('members')
-  @Roles(Role.admin_space, Role.staff)
+  @Roles(Role.admin_space, Role.staff, Role.super_admin)
   @ApiOperation({
     summary: 'Mendapatkan Daftar Semua Member',
     description:
-      'Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.',
+      'Dapat diakses oleh admin_space, staff, dan super_admin untuk melihat daftar member terdaftar.',
   })
   @ApiQuery({
     name: 'page',
@@ -72,15 +72,18 @@ export class UserController {
   }
 
   @Get('staffs')
-  @Roles(Role.admin_space)
+  @Roles(Role.admin_space, Role.super_admin)
   @ApiOperation({
     summary: 'Mendapatkan Daftar Staff Coworking Space',
     description:
-      'Hanya dapat diakses oleh admin_space untuk melihat seluruh staff yang bekerja di spacenya.',
+      'Dapat diakses oleh admin_space untuk melihat staffnya, atau super_admin untuk melihat seluruh staff.',
   })
   @ApiResponse({ status: 200, description: 'Daftar staff berhasil dimuat.' })
-  getOwnerStaffs(@GetUser('id') ownerUserId: number) {
-    return this.userService.getOwnerStaffs(ownerUserId);
+  getOwnerStaffs(
+    @GetUser('id') ownerUserId: number,
+    @GetUser('role') role: Role,
+  ) {
+    return this.userService.getOwnerStaffs(ownerUserId, role);
   }
 
   @Delete('staffs/:id')

@@ -273,8 +273,14 @@ export class TransactionService {
         metodePembayaran: paymentMethod || tx.metodePembayaran,
         statusPembayaran: PembayaranStatus.menunggu_pembayaran,
         persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
-        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
-        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
+        komisiPlatform:
+          tx.komisiPlatform && tx.komisiPlatform > 0
+            ? tx.komisiPlatform
+            : komisiPlatform,
+        pendapatanOwner:
+          tx.pendapatanOwner && tx.pendapatanOwner > 0
+            ? tx.pendapatanOwner
+            : pendapatanOwner,
       },
     });
 
@@ -393,8 +399,14 @@ export class TransactionService {
             ? tx.dibayarPada || new Date()
             : tx.dibayarPada,
         persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
-        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
-        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
+        komisiPlatform:
+          tx.komisiPlatform && tx.komisiPlatform > 0
+            ? tx.komisiPlatform
+            : komisiPlatform,
+        pendapatanOwner:
+          tx.pendapatanOwner && tx.pendapatanOwner > 0
+            ? tx.pendapatanOwner
+            : pendapatanOwner,
       },
       include: {
         reservasi: {
@@ -506,8 +518,14 @@ export class TransactionService {
             ? tx.dibayarPada || new Date()
             : tx.dibayarPada,
         persentaseKomisiPlatform: tx.persentaseKomisiPlatform ?? rate,
-        komisiPlatform: tx.komisiPlatform ?? komisiPlatform,
-        pendapatanOwner: tx.pendapatanOwner ?? pendapatanOwner,
+        komisiPlatform:
+          tx.komisiPlatform && tx.komisiPlatform > 0
+            ? tx.komisiPlatform
+            : komisiPlatform,
+        pendapatanOwner:
+          tx.pendapatanOwner && tx.pendapatanOwner > 0
+            ? tx.pendapatanOwner
+            : pendapatanOwner,
       },
       include: {
         reservasi: {

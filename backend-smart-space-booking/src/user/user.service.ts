@@ -208,7 +208,24 @@ export class UserService {
     });
   }
 
-  async getOwnerStaffs(ownerUserId: number) {
+  async getOwnerStaffs(ownerUserId: number, role?: Role) {
+    if (role === Role.super_admin) {
+      return this.prisma.staff.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              createdAt: true,
+            },
+          },
+          owner: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
+
     const owner = await this.prisma.spaceOwner.findUnique({
       where: { userId: ownerUserId },
     });
