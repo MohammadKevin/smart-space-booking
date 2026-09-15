@@ -1,0 +1,252 @@
+[
+  {
+    "category": "Reservations",
+    "method": "GET",
+    "path": "/api/reservations",
+    "description": "Get Reservations List",
+    "status": 200,
+    "latency_ms": 2906,
+    "result": "PASS",
+    "details": "Total reservations: 12"
+  },
+  {
+    "category": "Reservations",
+    "method": "GET",
+    "path": "/api/reservations/{id}",
+    "description": "Get Reservation Detail by ID",
+    "status": 200,
+    "latency_ms": 1185,
+    "result": "PASS",
+    "details": "Status: disetujui"
+  },
+  {
+    "category": "Reservations",
+    "method": "GET",
+    "path": "/api/reservations/{id}",
+    "description": "Get Reservation Non-existent",
+    "status": 404,
+    "latency_ms": 500,
+    "result": "PASS",
+    "details": "Status 404: Reservasi dengan ID 999999 tidak ditemukan."
+  },
+  {
+    "category": "Reservations",
+    "method": "POST",
+    "path": "/api/reservations",
+    "description": "Create Reservation Validation / RBAC",
+    "status": 403,
+    "latency_ms": 1154,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  },
+  {
+    "category": "Reservations",
+    "method": "PATCH",
+    "path": "/api/reservations/{id}/status",
+    "description": "Update Status Invalid Value / RBAC",
+    "status": 403,
+    "latency_ms": 287,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space, staff]"
+  },
+  {
+    "category": "Reservations",
+    "method": "PATCH",
+    "path": "/api/reservations/{id}/cancel",
+    "description": "Cancel Reservation Non-existent / RBAC",
+    "status": 403,
+    "latency_ms": 988,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  },
+  {
+    "category": "QR Checkin",
+    "method": "POST",
+    "path": "/api/checkin/verify",
+    "description": "Verify QR Code Format / Expiry",
+    "status": 403,
+    "latency_ms": 742,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space, staff]"
+  },
+  {
+    "category": "QR Checkin",
+    "method": "POST",
+    "path": "/api/checkin/verify",
+    "description": "Verify Invalid QR Code",
+    "status": 403,
+    "latency_ms": 1044,
+    "result": "PASS",
+    "details": "Properly rejected: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space, staff]"
+  },
+  {
+    "category": "QR Checkin",
+    "method": "POST",
+    "path": "/api/checkin/process",
+    "description": "Process Checkin Invalid QR",
+    "status": 403,
+    "latency_ms": 4103,
+    "result": "PASS",
+    "details": "Properly rejected: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space, staff]"
+  },
+  {
+    "category": "Reports",
+    "method": "GET",
+    "path": "/api/reports/summary",
+    "description": "Reports Summary Dashboard",
+    "status": 403,
+    "latency_ms": 510,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Reports",
+    "method": "GET",
+    "path": "/api/reports/monthly-revenue",
+    "description": "Reports Monthly Revenue",
+    "status": 403,
+    "latency_ms": 284,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Reports",
+    "method": "GET",
+    "path": "/api/reports/space-distribution",
+    "description": "Reports Space Distribution",
+    "status": 403,
+    "latency_ms": 252,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Reports",
+    "method": "GET",
+    "path": "/api/reports/recent-transactions",
+    "description": "Reports Recent Transactions",
+    "status": 403,
+    "latency_ms": 196,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Transactions",
+    "method": "GET",
+    "path": "/api/transactions",
+    "description": "Get Transactions List",
+    "status": 200,
+    "latency_ms": 332,
+    "result": "PASS",
+    "details": "Total transactions: 12"
+  },
+  {
+    "category": "Transactions",
+    "method": "GET",
+    "path": "/api/transactions/{id}",
+    "description": "Get Transaction Detail by ID",
+    "status": 200,
+    "latency_ms": 355,
+    "result": "PASS",
+    "details": "Invoice: INV-OWNER15-RES031470-9751"
+  },
+  {
+    "category": "Transactions",
+    "method": "GET",
+    "path": "/api/transactions/{id}",
+    "description": "Get Transaction Non-existent (Negative)",
+    "status": 404,
+    "latency_ms": 371,
+    "result": "PASS",
+    "details": "Status 404: Transaksi dengan ID / Reservasi ID 999999 tidak ditemukan."
+  },
+  {
+    "category": "Transactions",
+    "method": "GET",
+    "path": "/api/transactions/space/{spaceId}",
+    "description": "Get Transactions by Space ID",
+    "status": 200,
+    "latency_ms": 315,
+    "result": "PASS",
+    "details": "Status 200: 12"
+  },
+  {
+    "category": "Transactions",
+    "method": "POST",
+    "path": "/api/transactions/{reservationId}/pay",
+    "description": "Initiate Payment Non-existent / RBAC",
+    "status": 403,
+    "latency_ms": 512,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  },
+  {
+    "category": "Transactions",
+    "method": "POST",
+    "path": "/api/transactions/{id}/sync",
+    "description": "Sync Payment Status with Midtrans",
+    "status": 201,
+    "latency_ms": 493,
+    "result": "WARN",
+    "details": "{'message': 'Status pembayaran diperbarui.', 'data': {'id': 54, 'nomorInvoice': 'INV-OWNER15-RES031470-9751', 'reservasiId': 74, 'jumlah': 3500000, 'metodePembayaran': 'bank_transfer', 'snapToken': 'f3265048-a2d2-404c-83a3-1be2b79c75d7', 'snapRedirectUrl': 'https://app.sandbox.midtrans.com/snap/v4/redirection/f3265048-a2d2-404c-83a3-1be2b79c75d7', 'midtransOrderId': 'INV-OWNER15-RES031470-9751-1789357120103', 'midtransTransId': '890a9861-9733-4b0c-b934-8b3ef744470f', 'statusPembayaran': 'lunas', 'dibayarPada': '2026-09-14T03:39:09.246Z', 'persentaseKomisiPlatform': 10, 'komisiPlatform': 0, 'pendapatanOwner': 0, 'createdAt': '2026-09-14T03:37:11.472Z', 'updatedAt': '2026-09-15T01:42:52.053Z', 'reservasi': {'id': 74, 'tanggalReservasi': '2026-09-14T00:00:00.000Z', 'jamMulai': '11:00', 'durasiJam': 10, 'status': 'disetujui', 'qrCode': 'SSB-1789357031469-1FA73A', 'ownerId': 15, 'memberId': 14, 'createdAt': '2026-09-14T03:37:11.472Z', 'updatedAt': '2026-09-14T03:39:09.260Z', 'member': {'id': 14, 'namaMember': 'Figma Member QA', 'instansi': 'Corecraft QA Group', 'alamat': 'Jl. Rungkut Madya No. 1, Surabaya', 'telp': '081234567890', 'foto': None, 'userId': 43, 'createdAt': '2026-09-10T10:32:10.071Z', 'updatedAt': '2026-09-10T10:32:10.071Z', 'user': {'id': 43, 'email': 'figmaworked@gmail.com', 'password': '$2b$10$oQAP0sk324SBpF3W1y/JkuSavDTkiGILvqm6NBFJgzGLhtZCUoSBq', 'role': 'member', 'isVerified': True, 'otpCode': None, 'otpExpires': None, 'resetOtpCode': None, 'resetOtpExpires': None, 'createdAt': '2026-09-10T10:32:10.030Z', 'updatedAt': '2026-09-10T10:35:53.070Z'}}, 'detailReservasi': {'id': 74, 'reservasiId': 74, 'spaceId': 18, 'diskonId': None, 'totalHarga': 3500000, 'createdAt': '2026-09-14T03:37:11.472Z', 'updatedAt': '2026-09-14T03:37:11.472Z', 'space': {'id': 18, 'namaSpace': 'Private Team Office Suite', 'tipe': 'private_office', 'hargaPerJam': 350000, 'kapasitas': 6, 'foto': 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80', 'deskripsi': 'Suite kantor privat dengan IoT Smart Lock, 6 meja kerja terdedikasi, AC individual, storage cabinet, dan akses lounge.', 'ownerId': 15, 'createdAt': '2026-09-09T16:12:51.250Z', 'updatedAt': '2026-09-09T16:12:51.250Z'}, 'diskon': None}}}}"
+  },
+  {
+    "category": "Transactions",
+    "method": "PATCH",
+    "path": "/api/transactions/{id}/refund",
+    "description": "Mark Transaction Refund Non-existent",
+    "status": 404,
+    "latency_ms": 357,
+    "result": "PASS",
+    "details": "Status 404: Transaksi dengan ID / Reservasi ID 999999 tidak ditemukan."
+  },
+  {
+    "category": "Transactions",
+    "method": "POST",
+    "path": "/api/transactions/notification",
+    "description": "Midtrans Payment Webhook",
+    "status": 400,
+    "latency_ms": 560,
+    "result": "PASS",
+    "details": "Status 400: Signature notifikasi Midtrans tidak valid."
+  },
+  {
+    "category": "Transactions",
+    "method": "POST",
+    "path": "/api/transactions/webhook",
+    "description": "Midtrans Payment Webhook Alias",
+    "status": 400,
+    "latency_ms": 285,
+    "result": "PASS",
+    "details": "Status 400: Signature notifikasi Midtrans tidak valid."
+  },
+  {
+    "category": "Waitlist",
+    "method": "GET",
+    "path": "/api/waitlist/my",
+    "description": "Get My Waitlist",
+    "status": 403,
+    "latency_ms": 290,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  },
+  {
+    "category": "Waitlist",
+    "method": "POST",
+    "path": "/api/waitlist",
+    "description": "Join Waitlist Empty Payload / RBAC",
+    "status": 403,
+    "latency_ms": 238,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  },
+  {
+    "category": "Waitlist",
+    "method": "DELETE",
+    "path": "/api/waitlist/{id}",
+    "description": "Cancel Waitlist Non-existent / RBAC",
+    "status": 403,
+    "latency_ms": 301,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  }
+]

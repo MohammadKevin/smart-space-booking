@@ -1,0 +1,691 @@
+{
+  "LoginDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "john@example.com",
+        "description": "Email akun pengguna"
+      },
+      "password": {
+        "type": "string",
+        "example": "password123",
+        "description": "Password akun pengguna (minimal 6 karakter)"
+      }
+    },
+    "required": [
+      "email",
+      "password"
+    ]
+  },
+  "GoogleLoginDto": {
+    "type": "object",
+    "properties": {
+      "token": {
+        "type": "string",
+        "description": "ID Token atau Access Token dari Google OAuth / Credential",
+        "example": "eyJhbGciOiJSUzI1NiIsImtpZCI..."
+      },
+      "name": {
+        "type": "string",
+        "description": "Nama pengguna dari profil Google",
+        "example": "John Doe"
+      },
+      "email": {
+        "type": "string",
+        "description": "Alamat email pengguna Google",
+        "example": "johndoe@gmail.com"
+      },
+      "avatar": {
+        "type": "string",
+        "description": "URL foto avatar profil Google",
+        "example": "https://lh3.googleusercontent.com/a/..."
+      }
+    },
+    "required": [
+      "token"
+    ]
+  },
+  "RegisterMemberDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "member@example.com",
+        "description": "Email unik untuk member"
+      },
+      "password": {
+        "type": "string",
+        "example": "password123",
+        "description": "Password untuk akun member (minimal 6 karakter)"
+      },
+      "namaMember": {
+        "type": "string",
+        "example": "Kevin Sanjaya",
+        "description": "Nama lengkap member"
+      },
+      "instansi": {
+        "type": "string",
+        "example": "SMK Negeri 1 Surabaya",
+        "description": "Instansi, perusahaan, atau institusi asal member"
+      },
+      "alamat": {
+        "type": "string",
+        "example": "Jl. Pemuda No. 45, Surabaya",
+        "description": "Alamat domisili member"
+      },
+      "telp": {
+        "type": "string",
+        "example": "081234567890",
+        "description": "Nomor telepon / WhatsApp member"
+      },
+      "foto": {
+        "type": "string",
+        "example": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+        "description": "URL foto profil member"
+      }
+    },
+    "required": [
+      "email",
+      "password",
+      "namaMember",
+      "instansi",
+      "alamat",
+      "telp"
+    ]
+  },
+  "RegisterOwnerDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "owner@example.com",
+        "description": "Email unik untuk pengelola / admin space"
+      },
+      "password": {
+        "type": "string",
+        "example": "password123",
+        "description": "Password untuk akun admin space (minimal 6 karakter)"
+      },
+      "namaCoworking": {
+        "type": "string",
+        "example": "SpaceWorks Hub Surabaya",
+        "description": "Nama bisnis coworking space / workstation"
+      },
+      "namaPemilik": {
+        "type": "string",
+        "example": "Budi Santoso",
+        "description": "Nama lengkap pemilik / penanggung jawab space"
+      },
+      "alamat": {
+        "type": "string",
+        "example": "Jl. Basuki Rahmat No. 12-14, Surabaya",
+        "description": "Alamat lengkap coworking space"
+      },
+      "telp": {
+        "type": "string",
+        "example": "081987654321",
+        "description": "Nomor telepon resmi coworking space"
+      }
+    },
+    "required": [
+      "email",
+      "password",
+      "namaCoworking",
+      "namaPemilik",
+      "alamat",
+      "telp"
+    ]
+  },
+  "VerifyEmailDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "user@example.com",
+        "description": "Email pengguna yang didaftarkan"
+      },
+      "otp": {
+        "type": "string",
+        "example": "123456",
+        "description": "6-digit kode verifikasi OTP"
+      }
+    },
+    "required": [
+      "email",
+      "otp"
+    ]
+  },
+  "ResendOtpDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "user@example.com",
+        "description": "Email pengguna yang akan dikirimi ulang OTP"
+      },
+      "type": {
+        "type": "string",
+        "example": "register",
+        "enum": [
+          "register",
+          "forgot_password"
+        ],
+        "description": "Tipe permintaan OTP: register atau forgot_password"
+      }
+    },
+    "required": [
+      "email"
+    ]
+  },
+  "ForgotPasswordDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "user@example.com",
+        "description": "Email akun yang ingin di-reset kata sandinya"
+      }
+    },
+    "required": [
+      "email"
+    ]
+  },
+  "ResetPasswordDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "user@example.com",
+        "description": "Email akun yang sedang di-reset"
+      },
+      "otp": {
+        "type": "string",
+        "example": "123456",
+        "description": "6-digit kode reset OTP"
+      },
+      "password": {
+        "type": "string",
+        "example": "newpassword123*",
+        "description": "Kata sandi baru (minimal 6 karakter)"
+      }
+    },
+    "required": [
+      "email",
+      "otp",
+      "password"
+    ]
+  },
+  "SecretProvisionDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "ceo@worknest.app",
+        "description": "Email akun Super Admin / Platform Owner"
+      },
+      "password": {
+        "type": "string",
+        "example": "CeoPassword123*",
+        "description": "Kata sandi akun Super Admin (minimal 6 karakter)"
+      },
+      "secretKey": {
+        "type": "string",
+        "example": "WorkNest_CEO_SuperAdmin_Secret_Key_2026*",
+        "description": "Kunci rahasia Super Admin dari konfigurasi server (.env)"
+      },
+      "nama": {
+        "type": "string",
+        "example": "Chief Executive Officer",
+        "description": "Nama tampilan akun Super Admin"
+      }
+    },
+    "required": [
+      "email",
+      "password",
+      "secretKey"
+    ]
+  },
+  "CreateStaffDto": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "example": "staff@example.com",
+        "description": "Email unik untuk staff operasional"
+      },
+      "password": {
+        "type": "string",
+        "example": "password123",
+        "description": "Password untuk akun staff (minimal 6 karakter)"
+      },
+      "namaStaff": {
+        "type": "string",
+        "example": "Ani Lestari",
+        "description": "Nama lengkap staff operasional"
+      },
+      "telp": {
+        "type": "string",
+        "example": "081223344556",
+        "description": "Nomor telepon / WhatsApp staff"
+      }
+    },
+    "required": [
+      "email",
+      "password",
+      "namaStaff",
+      "telp"
+    ]
+  },
+  "UpdateProfileDto": {
+    "type": "object",
+    "properties": {
+      "nama": {
+        "type": "string",
+        "example": "Kevin Sanjaya Pratama"
+      },
+      "email": {
+        "type": "string",
+        "example": "user@example.com"
+      },
+      "oldPassword": {
+        "type": "string",
+        "example": "oldpassword123"
+      },
+      "password": {
+        "type": "string",
+        "example": "newpassword123"
+      },
+      "instansi": {
+        "type": "string",
+        "example": "Universitas Airlangga"
+      },
+      "alamat": {
+        "type": "string",
+        "example": "Jl. Ahmad Yani No. 100, Surabaya"
+      },
+      "telp": {
+        "type": "string",
+        "example": "081234567899"
+      },
+      "foto": {
+        "type": "string",
+        "example": "https://example.com/avatar.jpg"
+      },
+      "namaCoworking": {
+        "type": "string",
+        "example": "SpaceWorks Innovation Hub"
+      }
+    }
+  },
+  "UpdateCommissionDto": {
+    "type": "object",
+    "properties": {
+      "commissionPercent": {
+        "type": "number",
+        "example": 5,
+        "description": "Persentase komisi platform dari setiap transaksi sewa (0% - 50%)"
+      }
+    },
+    "required": [
+      "commissionPercent"
+    ]
+  },
+  "CreateSpaceDto": {
+    "type": "object",
+    "properties": {
+      "namaSpace": {
+        "type": "string",
+        "example": "Dedicated Hot Desk #04",
+        "description": "Nama ruangan / workstation / desk"
+      },
+      "tipe": {
+        "type": "string",
+        "enum": [
+          "desk",
+          "meeting_room",
+          "private_office"
+        ],
+        "example": "desk",
+        "description": "Tipe space: desk, meeting_room, atau private_office"
+      },
+      "hargaPerJam": {
+        "type": "number",
+        "example": 25000,
+        "description": "Harga sewa per jam dalam Rupiah (IDR)"
+      },
+      "kapasitas": {
+        "type": "number",
+        "example": 1,
+        "description": "Kapasitas maksimal orang dalam space"
+      },
+      "foto": {
+        "type": "string",
+        "example": "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80",
+        "description": "URL foto ruangan / workstation"
+      },
+      "deskripsi": {
+        "type": "string",
+        "example": "Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.",
+        "description": "Deskripsi fasilitas dan keunggulan space"
+      }
+    },
+    "required": [
+      "namaSpace",
+      "tipe",
+      "hargaPerJam",
+      "kapasitas"
+    ]
+  },
+  "UpdateSpaceDto": {
+    "type": "object",
+    "properties": {
+      "namaSpace": {
+        "type": "string",
+        "example": "Dedicated Hot Desk #04",
+        "description": "Nama ruangan / workstation / desk"
+      },
+      "tipe": {
+        "type": "string",
+        "enum": [
+          "desk",
+          "meeting_room",
+          "private_office"
+        ],
+        "example": "desk",
+        "description": "Tipe space: desk, meeting_room, atau private_office"
+      },
+      "hargaPerJam": {
+        "type": "number",
+        "example": 25000,
+        "description": "Harga sewa per jam dalam Rupiah (IDR)"
+      },
+      "kapasitas": {
+        "type": "number",
+        "example": 1,
+        "description": "Kapasitas maksimal orang dalam space"
+      },
+      "foto": {
+        "type": "string",
+        "example": "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80",
+        "description": "URL foto ruangan / workstation"
+      },
+      "deskripsi": {
+        "type": "string",
+        "example": "Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.",
+        "description": "Deskripsi fasilitas dan keunggulan space"
+      }
+    }
+  },
+  "CreateDiscountDto": {
+    "type": "object",
+    "properties": {
+      "namaDiskon": {
+        "type": "string",
+        "example": "Promo Diskon Awal Tahun 2026",
+        "description": "Nama program promo / diskon"
+      },
+      "kodeDiskon": {
+        "type": "string",
+        "example": "PROMO2026",
+        "description": "Kode kupon promo yang dapat dimasukkan saat reservasi"
+      },
+      "persentaseDiskon": {
+        "type": "number",
+        "example": 20,
+        "description": "Besaran persentase potongan harga (1 - 100%)"
+      },
+      "tanggalAwal": {
+        "type": "string",
+        "example": "2026-01-01T00:00:00.000Z",
+        "description": "Tanggal & waktu mulai berlakunya promo (ISO-8601 string)"
+      },
+      "spaceId": {
+        "type": "number",
+        "example": 1,
+        "description": "ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)"
+      },
+      "tanggalAkhir": {
+        "type": "string",
+        "example": "2026-12-31T23:59:59.000Z",
+        "description": "Tanggal & waktu berakhirnya promo (ISO-8601 string)"
+      }
+    },
+    "required": [
+      "namaDiskon",
+      "persentaseDiskon",
+      "tanggalAwal",
+      "tanggalAkhir"
+    ]
+  },
+  "UpdateDiscountDto": {
+    "type": "object",
+    "properties": {
+      "namaDiskon": {
+        "type": "string",
+        "example": "Promo Diskon Awal Tahun 2026",
+        "description": "Nama program promo / diskon"
+      },
+      "kodeDiskon": {
+        "type": "string",
+        "example": "PROMO2026",
+        "description": "Kode kupon promo yang dapat dimasukkan saat reservasi"
+      },
+      "persentaseDiskon": {
+        "type": "number",
+        "example": 20,
+        "description": "Besaran persentase potongan harga (1 - 100%)"
+      },
+      "tanggalAwal": {
+        "type": "string",
+        "example": "2026-01-01T00:00:00.000Z",
+        "description": "Tanggal & waktu mulai berlakunya promo (ISO-8601 string)"
+      },
+      "spaceId": {
+        "type": "number",
+        "example": 1,
+        "description": "ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)"
+      },
+      "tanggalAkhir": {
+        "type": "string",
+        "example": "2026-12-31T23:59:59.000Z",
+        "description": "Tanggal & waktu berakhirnya promo (ISO-8601 string)"
+      }
+    }
+  },
+  "CreateReservationDto": {
+    "type": "object",
+    "properties": {
+      "spaceId": {
+        "type": "number",
+        "example": 1,
+        "description": "ID Workstation / Ruangan yang dipesan"
+      },
+      "space_id": {
+        "type": "number",
+        "example": 1,
+        "description": "Alias snake_case untuk spaceId (opsional jika spaceId diisi)"
+      },
+      "tanggalReservasi": {
+        "type": "string",
+        "example": "2026-09-10",
+        "description": "Tanggal reservasi (format YYYY-MM-DD atau ISO string)"
+      },
+      "tanggal_reservasi": {
+        "type": "string",
+        "example": "2026-09-10",
+        "description": "Alias snake_case untuk tanggalReservasi"
+      },
+      "tanggal": {
+        "type": "string",
+        "example": "2026-09-10",
+        "description": "Alias pendek untuk tanggalReservasi"
+      },
+      "jamMulai": {
+        "type": "string",
+        "example": "09:00",
+        "description": "Jam mulai reservasi (format HH:mm, 24 jam)"
+      },
+      "jam_mulai": {
+        "type": "string",
+        "example": "09:00",
+        "description": "Alias snake_case untuk jamMulai"
+      },
+      "durasiJam": {
+        "type": "number",
+        "example": 3,
+        "description": "Durasi pemakaian dalam jam (minimal 1 jam, maksimal 24 jam)"
+      },
+      "durasi_jam": {
+        "type": "number",
+        "example": 3,
+        "description": "Alias snake_case untuk durasiJam"
+      },
+      "durasi": {
+        "type": "number",
+        "example": 3,
+        "description": "Alias pendek untuk durasiJam"
+      },
+      "diskonId": {
+        "type": "number",
+        "example": 1,
+        "description": "ID program promo / diskon jika ada"
+      },
+      "diskon_id": {
+        "type": "number",
+        "example": 1,
+        "description": "Alias snake_case untuk diskonId"
+      },
+      "kodeDiskon": {
+        "type": "string",
+        "example": "PROMO2026",
+        "description": "Kode promo / kupon diskon jika ada"
+      },
+      "kode_diskon": {
+        "type": "string",
+        "example": "PROMO2026",
+        "description": "Alias snake_case untuk kodeDiskon"
+      }
+    },
+    "required": [
+      "spaceId",
+      "tanggalReservasi",
+      "jamMulai",
+      "durasiJam"
+    ]
+  },
+  "UpdateReservationStatusDto": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "disetujui",
+          "aktif",
+          "selesai",
+          "dibatalkan"
+        ],
+        "example": "disetujui",
+        "description": "Status reservasi baru: pending, disetujui, aktif, selesai, dibatalkan"
+      }
+    },
+    "required": [
+      "status"
+    ]
+  },
+  "VerifyQrDto": {
+    "type": "object",
+    "properties": {
+      "qrCode": {
+        "type": "string",
+        "example": "SSB-1725178900000-A3B9F1",
+        "description": "String kode QR hasil scan dari aplikasi/tiket member"
+      }
+    },
+    "required": [
+      "qrCode"
+    ]
+  },
+  "ProcessCheckinDto": {
+    "type": "object",
+    "properties": {
+      "qrCode": {
+        "type": "string",
+        "example": "SSB-1725178900000-A3B9F1",
+        "description": "String kode QR hasil scan"
+      },
+      "action": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "checkin",
+          "checkout"
+        ],
+        "default": "auto",
+        "example": "auto",
+        "description": "Aksi check-in / check-out: \"auto\" (otomatis deteksi), \"checkin\", atau \"checkout\""
+      }
+    },
+    "required": [
+      "qrCode"
+    ]
+  },
+  "CreateReviewDto": {
+    "type": "object",
+    "properties": {
+      "reservasiId": {
+        "type": "number",
+        "description": "ID Reservasi yang telah berstatus selesai",
+        "example": 1
+      },
+      "rating": {
+        "type": "number",
+        "description": "Rating bintang dari 1 hingga 5",
+        "example": 5,
+        "minimum": 1,
+        "maximum": 5
+      },
+      "komentar": {
+        "type": "string",
+        "description": "Komentar testimoni atau ulasan pengalaman",
+        "example": "Tempat sangat nyaman, koneksi internet kencang dan AC dingin!"
+      }
+    },
+    "required": [
+      "reservasiId",
+      "rating"
+    ]
+  },
+  "CreateWaitlistDto": {
+    "type": "object",
+    "properties": {
+      "spaceId": {
+        "type": "number",
+        "description": "ID Ruangan / Space",
+        "example": 1
+      },
+      "tanggal": {
+        "type": "string",
+        "description": "Tanggal (YYYY-MM-DD)",
+        "example": "2026-09-15"
+      },
+      "jamMulai": {
+        "type": "string",
+        "description": "Jam mulai (HH:mm)",
+        "example": "10:00"
+      },
+      "durasiJam": {
+        "type": "number",
+        "description": "Durasi pemakaian dalam jam",
+        "example": 2
+      }
+    },
+    "required": [
+      "spaceId",
+      "tanggal",
+      "jamMulai",
+      "durasiJam"
+    ]
+  }
+}

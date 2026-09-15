@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 
 import { formatRupiah } from "@/lib/utils";
+import { SearchDatePicker } from "@/components/SearchDatePicker";
 
 function RealSpaceCard({ space }: { space: Space }) {
   const fallbackImage =
@@ -146,28 +147,6 @@ function RealSpaceCard({ space }: { space: Space }) {
 
 export default function HomePage() {
   const router = useRouter();
-
-  const dateOptions = useMemo(() => {
-    const dates: Array<{ label: string; value: string }> = [];
-    const now = new Date();
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() + i);
-      const iso = d.toISOString().split("T")[0];
-      const dayName =
-        i === 0
-          ? "Hari Ini"
-          : i === 1
-          ? "Besok"
-          : d.toLocaleDateString("id-ID", { weekday: "long" });
-      const label = `${dayName}, ${d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-      })}`;
-      dates.push({ label, value: iso });
-    }
-    return dates;
-  }, []);
 
   const [activeTab, setActiveTab] = useState<"flex" | "meeting" | "suite" | "all">("all");
   const [selectedCity, setSelectedCity] = useState("Semua Kota");
@@ -390,24 +369,10 @@ export default function HomePage() {
                 </div>
 
                 <div className="lg:col-span-3 border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">
-                  <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#006370]" />
-                    <span>Tanggal</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="w-full bg-transparent text-xs sm:text-[13px] font-semibold text-slate-900 focus:outline-none cursor-pointer py-1 pr-6 truncate appearance-none"
-                    >
-                      {dateOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1 top-2 pointer-events-none" />
-                  </div>
+                  <SearchDatePicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                  />
                 </div>
 
                 <div className="lg:col-span-3 border-b sm:border-b-0 lg:border-r border-slate-100 pb-2 sm:pb-0 sm:pr-3">

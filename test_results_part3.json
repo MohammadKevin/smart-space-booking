@@ -1,0 +1,212 @@
+[
+  {
+    "category": "Spaces",
+    "method": "GET",
+    "path": "/api/spaces",
+    "description": "Public Spaces Catalog",
+    "status": 200,
+    "latency_ms": 640,
+    "result": "PASS",
+    "details": "Available spaces: 3"
+  },
+  {
+    "category": "Spaces",
+    "method": "GET",
+    "path": "/api/spaces/{id}",
+    "description": "Get Space Detail by ID (Valid)",
+    "status": 200,
+    "latency_ms": 187,
+    "result": "PASS",
+    "details": "Space: Private Team Office Suite"
+  },
+  {
+    "category": "Spaces",
+    "method": "GET",
+    "path": "/api/spaces/{id}",
+    "description": "Get Space Detail Non-existent (Negative)",
+    "status": 404,
+    "latency_ms": 195,
+    "result": "PASS",
+    "details": "Properly returned 404 Not Found"
+  },
+  {
+    "category": "Spaces",
+    "method": "GET",
+    "path": "/api/spaces/{id}/booked-slots",
+    "description": "Get Booked Slots for Space",
+    "status": 200,
+    "latency_ms": 257,
+    "result": "PASS",
+    "details": "Slots: []"
+  },
+  {
+    "category": "Spaces",
+    "method": "GET",
+    "path": "/api/spaces/my-spaces",
+    "description": "Get My Spaces (Role check)",
+    "status": 403,
+    "latency_ms": 588,
+    "result": "PASS",
+    "details": "Result: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Spaces",
+    "method": "POST",
+    "path": "/api/spaces",
+    "description": "Create Space Validation / RBAC",
+    "status": 403,
+    "latency_ms": 254,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Spaces",
+    "method": "PUT",
+    "path": "/api/spaces/{id}",
+    "description": "Update Space RBAC / 404",
+    "status": 403,
+    "latency_ms": 238,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Spaces",
+    "method": "DELETE",
+    "path": "/api/spaces/{id}",
+    "description": "Delete Space RBAC / 404",
+    "status": 403,
+    "latency_ms": 442,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Spaces",
+    "method": "POST",
+    "path": "/api/spaces/upload",
+    "description": "Upload Space Image Missing File",
+    "status": 403,
+    "latency_ms": 145,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts",
+    "description": "Get All Active Discounts",
+    "status": 200,
+    "latency_ms": 234,
+    "result": "PASS",
+    "details": "Active promos: 1"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts/{id}",
+    "description": "Get Discount Detail by ID (Valid)",
+    "status": 200,
+    "latency_ms": 168,
+    "result": "PASS",
+    "details": "Promo: FINAL712"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts/{id}",
+    "description": "Get Discount Detail Non-existent (Negative)",
+    "status": 404,
+    "latency_ms": 429,
+    "result": "PASS",
+    "details": "Properly returned 404"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts/check/{code}",
+    "description": "Check Valid Promo Code",
+    "status": 200,
+    "latency_ms": 448,
+    "result": "PASS",
+    "details": "Promo found: None (None%)"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts/check/{code}",
+    "description": "Check Invalid Promo Code",
+    "status": 404,
+    "latency_ms": 223,
+    "result": "PASS",
+    "details": "Properly rejected invalid code"
+  },
+  {
+    "category": "Discounts",
+    "method": "GET",
+    "path": "/api/discounts/my-discounts",
+    "description": "Get My Discounts (Role check)",
+    "status": 403,
+    "latency_ms": 567,
+    "result": "PASS",
+    "details": "Result: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Discounts",
+    "method": "POST",
+    "path": "/api/discounts",
+    "description": "Create Discount Validation / RBAC",
+    "status": 403,
+    "latency_ms": 200,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Discounts",
+    "method": "PUT",
+    "path": "/api/discounts/{id}",
+    "description": "Update Discount Non-existent / RBAC",
+    "status": 403,
+    "latency_ms": 358,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Discounts",
+    "method": "DELETE",
+    "path": "/api/discounts/{id}",
+    "description": "Delete Discount Non-existent / RBAC",
+    "status": 403,
+    "latency_ms": 159,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Reviews",
+    "method": "GET",
+    "path": "/api/reviews",
+    "description": "Get Public Reviews",
+    "status": 200,
+    "latency_ms": 177,
+    "result": "PASS",
+    "details": "Total reviews: 2"
+  },
+  {
+    "category": "Reviews",
+    "method": "GET",
+    "path": "/api/reviews/space/{spaceId}/summary",
+    "description": "Get Review Summary for Space",
+    "status": 200,
+    "latency_ms": 161,
+    "result": "PASS",
+    "details": "Summary: {'spaceId': 18, 'averageRating': 5, 'totalReviews': 2}"
+  },
+  {
+    "category": "Reviews",
+    "method": "POST",
+    "path": "/api/reviews",
+    "description": "Create Review Empty Payload (Validation)",
+    "status": 403,
+    "latency_ms": 215,
+    "result": "PASS",
+    "details": "Status 403: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [member]"
+  }
+]

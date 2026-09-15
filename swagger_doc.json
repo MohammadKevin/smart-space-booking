@@ -1,0 +1,2820 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+      "/api": {
+        "get": {
+          "operationId": "AppController_getHello",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "tags": [
+            "App"
+          ]
+        }
+      },
+      "/api/auth/login": {
+        "post": {
+          "description": "Autentikasi untuk semua role (admin_space, staff, member) menggunakan email dan password.",
+          "operationId": "AuthController_login",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login berhasil, mengembalikan access_token dan data user."
+            },
+            "401": {
+              "description": "Email atau password tidak valid."
+            },
+            "403": {
+              "description": "Email belum diverifikasi."
+            }
+          },
+          "summary": "Login Akun",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/google": {
+        "post": {
+          "description": "Autentikasi 1-klik untuk akun Member menggunakan Google Credential / Token.",
+          "operationId": "AuthController_googleAuth",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleLoginDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login atau pendaftaran Google berhasil, mengembalikan access_token."
+            }
+          },
+          "summary": "Login & Registrasi Cepat Member via Google OAuth",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/register/member": {
+        "post": {
+          "description": "Mendaftarkan akun baru dengan role \"member\" dan mengirimkan kode OTP verifikasi email.",
+          "operationId": "AuthController_registerMember",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterMemberDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Registrasi member berhasil dibuat, OTP terkirim."
+            },
+            "409": {
+              "description": "Email sudah digunakan."
+            }
+          },
+          "summary": "Registrasi Member Baru",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/register/owner": {
+        "post": {
+          "description": "Mendaftarkan akun baru dengan role \"admin_space\" dan mengirimkan kode OTP verifikasi email.",
+          "operationId": "AuthController_registerOwner",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterOwnerDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Registrasi admin space berhasil dibuat, OTP terkirim."
+            },
+            "409": {
+              "description": "Email sudah digunakan."
+            }
+          },
+          "summary": "Registrasi Pengelola Coworking (Space Owner)",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/verify-email": {
+        "post": {
+          "description": "Memverifikasi alamat email akun yang baru didaftarkan menggunakan kode OTP yang dikirimkan via email.",
+          "operationId": "AuthController_verifyEmail",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyEmailDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Email berhasil diverifikasi, mengembalikan token JWT."
+            },
+            "400": {
+              "description": "Kode OTP salah atau telah kedaluwarsa."
+            }
+          },
+          "summary": "Verifikasi Email dengan 6-Digit OTP",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/resend-otp": {
+        "post": {
+          "description": "Mengirimkan kode OTP 6-digit baru ke alamat email untuk keperluan verifikasi registrasi atau reset password.",
+          "operationId": "AuthController_resendOtp",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendOtpDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kode OTP baru berhasil dikirimkan."
+            }
+          },
+          "summary": "Kirim Ulang Kode OTP",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/forgot-password": {
+        "post": {
+          "description": "Mengirimkan kode OTP 6-digit ke email terdaftar untuk proses pemulihan kata sandi.",
+          "operationId": "AuthController_forgotPassword",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kode OTP reset kata sandi telah dikirimkan ke email."
+            },
+            "404": {
+              "description": "Email tidak terdaftar di sistem."
+            }
+          },
+          "summary": "Lupa Kata Sandi (Kirim OTP Reset)",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/reset-password": {
+        "post": {
+          "description": "Memperbarui kata sandi akun menggunakan 6-digit kode OTP reset yang valid.",
+          "operationId": "AuthController_resetPassword",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kata sandi berhasil diperbarui."
+            },
+            "400": {
+              "description": "Kode OTP tidak valid atau telah kedaluwarsa."
+            }
+          },
+          "summary": "Reset Kata Sandi dengan OTP",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/secret-super-admin-provision": {
+        "post": {
+          "description": "Hanya dapat diakses menggunakan SUPER_ADMIN_SECRET_KEY rahasia yang terkonfigurasi di server untuk membuat / mengaktifkan akun Super Admin.",
+          "operationId": "AuthController_secretSuperAdminProvision",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretProvisionDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Akun Super Admin berhasil diaktifkan."
+            },
+            "403": {
+              "description": "Kunci rahasia salah."
+            }
+          },
+          "summary": "Akses Rahasia: Aktivasi Akun Super Admin (Platform Owner/CEO)",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/staff": {
+        "post": {
+          "description": "Hanya dapat diakses oleh \"admin_space\" untuk mendaftarkan staff operasional di coworking spacenya.",
+          "operationId": "AuthController_createStaff",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateStaffDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Akun staff berhasil dibuat."
+            },
+            "403": {
+              "description": "Akses ditolak (bukan admin_space)."
+            },
+            "409": {
+              "description": "Email sudah digunakan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Pendaftaran Akun Staff oleh Space Owner",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/auth/profile": {
+        "get": {
+          "description": "Mengambil data profil lengkap pengguna yang saat ini sedang login berdasarkan token JWT.",
+          "operationId": "AuthController_getProfile",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Profil pengguna berhasil dimuat."
+            },
+            "401": {
+              "description": "Token tidak valid atau telah kedaluwarsa."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Profil Pengguna Login",
+          "tags": [
+            "Authentication & Authorization"
+          ]
+        }
+      },
+      "/api/users/profile": {
+        "put": {
+          "description": "Memperbarui profil diri sesuai dengan role yang login.",
+          "operationId": "UserController_updateProfile",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfileDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Profil berhasil diperbarui."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Update Profil Pengguna",
+          "tags": [
+            "User & Profile Management"
+          ]
+        }
+      },
+      "/api/users/members": {
+        "get": {
+          "description": "Hanya dapat diakses oleh admin_space dan staff untuk melihat daftar member terdaftar.",
+          "operationId": "UserController_getAllMembers",
+          "parameters": [
+            {
+              "name": "page",
+              "required": false,
+              "in": "query",
+              "description": "Halaman data (opsional)",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas data per halaman (opsional)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar member berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Daftar Semua Member",
+          "tags": [
+            "User & Profile Management"
+          ]
+        }
+      },
+      "/api/users/staffs": {
+        "get": {
+          "description": "Hanya dapat diakses oleh admin_space untuk melihat seluruh staff yang bekerja di spacenya.",
+          "operationId": "UserController_getOwnerStaffs",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Daftar staff berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Daftar Staff Coworking Space",
+          "tags": [
+            "User & Profile Management"
+          ]
+        }
+      },
+      "/api/users/staffs/{id}": {
+        "delete": {
+          "description": "Hanya dapat diakses oleh admin_space untuk menghapus staff miliknya.",
+          "operationId": "UserController_deleteStaff",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Staff berhasil dihapus."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Menghapus Akun Staff",
+          "tags": [
+            "User & Profile Management"
+          ]
+        }
+      },
+      "/api/super-admin/overview": {
+        "get": {
+          "description": "Menampilkan Total GMV, Total Keuntungan Bersih Platform (Komisi CEO), Total Space Owner, Total Ruangan, dan Member se-Platform.",
+          "operationId": "SuperAdminController_getOverview",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Executive overview berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Executive Summary Finansial Platform",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/commission": {
+        "get": {
+          "description": "Mengambil persentase tarif komisi platform saat ini yang dikenakan ke seluruh transaksi sewa.",
+          "operationId": "SuperAdminController_getCommissionRate",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Melihat Persentase Komisi Platform Aktif",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        },
+        "put": {
+          "description": "Mengubah persentase tarif komisi platform secara dinamis tanpa perlu restart backend.",
+          "operationId": "SuperAdminController_setCommissionRate",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCommissionDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Memperbarui Persentase Komisi Platform",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/monthly-revenue": {
+        "get": {
+          "description": "Menghitung rincian GMV, Komisi Platform, dan Payout Space Owner untuk 12 bulan.",
+          "operationId": "SuperAdminController_getMonthlyRevenue",
+          "parameters": [
+            {
+              "name": "year",
+              "required": false,
+              "in": "query",
+              "description": "Tahun laporan (default tahun berjalan)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Laporan Pendapatan Platform Bulanan",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/owners": {
+        "get": {
+          "description": "Menampilkan performa toko tiap Space Owner, rincian GMV, potongan komisi platform, dan hak saldo payout.",
+          "operationId": "SuperAdminController_getAllSpaceOwners",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Daftar Seluruh Mitra Space Owner (Sellers / Merchants)",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/transactions": {
+        "get": {
+          "description": "Monitoring seluruh transaksi yang terjadi di platform secara real-time.",
+          "operationId": "SuperAdminController_getAllTransactions",
+          "parameters": [
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas jumlah transaksi (default 50)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Log Transaksi Global Se-Platform",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/users": {
+        "get": {
+          "description": "Super Admin dapat melihat dan mencari seluruh pengguna platform (Member, Space Owner, Staff, Super Admin) beserta status verifikasi emailnya.",
+          "operationId": "SuperAdminController_getAllUsers",
+          "parameters": [
+            {
+              "name": "role",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan role pengguna",
+              "schema": {
+                "enum": [
+                  "super_admin",
+                  "admin_space",
+                  "staff",
+                  "member"
+                ],
+                "type": "string"
+              }
+            },
+            {
+              "name": "isVerified",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan status verifikasi akun",
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "search",
+              "required": false,
+              "in": "query",
+              "description": "Cari berdasarkan nama, email, atau nama coworking",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Manajemen Pengguna Global Platform",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/users/{id}/verify": {
+        "patch": {
+          "description": "Super Admin dapat mengaktifkan dan memverifikasi email pengguna tanpa perlu kode OTP email.",
+          "operationId": "SuperAdminController_verifyUser",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Aktivasi / Verifikasi Akun Pengguna secara Manual",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/super-admin/users/{id}": {
+        "delete": {
+          "description": "Super Admin dapat menghapus akun pengguna (Member, Space Owner, Staff) jika melanggar ketentuan.",
+          "operationId": "SuperAdminController_deleteUser",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Hapus Akun Pengguna dari Platform",
+          "tags": [
+            "Super Admin (Platform Owner / CEO)"
+          ]
+        }
+      },
+      "/api/spaces/upload": {
+        "post": {
+          "description": "Mengunggah file gambar ruangan dan mengembalikan URL publik Cloudinary.",
+          "operationId": "SpaceController_uploadImage",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Upload Foto Ruangan ke Cloudinary",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        }
+      },
+      "/api/spaces": {
+        "post": {
+          "description": "Hanya dapat diakses oleh admin_space untuk menambahkan unit workstation / ruangan baru.",
+          "operationId": "SpaceController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSpaceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Space berhasil dibuat."
+            },
+            "403": {
+              "description": "Akses ditolak (bukan admin_space)."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Membuat Ruangan / Workstation Baru",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        },
+        "get": {
+          "description": "Publik & Member dapat melihat katalog space dengan filter tipe, kapasitas, kata kunci, dan ketersediaan waktu.",
+          "operationId": "SpaceController_findAll",
+          "parameters": [
+            {
+              "name": "search",
+              "required": false,
+              "in": "query",
+              "description": "Kata kunci pencarian pada nama space atau deskripsi",
+              "schema": {
+                "example": "Hot Desk",
+                "type": "string"
+              }
+            },
+            {
+              "name": "tipe",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan tipe: desk, meeting_room, private_office",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "desk",
+                  "meeting_room",
+                  "private_office"
+                ]
+              }
+            },
+            {
+              "name": "minKapasitas",
+              "required": false,
+              "in": "query",
+              "description": "Kapasitas minimal orang",
+              "schema": {
+                "example": 2,
+                "type": "number"
+              }
+            },
+            {
+              "name": "maxKapasitas",
+              "required": false,
+              "in": "query",
+              "description": "Kapasitas maksimal orang",
+              "schema": {
+                "example": 10,
+                "type": "number"
+              }
+            },
+            {
+              "name": "ownerId",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan ID Space Owner",
+              "schema": {
+                "example": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "tanggal",
+              "required": false,
+              "in": "query",
+              "description": "Tanggal reservasi yang ingin dicek ketersediaannya (YYYY-MM-DD)",
+              "schema": {
+                "example": "2026-09-10",
+                "type": "string"
+              }
+            },
+            {
+              "name": "jamMulai",
+              "required": false,
+              "in": "query",
+              "description": "Jam mulai untuk cek ketersediaan (format HH:mm)",
+              "schema": {
+                "example": "09:00",
+                "type": "string"
+              }
+            },
+            {
+              "name": "durasiJam",
+              "required": false,
+              "in": "query",
+              "description": "Durasi pemakaian dalam jam untuk cek ketersediaan",
+              "schema": {
+                "example": 3,
+                "type": "number"
+              }
+            },
+            {
+              "name": "date",
+              "required": false,
+              "in": "query",
+              "description": "Alias untuk tanggal (YYYY-MM-DD)",
+              "schema": {
+                "example": "2026-09-10",
+                "type": "string"
+              }
+            },
+            {
+              "name": "duration",
+              "required": false,
+              "in": "query",
+              "description": "String durasi dari UI (misal: \"09:00 - 18:00\")",
+              "schema": {
+                "example": "09:00 - 18:00",
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "required": false,
+              "in": "query",
+              "description": "Halaman data untuk pagination (1-indexed)",
+              "schema": {
+                "example": 1,
+                "type": "number"
+              }
+            },
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas data per halaman untuk pagination",
+              "schema": {
+                "example": 10,
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar space berhasil dimuat."
+            }
+          },
+          "summary": "Melihat Daftar Seluruh Space (Katalog)",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        }
+      },
+      "/api/spaces/my-spaces": {
+        "get": {
+          "description": "Hanya dapat diakses oleh admin_space untuk melihat seluruh unit ruangan di coworking spacenya.",
+          "operationId": "SpaceController_getMySpaces",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Daftar space pengelola berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Daftar Space Milik Sendiri",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        }
+      },
+      "/api/spaces/{id}/booked-slots": {
+        "get": {
+          "description": "Melihat slot jadwal yang sudah terisi pada tanggal tertentu untuk tampilan grid ketersediaan visual.",
+          "operationId": "SpaceController_getBookedSlots",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "date",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar slot terisi berhasil dimuat."
+            }
+          },
+          "summary": "Mendapatkan Daftar Slot Jam Terisi / Dipesan untuk Ruangan",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        }
+      },
+      "/api/spaces/{id}": {
+        "get": {
+          "description": "Menampilkan detail lengkap unit space beserta informasi coworking space pemilik.",
+          "operationId": "SpaceController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Detail space berhasil dimuat."
+            },
+            "404": {
+              "description": "Space tidak ditemukan."
+            }
+          },
+          "summary": "Mendapatkan Detail Satu Space",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        },
+        "put": {
+          "description": "Hanya pemilik space (admin_space) yang dapat memperbarui unit space miliknya.",
+          "operationId": "SpaceController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSpaceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Space berhasil diperbarui."
+            },
+            "403": {
+              "description": "Akses ditolak."
+            },
+            "404": {
+              "description": "Space tidak ditemukan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Memperbarui Data Space",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        },
+        "delete": {
+          "description": "Hanya pemilik space (admin_space) yang dapat menghapus unit space miliknya.",
+          "operationId": "SpaceController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Space berhasil dihapus."
+            },
+            "403": {
+              "description": "Akses ditolak."
+            },
+            "404": {
+              "description": "Space tidak ditemukan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Menghapus Unit Space",
+          "tags": [
+            "Spaces & Workstations"
+          ]
+        }
+      },
+      "/api/discounts": {
+        "post": {
+          "description": "Hanya dapat diakses oleh admin_space untuk membuat kode promo baru pada coworking space miliknya.",
+          "operationId": "DiscountController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateDiscountDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Diskon berhasil dibuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Membuat Promo / Diskon Baru",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        },
+        "get": {
+          "description": "Daftar promo dan diskon yang tersedia.",
+          "operationId": "DiscountController_findAll",
+          "parameters": [
+            {
+              "name": "ownerId",
+              "required": false,
+              "in": "query",
+              "description": "Filter promo berdasarkan ID Space Owner",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "spaceId",
+              "required": false,
+              "in": "query",
+              "description": "Filter promo berdasarkan ID Ruangan (Space)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar diskon berhasil dimuat."
+            }
+          },
+          "summary": "Mendapatkan Semua Daftar Promo",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        }
+      },
+      "/api/discounts/check/{code}": {
+        "get": {
+          "description": "Memeriksa apakah kode promo valid, ada, dan masih dalam periode tanggal berlaku.",
+          "operationId": "DiscountController_checkValidity",
+          "parameters": [
+            {
+              "name": "code",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "spaceId",
+              "required": false,
+              "in": "query",
+              "description": "ID Ruangan untuk memastikan promo berlaku pada space terkait",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Kode promo valid."
+            },
+            "400": {
+              "description": "Kode promo kedaluwarsa, tidak aktif, atau tidak berlaku untuk ruangan ini."
+            },
+            "404": {
+              "description": "Kode promo tidak ditemukan."
+            }
+          },
+          "summary": "Cek Keaktifan dan Validitas Kode Promo",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        }
+      },
+      "/api/discounts/my-discounts": {
+        "get": {
+          "description": "Hanya dapat diakses oleh admin_space untuk melihat daftar promo yang dibuat untuk coworking spacenya.",
+          "operationId": "DiscountController_getMyDiscounts",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Daftar diskon milik owner berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Daftar Promo Milik Space Owner Sendiri",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        }
+      },
+      "/api/discounts/{id}": {
+        "get": {
+          "description": "Menampilkan detail promo berdasarkan ID.",
+          "operationId": "DiscountController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Detail diskon berhasil dimuat."
+            },
+            "404": {
+              "description": "Diskon tidak ditemukan."
+            }
+          },
+          "summary": "Mendapatkan Detail Satu Diskon",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        },
+        "put": {
+          "description": "Hanya dapat diakses oleh admin_space pemilik promo untuk mengubah parameter diskon.",
+          "operationId": "DiscountController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateDiscountDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Diskon berhasil diperbarui."
+            },
+            "403": {
+              "description": "Tidak memiliki hak akses atas promo ini."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Memperbarui Promo / Diskon",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        },
+        "delete": {
+          "description": "Hanya dapat diakses oleh admin_space pemilik promo untuk menghapus promo.",
+          "operationId": "DiscountController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Diskon berhasil dihapus."
+            },
+            "403": {
+              "description": "Tidak memiliki hak akses atas promo ini."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Menghapus Promo / Diskon",
+          "tags": [
+            "Discounts & Promo Codes"
+          ]
+        }
+      },
+      "/api/reservations": {
+        "post": {
+          "description": "Member memesan workstation dengan pengecekan bentrok slot waktu (anti-collision) dan kalkulasi diskon otomatis.",
+          "operationId": "ReservationController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReservationDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Reservasi berhasil dibuat."
+            },
+            "400": {
+              "description": "Jadwal bentrok atau kupon tidak valid."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Membuat Reservasi Ruangan / Workstation Baru",
+          "tags": [
+            "Reservations & Bookings"
+          ]
+        },
+        "get": {
+          "description": "Member melihat reservasinya sendiri; Admin Space & Staff melihat semua reservasi pada Coworking Space mereka.",
+          "operationId": "ReservationController_findAll",
+          "parameters": [
+            {
+              "name": "status",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan status reservasi: pending, disetujui, aktif, selesai, dibatalkan",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "disetujui",
+                  "aktif",
+                  "selesai",
+                  "dibatalkan"
+                ]
+              }
+            },
+            {
+              "name": "tanggal",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan tanggal reservasi (YYYY-MM-DD)",
+              "schema": {
+                "example": "2026-09-10",
+                "type": "string"
+              }
+            },
+            {
+              "name": "spaceId",
+              "required": false,
+              "in": "query",
+              "description": "Filter berdasarkan ID Space",
+              "schema": {
+                "example": 1,
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar reservasi berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Daftar Reservasi Sesuai Role",
+          "tags": [
+            "Reservations & Bookings"
+          ]
+        }
+      },
+      "/api/reservations/{id}": {
+        "get": {
+          "description": "Menampilkan detail lengkap transaksi reservasi, informasi workstation, diskon, dan status.",
+          "operationId": "ReservationController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Detail reservasi berhasil dimuat."
+            },
+            "404": {
+              "description": "Reservasi tidak ditemukan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mendapatkan Detail Satu Reservasi",
+          "tags": [
+            "Reservations & Bookings"
+          ]
+        }
+      },
+      "/api/reservations/{id}/status": {
+        "patch": {
+          "description": "Hanya dapat diakses oleh Admin Space dan Staff untuk menyetujui, mengaktifkan, menyelesaikan, atau membatalkan reservasi.",
+          "operationId": "ReservationController_updateStatus",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateReservationStatusDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Status reservasi berhasil diperbarui."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Mengubah Status Reservasi",
+          "tags": [
+            "Reservations & Bookings"
+          ]
+        }
+      },
+      "/api/reservations/{id}/cancel": {
+        "patch": {
+          "description": "Member dapat membatalkan reservasinya sendiri jika status masih \"pending\" atau \"disetujui\".",
+          "operationId": "ReservationController_cancelMyReservation",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Reservasi berhasil dibatalkan."
+            },
+            "400": {
+              "description": "Reservasi tidak dapat dibatalkan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Batalkan Reservasi Mandiri oleh Member",
+          "tags": [
+            "Reservations & Bookings"
+          ]
+        }
+      },
+      "/api/checkin/verify": {
+        "post": {
+          "description": "Staff / Admin Space memindai QR code tiket member untuk memeriksa validitas dan status terkini reservasi.",
+          "operationId": "CheckinController_verifyQr",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyQrDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "QR Code valid dan detail reservasi berhasil diverifikasi."
+            },
+            "404": {
+              "description": "Kode QR tidak ditemukan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Verifikasi & Scan Kode QR",
+          "tags": [
+            "QR Check-In & Check-Out"
+          ]
+        }
+      },
+      "/api/checkin/process": {
+        "post": {
+          "description": "Melakukan transisi status secara otomatis: \"disetujui\" -> \"aktif\" (Check-In) -> \"selesai\" (Check-Out).",
+          "operationId": "CheckinController_processCheckin",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessCheckinDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Proses Check-In atau Check-Out berhasil."
+            },
+            "400": {
+              "description": "Status reservasi tidak valid untuk check-in/out."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Proses Check-In / Check-Out Seketika",
+          "tags": [
+            "QR Check-In & Check-Out"
+          ]
+        }
+      },
+      "/api/reports/summary": {
+        "get": {
+          "description": "Menampilkan total pendapatan, jumlah space, jumlah staff, dan ringkasan status reservasi untuk Admin Space.",
+          "operationId": "ReportController_getDashboardSummary",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Ringkasan metrik berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Ringkasan Metrik Dashboard",
+          "tags": [
+            "Reports & Financial Analytics"
+          ]
+        }
+      },
+      "/api/reports/monthly-revenue": {
+        "get": {
+          "description": "Menghitung total pendapatan dan jumlah booking per bulan (Januari - Desember) pada tahun yang dipilih.",
+          "operationId": "ReportController_getMonthlyRevenue",
+          "parameters": [
+            {
+              "name": "year",
+              "required": false,
+              "in": "query",
+              "description": "Tahun laporan pendapatan (contoh: 2026)",
+              "schema": {
+                "example": 2026,
+                "type": "number"
+              }
+            },
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas jumlah data transaksi terbaru yang diambil",
+              "schema": {
+                "example": 10,
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Laporan pendapatan bulanan berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Laporan Pendapatan Bulanan",
+          "tags": [
+            "Reports & Financial Analytics"
+          ]
+        }
+      },
+      "/api/reports/space-distribution": {
+        "get": {
+          "description": "Menganalisis pendapatan dan kontribusi pesanan berdasarkan tipe: desk, meeting_room, dan private_office.",
+          "operationId": "ReportController_getSpaceTypeDistribution",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Distribusi tipe space berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Distribusi Pendapatan Berdasarkan Tipe Space",
+          "tags": [
+            "Reports & Financial Analytics"
+          ]
+        }
+      },
+      "/api/reports/recent-transactions": {
+        "get": {
+          "description": "Mengambil riwayat transaksi dan reservasi terbaru pada coworking space.",
+          "operationId": "ReportController_getRecentTransactions",
+          "parameters": [
+            {
+              "name": "year",
+              "required": false,
+              "in": "query",
+              "description": "Tahun laporan pendapatan (contoh: 2026)",
+              "schema": {
+                "example": 2026,
+                "type": "number"
+              }
+            },
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas jumlah data transaksi terbaru yang diambil",
+              "schema": {
+                "example": 10,
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Daftar transaksi terbaru berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Daftar Transaksi Terbaru",
+          "tags": [
+            "Reports & Financial Analytics"
+          ]
+        }
+      },
+      "/api/transactions/{reservationId}/pay": {
+        "post": {
+          "description": "Member membuat token Snap atau langsung mendapatkan VA/QRIS Midtrans untuk menyelesaikan pembayaran reservasi.",
+          "operationId": "TransactionController_startPayment",
+          "parameters": [
+            {
+              "name": "reservationId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Pembayaran berhasil diinisialisasi."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Memulai Pembayaran Reservasi (Direct VA / Midtrans Snap)",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions": {
+        "get": {
+          "description": "Member melihat transaksinya sendiri; Admin Space & Staff melihat seluruh transaksi pada coworking space mereka (dapat difilter per spaceId).",
+          "operationId": "TransactionController_findAll",
+          "parameters": [
+            {
+              "name": "spaceId",
+              "required": false,
+              "in": "query",
+              "description": "Filter transaksi berdasarkan ID Ruangan / Space",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Daftar Transaksi Sesuai Role",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/space/{spaceId}": {
+        "get": {
+          "description": "Mengambil riwayat transaksi yang terkait dengan ruangan tertentu.",
+          "operationId": "TransactionController_findBySpace",
+          "parameters": [
+            {
+              "name": "spaceId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Daftar Transaksi Berdasarkan ID Ruangan (Space)",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/{id}": {
+        "get": {
+          "description": "Menampilkan rincian invoice, status pembayaran, dan data reservasi terkait.",
+          "operationId": "TransactionController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Transaksi tidak ditemukan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Detail Satu Transaksi / Invoice",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/{id}/sync": {
+        "post": {
+          "description": "Menanyakan ulang status transaksi ke Midtrans dan memperbarui status pembayaran di sistem.",
+          "operationId": "TransactionController_syncPayment",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": ""
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Sinkronkan Status Pembayaran dengan Midtrans",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/{id}/refund": {
+        "patch": {
+          "description": "Super Admin / Admin Space / Staff menandai transaksi lunas sebagai refund, misalnya saat pembatalan sebelum check-in.",
+          "operationId": "TransactionController_markRefund",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Transaksi ditandai sebagai refund."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Tandai Transaksi sebagai Refund",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/notification": {
+        "post": {
+          "description": "Diterima oleh Midtrans saat status pembayaran berubah. Memverifikasi signature lalu memperbarui status pembayaran.",
+          "operationId": "MidtransNotificationController_handleNotification",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Notifikasi diterima."
+            },
+            "202": {
+              "description": "Notifikasi diterima (sukses)."
+            }
+          },
+          "summary": "Webhook Notifikasi Pembayaran dari Midtrans",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/transactions/webhook": {
+        "post": {
+          "operationId": "MidtransNotificationController_handleWebhook",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "summary": "Alias Webhook Notifikasi Pembayaran dari Midtrans",
+          "tags": [
+            "Transactions & Payments"
+          ]
+        }
+      },
+      "/api/reviews": {
+        "post": {
+          "description": "Hanya dapat dilakukan oleh Member yang reservasinya telah berstatus selesai.",
+          "operationId": "ReviewController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReviewDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Ulasan berhasil dibuat."
+            },
+            "403": {
+              "description": "Reservasi belum selesai atau bukan milik member yang sedang login."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Memberikan Ulasan & Rating Reservasi Selesai",
+          "tags": [
+            "Reviews & Testimonials"
+          ]
+        },
+        "get": {
+          "description": "Mendapatkan daftar ulasan, dapat difilter berdasarkan ID Ruangan (spaceId).",
+          "operationId": "ReviewController_findAll",
+          "parameters": [
+            {
+              "name": "spaceId",
+              "required": false,
+              "in": "query",
+              "description": "Filter ulasan berdasarkan ID Space / Ruangan",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "page",
+              "required": false,
+              "in": "query",
+              "description": "Nomor halaman pagination (default: 1)",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "limit",
+              "required": false,
+              "in": "query",
+              "description": "Batas data per halaman (default: 10)",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "summary": "Daftar Ulasan & Testimoni",
+          "tags": [
+            "Reviews & Testimonials"
+          ]
+        }
+      },
+      "/api/reviews/space/{spaceId}/summary": {
+        "get": {
+          "description": "Mendapatkan nilai rata-rata rating dan total jumlah ulasan.",
+          "operationId": "ReviewController_getAverageRating",
+          "parameters": [
+            {
+              "name": "spaceId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Statistik rating berhasil dimuat."
+            }
+          },
+          "summary": "Ringkasan Rating & Total Review untuk Space",
+          "tags": [
+            "Reviews & Testimonials"
+          ]
+        }
+      },
+      "/api/waitlist": {
+        "post": {
+          "description": "Member mendaftarkan diri ke antrean ruangan saat jadwal penuh.",
+          "operationId": "WaitlistController_joinWaitlist",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateWaitlistDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Berhasil bergabung ke waitlist."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Bergabung ke Antrean / Waitlist Ruangan",
+          "tags": [
+            "Waitlist"
+          ]
+        }
+      },
+      "/api/waitlist/my": {
+        "get": {
+          "description": "Menampilkan seluruh antrean waitlist milik member yang sedang login.",
+          "operationId": "WaitlistController_getMyWaitlists",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Daftar waitlist berhasil dimuat."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Melihat Antrean Waitlist Saya",
+          "tags": [
+            "Waitlist"
+          ]
+        }
+      },
+      "/api/waitlist/{id}": {
+        "delete": {
+          "description": "Member membatalkan antrean waitlist ruangan miliknya.",
+          "operationId": "WaitlistController_cancelWaitlist",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Waitlist berhasil dibatalkan."
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Membatalkan Pendaftaran Waitlist",
+          "tags": [
+            "Waitlist"
+          ]
+        }
+      }
+    },
+    "info": {
+      "title": "WorkNest API",
+      "description": "Dokumentasi RESTful API untuk Sistem Reservasi Coworking Space & Workstation (UKK RPL 2026/2027)",
+      "version": "1.0",
+      "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+      "securitySchemes": {
+        "bearer": {
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "type": "http"
+        }
+      },
+      "schemas": {
+        "LoginDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "john@example.com",
+              "description": "Email akun pengguna"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "Password akun pengguna (minimal 6 karakter)"
+            }
+          },
+          "required": [
+            "email",
+            "password"
+          ]
+        },
+        "GoogleLoginDto": {
+          "type": "object",
+          "properties": {
+            "token": {
+              "type": "string",
+              "description": "ID Token atau Access Token dari Google OAuth / Credential",
+              "example": "eyJhbGciOiJSUzI1NiIsImtpZCI..."
+            },
+            "name": {
+              "type": "string",
+              "description": "Nama pengguna dari profil Google",
+              "example": "John Doe"
+            },
+            "email": {
+              "type": "string",
+              "description": "Alamat email pengguna Google",
+              "example": "johndoe@gmail.com"
+            },
+            "avatar": {
+              "type": "string",
+              "description": "URL foto avatar profil Google",
+              "example": "https://lh3.googleusercontent.com/a/..."
+            }
+          },
+          "required": [
+            "token"
+          ]
+        },
+        "RegisterMemberDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "member@example.com",
+              "description": "Email unik untuk member"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "Password untuk akun member (minimal 6 karakter)"
+            },
+            "namaMember": {
+              "type": "string",
+              "example": "Kevin Sanjaya",
+              "description": "Nama lengkap member"
+            },
+            "instansi": {
+              "type": "string",
+              "example": "SMK Negeri 1 Surabaya",
+              "description": "Instansi, perusahaan, atau institusi asal member"
+            },
+            "alamat": {
+              "type": "string",
+              "example": "Jl. Pemuda No. 45, Surabaya",
+              "description": "Alamat domisili member"
+            },
+            "telp": {
+              "type": "string",
+              "example": "081234567890",
+              "description": "Nomor telepon / WhatsApp member"
+            },
+            "foto": {
+              "type": "string",
+              "example": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+              "description": "URL foto profil member"
+            }
+          },
+          "required": [
+            "email",
+            "password",
+            "namaMember",
+            "instansi",
+            "alamat",
+            "telp"
+          ]
+        },
+        "RegisterOwnerDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "owner@example.com",
+              "description": "Email unik untuk pengelola / admin space"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "Password untuk akun admin space (minimal 6 karakter)"
+            },
+            "namaCoworking": {
+              "type": "string",
+              "example": "SpaceWorks Hub Surabaya",
+              "description": "Nama bisnis coworking space / workstation"
+            },
+            "namaPemilik": {
+              "type": "string",
+              "example": "Budi Santoso",
+              "description": "Nama lengkap pemilik / penanggung jawab space"
+            },
+            "alamat": {
+              "type": "string",
+              "example": "Jl. Basuki Rahmat No. 12-14, Surabaya",
+              "description": "Alamat lengkap coworking space"
+            },
+            "telp": {
+              "type": "string",
+              "example": "081987654321",
+              "description": "Nomor telepon resmi coworking space"
+            }
+          },
+          "required": [
+            "email",
+            "password",
+            "namaCoworking",
+            "namaPemilik",
+            "alamat",
+            "telp"
+          ]
+        },
+        "VerifyEmailDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email pengguna yang didaftarkan"
+            },
+            "otp": {
+              "type": "string",
+              "example": "123456",
+              "description": "6-digit kode verifikasi OTP"
+            }
+          },
+          "required": [
+            "email",
+            "otp"
+          ]
+        },
+        "ResendOtpDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email pengguna yang akan dikirimi ulang OTP"
+            },
+            "type": {
+              "type": "string",
+              "example": "register",
+              "enum": [
+                "register",
+                "forgot_password"
+              ],
+              "description": "Tipe permintaan OTP: register atau forgot_password"
+            }
+          },
+          "required": [
+            "email"
+          ]
+        },
+        "ForgotPasswordDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email akun yang ingin di-reset kata sandinya"
+            }
+          },
+          "required": [
+            "email"
+          ]
+        },
+        "ResetPasswordDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email akun yang sedang di-reset"
+            },
+            "otp": {
+              "type": "string",
+              "example": "123456",
+              "description": "6-digit kode reset OTP"
+            },
+            "password": {
+              "type": "string",
+              "example": "newpassword123*",
+              "description": "Kata sandi baru (minimal 6 karakter)"
+            }
+          },
+          "required": [
+            "email",
+            "otp",
+            "password"
+          ]
+        },
+        "SecretProvisionDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "ceo@worknest.app",
+              "description": "Email akun Super Admin / Platform Owner"
+            },
+            "password": {
+              "type": "string",
+              "example": "CeoPassword123*",
+              "description": "Kata sandi akun Super Admin (minimal 6 karakter)"
+            },
+            "secretKey": {
+              "type": "string",
+              "example": "WorkNest_CEO_SuperAdmin_Secret_Key_2026*",
+              "description": "Kunci rahasia Super Admin dari konfigurasi server (.env)"
+            },
+            "nama": {
+              "type": "string",
+              "example": "Chief Executive Officer",
+              "description": "Nama tampilan akun Super Admin"
+            }
+          },
+          "required": [
+            "email",
+            "password",
+            "secretKey"
+          ]
+        },
+        "CreateStaffDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "staff@example.com",
+              "description": "Email unik untuk staff operasional"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "Password untuk akun staff (minimal 6 karakter)"
+            },
+            "namaStaff": {
+              "type": "string",
+              "example": "Ani Lestari",
+              "description": "Nama lengkap staff operasional"
+            },
+            "telp": {
+              "type": "string",
+              "example": "081223344556",
+              "description": "Nomor telepon / WhatsApp staff"
+            }
+          },
+          "required": [
+            "email",
+            "password",
+            "namaStaff",
+            "telp"
+          ]
+        },
+        "UpdateProfileDto": {
+          "type": "object",
+          "properties": {
+            "nama": {
+              "type": "string",
+              "example": "Kevin Sanjaya Pratama"
+            },
+            "email": {
+              "type": "string",
+              "example": "user@example.com"
+            },
+            "oldPassword": {
+              "type": "string",
+              "example": "oldpassword123"
+            },
+            "password": {
+              "type": "string",
+              "example": "newpassword123"
+            },
+            "instansi": {
+              "type": "string",
+              "example": "Universitas Airlangga"
+            },
+            "alamat": {
+              "type": "string",
+              "example": "Jl. Ahmad Yani No. 100, Surabaya"
+            },
+            "telp": {
+              "type": "string",
+              "example": "081234567899"
+            },
+            "foto": {
+              "type": "string",
+              "example": "https://example.com/avatar.jpg"
+            },
+            "namaCoworking": {
+              "type": "string",
+              "example": "SpaceWorks Innovation Hub"
+            }
+          }
+        },
+        "UpdateCommissionDto": {
+          "type": "object",
+          "properties": {
+            "commissionPercent": {
+              "type": "number",
+              "example": 5,
+              "description": "Persentase komisi platform dari setiap transaksi sewa (0% - 50%)"
+            }
+          },
+          "required": [
+            "commissionPercent"
+          ]
+        },
+        "CreateSpaceDto": {
+          "type": "object",
+          "properties": {
+            "namaSpace": {
+              "type": "string",
+              "example": "Dedicated Hot Desk #04",
+              "description": "Nama ruangan / workstation / desk"
+            },
+            "tipe": {
+              "type": "string",
+              "enum": [
+                "desk",
+                "meeting_room",
+                "private_office"
+              ],
+              "example": "desk",
+              "description": "Tipe space: desk, meeting_room, atau private_office"
+            },
+            "hargaPerJam": {
+              "type": "number",
+              "example": 25000,
+              "description": "Harga sewa per jam dalam Rupiah (IDR)"
+            },
+            "kapasitas": {
+              "type": "number",
+              "example": 1,
+              "description": "Kapasitas maksimal orang dalam space"
+            },
+            "foto": {
+              "type": "string",
+              "example": "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80",
+              "description": "URL foto ruangan / workstation"
+            },
+            "deskripsi": {
+              "type": "string",
+              "example": "Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.",
+              "description": "Deskripsi fasilitas dan keunggulan space"
+            }
+          },
+          "required": [
+            "namaSpace",
+            "tipe",
+            "hargaPerJam",
+            "kapasitas"
+          ]
+        },
+        "UpdateSpaceDto": {
+          "type": "object",
+          "properties": {
+            "namaSpace": {
+              "type": "string",
+              "example": "Dedicated Hot Desk #04",
+              "description": "Nama ruangan / workstation / desk"
+            },
+            "tipe": {
+              "type": "string",
+              "enum": [
+                "desk",
+                "meeting_room",
+                "private_office"
+              ],
+              "example": "desk",
+              "description": "Tipe space: desk, meeting_room, atau private_office"
+            },
+            "hargaPerJam": {
+              "type": "number",
+              "example": 25000,
+              "description": "Harga sewa per jam dalam Rupiah (IDR)"
+            },
+            "kapasitas": {
+              "type": "number",
+              "example": 1,
+              "description": "Kapasitas maksimal orang dalam space"
+            },
+            "foto": {
+              "type": "string",
+              "example": "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=600&q=80",
+              "description": "URL foto ruangan / workstation"
+            },
+            "deskripsi": {
+              "type": "string",
+              "example": "Workstation ergonomis dengan koneksi internet Gigabit, stopkontak dedicated, dan view ke taman.",
+              "description": "Deskripsi fasilitas dan keunggulan space"
+            }
+          }
+        },
+        "CreateDiscountDto": {
+          "type": "object",
+          "properties": {
+            "namaDiskon": {
+              "type": "string",
+              "example": "Promo Diskon Awal Tahun 2026",
+              "description": "Nama program promo / diskon"
+            },
+            "kodeDiskon": {
+              "type": "string",
+              "example": "PROMO2026",
+              "description": "Kode kupon promo yang dapat dimasukkan saat reservasi"
+            },
+            "persentaseDiskon": {
+              "type": "number",
+              "example": 20,
+              "description": "Besaran persentase potongan harga (1 - 100%)"
+            },
+            "tanggalAwal": {
+              "type": "string",
+              "example": "2026-01-01T00:00:00.000Z",
+              "description": "Tanggal & waktu mulai berlakunya promo (ISO-8601 string)"
+            },
+            "spaceId": {
+              "type": "number",
+              "example": 1,
+              "description": "ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)"
+            },
+            "tanggalAkhir": {
+              "type": "string",
+              "example": "2026-12-31T23:59:59.000Z",
+              "description": "Tanggal & waktu berakhirnya promo (ISO-8601 string)"
+            }
+          },
+          "required": [
+            "namaDiskon",
+            "persentaseDiskon",
+            "tanggalAwal",
+            "tanggalAkhir"
+          ]
+        },
+        "UpdateDiscountDto": {
+          "type": "object",
+          "properties": {
+            "namaDiskon": {
+              "type": "string",
+              "example": "Promo Diskon Awal Tahun 2026",
+              "description": "Nama program promo / diskon"
+            },
+            "kodeDiskon": {
+              "type": "string",
+              "example": "PROMO2026",
+              "description": "Kode kupon promo yang dapat dimasukkan saat reservasi"
+            },
+            "persentaseDiskon": {
+              "type": "number",
+              "example": 20,
+              "description": "Besaran persentase potongan harga (1 - 100%)"
+            },
+            "tanggalAwal": {
+              "type": "string",
+              "example": "2026-01-01T00:00:00.000Z",
+              "description": "Tanggal & waktu mulai berlakunya promo (ISO-8601 string)"
+            },
+            "spaceId": {
+              "type": "number",
+              "example": 1,
+              "description": "ID Ruangan spesifik yang dikenakan promo (opsional, jika kosong berlaku untuk semua ruangan)"
+            },
+            "tanggalAkhir": {
+              "type": "string",
+              "example": "2026-12-31T23:59:59.000Z",
+              "description": "Tanggal & waktu berakhirnya promo (ISO-8601 string)"
+            }
+          }
+        },
+        "CreateReservationDto": {
+          "type": "object",
+          "properties": {
+            "spaceId": {
+              "type": "number",
+              "example": 1,
+              "description": "ID Workstation / Ruangan yang dipesan"
+            },
+            "space_id": {
+              "type": "number",
+              "example": 1,
+              "description": "Alias snake_case untuk spaceId (opsional jika spaceId diisi)"
+            },
+            "tanggalReservasi": {
+              "type": "string",
+              "example": "2026-09-10",
+              "description": "Tanggal reservasi (format YYYY-MM-DD atau ISO string)"
+            },
+            "tanggal_reservasi": {
+              "type": "string",
+              "example": "2026-09-10",
+              "description": "Alias snake_case untuk tanggalReservasi"
+            },
+            "tanggal": {
+              "type": "string",
+              "example": "2026-09-10",
+              "description": "Alias pendek untuk tanggalReservasi"
+            },
+            "jamMulai": {
+              "type": "string",
+              "example": "09:00",
+              "description": "Jam mulai reservasi (format HH:mm, 24 jam)"
+            },
+            "jam_mulai": {
+              "type": "string",
+              "example": "09:00",
+              "description": "Alias snake_case untuk jamMulai"
+            },
+            "durasiJam": {
+              "type": "number",
+              "example": 3,
+              "description": "Durasi pemakaian dalam jam (minimal 1 jam, maksimal 24 jam)"
+            },
+            "durasi_jam": {
+              "type": "number",
+              "example": 3,
+              "description": "Alias snake_case untuk durasiJam"
+            },
+            "durasi": {
+              "type": "number",
+              "example": 3,
+              "description": "Alias pendek untuk durasiJam"
+            },
+            "diskonId": {
+              "type": "number",
+              "example": 1,
+              "description": "ID program promo / diskon jika ada"
+            },
+            "diskon_id": {
+              "type": "number",
+              "example": 1,
+              "description": "Alias snake_case untuk diskonId"
+            },
+            "kodeDiskon": {
+              "type": "string",
+              "example": "PROMO2026",
+              "description": "Kode promo / kupon diskon jika ada"
+            },
+            "kode_diskon": {
+              "type": "string",
+              "example": "PROMO2026",
+              "description": "Alias snake_case untuk kodeDiskon"
+            }
+          },
+          "required": [
+            "spaceId",
+            "tanggalReservasi",
+            "jamMulai",
+            "durasiJam"
+          ]
+        },
+        "UpdateReservationStatusDto": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "disetujui",
+                "aktif",
+                "selesai",
+                "dibatalkan"
+              ],
+              "example": "disetujui",
+              "description": "Status reservasi baru: pending, disetujui, aktif, selesai, dibatalkan"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "VerifyQrDto": {
+          "type": "object",
+          "properties": {
+            "qrCode": {
+              "type": "string",
+              "example": "SSB-1725178900000-A3B9F1",
+              "description": "String kode QR hasil scan dari aplikasi/tiket member"
+            }
+          },
+          "required": [
+            "qrCode"
+          ]
+        },
+        "ProcessCheckinDto": {
+          "type": "object",
+          "properties": {
+            "qrCode": {
+              "type": "string",
+              "example": "SSB-1725178900000-A3B9F1",
+              "description": "String kode QR hasil scan"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "checkin",
+                "checkout"
+              ],
+              "default": "auto",
+              "example": "auto",
+              "description": "Aksi check-in / check-out: \"auto\" (otomatis deteksi), \"checkin\", atau \"checkout\""
+            }
+          },
+          "required": [
+            "qrCode"
+          ]
+        },
+        "CreateReviewDto": {
+          "type": "object",
+          "properties": {
+            "reservasiId": {
+              "type": "number",
+              "description": "ID Reservasi yang telah berstatus selesai",
+              "example": 1
+            },
+            "rating": {
+              "type": "number",
+              "description": "Rating bintang dari 1 hingga 5",
+              "example": 5,
+              "minimum": 1,
+              "maximum": 5
+            },
+            "komentar": {
+              "type": "string",
+              "description": "Komentar testimoni atau ulasan pengalaman",
+              "example": "Tempat sangat nyaman, koneksi internet kencang dan AC dingin!"
+            }
+          },
+          "required": [
+            "reservasiId",
+            "rating"
+          ]
+        },
+        "CreateWaitlistDto": {
+          "type": "object",
+          "properties": {
+            "spaceId": {
+              "type": "number",
+              "description": "ID Ruangan / Space",
+              "example": 1
+            },
+            "tanggal": {
+              "type": "string",
+              "description": "Tanggal (YYYY-MM-DD)",
+              "example": "2026-09-15"
+            },
+            "jamMulai": {
+              "type": "string",
+              "description": "Jam mulai (HH:mm)",
+              "example": "10:00"
+            },
+            "durasiJam": {
+              "type": "number",
+              "description": "Durasi pemakaian dalam jam",
+              "example": 2
+            }
+          },
+          "required": [
+            "spaceId",
+            "tanggal",
+            "jamMulai",
+            "durasiJam"
+          ]
+        }
+      }
+    }
+  }

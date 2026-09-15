@@ -1,0 +1,152 @@
+[
+  {
+    "category": "App",
+    "method": "GET",
+    "path": "/api",
+    "description": "Root health/welcome endpoint",
+    "status": 200,
+    "latency_ms": 488,
+    "result": "PASS",
+    "details": "Hello World!"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "description": "Super Admin Login (Valid)",
+    "status": 200,
+    "latency_ms": 273,
+    "result": "PASS",
+    "details": "User: super_admin"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "description": "Login Wrong Password (Negative)",
+    "status": 401,
+    "latency_ms": 308,
+    "result": "PASS",
+    "details": "Email atau password salah."
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "description": "Login Empty Body (Validation)",
+    "status": 400,
+    "latency_ms": 153,
+    "result": "PASS",
+    "details": "['Email tidak boleh kosong', 'Format email tidak valid', 'Password minimal 6 karakter', 'Password tidak boleh kosong', 'Password harus berupa teks']"
+  },
+  {
+    "category": "Auth",
+    "method": "GET",
+    "path": "/api/auth/profile",
+    "description": "Get Profile Authenticated",
+    "status": 200,
+    "latency_ms": 195,
+    "result": "PASS",
+    "details": "Role: super_admin"
+  },
+  {
+    "category": "Auth",
+    "method": "GET",
+    "path": "/api/auth/profile",
+    "description": "Get Profile Unauthenticated (RBAC)",
+    "status": 401,
+    "latency_ms": 226,
+    "result": "PASS",
+    "details": "Rejected with 401 Unauthorized"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/register/member",
+    "description": "Register Member Empty Payload",
+    "status": 400,
+    "latency_ms": 136,
+    "result": "PASS",
+    "details": "Validation handled: ['Email tidak boleh kosong', 'Format email tidak valid', 'Pa"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/register/owner",
+    "description": "Register Owner Empty Payload",
+    "status": 400,
+    "latency_ms": 182,
+    "result": "PASS",
+    "details": "Validation handled: ['Email tidak boleh kosong', 'Format email tidak valid', 'Pa"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/verify-email",
+    "description": "Verify Email Invalid OTP/User",
+    "status": 404,
+    "latency_ms": 201,
+    "result": "PASS",
+    "details": "Pengguna tidak ditemukan."
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/resend-otp",
+    "description": "Resend OTP Non-existent Email",
+    "status": 404,
+    "latency_ms": 177,
+    "result": "PASS",
+    "details": "Akun dengan email tersebut tidak ditemukan."
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/forgot-password",
+    "description": "Forgot Password Non-existent Email",
+    "status": 404,
+    "latency_ms": 164,
+    "result": "PASS",
+    "details": "Akun dengan alamat email tersebut tidak terdaftar di sistem."
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/reset-password",
+    "description": "Reset Password Invalid OTP",
+    "status": 404,
+    "latency_ms": 286,
+    "result": "PASS",
+    "details": "Pengguna tidak ditemukan."
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/secret-super-admin-provision",
+    "description": "Secret Provision Unauthorized Attempt",
+    "status": 403,
+    "latency_ms": 1153,
+    "result": "PASS",
+    "details": "Properly guarded with key check"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/staff",
+    "description": "Staff Registration by Super Admin",
+    "status": 403,
+    "latency_ms": 186,
+    "result": "PASS",
+    "details": "Result: Akses ditolak: role 'super_admin' tidak memiliki izin untuk mengakses resource ini. Diperlukan salah satu dari: [admin_space]"
+  },
+  {
+    "category": "Auth",
+    "method": "POST",
+    "path": "/api/auth/google",
+    "description": "Google OAuth Invalid Token",
+    "status": 400,
+    "latency_ms": 427,
+    "result": "PASS",
+    "details": "Autentikasi Google gagal. Alamat email tidak dapat diverifikasi."
+  }
+]
