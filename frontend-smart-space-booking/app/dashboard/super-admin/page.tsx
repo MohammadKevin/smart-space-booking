@@ -96,7 +96,7 @@ export default function SuperAdminOverviewPage() {
   }, [owners]);
 
   const handleExportAudit = () => {
-    const headers = "Metric,Nilai\n";
+    const headers = "Metrik,Nilai\n";
     const rows = [
       `Total GMV Nasional,${gmvValue}`,
       `Pendapatan Bersih Platform (Komisi),${netTakeValue}`,

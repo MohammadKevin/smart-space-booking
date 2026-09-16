@@ -98,11 +98,11 @@ export default function OwnerOverviewPage() {
 
   const handleExportReport = () => {
     const csvContent = [
-      ["Transaction ID", "Space", "Member", "Amount", "Status", "Date"].join(","),
+      ["ID Transaksi", "Ruangan", "Pengguna/Member", "Nominal", "Status", "Tanggal"].join(","),
       ...recentTransactions.map((t) =>
         [
           `TRX-${t.id}`,
-          `"${t.detailReservasi?.space?.namaSpace || "Space"}"`,
+          `"${t.detailReservasi?.space?.namaSpace || "Ruangan"}"`,
           `"${t.detailReservasi?.space?.owner?.namaCoworking || "Member"}"`,
           t.detailReservasi?.totalHarga || 0,
           t.status,

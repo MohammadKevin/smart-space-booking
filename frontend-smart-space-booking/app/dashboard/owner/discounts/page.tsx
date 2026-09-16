@@ -651,7 +651,7 @@ export default function OwnerDiscountsPage() {
                   onChange={(e) => setSpaceId(e.target.value ? Number(e.target.value) : "")}
                   className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-slate-800 focus:outline-none focus:border-[#006370] cursor-pointer"
                 >
-                  <option value="">Semua Ruangan (All Spaces)</option>
+                  <option value="">Semua Ruangan</option>
                   {spaces.map((sp) => (
                     <option key={sp.id} value={sp.id}>
                       {sp.namaSpace} ({sp.tipe})

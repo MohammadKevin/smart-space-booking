@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSpaces, Space } from "@/lib/api";
@@ -28,12 +28,75 @@ import {
   VolumeX,
   Check,
   Monitor,
+  Heart,
+  MoveRight,
 } from "lucide-react";
 
 import { formatRupiah } from "@/lib/utils";
 import { SearchDatePicker } from "@/components/SearchDatePicker";
 
+/* ------------------------------------------------------------------ */
+/*  ANIMATION UTILITIES                                                */
+/*  useReveal(): IntersectionObserver hook -> triggers once in view    */
+/*  <Reveal>: wraps content, fades + slides up when it enters viewport */
+/* ------------------------------------------------------------------ */
+
+function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { threshold, rootMargin: "0px 0px -60px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
+
+function Reveal({
+  children,
+  className = "",
+  delay = 0,
+  as = "div",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+  as?: "div";
+}) {
+  const { ref, visible } = useReveal();
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out will-change-transform ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      } ${className}`}
+      style={{ transitionDelay: visible ? `${delay}ms` : "0ms" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
 function RealSpaceCard({ space }: { space: Space }) {
+  const [saved, setSaved] = useState(false);
+
   const fallbackImage =
     space.tipe === "meeting_room"
       ? "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
@@ -41,56 +104,62 @@ function RealSpaceCard({ space }: { space: Space }) {
       ? "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80"
       : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=1200&q=80";
 
-  const getStatusBadge = () => {
-    if (space.tipe === "desk") {
-      return { label: "Turnstile Otomatis", ping: true, color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
-    }
-    if (space.tipe === "meeting_room") {
-      return { label: "Siap Digunakan", ping: false, color: "text-cyan-700 bg-cyan-50 border-cyan-200" };
-    }
-    return { label: "Akses NFC Instan", ping: false, color: "text-indigo-700 bg-indigo-50 border-indigo-200" };
-  };
+  const typeLabel =
+    space.tipe === "meeting_room" ? "Ruang Rapat" : space.tipe === "private_office" ? "Suite Privat" : "Flex Desk";
 
-  const status = getStatusBadge();
-  const locationText = space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Mitra Hub";
+  const ownerName = space.owner?.namaCoworking || "WorkNest Partner";
+  const locationText = space.owner?.alamat || ownerName;
+  const ownerInitial = ownerName.trim().charAt(0).toUpperCase() || "W";
+
+  // Deterministic pseudo-rating so it stays stable per card instead of re-randomizing on every render
+  const rating = (4.6 + ((Number(space.id) * 7) % 4) / 10).toFixed(1);
 
   return (
-    <div className="bg-white rounded-xs border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all">
+    <div className="group bg-white rounded-3xl border border-slate-200/80 p-3 flex flex-col justify-between hover:shadow-xl hover:shadow-slate-200/60 hover:-translate-y-1.5 transition-all duration-300">
       <div>
-        <div className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden">
+        {/* Floating image with inset padding, like a property listing card */}
+        <div className="relative aspect-[4/3] w-full rounded-2xl bg-slate-100 overflow-hidden">
           <img
             src={space.foto || fallbackImage}
             alt={space.namaSpace}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLImageElement).src = fallbackImage;
             }}
           />
-          
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 pointer-events-none" />
+
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[4px] text-[11px] font-semibold bg-white/95 backdrop-blur-xs border shadow-2xs ${status.color}`}>
-              <span>{status.label}</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-slate-800 shadow-sm">
+              {typeLabel}
             </span>
           </div>
 
-          <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200 shadow-2xs">
-              <Users className="w-3 h-3 text-slate-500" />
-              <span>{space.kapasitas} Orang</span>
-            </span>
-          </div>
+          <button
+            type="button"
+            onClick={() => setSaved((s) => !s)}
+            aria-label="Simpan ruangan"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+          >
+            <Heart
+              className={`w-3.5 h-3.5 transition-colors ${saved ? "fill-rose-500 text-rose-500" : "text-slate-500"}`}
+            />
+          </button>
         </div>
 
-        <div className="p-5 space-y-3">
-          
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-            <div className="flex items-center gap-1 truncate pr-2">
-              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+        <div className="px-2 pt-5 pb-2 space-y-3">
+          {/* Owner / host row */}
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-[#0D5C63] text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+              {ownerInitial}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium truncate">{ownerName}</span>
+            <span className="text-slate-300">•</span>
+            <div className="flex items-center gap-1 text-[11px] text-slate-500 font-medium truncate">
+              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
               <span className="truncate">{locationText}</span>
             </div>
-            <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 shrink-0">
-              ID #SP-{String(space.id).padStart(2, "0")}
-            </span>
           </div>
 
           <h3 className="font-serif text-lg font-bold text-slate-900 leading-tight">
@@ -101,31 +170,28 @@ function RealSpaceCard({ space }: { space: Space }) {
             {space.deskripsi || "Workstation representatif dengan fasilitas lengkap dan konektivitas prima."}
           </p>
 
-          <div className="pt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-medium border-t border-slate-100">
-            <div className="flex items-center gap-1.5">
-              <Wifi className="w-3 h-3 text-cyan-600" />
-              <span>WiFi Gigabit</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Armchair className="w-3 h-3 text-cyan-600" />
-              <span>Kursi Ergonomis</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Cpu className="w-3 h-3 text-cyan-600" />
-              <span>Kunci Digital QR</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Coffee className="w-3 h-3 text-cyan-600" />
-              <span>Free-flow Kopi</span>
-            </div>
+          {/* Amenity pills */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-medium text-slate-600">
+              <Users className="w-3 h-3 text-slate-400" />
+              {space.kapasitas} Orang
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-medium text-slate-600">
+              <Wifi className="w-3 h-3 text-slate-400" />
+              WiFi Gigabit
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-medium text-slate-600">
+              <Cpu className="w-3 h-3 text-slate-400" />
+              Kunci QR
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="p-5 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
+      <div className="px-2 pt-3 mt-2 border-t border-slate-100 flex items-center justify-between">
         <div>
           <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wide">
-            Tarif Sewa
+            Mulai dari
           </span>
           <div className="flex items-baseline gap-1">
             <span className="text-base font-bold text-slate-900 font-mono">
@@ -136,9 +202,10 @@ function RealSpaceCard({ space }: { space: Space }) {
         </div>
         <Link
           href={`/booking/${space.id}`}
-          className="px-4 py-1.5 rounded-xs bg-[#0D5C63] hover:bg-[#094348] text-xs font-semibold text-white transition-colors shadow-2xs"
+          aria-label={space.tipe === "meeting_room" ? "Pesan Ruangan" : "Pesan Kursi"}
+          className="w-10 h-10 rounded-full bg-[#0D5C63] hover:bg-[#094348] text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-md shrink-0"
         >
-          {space.tipe === "meeting_room" ? "Pesan Ruangan" : "Pesan Kursi"}
+          <MoveRight className="w-4 h-4" />
         </Link>
       </div>
     </div>
@@ -161,6 +228,13 @@ export default function HomePage() {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
+
+  // Trigger hero entrance animation right after first paint
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
 
   useEffect(() => {
     async function loadSpaces() {
@@ -282,18 +356,32 @@ export default function HomePage() {
 
   return (
     <div className="bg-white min-h-screen text-slate-900 selection:bg-[#0D5C63] selection:text-white">
-      <section id="home" className="pt-10 pb-16 lg:pt-14 lg:pb-20 border-b border-slate-100">
+      <section id="home" className="pt-10 pb-16 lg:pt-14 lg:pb-20 border-b border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-9">
           <div className="max-w-3xl mx-auto text-center space-y-4 pt-8">
-            <h1 className="font-serif text-[48px] sm:text-[48px] md:text-[48px] lg:text-[54px] font-semibold text-slate-900 tracking-tight leading-[1.12]">
+            <h1
+              className={`font-serif text-[72px] sm:text-[72px] md:text-[72px] lg:text-[72px] font-semibold text-slate-900 tracking-tight leading-[1.12] transition-all duration-700 ease-out ${
+                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
               Ruang kerja siap pakai <br /> kapan saja
             </h1>
-            <h2 className="text-xs sm:text-sm md:text-[15px] text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
+            <h2
+              className={`text-md sm:text-md md:text-md lg:text-md text-slate-600 max-w-4xl mx-auto font-normal leading-relaxed transition-all duration-700 ease-out ${
+                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+              style={{ transitionDelay: mounted ? "120ms" : "0ms" }}
+            >
               Temukan ruang kerja ideal sesuai kebutuhan Anda, mulai dari meja fleksibel, ruang meeting, hingga kantor privat. Cukup pilih lokasi, tanggal, dan durasi. Semua proses, mulai dari pemesanan hingga akses masuk, dapat dilakukan secara instan melalui perangkat Anda.
             </h2>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+          <div
+            className={`max-w-4xl mx-auto transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.98]"
+            }`}
+            style={{ transitionDelay: mounted ? "240ms" : "0ms" }}
+          >
             <div className="bg-white rounded-xs border border-slate-200 shadow-sm shadow-slate-100 p-2 sm:p-3">
               <div className="flex items-center gap-1 sm:gap-2 px-2 pt-1 pb-3 overflow-x-auto text-xs border-b border-slate-100">
                 <button
@@ -408,7 +496,12 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="max-w-4xl mx-auto pt-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div
+            className={`max-w-4xl mx-auto pt-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
+            style={{ transitionDelay: mounted ? "360ms" : "0ms" }}
+          >
             <div className="space-y-1">
               <p className="text-xl sm:text-2xl font-bold font-mono tracking-tight text-slate-900">
                 {spaces.length > 0 ? `${spaces.length}+` : "48+"}
@@ -435,7 +528,7 @@ export default function HomePage() {
                 1.500+
               </p>
               <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                Engineer &amp; Founder Bergabung
+                Profesional &amp; Founder Bergabung
               </p>
             </div>
 
@@ -451,7 +544,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="instant-rates" className="border-b border-slate-200/80 bg-slate-50/60 py-3.5">
+      <Reveal as="div" className="border-b border-slate-200/80 bg-slate-50/60">
+      <section id="instant-rates" className="py-3.5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-6 text-xs text-slate-600">
             <span className="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-500 uppercase shadow-2xs">
@@ -461,7 +555,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
               <span>
-                <strong className="font-semibold text-slate-800">Flex Desks:</strong> {deskSpaces.length > 0 ? <>mulai {formatRupiah(minDeskRate)}/jam</> : "Segera hadir"}
+                <strong className="font-semibold text-slate-800">Meja Kerja (Flex Desk):</strong> {deskSpaces.length > 0 ? <>mulai {formatRupiah(minDeskRate)}/jam</> : "Segera hadir"}
               </span>
             </div>
 
@@ -488,10 +582,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </Reveal>
 
       <section id="ruang-kerja" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
                 DIRANCANG UNTUK PRODUKTIVITAS
@@ -508,23 +603,23 @@ export default function HomePage() {
               <span>Lihat semua {spaces.length > 0 ? `${spaces.length} ` : ""}ruangan di seluruh Indonesia</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
-          </div>
+          </Reveal>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3"
+                  className="bg-white rounded-3xl border border-slate-200/80 p-3 animate-pulse space-y-3"
                 >
-                  <div className="aspect-[16/10] bg-slate-200/70" />
-                  <div className="p-5 space-y-3">
+                  <div className="aspect-[4/3] rounded-2xl bg-slate-200/70" />
+                  <div className="px-2 pt-2 pb-1 space-y-3">
                     <div className="h-3.5 bg-slate-200 rounded w-1/3" />
                     <div className="h-5 bg-slate-200 rounded w-3/4" />
                     <div className="h-3 bg-slate-100 rounded w-full" />
                     <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
                       <div className="h-5 bg-slate-200 rounded w-1/3" />
-                      <div className="h-7 bg-slate-200 rounded w-20" />
+                      <div className="h-10 w-10 bg-slate-200 rounded-full" />
                     </div>
                   </div>
                 </div>
@@ -553,9 +648,11 @@ export default function HomePage() {
               </button>
             </div>
           ) : displayedSpaces.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {displayedSpaces.slice(0, 6).map((space) => (
-                <RealSpaceCard key={space.id} space={space} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7">
+              {displayedSpaces.slice(0, 6).map((space, i) => (
+                <Reveal key={space.id} delay={i * 90}>
+                  <RealSpaceCard space={space} />
+                </Reveal>
               ))}
             </div>
           ) : (
@@ -592,7 +689,7 @@ export default function HomePage() {
 
       <section id="tarif" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="max-w-3xl space-y-2">
+          <Reveal className="max-w-3xl space-y-2">
             <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
               TARIF WORKNEST
             </p>
@@ -602,10 +699,11 @@ export default function HomePage() {
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
               Tanpa biaya tersembunyi. Semua harga sudah termasuk pajak dan biaya layanan.
             </p>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <Reveal delay={0}>
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -650,8 +748,10 @@ export default function HomePage() {
                 Pesan Flex Desk
               </Link>
             </div>
+            </Reveal>
 
-            <div className="bg-white rounded-xs border-2 border-[#006370] p-6 flex flex-col justify-between space-y-5 relative shadow-sm">
+            <Reveal delay={120}>
+            <div className="bg-white rounded-xs border-2 border-[#006370] p-6 flex flex-col justify-between space-y-5 relative shadow-sm hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -700,8 +800,10 @@ export default function HomePage() {
                 Pesan Ruang Rapat
               </Link>
             </div>
+            </Reveal>
 
-            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <Reveal delay={240}>
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
@@ -750,13 +852,14 @@ export default function HomePage() {
                 Pesan Suite Privat
               </Link>
             </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       <section id="protocol" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="max-w-3xl space-y-2">
+          <Reveal className="max-w-3xl space-y-2">
             <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
               STANDAR TEKNOLOGI WORKNEST
             </p>
@@ -766,11 +869,12 @@ export default function HomePage() {
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
               Tanpa kartu fisik atau formulir manual. Seluruh alur reservasi, pintu masuk, dan penagihan dikendalikan langsung lewat perangkat Anda.
             </p>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+
+            <Reveal delay={0}>
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <Cpu className="w-4 h-4" />
@@ -788,8 +892,10 @@ export default function HomePage() {
                 <span className="font-semibold text-cyan-700">Instan</span>
               </div>
             </div>
+            </Reveal>
 
-            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <Reveal delay={120}>
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <CreditCard className="w-4 h-4" />
@@ -807,8 +913,10 @@ export default function HomePage() {
                 <span className="font-semibold text-cyan-700">Otomatis</span>
               </div>
             </div>
+            </Reveal>
 
-            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 transition-colors">
+            <Reveal delay={240}>
+            <div className="bg-white rounded-xs border border-slate-200/90 p-6 flex flex-col justify-between space-y-5 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 h-full">
               <div className="space-y-3.5">
                 <div className="w-9 h-9 rounded-xs bg-cyan-50 border border-cyan-100/70 text-cyan-700 flex items-center justify-center">
                   <Users className="w-4 h-4" />
@@ -822,19 +930,20 @@ export default function HomePage() {
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                <span className="font-mono text-slate-400">Enterprise: SAML / Slack</span>
-                <span className="font-semibold text-cyan-700">Enterprise</span>
+                <span className="font-mono text-slate-400">Korporasi: SAML / Integrasi</span>
+                <span className="font-semibold text-cyan-700">Perusahaan</span>
               </div>
             </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       <section className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-xs border border-slate-200/90 bg-white p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xs">
+          <Reveal className="rounded-xs border border-slate-200/90 bg-white p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-2xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
+
               <div className="lg:col-span-6 space-y-4">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
                   <MapPin className="w-3 h-3 text-slate-500" />
@@ -869,10 +978,6 @@ export default function HomePage() {
               <div className="lg:col-span-6 bg-slate-50/80 rounded-xs border border-slate-200/80 p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
                     <span>Topologi Jaringan Hub Aktif</span>
                   </div>
                   <span className="text-[11px] font-mono text-slate-400">Sinkronisasi v2.4</span>
@@ -894,48 +999,53 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <section id="faq" className="py-14 sm:py-20 border-b border-slate-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center space-y-1.5">
+          <Reveal className="text-center space-y-1.5">
             <p className="text-[11px] font-bold text-cyan-700 tracking-wider uppercase">
               PERTANYAAN UMUM
             </p>
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
               Pertanyaan yang sering diajukan
             </h2>
-          </div>
+          </Reveal>
 
           <div className="space-y-3">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
               return (
-                <div
-                  key={index}
-                  className="rounded-xs border border-slate-200/90 bg-white transition-all"
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleFaq(index)}
-                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer focus:outline-none"
-                  >
-                    <span className="text-xs sm:text-[13px] font-semibold text-slate-800">
-                      {faq.q}
-                    </span>
-                    <span className="text-slate-400 hover:text-slate-700 shrink-0">
-                      {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    </span>
-                  </button>
+                <Reveal key={index} delay={index * 70}>
+                  <div className="rounded-xs border border-slate-200/90 bg-white transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => toggleFaq(index)}
+                      className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer focus:outline-none"
+                    >
+                      <span className="text-xs sm:text-[13px] font-semibold text-slate-800">
+                        {faq.q}
+                      </span>
+                      <span className={`text-slate-400 hover:text-slate-700 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : "rotate-0"}`}>
+                        {isOpen ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      </span>
+                    </button>
 
-                  {isOpen && (
-                    <div className="px-4 sm:px-5 pb-5 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100">
-                      {faq.a}
+                    <div
+                      className={`grid transition-all duration-300 ease-out ${
+                        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="px-4 sm:px-5 pb-5 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100">
+                          {faq.a}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                </Reveal>
               );
             })}
           </div>
@@ -944,7 +1054,7 @@ export default function HomePage() {
 
       <section className="py-14 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-xs border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
+          <Reveal className="rounded-xs border border-slate-200/90 bg-white p-8 sm:p-12 text-center space-y-5 shadow-2xs">
             <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
               Siap meningkatkan produktivitas tim Anda hari ini?
             </h2>
@@ -956,7 +1066,7 @@ export default function HomePage() {
             <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/spaces"
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xs bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-[13px] font-semibold transition-colors shadow-xs"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xs bg-[#0D5C63] hover:bg-[#094348] text-white text-xs sm:text-[13px] font-semibold transition-all hover:scale-105 shadow-xs"
               >
                 Pesan Ruangan Sekarang
               </Link>
@@ -967,7 +1077,7 @@ export default function HomePage() {
                 Daftar Sebagai Pengelola Ruangan
               </Link>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
     </div>

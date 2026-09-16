@@ -218,7 +218,7 @@ export default function MemberDashboardPage() {
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 24px sans-serif";
-    ctx.fillText("WORKNEST ACCESS PASS", 40, 55);
+    ctx.fillText("TIKET MASUK RESMI WORKNEST", 40, 55);
 
     ctx.font = "14px sans-serif";
     ctx.fillStyle = "#BCE3DE";
@@ -226,7 +226,7 @@ export default function MemberDashboardPage() {
 
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#e0f2fe";
-    ctx.fillText("DIGITAL BOARDING PASS & ACCESS KEY", 40, 125);
+    ctx.fillText("TIKET DIGITAL & KUNCI AKSES RUANGAN", 40, 125);
 
     ctx.fillStyle = "#0f172a";
     ctx.font = "bold 20px sans-serif";
@@ -252,12 +252,12 @@ export default function MemberDashboardPage() {
 
       ctx.fillStyle = "#059669";
       ctx.font = "bold 13px sans-serif";
-      ctx.fillText("STATUS: VALID ACCESS PASS", 300, 710);
+      ctx.fillText("STATUS: TIKET AKSES VALID", 300, 710);
 
       const pngUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = pngUrl;
-      link.download = `WorkNest-Pass-${ticket.qrCode}.png`;
+      link.download = `WorkNest-Tiket-${ticket.qrCode}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

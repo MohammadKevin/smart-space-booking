@@ -11,7 +11,6 @@ import {
   getApiErrorMessage,
 } from "@/lib/api";
 import { WorkNestLogo } from "@/components/WorkNestLogo";
-import { GoogleLoginButton } from "@/components/GoogleLoginButton";
 import {
   Lock,
   ArrowRight,
@@ -51,17 +50,17 @@ function RegisterForm() {
     setSuccessMessage(null);
 
     if (!agreedToTerms) {
-      setErrorMessage("Please agree to the Terms of Service and Privacy Policy.");
+      setErrorMessage("Silakan setujui Syarat & Ketentuan serta Kebijakan Privasi.");
       return;
     }
 
     if (!email.trim()) {
-      setErrorMessage("Work email cannot be empty.");
+      setErrorMessage("Alamat email tidak boleh kosong.");
       return;
     }
 
     if (password.length < 8) {
-      setErrorMessage("Password must be at least 8 characters long.");
+      setErrorMessage("Kata sandi minimal 8 karakter.");
       return;
     }
 
@@ -75,7 +74,7 @@ function RegisterForm() {
     try {
       if (role === "member") {
         if (!fullName.trim()) {
-          setErrorMessage("Please enter your full name.");
+          setErrorMessage("Silakan masukkan nama lengkap Anda.");
           setLoading(false);
           return;
         }
@@ -84,28 +83,28 @@ function RegisterForm() {
           email: email.trim(),
           password,
           namaMember: fullName.trim(),
-          instansi: "WorkNest Member",
+          instansi: "Member WorkNest",
           alamat: "Indonesia",
           telp: cleanPhone.startsWith("0") ? cleanPhone : "0" + cleanPhone.replace(/^(\+62|62)/, ""),
         };
 
         const res = await registerMember(dto);
         setSuccessMessage(
-          res.message || "Account created successfully! Redirecting to security verification..."
+          res.message || "Akun berhasil dibuat! Mengarahkan ke verifikasi email..."
         );
       } else {
         if (!namaCoworking.trim()) {
-          setErrorMessage("Please enter your Coworking space / property name.");
+          setErrorMessage("Silakan masukkan nama Coworking Space / properti Anda.");
           setLoading(false);
           return;
         }
         if (!fullName.trim()) {
-          setErrorMessage("Please enter the owner or manager name.");
+          setErrorMessage("Silakan masukkan nama pengelola atau PIC.");
           setLoading(false);
           return;
         }
         if (!alamat.trim()) {
-          setErrorMessage("Please enter the commercial property address.");
+          setErrorMessage("Silakan masukkan alamat properti Anda.");
           setLoading(false);
           return;
         }
@@ -121,7 +120,7 @@ function RegisterForm() {
 
         const res = await registerOwner(dto);
         setSuccessMessage(
-          res.message || "Host account registered! Redirecting to email verification..."
+          res.message || "Akun pengelola berhasil didaftarkan! Mengarahkan ke verifikasi email..."
         );
       }
 
@@ -201,7 +200,7 @@ function RegisterForm() {
                 role === "owner" ? "bg-[#006370]" : "bg-transparent"
               }`}
             />
-            <span>Owner</span>
+            <span>Pengelola Space</span>
           </button>
         </div>
 
@@ -225,7 +224,7 @@ function RegisterForm() {
           
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-800">
-              {role === "owner" ? "Full Name / PIC Name" : "Full Name"}
+              {role === "owner" ? "Nama Lengkap / PIC Pengelola" : "Nama Lengkap"}
             </label>
             <input
               type="text"
@@ -239,14 +238,14 @@ function RegisterForm() {
 
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-800">
-              Email
+              Alamat Email
             </label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@company.co.id"
+              placeholder="nama@email.com"
               className="w-full px-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
             />
           </div>
@@ -254,7 +253,7 @@ function RegisterForm() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-slate-800">
-                WhatsApp / Phone Number
+                Nomor Telepon / WhatsApp
               </label>
             </div>
             <div className="flex items-stretch border border-slate-200 rounded-xs bg-white overflow-hidden focus-within:border-[#006370] focus-within:ring-2 focus-within:ring-[#006370]/15 transition-all">
@@ -276,7 +275,7 @@ function RegisterForm() {
             <div className="space-y-3.5 p-3.5 bg-slate-50 rounded-xs border border-slate-200/90 text-xs">
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-800">
-                  Coworking Space / Commercial Brand Name
+                  Nama Coworking Space / Brand
                 </label>
                 <div className="relative">
                   <Building2 className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
@@ -285,7 +284,7 @@ function RegisterForm() {
                     required
                     value={namaCoworking}
                     onChange={(e) => setNamaCoworking(e.target.value)}
-                    placeholder="e.g. Malang Creative Hub"
+                    placeholder="Contoh: Malang Creative Hub"
                     className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                   />
                 </div>
@@ -293,7 +292,7 @@ function RegisterForm() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-slate-800">
-                  Property Address
+                  Alamat Lengkap Properti
                 </label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" />
@@ -312,7 +311,7 @@ function RegisterForm() {
 
           <div className="space-y-1.5">
             <label className="block text-xs font-semibold text-slate-800">
-              Password
+              Kata Sandi
             </label>
             <div className="relative">
               <input
@@ -320,14 +319,14 @@ function RegisterForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a robust passphrase"
+                placeholder="Buat kata sandi minimal 8 karakter"
                 className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer rounded-xs"
-                aria-label="Toggle password visibility"
+                aria-label="Tampilkan / sembunyikan kata sandi"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -337,8 +336,8 @@ function RegisterForm() {
               </button>
             </div>
             <div className="flex items-center justify-between font-mono text-[11px] text-slate-400 pt-0.5 px-0.5">
-              <span>Min. 8 characters</span>
-              <span>Work-Nest-Security</span>
+              <span>Min. 8 karakter</span>
+              <span>WorkNest-Security</span>
             </div>
           </div>
 
@@ -359,7 +358,7 @@ function RegisterForm() {
                 href="/terms"
                 className="text-[#006370] font-semibold hover:underline"
               >
-                Syarat & Ketentuan
+                Syarat &amp; Ketentuan
               </Link>{" "}
               dan{" "}
               <Link
@@ -380,30 +379,16 @@ function RegisterForm() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating Account...</span>
+                <span>Mendaftarkan Akun...</span>
               </>
             ) : (
               <>
-                <span>Create Account</span>
+                <span>Daftar Sekarang</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
-
-        <div className="relative my-5">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-2 text-slate-400 font-medium">atau daftar dengan</span>
-          </div>
-        </div>
-
-        <GoogleLoginButton
-          label="Daftar Akun dengan Google"
-          onError={(err) => setErrorMessage(err)}
-        />
 
         <div className="mt-6 text-center text-xs text-slate-500">
           Sudah punya akun?{" "}

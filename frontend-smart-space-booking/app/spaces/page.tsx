@@ -337,7 +337,7 @@ function SpacesContent() {
                 { id: null, label: "Semua" },
                 { id: "proyektor", label: "📽️ Proyektor / Layar" },
                 { id: "ergonomis", label: "🪑 Kursi Ergonomis" },
-                { id: "pantry", label: "☕ Free Coffee & Tea" },
+                { id: "pantry", label: "☕ Kopi & Teh Gratis" },
               ].map((amenity) => (
                 <button
                   key={amenity.label}
@@ -424,7 +424,7 @@ function SpacesContent() {
                 onClick={handleResetFilters}
                 className="text-[#006370] hover:text-[#004f59] font-semibold underline underline-offset-4 cursor-pointer"
               >
-                Reset Filter
+                Atur Ulang Filter
               </button>
             )}
             <span className="text-slate-400 font-medium">

@@ -46,58 +46,58 @@ interface AmenityOption {
 const AMENITY_OPTIONS: AmenityOption[] = [
   {
     id: "display_4k",
-    name: "4K UHD Presentation Display",
-    desc: '65" Sony Bravia HDR with HDMI & AirPlay',
-    tag: "4K Display",
+    name: "Layar Presentasi 4K UHD",
+    desc: 'Smart TV 65" 4K HDR dengan HDMI & Screen Share',
+    tag: "Layar 4K",
     icon: Tv,
   },
   {
     id: "polycom_bar",
-    name: "Polycom / Jabra Video Bar",
-    desc: "Auto speaker-tracking with beamforming mic",
-    tag: "Polycom Video",
+    name: "Video Bar Konferensi Polycom / Jabra",
+    desc: "Auto speaker-tracking dengan mikrofon peredam bising",
+    tag: "Video Bar",
     icon: Mic,
   },
   {
     id: "glass_board",
-    name: "Ultra-wide Magnetic Glass Board",
-    desc: "3.2m x 1.2m seamless tempered glass surface",
-    tag: "Glass Board",
+    name: "Papan Tulis Kaca Magnetik Ultra-Wide",
+    desc: "Permukaan kaca tempered magnetik 3.2m x 1.2m",
+    tag: "Papan Kaca",
     icon: Sparkles,
   },
   {
     id: "wifi_fiber",
-    name: "Dual Gigabit Symmetrical Fiber",
-    desc: "Wi-Fi 6E mesh with dedicated VLAN per session",
+    name: "Internet Fiber Gigabit Berkecepatan Tinggi",
+    desc: "Wi-Fi 6E mesh berkecepatan tinggi dengan koneksi stabil",
     tag: "Wi-Fi 6E",
     icon: Wifi,
   },
   {
     id: "acoustic_panels",
-    name: "Dedicated Soundproof Paneling",
-    desc: "Certified -42dB acoustic isolation damping",
-    tag: "Acoustic -42dB",
+    name: "Panel Peredam Suara Akustik",
+    desc: "Peredam suara akustik berstandar studio rapat (-42dB)",
+    tag: "Peredam Akustik",
     icon: Volume2,
   },
   {
     id: "nespresso_bar",
-    name: "Complimentary Nespresso Bar",
-    desc: "Artisanal pods and filtered chilled water tap",
-    tag: "Nespresso Bar",
+    name: "Minuman Kopi & Teh Gratis",
+    desc: "Kopi kapsul Nespresso & air mineral dingin gratis",
+    tag: "Kopi & Teh",
     icon: Coffee,
   },
   {
     id: "podcast_mics",
-    name: "Podcast Microphones & Mixer",
-    desc: "Rodecaster Pro II console with 4x Shure SM7B",
-    tag: "Podcast Gear",
+    name: "Mikrofon Podcast & Mixer Audio",
+    desc: "Audio konsol mixer dengan 4 mikrofon kondenser",
+    tag: "Alat Podcast",
     icon: Mic,
   },
   {
     id: "balcony_access",
-    name: "Natural Sunlight / Balcony Access",
-    desc: "Floor-to-ceiling double glazed patio door",
-    tag: "Balcony Access",
+    name: "Pencahayaan Alami / Akses Balkon",
+    desc: "Jendela kaca besar dengan akses pencahayaan alami",
+    tag: "Akses Balkon",
     icon: Sun,
   },
 ];
@@ -111,8 +111,8 @@ const PRESET_SAMPLE_PHOTOS = [
 export default function CreateWorkspacePage() {
   const router = useRouter();
 
-  const [title, setTitle] = useState("Semeru Creative Studio & Podcast Suite");
-  const [category, setCategory] = useState("Meeting Room & Production");
+  const [title, setTitle] = useState("Studio Kreatif Semeru & Ruang Rapat");
+  const [category, setCategory] = useState("Ruang Rapat & Presentasi");
   const [spaceType, setSpaceType] = useState<SpaceType>("meeting_room");
   const [floorUnit, setFloorUnit] = useState("Lantai 3, Unit 304");
   const [capacity, setCapacity] = useState(8);
@@ -366,12 +366,12 @@ export default function CreateWorkspacePage() {
                     onChange={handleCategoryChange}
                     className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 cursor-pointer"
                   >
-                    <option value="Meeting Room & Production">Meeting Room &amp; Production</option>
-                    <option value="Executive VIP Suite">Executive VIP Suite</option>
-                    <option value="Focus Pod & Solo Booth">Focus Pod &amp; Solo Booth</option>
-                    <option value="Team Sprint Lab">Team Sprint Lab</option>
-                    <option value="Event Space & Workshop Loft">Event Space &amp; Workshop Loft</option>
-                    <option value="Open Hot Desk Commons">Open Hot Desk Commons</option>
+                    <option value="Ruang Rapat & Presentasi">Ruang Rapat &amp; Presentasi</option>
+                    <option value="Ruang Kerja Privat / VIP Suite">Ruang Kerja Privat / VIP Suite</option>
+                    <option value="Bilik Fokus / Solo Pod">Bilik Fokus / Solo Pod</option>
+                    <option value="Ruang Kolaborasi Tim / Sprint Lab">Ruang Kolaborasi Tim / Sprint Lab</option>
+                    <option value="Area Acara & Workshop">Area Acara &amp; Workshop</option>
+                    <option value="Meja Kerja Bersama (Flex Desk)">Meja Kerja Bersama (Flex Desk)</option>
                   </select>
                 </div>
 
@@ -712,11 +712,11 @@ export default function CreateWorkspacePage() {
               <div className="relative aspect-16/10 overflow-hidden bg-slate-100">
                 <img
                   src={photos[coverIndex] || photos[0] || PRESET_SAMPLE_PHOTOS[0]}
-                  alt="Catalog Preview"
+                  alt="Pratinjau Katalog"
                   className="w-full h-full object-cover"
                 />
                 <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-xs bg-[#006370] text-white text-[10px] font-bold shadow-2xs font-mono">
-                  Instant Book
+                  Booking Instan
                 </span>
                 <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-xs bg-slate-900/80 text-white text-[10px] font-mono backdrop-blur-xs">
                   {floorUnit || "Lantai 3 • Unit 304"}

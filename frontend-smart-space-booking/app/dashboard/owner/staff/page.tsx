@@ -177,9 +177,9 @@ export default function OwnerStaffPage() {
             type="button"
             onClick={() => {
               const csv =
-                "Name,Role,Email,Phone\n" +
+                "Nama,Peran,Email,Telepon\n" +
                 staffs
-                  .map((s) => `"${s.namaStaff}","Staff","${s.user?.email || ""}","${s.telp}"`)
+                  .map((s) => `"${s.namaStaff}","Staf","${s.user?.email || ""}","${s.telp}"`)
                   .join("\n");
               const blob = new Blob([csv], { type: "text/csv" });
               const url = URL.createObjectURL(blob);

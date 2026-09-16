@@ -128,9 +128,9 @@ export default function OwnerSpacesPage() {
   }, [spaces, searchQuery, typeFilter]);
 
   const getTypeLabel = (tipe: SpaceType) => {
-    if (tipe === "meeting_room") return "Meeting Room";
-    if (tipe === "private_office") return "Private Office";
-    if (tipe === "desk") return "Dedicated Desk";
+    if (tipe === "meeting_room") return "Ruang Rapat";
+    if (tipe === "private_office") return "Kantor Privat";
+    if (tipe === "desk") return "Meja Kerja (Desk)";
     return tipe;
   };
 
@@ -221,9 +221,9 @@ export default function OwnerSpacesPage() {
           <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold">
             {[
               { id: "all", label: "Semua Tipe" },
-              { id: "meeting_room", label: "Meeting Room" },
-              { id: "private_office", label: "Private Office" },
-              { id: "desk", label: "Desk" },
+              { id: "meeting_room", label: "Ruang Rapat" },
+              { id: "private_office", label: "Kantor Privat" },
+              { id: "desk", label: "Meja Kerja" },
             ].map((t) => (
               <button
                 key={t.id}

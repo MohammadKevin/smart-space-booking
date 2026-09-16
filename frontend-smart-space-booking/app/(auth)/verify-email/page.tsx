@@ -139,7 +139,7 @@ function VerifyEmailContent() {
     }
 
     if (fullOtp.length !== 6) {
-      setErrorMessage("Please enter the complete 6-digit security code.");
+      setErrorMessage("Silakan masukkan 6 digit kode keamanan dengan lengkap.");
       return;
     }
 
@@ -148,7 +148,7 @@ function VerifyEmailContent() {
     try {
       if (typeParam === "reset") {
         if (!newPassword || newPassword.length < 8) {
-          setErrorMessage("New password must be at least 8 characters long.");
+          setErrorMessage("Kata sandi baru minimal 8 karakter.");
           setLoading(false);
           return;
         }
@@ -159,7 +159,7 @@ function VerifyEmailContent() {
           password: newPassword,
         });
 
-        setSuccessMessage(res.message || "Password updated! Redirecting to login...");
+        setSuccessMessage(res.message || "Kata sandi berhasil diperbarui! Mengarahkan ke halaman masuk...");
         setTimeout(() => router.push("/login"), 1200);
       } else {
         const res = await verifyEmail({
@@ -168,7 +168,7 @@ function VerifyEmailContent() {
         });
 
         loginUser(res.access_token, res.user);
-        setSuccessMessage("Security verification successful! Activating your pass...");
+        setSuccessMessage("Verifikasi berhasil! Mengaktifkan akses akun Anda...");
 
         setTimeout(() => {
           const r = res.user.role?.toLowerCase();
@@ -206,7 +206,7 @@ function VerifyEmailContent() {
         type: typeParam === "reset" ? "forgot_password" : "register",
       });
 
-      setSuccessMessage(res.message || "New 6-digit verification code sent.");
+      setSuccessMessage(res.message || "Kode OTP 6-digit baru telah dikirimkan.");
       setResendCooldown(60);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
@@ -227,7 +227,7 @@ function VerifyEmailContent() {
 
           <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-[#E0F2FE] text-[#0369A1] font-mono text-[11px] font-bold border border-[#BAE6FD]">
             <ShieldCheck className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span>SECURE ACCESS</span>
+            <span>AKSES AMAN</span>
           </div>
         </div>
 
@@ -252,10 +252,10 @@ function VerifyEmailContent() {
 
         <div className="text-center mt-5 space-y-2">
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Verify your email & phone
+            Verifikasi Email &amp; No. Telepon
           </h1>
           <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed max-w-sm mx-auto">
-            We&apos;ve sent a 6-digit verification security code to{" "}
+            Kami telah mengirimkan 6 digit kode OTP verifikasi ke{" "}
             <span className="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-xs font-semibold text-xs inline-block">
               {maskEmail(email)}
             </span>{" "}
@@ -302,7 +302,7 @@ function VerifyEmailContent() {
           {typeParam === "reset" && (
             <div className="space-y-2 pt-2 border-t border-slate-100">
               <label className="block text-xs font-semibold text-slate-800">
-                New Robust Password
+                Kata Sandi Baru
               </label>
               <div className="relative">
                 <input
@@ -310,7 +310,7 @@ function VerifyEmailContent() {
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
+                  placeholder="Min. 8 karakter"
                   className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
                 />
                 <button
@@ -328,7 +328,7 @@ function VerifyEmailContent() {
             <div className="flex items-center gap-1.5 text-slate-600 font-medium">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               {resendCooldown > 0 ? (
-                <span>Resend in {formatTimer(resendCooldown)}</span>
+                <span>Kirim ulang dalam {formatTimer(resendCooldown)}</span>
               ) : (
                 <button
                   type="button"
@@ -336,7 +336,7 @@ function VerifyEmailContent() {
                   disabled={resending}
                   className="text-[#006370] font-bold hover:underline cursor-pointer"
                 >
-                  {resending ? "Sending..." : "Resend Code"}
+                  {resending ? "Mengirim..." : "Kirim Ulang Kode"}
                 </button>
               )}
             </div>
@@ -346,7 +346,7 @@ function VerifyEmailContent() {
               onClick={handleResend}
               className="inline-flex items-center gap-1 font-semibold text-slate-700 hover:text-[#006370] transition-colors cursor-pointer"
             >
-              <span>Try via SMS / Call</span>
+              <span>Bantuan via SMS / Kontak</span>
               <Headphones className="w-3.5 h-3.5 text-slate-500" />
             </button>
           </div>
@@ -359,11 +359,11 @@ function VerifyEmailContent() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Verifying Security Pass...</span>
+                <span>Memverifikasi Kode OTP...</span>
               </>
             ) : (
               <>
-                <span>Confirm & Activate Pass</span>
+                <span>Konfirmasi &amp; Aktifkan Akses</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -379,17 +379,17 @@ function VerifyEmailContent() {
             <span className="text-slate-400">SHA256 • TLS 1.3</span>
           </div>
           <p className="text-[11px] text-slate-500">
-            Security Level: Biometric & TOTP Multi-Tenant Verified
+            Tingkat Keamanan: Verifikasi Multi-Tenant TOTP &amp; Akses Terenkripsi
           </p>
         </div>
 
         <div className="mt-6 text-center text-xs text-slate-500">
-          Wrong email address?{" "}
+          Salah alamat email?{" "}
           <Link
             href="/register"
             className="font-bold text-[#006370] hover:text-[#004f59] hover:underline"
           >
-            Change email
+            Ganti email
           </Link>
         </div>
       </div>
