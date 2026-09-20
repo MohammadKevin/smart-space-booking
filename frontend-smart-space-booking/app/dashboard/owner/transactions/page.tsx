@@ -51,7 +51,6 @@ export default function OwnerTransactionsPage() {
       const list = Array.isArray(data) ? data : [];
       setTransactions(list);
 
-      // Auto-sync pending transactions in the background
       if (autoSync && list.length > 0) {
         const pendingTxs = list.filter(
           (t) =>

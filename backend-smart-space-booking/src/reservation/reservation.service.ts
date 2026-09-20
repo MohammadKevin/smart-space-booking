@@ -181,7 +181,6 @@ export class ReservationService implements OnModuleInit {
       : ReservasiStatus.pending;
 
     const res = await this.prisma.$transaction(async (tx) => {
-      // Row-level lock on the space record to prevent race conditions & double-booking (BUG-009)
       await tx.$executeRawUnsafe(
         'SELECT id FROM spaces WHERE id = ? FOR UPDATE;',
         space.id,

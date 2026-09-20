@@ -286,7 +286,6 @@ export class MidtransService {
       );
     }
 
-    // If duplicate order ID (406), fetch the existing transaction status from Midtrans
     if (resData.status_code === '406' || res.status === 406) {
       try {
         const statusData = await this.getTransactionStatus(orderId);

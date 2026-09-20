@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
     const authHeader = `Basic ${Buffer.from(MIDTRANS_SERVER_KEY + ":").toString("base64")}`;
     const authBearer = req.headers.get("authorization");
 
-    // 1. Check Midtrans status directly if orderId is available
     if (orderId) {
       try {
         const midtransRes = await fetch(`${API_BASE_URL}/v2/${orderId}/status`, {
@@ -49,7 +48,6 @@ export async function GET(req: NextRequest) {
           ) {
             isPaid = true;
 
-            // Forward webhook notification payload to backend so the database updates immediately
             try {
               await fetch(`${BACKEND_API_BASE_URL}/transactions/notification`, {
                 method: "POST",
@@ -62,7 +60,6 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
-    // 2. Also query backend sync endpoint to ensure database is in sync
     const syncTargetId = transactionId || reservationId;
     if (syncTargetId) {
       try {
@@ -85,7 +82,6 @@ export async function GET(req: NextRequest) {
       } catch {}
     }
 
-    // 3. If still pending, check reservation status directly
     if (!isPaid && reservationId) {
       try {
         const resCheck = await fetch(`${BACKEND_API_BASE_URL}/reservations/${reservationId}`, {

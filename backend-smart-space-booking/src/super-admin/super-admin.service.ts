@@ -41,7 +41,6 @@ export class SuperAdminService {
         }
       }
     } catch {
-      // Fallback to in-memory / env
     }
     return this.commissionPercent;
   }

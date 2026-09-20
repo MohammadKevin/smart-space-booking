@@ -65,7 +65,6 @@ export default function MemberDashboardPage() {
       const list = Array.isArray(data) ? data : [];
       setReservations(list);
 
-      // Auto-sync in background if there are pending bookings/transactions
       if (autoSync && list.length > 0) {
         const pendingItems = list.filter(
           (r) =>

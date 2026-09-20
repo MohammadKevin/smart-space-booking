@@ -63,7 +63,7 @@ export class MailService {
             <div style="display: inline-block; background-color: #f0fdf4; border: 2px dashed #16a34a; border-radius: 12px; padding: 16px 36px;">
               <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #15803d;">${otp}</span>
             </div>
-            <p style="font-size: 11px; color: #64748b; margin-top: 8px;">Kode berlaku selama <strong>15 menit</strong>. Jangan bagikan kode ini kepada siapapun.</p>
+            <p style="font-size: 11px; color: #5d7699; margin-top: 8px;">Kode berlaku selama <strong>15 menit</strong>. Jangan bagikan kode ini kepada siapapun.</p>
           </div>
           <p style="font-size: 12px; line-height: 1.5; color: #64748b;">
             Jika Anda tidak merasa mendaftar di WorkNest, Anda dapat mengabaikan email ini dengan aman.

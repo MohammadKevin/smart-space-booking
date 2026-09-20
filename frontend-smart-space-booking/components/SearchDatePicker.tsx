@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 interface SearchDatePickerProps {
-  value: string; // ISO "YYYY-MM-DD"
+  value: string;
   onChange: (value: string) => void;
   className?: string;
   label?: string;
@@ -43,7 +43,6 @@ export function SearchDatePicker({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Reference for "today" in local timezone
   const today = useMemo(() => new Date(), []);
   const todayYear = today.getFullYear();
   const todayMonth = today.getMonth();
@@ -69,13 +68,12 @@ export function SearchDatePicker({
 
   const weekendIso = useMemo(() => {
     const d = new Date(todayYear, todayMonth, todayDate);
-    const dayOfWeek = d.getDay(); // 0 is Sunday, 6 is Saturday
+    const dayOfWeek = d.getDay();
     const diff = dayOfWeek === 6 ? 0 : 6 - dayOfWeek;
     d.setDate(d.getDate() + (diff === 0 ? 7 : diff));
     return toIsoString(d.getFullYear(), d.getMonth(), d.getDate());
   }, [todayYear, todayMonth, todayDate]);
 
-  // View state for the calendar month navigation
   const [viewDate, setViewDate] = useState(() => {
     if (value) {
       const [y, m] = value.split("-").map(Number);
@@ -86,7 +84,6 @@ export function SearchDatePicker({
     return new Date(todayYear, todayMonth, 1);
   });
 
-  // Sync viewed month when value changes from outside
   useEffect(() => {
     if (value) {
       const [y, m] = value.split("-").map(Number);
@@ -96,7 +93,6 @@ export function SearchDatePicker({
     }
   }, [value]);
 
-  // Click outside to close
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -138,11 +134,9 @@ export function SearchDatePicker({
     setViewDate(new Date(viewYear, viewMonth + 1, 1));
   };
 
-  // Days calculations
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
 
-  // Trigger label details
   const displayDetails = useMemo(() => {
     if (!value) {
       return {
@@ -188,16 +182,13 @@ export function SearchDatePicker({
 
   return (
     <div ref={containerRef} className={`relative select-none ${className}`}>
-      {/* Hidden input for standard forms */}
       <input type="hidden" name="date" value={value} />
 
-      {/* Label */}
       <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
         <CalendarIcon className="w-3.5 h-3.5 text-[#006370]" />
         <span>{label}</span>
       </label>
 
-      {/* Custom Button Trigger */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -227,15 +218,13 @@ export function SearchDatePicker({
         />
       </button>
 
-      {/* Floating Popover Calendar */}
       {isOpen && (
-        <div className="absolute left-0 sm:left-auto lg:left-0 top-[calc(100%+8px)] z-50 w-76 sm:w-80 bg-white rounded-xl shadow-2xl border border-slate-200/90 p-3.5 animate-in fade-in zoom-in-95 duration-150">
-          {/* Quick Preset Buttons */}
-          <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-slate-100 overflow-x-auto text-[11px]">
+        <div className="absolute left-0 sm:left-auto sm:right-0 lg:left-0 lg:right-auto top-[calc(100%+8px)] z-50 w-[calc(100vw-2.5rem)] max-w-[320px] sm:w-80 bg-white rounded-xl shadow-2xl border border-slate-200/90 p-3 sm:p-3.5 animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-center gap-1.5 pb-2.5 mb-2.5 sm:pb-3 sm:mb-3 border-b border-slate-100 overflow-x-auto text-[11px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button
               type="button"
               onClick={() => handleSelect(todayIso)}
-              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer shrink-0 text-[10px] sm:text-[11px] ${
                 value === todayIso
                   ? "bg-[#006370] text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -246,7 +235,7 @@ export function SearchDatePicker({
             <button
               type="button"
               onClick={() => handleSelect(tomorrowIso)}
-              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer shrink-0 text-[10px] sm:text-[11px] ${
                 value === tomorrowIso
                   ? "bg-[#006370] text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -257,7 +246,7 @@ export function SearchDatePicker({
             <button
               type="button"
               onClick={() => handleSelect(lusaIso)}
-              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer shrink-0 text-[10px] sm:text-[11px] ${
                 value === lusaIso
                   ? "bg-[#006370] text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -268,7 +257,7 @@ export function SearchDatePicker({
             <button
               type="button"
               onClick={() => handleSelect(weekendIso)}
-              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer shrink-0 text-[10px] sm:text-[11px] ${
                 value === weekendIso
                   ? "bg-[#006370] text-white shadow-xs"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -278,10 +267,9 @@ export function SearchDatePicker({
             </button>
           </div>
 
-          {/* Month & Year Navigation Header */}
-          <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center justify-between mb-2.5 sm:mb-3 px-1">
             <div className="flex items-center gap-1.5">
-              <span className="font-serif font-bold text-slate-900 text-sm tracking-tight">
+              <span className="font-serif font-bold text-slate-900 text-xs sm:text-sm tracking-tight">
                 {MONTH_NAMES[viewMonth]} {viewYear}
               </span>
             </div>
@@ -298,7 +286,7 @@ export function SearchDatePicker({
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
                 }`}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
               <button
                 type="button"
@@ -306,17 +294,16 @@ export function SearchDatePicker({
                 aria-label="Bulan Berikutnya"
                 className="p-1 rounded-md text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer transition-colors"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
 
-          {/* Weekday Names */}
-          <div className="grid grid-cols-7 gap-1 text-center mb-1">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center mb-1">
             {DAY_LABELS.map((d, index) => (
               <span
                 key={d}
-                className={`text-[11px] font-semibold py-1 font-mono ${
+                className={`text-[10px] sm:text-[11px] font-semibold py-0.5 sm:py-1 font-mono ${
                   index === 0 ? "text-rose-500" : "text-slate-400"
                 }`}
               >
@@ -325,14 +312,11 @@ export function SearchDatePicker({
             ))}
           </div>
 
-          {/* Days Grid */}
-          <div className="grid grid-cols-7 gap-1 text-center">
-            {/* Empty slots before day 1 */}
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center">
             {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-              <div key={`blank-${i}`} className="w-8 h-8" />
+              <div key={`blank-${i}`} className="w-7 h-7 sm:w-8 sm:h-8 mx-auto" />
             ))}
 
-            {/* Days in Month */}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
               const dateIso = toIsoString(viewYear, viewMonth, day);
@@ -351,7 +335,7 @@ export function SearchDatePicker({
                   type="button"
                   disabled={isPast}
                   onClick={() => handleSelect(dateIso)}
-                  className={`w-8 h-8 mx-auto flex items-center justify-center rounded-lg text-xs font-semibold transition-all relative cursor-pointer ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 mx-auto flex items-center justify-center rounded-md sm:rounded-lg text-[11px] sm:text-xs font-semibold transition-all relative cursor-pointer ${
                     isSelected
                       ? "bg-[#006370] text-white font-bold shadow-sm shadow-[#006370]/30 scale-105"
                       : isPast
@@ -370,8 +354,7 @@ export function SearchDatePicker({
             })}
           </div>
 
-          {/* Footer with Info & Quick Reset */}
-          <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div className="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500">
             <span className="truncate pr-2 font-medium text-slate-600">
               {displayDetails.sub}
             </span>

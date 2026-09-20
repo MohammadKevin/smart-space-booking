@@ -325,7 +325,6 @@ export class TransactionService {
       );
     }
 
-    // Exact match orderId against midtransOrderId or nomorInvoice (remove fuzzy slice(0, 18) match)
     const tx = await this.prisma.transaksi.findFirst({
       where: {
         OR: [{ midtransOrderId: orderId }, { nomorInvoice: orderId }],
@@ -348,7 +347,6 @@ export class TransactionService {
       );
     }
 
-    // Strict nominal check: incoming gross_amount must match tx.jumlah in database
     const incomingGrossAmount = Math.round(Number(grossAmount || 0));
     const expectedAmount = Math.round(Number(tx.jumlah || 0));
 
@@ -362,7 +360,6 @@ export class TransactionService {
       );
     }
 
-    // Idempotency: if already marked lunas and notification is settlement, skip redundant processing
     if (
       tx.statusPembayaran === PembayaranStatus.lunas &&
       (transactionStatus === 'settlement' || transactionStatus === 'capture')
@@ -479,7 +476,6 @@ export class TransactionService {
       );
     }
 
-    // Strict nominal check on sync
     if (mt.gross_amount) {
       const incomingAmount = Math.round(Number(mt.gross_amount));
       const expectedAmount = Math.round(Number(tx.jumlah));
@@ -588,7 +584,6 @@ export class TransactionService {
     const where: any = {};
 
     if (user.role === Role.super_admin) {
-      // Super admin can see all transactions
     } else if (user.role === Role.member) {
       if (!user.member) {
         throw new ForbiddenException('Profil member tidak ditemukan.');

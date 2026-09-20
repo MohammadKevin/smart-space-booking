@@ -236,7 +236,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     return "/dashboard/member";
   }, [user]);
 
-  // Auto redirect countdown on paySuccess
   useEffect(() => {
     if (!paySuccess) return;
 
@@ -262,7 +261,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
     let isSettled = false;
 
-    // 1. Check direct Midtrans status API
     try {
       const queryParams = new URLSearchParams();
       if (activeOrderId) queryParams.set("orderId", activeOrderId);
@@ -278,7 +276,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       }
     } catch {}
 
-    // 2. Also check backend sync endpoint
     if (!isSettled && (txId || reservationId)) {
       try {
         const syncId = txId || reservationId;
@@ -290,7 +287,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       } catch {}
     }
 
-    // 3. Check reservation status
     if (!isSettled && reservationId) {
       try {
         const checkData = await getReservationById(reservationId);
@@ -318,7 +314,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     return false;
   }, [paymentDetails?.orderId, reservation?.transaksi?.midtransOrderId, reservation?.transaksi?.id, reservationId]);
 
-  // Real-time auto-polling every 6 seconds while modal is open (BUG-013)
   useEffect(() => {
     if (modalOpen && !paySuccess) {
       pollingRef.current = setInterval(async () => {
@@ -494,11 +489,9 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
         {paySuccess ? (
           <div className="bg-white border border-slate-200 rounded-xs p-8 text-center space-y-6 shadow-2xl max-w-lg mx-auto relative overflow-hidden animate-in fade-in zoom-in-95">
-            {/* Background glowing aura */}
             <div className="absolute -top-12 -left-12 w-36 h-36 bg-emerald-100 rounded-full blur-3xl pointer-events-none opacity-60" />
             <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-[#E6F4F2] rounded-full blur-3xl pointer-events-none opacity-60" />
 
-            {/* Checkmark Icon Animation */}
             <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
               <div className="absolute inset-0 rounded-full bg-emerald-100/70 animate-ping opacity-75" />
               <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
@@ -519,7 +512,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               </p>
             </div>
 
-            {/* Ticket Snapshot Card */}
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xs text-left space-y-2 text-xs relative z-10">
               <div className="flex justify-between items-center border-b border-slate-200/70 pb-2">
                 <div className="flex items-center gap-1.5 font-bold text-slate-900">
@@ -542,7 +534,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               </div>
             </div>
 
-            {/* Countdown and Progress Bar */}
             <div className="space-y-1.5 text-xs text-slate-500 font-medium relative z-10">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="flex items-center gap-1.5">
@@ -559,7 +550,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center relative z-10">
               <Link
                 href={targetRedirectUrl}
@@ -932,7 +922,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
               </div>
 
-              {/* Real-time auto polling indicator */}
               <div className="flex items-center justify-between p-2.5 bg-[#E6F4F2]/50 border border-[#BCE3DE] rounded-xs text-[11px] text-[#006370]">
                 <div className="flex items-center gap-2 font-medium">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
@@ -940,7 +929,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
               </div>
 
-              {/* Payment guide accordions/tabs */}
               <div className="bg-white rounded-xs border border-slate-200 p-4 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <h4 className="font-bold text-slate-900 text-xs">Panduan Pembayaran ({selectedOption.badge})</h4>
@@ -1004,7 +992,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
               </div>
 
-              {/* Action button */}
               <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
                 <button
                   type="button"
