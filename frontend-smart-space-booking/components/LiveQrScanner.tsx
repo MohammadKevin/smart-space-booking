@@ -140,10 +140,10 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
   };
 
   return (
-    <div className="bg-slate-900 text-white rounded-xs overflow-hidden border border-slate-800 shadow-md">
-      <div className="p-3 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+    <div className="bg-slate-900 text-white rounded-2xl overflow-hidden border border-slate-800 shadow-md">
+      <div className="p-3.5 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${isScanning ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
+          <div className={`w-2.5 h-2.5 rounded-full ${isScanning ? "bg-emerald-400 animate-pulse" : "bg-slate-600"}`} />
           <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-300">
             {isScanning ? "Live Scanner Aktif" : "Scanner Siaga"}
           </span>
@@ -155,7 +155,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
               value={selectedCameraId}
               disabled={isScanning}
               onChange={(e) => setSelectedCameraId(e.target.value)}
-              className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1.5 rounded-xs border border-slate-700 focus:outline-none disabled:opacity-60 cursor-pointer"
+              className="bg-slate-800 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 focus:outline-none disabled:opacity-60 cursor-pointer"
             >
               {cameras.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -169,7 +169,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={stopScanner}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-sm"
             >
               <CameraOff className="w-3.5 h-3.5" />
               <span>Matikan Kamera</span>
@@ -178,7 +178,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={startScanner}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shadow-sky-600/25 cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Nyalakan Kamera</span>
@@ -192,8 +192,8 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
 
         {!isScanning && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3 bg-slate-900/90 backdrop-blur-xs">
-            <div className="w-12 h-12 rounded-xs bg-[#006370]/20 border border-[#006370]/40 text-[#006370] flex items-center justify-center">
-              <Camera className="w-6 h-6 text-cyan-400" />
+            <div className="w-12 h-12 rounded-xl bg-sky-600/20 border border-sky-500/40 text-sky-400 flex items-center justify-center">
+              <Camera className="w-6 h-6 text-sky-400" />
             </div>
             <div className="space-y-1 max-w-xs">
               <h4 className="text-sm font-bold text-slate-200">Kamera Belum Aktif</h4>
@@ -204,9 +204,9 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
             <button
               type="button"
               onClick={startScanner}
-              className="py-2 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              className="py-2.5 px-5 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center gap-2 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-cyan-200" />
+              <Sparkles className="w-4 h-4 text-sky-200" />
               <span>Mulai Scan Kamera</span>
             </button>
           </div>
@@ -214,20 +214,20 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
 
         {isScanning && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-52 h-52 border-2 border-[#006370] rounded-xs relative shadow-[0_0_20px_rgba(0,99,112,0.4)]">
-              <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
-              <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-cyan-400" />
-              <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-cyan-400" />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
-              <div className="w-full h-0.5 bg-cyan-400 shadow-[0_0_8px_#22d3ee] animate-pulse" />
+            <div className="w-52 h-52 border-2 border-sky-500 rounded-xl relative shadow-[0_0_20px_rgba(2,132,199,0.4)]">
+              <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-sky-400 rounded-tl" />
+              <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-sky-400 rounded-tr" />
+              <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-sky-400 rounded-bl" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-sky-400 rounded-br" />
+              <div className="w-full h-0.5 bg-sky-400 shadow-[0_0_8px_#38bdf8] animate-pulse" />
             </div>
           </div>
         )}
 
         {isProcessing && (
           <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-10 space-y-2">
-            <div className="bg-slate-900 border border-slate-700 p-4 rounded-xs flex items-center gap-3 shadow-xl">
-              <RefreshCw className="w-5 h-5 text-cyan-400 animate-spin" />
+            <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl flex items-center gap-3 shadow-xl">
+              <RefreshCw className="w-5 h-5 text-sky-400 animate-spin" />
               <span className="text-xs font-bold text-slate-100">Memvalidasi Tiket...</span>
             </div>
           </div>
@@ -240,7 +240,7 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
           <span>Audio Beep aktif saat QR terbaca</span>
         </div>
         {lastScannedCode && (
-          <span className="font-mono text-cyan-400 text-[10px] truncate max-w-[200px]">
+          <span className="font-mono text-sky-400 text-[10px] truncate max-w-[200px]">
             Terakhir: {lastScannedCode}
           </span>
         )}

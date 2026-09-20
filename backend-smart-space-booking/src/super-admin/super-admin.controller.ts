@@ -1,12 +1,14 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Patch,
   Delete,
   Body,
   Param,
   Query,
+  Req,
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -19,9 +21,11 @@ import {
 } from '@nestjs/swagger';
 import { SuperAdminService } from './super-admin.service';
 import { UpdateCommissionDto } from './dto/update-commission.dto';
+import { ResetDataDto } from './dto/reset-data.dto';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { RolesGuard } from '../auth/guard/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Super Admin (Platform Owner / CEO)')
@@ -168,5 +172,33 @@ export class SuperAdminController {
   })
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.superAdminService.deleteUser(id);
+  }
+
+  @Post('system/reset-data')
+  @ApiOperation({
+    summary: 'Reset / Kosongkan Seluruh Data Testing Platform (Super Admin)',
+    description:
+      'Menghapus seluruh data reservasi, transaksi, ruangan, diskon, staf, member, dan space owner secara transaksional, serta mempertahankan akun super_admin. Hanya aktif jika ALLOW_DATA_RESET=true pada environment.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Seluruh data testing berhasil direset.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Teks konfirmasi tidak sesuai.',
+  })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Akses ditolak atau environment tidak mengizinkan operasi reset data.',
+  })
+  resetData(@Body() dto: ResetDataDto, @Req() req: any, @GetUser() user: any) {
+    const ipAddress =
+      req.ip ||
+      req.headers['x-forwarded-for'] ||
+      req.socket.remoteAddress ||
+      '127.0.0.1';
+    return this.superAdminService.resetAllData(dto, user, String(ipAddress));
   }
 }

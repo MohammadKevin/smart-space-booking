@@ -95,7 +95,7 @@ export default function SuperAdminCommissionPage() {
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Konfigurasi Komisi &amp; Bagi Hasil
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -108,16 +108,16 @@ export default function SuperAdminCommissionPage() {
             type="button"
             onClick={fetchCommissionData}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-sky-600" : ""}`} />
             <span>Perbarui</span>
           </button>
           <button
             type="button"
             onClick={handleSaveCommission}
             disabled={saving || !isChanged}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-all disabled:opacity-50 cursor-pointer"
           >
             {saving ? (
               <>
@@ -135,27 +135,27 @@ export default function SuperAdminCommissionPage() {
       </div>
 
       {successMessage && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium flex items-center gap-2.5 shadow-2xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-4 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl text-xs font-medium flex items-center gap-2.5 shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
           <span>{successMessage}</span>
         </div>
       )}
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2.5 shadow-sm">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TARIF KOMISI AKTIF
             </span>
-            <TicketPercent className="w-4 h-4 text-[#006370]" />
+            <TicketPercent className="w-4 h-4 text-sky-600" />
           </div>
-          <div className="text-3xl font-bold text-[#006370] font-mono">
+          <div className="text-3xl font-bold text-sky-600 font-mono">
             {commissionRate}%
           </div>
           <p className="text-[11px] text-slate-500">
@@ -163,12 +163,12 @@ export default function SuperAdminCommissionPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TOTAL KOMISI TERKUMPUL
             </span>
-            <Coins className="w-4 h-4 text-emerald-600" />
+            <Coins className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
             {formatRupiah(overview?.platformProfit || 0)}
@@ -178,7 +178,7 @@ export default function SuperAdminCommissionPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               HAK BERSIH MITRA (PAYOUT)
@@ -193,17 +193,17 @@ export default function SuperAdminCommissionPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               SETTLEMENT GATEWAY
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-sky-500" />
           </div>
           <div className="text-lg font-bold text-slate-900">
             Midtrans Otomatis
           </div>
-          <p className="text-[11px] text-emerald-700 font-medium">
+          <p className="text-[11px] text-sky-700 font-medium">
             Clearance instan per reservasi
           </p>
         </div>
@@ -211,13 +211,13 @@ export default function SuperAdminCommissionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-6">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
           <div className="border-b border-slate-100 pb-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                 <Sliders className="w-3.5 h-3.5" />
               </div>
-              <h2 className="font-serif text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900">
                 Pengaturan Tarif Persentase
               </h2>
             </div>
@@ -232,7 +232,7 @@ export default function SuperAdminCommissionPage() {
                 <label className="text-xs font-bold text-slate-700">
                   Persentase Komisi Platform (%)
                 </label>
-                <span className="text-lg font-bold font-mono text-[#006370]">
+                <span className="text-lg font-bold font-mono text-sky-600">
                   {commissionRate}%
                 </span>
               </div>
@@ -244,7 +244,7 @@ export default function SuperAdminCommissionPage() {
                 step="0.5"
                 value={commissionRate}
                 onChange={(e) => setCommissionRate(parseFloat(e.target.value))}
-                className="w-full accent-[#006370] cursor-pointer h-2 bg-slate-100 rounded-xs"
+                className="w-full accent-sky-600 cursor-pointer h-2 bg-slate-100 rounded-xl"
               />
               <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
                 <span>0% (Bebas Biaya)</span>
@@ -265,7 +265,7 @@ export default function SuperAdminCommissionPage() {
                   step="0.1"
                   value={commissionRate}
                   onChange={(e) => setCommissionRate(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-bold font-mono text-slate-900 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-xs font-bold font-mono text-slate-900 focus:outline-none transition-colors"
                 />
                 <span className="absolute right-3 top-2 text-xs font-bold text-slate-400 font-mono">
                   %
@@ -283,9 +283,9 @@ export default function SuperAdminCommissionPage() {
                     key={rate}
                     type="button"
                     onClick={() => setCommissionRate(rate)}
-                    className={`px-3 py-1.5 rounded-xs text-xs font-bold font-mono transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
                       commissionRate === rate
-                        ? "bg-[#006370] text-white shadow-2xs"
+                        ? "bg-sky-600 text-white shadow-sm"
                         : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                     }`}
                   >
@@ -296,13 +296,13 @@ export default function SuperAdminCommissionPage() {
             </div>
 
             {isChanged && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-xs text-xs text-green-800 flex items-center justify-between">
+              <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl text-xs text-sky-800 flex items-center justify-between">
                 <span>Perubahan belum disimpan ({initialRate}% → {commissionRate}%)</span>
                 <button
                   type="button"
                   onClick={handleSaveCommission}
                   disabled={saving}
-                  className="px-3 py-1 bg-[#006370] hover:bg-[#004f59] text-white rounded-xs font-bold text-xs cursor-pointer"
+                  className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs cursor-pointer"
                 >
                   Simpan Sekarang
                 </button>
@@ -311,13 +311,13 @@ export default function SuperAdminCommissionPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-6">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
           <div className="border-b border-slate-100 pb-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xs bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <Coins className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center">
+                <Coins className="w-3.5 h-3.5 text-sky-600" />
               </div>
-              <h2 className="font-serif text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-slate-900">
                 Simulasi Bagi Hasil Transaksi
               </h2>
             </div>
@@ -334,7 +334,7 @@ export default function SuperAdminCommissionPage() {
               <select
                 value={simulationAmount}
                 onChange={(e) => setSimulationAmount(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xs text-xs font-bold font-mono text-slate-900 focus:outline-none cursor-pointer"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold font-mono text-slate-900 focus:outline-none cursor-pointer"
               >
                 <option value={50000}>Rp 50.000 (Sewa Meja Flex Desk 1 Jam)</option>
                 <option value={150000}>Rp 150.000 (Sewa Meja Seharian)</option>
@@ -345,7 +345,7 @@ export default function SuperAdminCommissionPage() {
               </select>
             </div>
 
-            <div className="p-4 bg-slate-50 rounded-xs border border-slate-200/80 space-y-3">
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-3">
               <div className="flex items-center justify-between text-xs text-slate-600">
                 <span>Nilai Transaksi Bruto (Member Bayar)</span>
                 <strong className="font-mono text-slate-900 text-sm">
@@ -353,9 +353,9 @@ export default function SuperAdminCommissionPage() {
                 </strong>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-[#006370] pt-2 border-t border-slate-200/60">
+              <div className="flex items-center justify-between text-xs text-sky-600 pt-2 border-t border-slate-200/60">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-[#006370]" />
+                  <span className="w-2 h-2 rounded-full bg-sky-600" />
                   <span>Komisi Platform WorkNest ({commissionRate}%)</span>
                 </span>
                 <strong className="font-mono text-base">
@@ -363,9 +363,9 @@ export default function SuperAdminCommissionPage() {
                 </strong>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-emerald-800 pt-2 border-t border-slate-200/60">
+              <div className="flex items-center justify-between text-xs text-slate-800 pt-2 border-t border-slate-200/60">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="w-2 h-2 rounded-full bg-slate-900" />
                   <span>Hak Bersih Mitra Owner ({100 - commissionRate}%)</span>
                 </span>
                 <strong className="font-mono text-base">
@@ -382,11 +382,11 @@ export default function SuperAdminCommissionPage() {
               <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex">
                 <div
                   style={{ width: `${100 - commissionRate}%` }}
-                  className="bg-emerald-500 h-full transition-all"
+                  className="bg-slate-700 h-full transition-all"
                 />
                 <div
                   style={{ width: `${commissionRate}%` }}
-                  className="bg-[#006370] h-full transition-all"
+                  className="bg-sky-600 h-full transition-all"
                 />
               </div>
             </div>
@@ -394,9 +394,9 @@ export default function SuperAdminCommissionPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-4">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
         <div className="border-b border-slate-100 pb-3">
-          <h2 className="font-serif text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900">
             Mekanisme Bagi Hasil &amp; Pembayaran Platform
           </h2>
           <p className="text-xs text-slate-500">
@@ -405,8 +405,8 @@ export default function SuperAdminCommissionPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="p-4 rounded-xs bg-slate-50/70 border border-slate-100 space-y-2">
-            <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
+          <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-100 space-y-2">
+            <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
               1
             </div>
             <h3 className="font-bold text-slate-900 text-xs">Penerimaan Pembayaran</h3>
@@ -415,8 +415,8 @@ export default function SuperAdminCommissionPage() {
             </p>
           </div>
 
-          <div className="p-4 rounded-xs bg-slate-50/70 border border-slate-100 space-y-2">
-            <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
+          <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-100 space-y-2">
+            <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
               2
             </div>
             <h3 className="font-bold text-slate-900 text-xs">Pemisahan Komisi Otomatis</h3>
@@ -425,8 +425,8 @@ export default function SuperAdminCommissionPage() {
             </p>
           </div>
 
-          <div className="p-4 rounded-xs bg-slate-50/70 border border-slate-100 space-y-2">
-            <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold">
+          <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-100 space-y-2">
+            <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
               3
             </div>
             <h3 className="font-bold text-slate-900 text-xs">Settlement &amp; Payout Mitra</h3>

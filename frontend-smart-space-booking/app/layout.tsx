@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Newsreader } from "next/font/google";
 import "./globals.css";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
 import { AuthProvider } from "@/lib/auth-context";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -38,7 +41,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`h-full bg-white antialiased ${geist.variable} ${newsreader.variable} ${geist.className}`}>
-      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-cyan-500 selection:text-white font-light tracking-tight">
+      <body className="min-h-full flex flex-col bg-white text-slate-900 selection:bg-sky-500 selection:text-white font-light tracking-tight">
         <AuthProvider>
           <Navbar />
           <main className="flex-1 flex flex-col">{children}</main>

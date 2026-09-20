@@ -215,14 +215,14 @@ export default function StaffTerminalPage() {
     <div className="space-y-6 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
             <span>TERMINAL FRONTDESK</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Otorisasi &amp; Validasi Masuk
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Terminal Check-In &amp; Pintu Otomatis
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -231,8 +231,8 @@ export default function StaffTerminalPage() {
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xs bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700">
-            <Clock className="w-3.5 h-3.5 text-[#006370]" />
+          <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-700 shadow-sm">
+            <Clock className="w-3.5 h-3.5 text-sky-600" />
             <span className="font-bold text-slate-900">{currentTime || "00:00:00 WIB"}</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 hidden sm:inline">{currentDate}</span>
@@ -241,26 +241,26 @@ export default function StaffTerminalPage() {
           <button
             type="button"
             onClick={() => setMuted(!muted)}
-            className="p-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer shadow-2xs"
+            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer shadow-sm"
             title={muted ? "Nyalakan Audio Beep" : "Bisukan Audio"}
           >
-            {muted ? <VolumeX className="w-3.5 h-3.5 text-rose-500" /> : <Volume2 className="w-3.5 h-3.5 text-slate-600" />}
+            {muted ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-slate-600" />}
           </button>
 
           <button
             type="button"
             onClick={fetchReservations}
             disabled={fetchingData}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${fetchingData ? "animate-spin text-[#006370]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${fetchingData ? "animate-spin text-sky-600" : ""}`} />
             <span>Perbarui</span>
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 flex items-center justify-between gap-3 text-xs text-rose-800 shadow-2xs animate-in fade-in">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-3 text-xs text-rose-800 shadow-sm animate-in fade-in">
           <div className="flex items-center gap-2 font-medium">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
@@ -276,35 +276,35 @@ export default function StaffTerminalPage() {
       )}
 
       {result && (
-        <div className="p-4 rounded-xs bg-emerald-50 border border-emerald-300 flex items-center justify-between gap-3 text-xs text-emerald-900 shadow-2xs animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-between gap-3 text-xs text-sky-900 shadow-sm animate-in fade-in">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xs bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
               <p className="font-bold text-sm text-slate-900">Akses Diberikan • Check-In Berhasil</p>
-              <p className="text-[11px] text-emerald-800">
+              <p className="text-[11px] text-sky-800">
                 {result.message || "Validasi tiket berhasil. Sesi reservasi telah diaktifkan."}
               </p>
             </div>
           </div>
-          <span className="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded-xs border border-emerald-200 text-emerald-800">
+          <span className="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded-md border border-sky-200 text-sky-800 shadow-sm">
             OPEN: 4.0s
           </span>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               STATUS GERBANG IOT
             </span>
-            <Radio className="w-4 h-4 text-[#006370]" />
+            <Radio className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-xl font-bold font-mono">
             {gateUnlocked ? (
-              <span className="text-emerald-600 flex items-center gap-1.5">
+              <span className="text-sky-600 flex items-center gap-1.5">
                 <Unlock className="w-4 h-4" /> TERBUKA
               </span>
             ) : (
@@ -318,22 +318,22 @@ export default function StaffTerminalPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TAMU AKTIF DI VENUE
             </span>
-            <Users className="w-4 h-4 text-[#006370]" />
+            <Users className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
             {activeReservations.length}
           </div>
-          <p className="text-[11px] text-emerald-600 font-semibold">
+          <p className="text-[11px] text-sky-600 font-semibold">
             Sesi sedang berjalan
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               MENUNGGU CHECK-IN
@@ -348,7 +348,7 @@ export default function StaffTerminalPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL LOG HARI INI
@@ -365,22 +365,22 @@ export default function StaffTerminalPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono font-bold text-[#006370] uppercase block">
+              <span className="text-[10px] font-mono font-bold text-sky-600 uppercase block">
                 METODE 01
               </span>
-              <h2 className="font-serif text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-slate-900">
                 Pindai QR Code Tiket
               </h2>
             </div>
-            <QrCode className="w-4 h-4 text-[#006370]" />
+            <QrCode className="w-4 h-4 text-sky-600" />
           </div>
 
           <div className="space-y-4">
             {cameraActive ? (
-              <div className="rounded-xs overflow-hidden border border-slate-200 bg-slate-900 relative">
+              <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative">
                 <LiveQrScanner
                   onScanSuccess={(scannedCode: string) => {
                     executeCheckin(scannedCode);
@@ -389,14 +389,14 @@ export default function StaffTerminalPage() {
                 <button
                   type="button"
                   onClick={() => setCameraActive(false)}
-                  className="absolute top-3 right-3 px-3 py-1 bg-black/70 hover:bg-black text-white text-xs font-semibold rounded-xs border border-white/20 cursor-pointer"
+                  className="absolute top-3 right-3 px-3 py-1 bg-black/70 hover:bg-black text-white text-xs font-semibold rounded-xl border border-white/20 cursor-pointer shadow-sm"
                 >
                   Tutup Kamera
                 </button>
               </div>
             ) : (
-              <div className="p-8 border-2 border-dashed border-slate-200 rounded-xs text-center space-y-3 bg-slate-50/50">
-                <div className="w-12 h-12 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center mx-auto border border-[#BCE3DE]">
+              <div className="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center space-y-3 bg-slate-50/50">
+                <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto border border-sky-100">
                   <Camera className="w-6 h-6" />
                 </div>
                 <div>
@@ -408,7 +408,7 @@ export default function StaffTerminalPage() {
                 <button
                   type="button"
                   onClick={() => setCameraActive(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold rounded-xs shadow-2xs transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
                 >
                   <Camera className="w-3.5 h-3.5" />
                   <span>Nyalakan Kamera Scanner</span>
@@ -426,13 +426,13 @@ export default function StaffTerminalPage() {
                   value={manualCodeInput}
                   onChange={(e) => setManualCodeInput(e.target.value)}
                   placeholder="Contoh: WN-BOK-123456"
-                  className="flex-1 px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#006370] transition-colors"
+                  className="flex-1 px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => executeCheckin(manualCodeInput)}
                   disabled={!manualCodeInput.trim() || loading}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Verifikasi
                 </button>
@@ -441,13 +441,13 @@ export default function StaffTerminalPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono font-bold text-[#006370] uppercase block">
+              <span className="text-[10px] font-mono font-bold text-sky-600 uppercase block">
                 METODE 02
               </span>
-              <h2 className="font-serif text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-slate-900">
                 Input Keypad PIN 6-Digit
               </h2>
             </div>
@@ -462,11 +462,11 @@ export default function StaffTerminalPage() {
                 return (
                   <div
                     key={index}
-                    className={`w-10 h-12 rounded-xs flex items-center justify-center font-mono text-xl font-bold border transition-all ${
+                    className={`w-10 h-12 sm:w-11 sm:h-13 rounded-xl flex items-center justify-center font-mono text-xl font-bold border transition-all ${
                       digit
-                        ? "bg-slate-50 text-[#006370] border-[#006370] shadow-2xs"
+                        ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
                         : isActive
-                        ? "bg-white text-slate-400 border-[#006370] ring-1 ring-[#006370]/20"
+                        ? "bg-white text-slate-400 border-sky-500 ring-2 ring-sky-500/15"
                         : "bg-slate-50 text-slate-300 border-slate-200"
                     }`}
                   >
@@ -482,7 +482,7 @@ export default function StaffTerminalPage() {
                   key={num}
                   type="button"
                   onClick={() => handleKeypadPress(num)}
-                  className="h-11 rounded-xs bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-2xs select-none"
+                  className="h-11 rounded-xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm select-none"
                 >
                   {num}
                 </button>
@@ -491,7 +491,7 @@ export default function StaffTerminalPage() {
               <button
                 type="button"
                 onClick={handleClearPin}
-                className="h-11 rounded-xs bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center cursor-pointer select-none"
+                className="h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center cursor-pointer select-none"
               >
                 HAPUS
               </button>
@@ -499,7 +499,7 @@ export default function StaffTerminalPage() {
               <button
                 type="button"
                 onClick={() => handleKeypadPress("0")}
-                className="h-11 rounded-xs bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-2xs select-none"
+                className="h-11 rounded-xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm select-none"
               >
                 0
               </button>
@@ -507,7 +507,7 @@ export default function StaffTerminalPage() {
               <button
                 type="button"
                 onClick={handleBackspacePin}
-                className="h-11 rounded-xs bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors flex items-center justify-center cursor-pointer select-none"
+                className="h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors flex items-center justify-center cursor-pointer select-none"
                 aria-label="Backspace"
               >
                 <Delete className="w-4 h-4" />
@@ -518,9 +518,9 @@ export default function StaffTerminalPage() {
               type="button"
               onClick={handleVerifyPin}
               disabled={pinDigits.length === 0 || loading}
-              className={`w-full py-2.5 px-4 rounded-xs font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer ${
+              className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
                 pinDigits.length === 6
-                  ? "bg-[#006370] hover:bg-[#004f59] text-white"
+                  ? "bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/25"
                   : "bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-50"
               }`}
             >
@@ -531,7 +531,7 @@ export default function StaffTerminalPage() {
                 </>
               ) : gateUnlocked ? (
                 <>
-                  <Unlock className="w-4 h-4 text-emerald-600" />
+                  <Unlock className="w-4 h-4 text-sky-600" />
                   <span>Pintu Terbuka!</span>
                 </>
               ) : (
@@ -545,10 +545,10 @@ export default function StaffTerminalPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
-            <h2 className="font-serif text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900">
               Daftar Reservasi Terbaru
             </h2>
             <p className="text-xs text-slate-500">
@@ -557,7 +557,7 @@ export default function StaffTerminalPage() {
           </div>
           <Link
             href="/dashboard/staff/history"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006370] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline"
           >
             <span>Buka Log Lengkap ({reservations.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -585,7 +585,7 @@ export default function StaffTerminalPage() {
                   const isPending = r.status === "pending";
 
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
                         {r.qrCode || `RES-${r.id}`}
                       </td>
@@ -602,18 +602,18 @@ export default function StaffTerminalPage() {
                       </td>
                       <td className="py-3.5 px-4">
                         {isAktif && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 font-semibold text-[10px] border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-semibold text-[10px] border border-sky-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
                             Aktif
                           </span>
                         )}
                         {isPending && (
-                          <span className="px-2 py-0.5 rounded-xs bg-amber-50 text-amber-700 font-semibold text-[10px] border border-amber-200">
+                          <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold text-[10px] border border-amber-200">
                             Pending
                           </span>
                         )}
                         {!isAktif && !isPending && (
-                          <span className="px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 font-semibold text-[10px] border border-slate-200">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px] border border-slate-200">
                             {r.status}
                           </span>
                         )}
@@ -622,7 +622,7 @@ export default function StaffTerminalPage() {
                         <button
                           type="button"
                           onClick={() => executeCheckin(r.qrCode || String(r.id))}
-                          className="px-2.5 py-1 rounded-xs border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+                          className="px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm transition-colors cursor-pointer"
                         >
                           Validasi
                         </button>

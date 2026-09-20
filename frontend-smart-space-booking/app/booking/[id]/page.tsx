@@ -336,8 +336,8 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   if (loadingSpace) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] py-24 flex flex-col items-center justify-center text-slate-400">
-        <Loader2 className="w-8 h-8 text-[#006370] animate-spin mb-2" />
+      <div className="min-h-screen bg-slate-50/70 py-24 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 className="w-8 h-8 text-sky-600 animate-spin mb-2" />
         <p className="text-xs font-medium text-slate-600">Memuat formulir pemesanan...</p>
       </div>
     );
@@ -345,17 +345,17 @@ export default function BookingPage({ params }: BookingPageProps) {
 
   if (spaceError || !space) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] py-24 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-xs border border-slate-200 shadow-sm text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+      <div className="min-h-screen bg-slate-50/70 py-24 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="font-serif text-xl font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
+          <h2 className="text-xl font-bold text-slate-900">Ruangan Tidak Ditemukan</h2>
           <p className="text-xs text-slate-500 leading-relaxed">{spaceError || "Ruangan tidak tersedia atau telah dihapus."}</p>
           <div className="pt-2">
             <Link
               href="/spaces"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Kembali ke Katalog Ruangan</span>
@@ -374,18 +374,18 @@ export default function BookingPage({ params }: BookingPageProps) {
       : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80";
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] py-8 sm:py-12">
+    <div className="min-h-screen bg-slate-50/70 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
               <span>RESERVASI RUANGAN</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-500 font-sans font-normal">
                 {space.owner?.namaCoworking || "WorkNest Hub"}
               </span>
             </div>
-            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Pesan Ruang Kerja
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -396,7 +396,7 @@ export default function BookingPage({ params }: BookingPageProps) {
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <Link
               href={`/spaces/${space.id}`}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Detail Ruangan</span>
@@ -404,9 +404,9 @@ export default function BookingPage({ params }: BookingPageProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xs border border-slate-200 p-5 flex flex-col md:flex-row items-center justify-between gap-5 shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col md:flex-row items-center justify-between gap-5 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
-            <div className="relative w-full sm:w-44 h-28 rounded-xs overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+            <div className="relative w-full sm:w-44 h-28 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
               <img
                 src={space.foto || fallbackImage}
                 alt={space.namaSpace}
@@ -415,35 +415,35 @@ export default function BookingPage({ params }: BookingPageProps) {
                   (e.target as HTMLImageElement).src = fallbackImage;
                 }}
               />
-              <span className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-xs text-white font-mono text-[10px] px-2 py-0.5 rounded-xs font-bold uppercase">
+              <span className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-xs text-white font-mono text-[10px] px-2.5 py-0.5 rounded-md font-bold uppercase">
                 {space.tipe?.replace(/_/g, " ")}
               </span>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center gap-2.5">
-                <h2 className="font-serif text-xl font-bold text-slate-900">
+                <h2 className="text-xl font-bold text-slate-900">
                   {space.namaSpace}
                 </h2>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                   <span>Siap Dipesan</span>
                 </span>
               </div>
 
-              <p className="text-xs text-slate-500 flex items-center gap-1">
+              <p className="text-xs text-slate-500 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span>{space.owner?.alamat || space.owner?.namaCoworking || "WorkNest Hub"}</span>
               </p>
 
               <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-600 pt-0.5">
-                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                <span className="bg-slate-100 px-2.5 py-0.5 rounded-lg font-mono font-medium border border-slate-200">
                   👥 {space.kapasitas} Orang
                 </span>
-                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                <span className="bg-slate-100 px-2.5 py-0.5 rounded-lg font-mono font-medium border border-slate-200">
                   📶 Wi-Fi Fiber
                 </span>
-                <span className="bg-slate-100 px-2 py-0.5 rounded-xs font-mono font-medium border border-slate-200">
+                <span className="bg-slate-100 px-2.5 py-0.5 rounded-lg font-mono font-medium border border-slate-200">
                   🔑 Kunci Digital QR
                 </span>
               </div>
@@ -452,7 +452,7 @@ export default function BookingPage({ params }: BookingPageProps) {
 
           <div className="text-right self-end md:self-center border-t md:border-t-0 pt-3 md:pt-0 w-full md:w-auto">
             <span className="text-[10px] text-slate-400 block font-mono uppercase tracking-wider">Tarif Sewa</span>
-            <div className="text-xl font-bold text-[#006370] font-mono">
+            <div className="text-xl font-bold text-sky-600 font-mono">
               {formatRupiah(space.hargaPerJam)} <span className="text-xs font-normal text-slate-500 font-sans">/ jam</span>
             </div>
           </div>
@@ -460,23 +460,23 @@ export default function BookingPage({ params }: BookingPageProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-5 shadow-2xs">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-xs bg-[#006370] text-white flex items-center justify-center text-xs font-bold font-mono">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold font-mono">
                     1
                   </span>
-                  <h3 className="font-serif text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900">
                     Pilih Tanggal &amp; Jam Pemakaian
                   </h3>
                 </div>
-                <span className="text-xs font-semibold text-[#006370] font-mono">
+                <span className="text-xs font-semibold text-sky-600 font-mono">
                   WIB (GMT+7)
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <div className="md:col-span-5 bg-slate-50 p-4 rounded-xs border border-slate-200 space-y-3">
+                <div className="md:col-span-5 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between text-xs font-bold text-slate-800">
                     <span>
                       {MONTH_NAMES[viewMonth]} {viewYear}
@@ -485,14 +485,14 @@ export default function BookingPage({ params }: BookingPageProps) {
                       <button
                         type="button"
                         onClick={handlePrevMonth}
-                        className="p-1 hover:text-slate-700 cursor-pointer rounded-xs"
+                        className="p-1 hover:text-slate-700 cursor-pointer rounded-lg hover:bg-slate-200"
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
                       <button
                         type="button"
                         onClick={handleNextMonth}
-                        className="p-1 hover:text-slate-700 cursor-pointer rounded-xs"
+                        className="p-1 hover:text-slate-700 cursor-pointer rounded-lg hover:bg-slate-200"
                       >
                         <ChevronRight className="w-4 h-4" />
                       </button>
@@ -525,9 +525,9 @@ export default function BookingPage({ params }: BookingPageProps) {
                           type="button"
                           disabled={isPast}
                           onClick={() => handleSelectDay(day)}
-                          className={`py-1.5 rounded-xs font-semibold transition-all cursor-pointer text-xs ${
+                          className={`py-1.5 rounded-lg font-semibold transition-all cursor-pointer text-xs ${
                             isSelected
-                              ? "bg-[#006370] text-white font-bold shadow-xs"
+                              ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/25"
                               : isPast
                               ? "text-slate-300 cursor-not-allowed"
                               : "text-slate-700 hover:bg-slate-200"
@@ -540,14 +540,14 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-200">
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-xs bg-[#006370]" /> Terpilih
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-sky-600" /> Terpilih
                     </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-xs bg-slate-300" /> Terisi
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-slate-300" /> Terisi
                     </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-xs bg-slate-200 border" /> Tersedia
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-sm bg-white border border-slate-300" /> Tersedia
                     </span>
                   </div>
                 </div>
@@ -557,7 +557,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                     <span className="text-xs font-bold text-slate-900">
                       Slot Jam: {formattedSelectedDate}
                     </span>
-                    <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#E6F4F2] text-[#006370] border border-[#BCE3DE]">
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
                       {durationHours} Jam Dipilih
                     </span>
                   </div>
@@ -568,7 +568,7 @@ export default function BookingPage({ params }: BookingPageProps) {
 
                   {loadingSlots ? (
                     <div className="py-8 text-center text-xs text-slate-400">
-                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-[#006370] mb-1" />
+                      <Loader2 className="w-5 h-5 animate-spin mx-auto text-sky-600 mb-1" />
                       <span>Memeriksa ketersediaan jam...</span>
                     </div>
                   ) : (
@@ -585,12 +585,12 @@ export default function BookingPage({ params }: BookingPageProps) {
                             type="button"
                             disabled={isBooked}
                             onClick={() => toggleHour(hour)}
-                            className={`py-2 px-2.5 rounded-xs text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${
+                            className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${
                               isSelected
-                                ? "bg-[#006370] text-white font-bold shadow-2xs"
+                                ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/25"
                                 : isBooked
                                 ? "bg-slate-50 text-slate-300 line-through border border-dashed border-slate-200 cursor-not-allowed"
-                                : "bg-white text-slate-700 border border-slate-200 hover:border-[#006370] hover:bg-slate-50"
+                                : "bg-white text-slate-700 border border-slate-200 hover:border-sky-500 hover:bg-slate-50"
                             }`}
                           >
                             {label}
@@ -600,9 +600,9 @@ export default function BookingPage({ params }: BookingPageProps) {
                     </div>
                   )}
 
-                  <div className="mt-3 p-3 rounded-xs bg-[#E6F4F2]/50 border border-[#BCE3DE] flex items-center justify-between text-xs">
+                  <div className="mt-3 p-3.5 rounded-xl bg-sky-50/70 border border-sky-100 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-slate-800 font-semibold">
-                      <Clock className="w-4 h-4 text-[#006370]" />
+                      <Clock className="w-4 h-4 text-sky-600" />
                       <span>
                         Durasi: {selectedHours[0] || "09:00"} &mdash;{" "}
                         {selectedHours[selectedHours.length - 1]
@@ -616,13 +616,13 @@ export default function BookingPage({ params }: BookingPageProps) {
               </div>
             </div>
 
-            <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-4 shadow-2xs">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <span className="w-5 h-5 rounded-xs bg-[#006370] text-white flex items-center justify-center text-xs font-bold font-mono">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+                <span className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs font-bold font-mono">
                   2
                 </span>
                 <div>
-                  <h3 className="font-serif text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900">
                     Informasi Kontak Pemesan
                   </h3>
                   <p className="text-[11px] text-slate-500">
@@ -642,7 +642,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Nama lengkap Anda"
-                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -656,7 +656,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="nama@email.com"
-                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors font-mono"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-colors font-mono"
                   />
                 </div>
 
@@ -670,7 +670,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="081234567890"
-                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-slate-900 focus:outline-none transition-colors font-mono"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-colors font-mono"
                   />
                 </div>
               </div>
@@ -678,8 +678,8 @@ export default function BookingPage({ params }: BookingPageProps) {
           </div>
 
           <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-20">
-            <div className="bg-white rounded-xs border border-slate-200 p-5 space-y-4 shadow-2xs">
-              <h3 className="font-serif text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+              <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                 Ringkasan Pemesanan
               </h3>
 
@@ -718,15 +718,15 @@ export default function BookingPage({ params }: BookingPageProps) {
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <span className="font-bold text-slate-900 text-sm">Total Bayar</span>
-                  <span className="text-lg font-bold text-[#006370] font-mono">
+                  <span className="text-xl font-bold text-sky-600 font-mono">
                     {formatRupiah(totalPayable)}
                   </span>
                 </div>
               </div>
 
-              <form onSubmit={handleApplyPromo} className="space-y-2 pt-2 border-t border-slate-100">
+              <form onSubmit={handleApplyPromo} className="space-y-2 pt-3 border-t border-slate-100">
                 <label className="block text-[11px] font-bold text-slate-700">
                   Punya Kode Voucher?
                 </label>
@@ -736,12 +736,12 @@ export default function BookingPage({ params }: BookingPageProps) {
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                     placeholder="KODE PROMO"
-                    className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-mono font-bold text-slate-900 focus:outline-none"
+                    className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none"
                   />
                   <button
                     type="submit"
                     disabled={promoLoading || !promoInput.trim()}
-                    className="px-3 py-1.5 rounded-xs bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white text-xs font-semibold transition-colors cursor-pointer shadow-sm"
                   >
                     {promoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Gunakan"}
                   </button>
@@ -759,7 +759,7 @@ export default function BookingPage({ params }: BookingPageProps) {
               </form>
 
               {submitError && (
-                <div className="p-3 rounded-xs bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
                   <span>{submitError}</span>
                 </div>
@@ -769,7 +769,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                 type="button"
                 onClick={handleProceedCheckout}
                 disabled={submitting}
-                className="w-full py-2.5 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 mt-2"
               >
                 {submitting ? (
                   <>

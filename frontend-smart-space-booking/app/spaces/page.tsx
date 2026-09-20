@@ -73,6 +73,18 @@ function SpacesContent() {
         } else if (selectedDuration.includes("17:00 - 21:00")) {
           jamMulai = "17:00";
           durasiJam = 4;
+        } else if (selectedDuration.includes("10:00 - 12:00")) {
+          jamMulai = "10:00";
+          durasiJam = 2;
+        } else {
+          const matchRange = selectedDuration.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+          if (matchRange) {
+            jamMulai = matchRange[1].padStart(5, "0");
+            const [sh, sm] = matchRange[1].split(":").map(Number);
+            const [eh, em] = matchRange[2].split(":").map(Number);
+            const diffHours = (eh * 60 + (em || 0) - (sh * 60 + (sm || 0))) / 60;
+            durasiJam = Math.max(1, Math.round(diffHours));
+          }
         }
       }
 
@@ -80,6 +92,7 @@ function SpacesContent() {
       if (selectedDate) filterParams.tanggal = selectedDate;
       if (jamMulai) filterParams.jamMulai = jamMulai;
       if (durasiJam) filterParams.durasiJam = durasiJam;
+      if (selectedDuration) filterParams.duration = selectedDuration;
 
       const data = await getSpaces(Object.keys(filterParams).length > 0 ? filterParams : undefined);
       setSpaces(data || []);
@@ -221,22 +234,21 @@ function SpacesContent() {
   );
 
   return (
-    <div className="bg-[#fcfdfd] min-h-screen text-slate-900 pb-20">
-      
-      <div className="border-b border-slate-200/80 bg-white py-2.5 px-4 sm:px-6 lg:px-8">
+    <div className="bg-slate-50/70 min-h-screen text-slate-900 pb-20">
+      <div className="border-b border-slate-200/80 bg-white py-3 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2 text-slate-700">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-slate-900">Ketersediaan Real-Time</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-bold text-slate-900">Ketersediaan Real-Time</span>
             <span className="text-slate-300">|</span>
             <span className="text-slate-500">
-              {spaces.length > 0 ? `${spaces.length} Ruangan Terdaftar di 14 Kota Indonesia` : "Katalog Ruangan di Seluruh Indonesia"}
+              {spaces.length > 0 ? `${spaces.length} Ruangan Terdaftar di Seluruh Indonesia` : "Katalog Ruangan di Seluruh Indonesia"}
             </span>
           </div>
 
           <div className="flex items-center gap-5 text-slate-500 font-medium">
             <div className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-[#006370]" />
+              <Zap className="w-3.5 h-3.5 text-sky-600" />
               <span>Konfirmasi Instan</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -248,19 +260,16 @@ function SpacesContent() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        
-        <div className="bg-white rounded-xs border border-slate-200 p-4 space-y-3.5 shadow-2xs">
-          
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            
             <div className="md:col-span-4 relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+              <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari berdasarkan nama hub, distrik, atau lokasi (cth. SCBD, Senopati, Klojen)..."
-                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+                placeholder="Cari berdasarkan nama hub, distrik, atau lokasi..."
+                className="w-full pl-10 pr-8 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -277,7 +286,7 @@ function SpacesContent() {
               <select
                 value={selectedMetro}
                 onChange={(e) => setSelectedMetro(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kota: Semua Lokasi</option>
                 {availableMetros.map((m) => (
@@ -292,7 +301,7 @@ function SpacesContent() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tipe: Semua Ruangan</option>
                 <option value="desk">Flex Desk / Meja</option>
@@ -305,7 +314,7 @@ function SpacesContent() {
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Kapasitas: Semua</option>
                 <option value="1">1 Orang</option>
@@ -319,7 +328,7 @@ function SpacesContent() {
               <select
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-800 focus:outline-none cursor-pointer transition-colors"
               >
                 <option value="">Tarif: Semua</option>
                 <option value="50000">Rp 50.000 / jam</option>
@@ -330,7 +339,7 @@ function SpacesContent() {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[11px] font-semibold text-slate-500 mr-1">Fasilitas:</span>
               {[
@@ -343,9 +352,9 @@ function SpacesContent() {
                   key={amenity.label}
                   type="button"
                   onClick={() => setSelectedAmenity(amenity.id)}
-                  className={`px-2.5 py-1 rounded-xs text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                     selectedAmenity === amenity.id
-                      ? "bg-[#006370] text-white shadow-xs"
+                      ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
@@ -360,7 +369,7 @@ function SpacesContent() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-slate-50 border border-slate-200 rounded-xs px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
                 >
                   <option value="rating">Rating Tertinggi</option>
                   <option value="price_asc">Harga Terendah</option>
@@ -373,9 +382,9 @@ function SpacesContent() {
                 onClick={fetchSpacesData}
                 disabled={loading}
                 aria-label="Segarkan Ruangan"
-                className="p-1.5 rounded-xs border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer shadow-sm"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : ""}`} />
               </button>
             </div>
           </div>
@@ -384,12 +393,12 @@ function SpacesContent() {
             <div className="pt-2 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-600">
               <span className="font-semibold text-slate-700">Filter Jadwal Aktif:</span>
               {selectedDate && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
                   📅 {selectedDate}
                 </span>
               )}
               {selectedDuration && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-xs bg-cyan-50 text-cyan-800 border border-cyan-200 font-medium">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 font-medium">
                   ⏱️ {selectedDuration}
                 </span>
               )}
@@ -407,9 +416,9 @@ function SpacesContent() {
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
           <div>
-            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Ruang Kerja &amp; Meja Eksekutif
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 font-normal">
@@ -422,7 +431,7 @@ function SpacesContent() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="text-[#006370] hover:text-[#004f59] font-semibold underline underline-offset-4 cursor-pointer"
+                className="text-sky-600 hover:text-sky-700 font-bold underline underline-offset-4 cursor-pointer"
               >
                 Atur Ulang Filter
               </button>
@@ -438,7 +447,7 @@ function SpacesContent() {
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-xs animate-pulse space-y-3 h-full flex flex-col justify-between"
+                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm animate-pulse space-y-3 h-full flex flex-col justify-between"
               >
                 <div className="aspect-[16/10] bg-slate-200/70" />
                 <div className="p-5 space-y-3 flex-1">
@@ -457,14 +466,14 @@ function SpacesContent() {
             ))}
           </div>
         ) : error ? (
-          <div className="p-12 text-center bg-white rounded-xs border border-rose-200 space-y-3">
+          <div className="p-12 text-center bg-white rounded-2xl border border-rose-200 space-y-3 shadow-sm">
             <Building2 className="w-8 h-8 text-rose-400 mx-auto" />
-            <p className="text-sm font-semibold text-slate-800">Gagal Memuat Katalog Ruangan</p>
+            <p className="text-sm font-bold text-slate-800">Gagal Memuat Katalog Ruangan</p>
             <p className="text-xs text-slate-500">{error}</p>
             <button
               type="button"
               onClick={fetchSpacesData}
-              className="mt-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
+              className="mt-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
             >
               Coba Lagi
             </button>
@@ -478,12 +487,12 @@ function SpacesContent() {
             ))}
           </div>
         ) : (
-          <div className="p-14 text-center bg-white rounded-xs border border-slate-200 space-y-4 w-full mx-auto">
-            <div className="w-12 h-12 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
+          <div className="p-14 text-center bg-white rounded-2xl border border-slate-200 space-y-4 w-full mx-auto shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto text-slate-400">
               <Building2 className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-serif text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-slate-900">
                 Tidak Ada Ruangan yang Sesuai Filter
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
@@ -496,7 +505,7 @@ function SpacesContent() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-4 py-2 bg-[#0D5C63] hover:bg-[#094348] text-white text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+                className="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
               >
                 Reset Semua Filter
               </button>
@@ -504,13 +513,13 @@ function SpacesContent() {
           </div>
         )}
 
-        <div className="bg-white rounded-xs border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-[11px] font-bold text-[#006370] tracking-wider uppercase">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-sky-600 tracking-wider uppercase">
               <Building2 className="w-3.5 h-3.5" />
               <span>JARINGAN WORKNEST INDONESIA</span>
             </div>
-            <h3 className="font-serif text-xl sm:text-2xl font-semibold text-slate-900 leading-tight">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
               Butuh ruangan di lokasi spesifik tim Anda?
             </h3>
             <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
@@ -520,7 +529,7 @@ function SpacesContent() {
 
           <Link
             href="/#protocol"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xs border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-colors shrink-0 shadow-2xs"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shrink-0 shadow-sm"
           >
             <Compass className="w-3.5 h-3.5 text-slate-600" />
             <span>Pelajari Alur Akses</span>
@@ -542,12 +551,12 @@ function SpacesContent() {
               ruang kerja terverifikasi
             </p>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm font-semibold"
               >
                 &lt;
               </button>
@@ -557,9 +566,9 @@ function SpacesContent() {
                   key={page}
                   type="button"
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 rounded-xs text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm ${
                     currentPage === page
-                      ? "bg-[#006370] text-white"
+                      ? "bg-sky-600 text-white shadow-sky-600/25"
                       : "bg-white border border-slate-200 hover:bg-slate-50 text-slate-700"
                   }`}
                 >
@@ -571,7 +580,7 @@ function SpacesContent() {
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm font-semibold"
               >
                 &gt;
               </button>
@@ -588,7 +597,7 @@ export default function SpacesPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-white">
-          <Loader2 className="w-6 h-6 text-[#0D5C63] animate-spin" />
+          <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
         </div>
       }
     >

@@ -7,7 +7,6 @@ import { SpaceCard } from "@/components/SpaceCard";
 import {
   Search,
   Building2,
-  Compass,
   RefreshCw,
   Loader2,
   AlertCircle,
@@ -78,14 +77,14 @@ export default function MemberSpacesPage() {
     <div className="space-y-6 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
             <span>PORTAL MEMBER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Katalog &amp; Ketersediaan Ruangan
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Cari &amp; Reservasi Ruang Kerja
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -98,30 +97,30 @@ export default function MemberSpacesPage() {
             type="button"
             onClick={fetchSpacesData}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : "text-slate-500"}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-500"}`} />
             <span>Perbarui</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xs border border-slate-200 p-4 shadow-2xs space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-6 relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" />
+            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama ruangan, coworking space, atau fasilitas..."
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+              className="w-full pl-9 pr-8 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -133,7 +132,7 @@ export default function MemberSpacesPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-all truncate"
               >
                 <option value="">Semua Tipe</option>
                 <option value="desk">Hot Desk / Workstation</option>
@@ -146,7 +145,7 @@ export default function MemberSpacesPage() {
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-colors truncate"
+                className="w-full px-3 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-medium text-slate-900 focus:outline-none cursor-pointer transition-all truncate"
               >
                 <option value="">Semua Kapasitas</option>
                 <option value="1">Min. 1 Orang</option>
@@ -171,10 +170,10 @@ export default function MemberSpacesPage() {
                 key={pill.id}
                 type="button"
                 onClick={() => setSelectedType(pill.id)}
-                className={`px-2.5 py-1 rounded-xs text-xs font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
                   selectedType === pill.id
-                    ? "bg-[#006370] text-white shadow-2xs font-bold"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    ? "bg-sky-600 text-white shadow-sm shadow-sky-600/25 font-bold"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200 font-semibold"
                 }`}
               >
                 {pill.label}
@@ -200,7 +199,7 @@ export default function MemberSpacesPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs shadow-2xs">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-rose-800 text-xs shadow-sm">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
           <div className="space-y-0.5">
             <p className="font-semibold">Gagal Memuat Inventaris Ruangan</p>
@@ -211,7 +210,7 @@ export default function MemberSpacesPage() {
 
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-          <Loader2 className="w-7 h-7 animate-spin text-[#006370] mb-2" />
+          <Loader2 className="w-7 h-7 animate-spin text-sky-600 mb-2" />
           <p className="text-xs">Memuat katalog ruangan...</p>
         </div>
       ) : filteredSpaces.length > 0 ? (
@@ -221,12 +220,12 @@ export default function MemberSpacesPage() {
           ))}
         </div>
       ) : (
-        <div className="p-10 sm:p-14 text-center bg-white rounded-xs border border-slate-200 shadow-2xs space-y-4 max-w-md mx-auto">
-          <div className="w-12 h-12 rounded-xs bg-slate-100 text-slate-400 flex items-center justify-center mx-auto border border-slate-200">
+        <div className="p-10 sm:p-14 text-center bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4 max-w-md mx-auto">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto border border-slate-200">
             <Building2 className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-serif text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900">
               {spaces.length === 0 ? "Belum Ada Ruangan Terdaftar" : "Tidak Ada Ruangan yang Sesuai"}
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
@@ -241,7 +240,7 @@ export default function MemberSpacesPage() {
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+                className="px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer"
               >
                 Hapus Semua Filter
               </button>

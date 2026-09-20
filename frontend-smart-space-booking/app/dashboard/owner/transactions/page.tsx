@@ -244,14 +244,14 @@ export default function OwnerTransactionsPage() {
     <div className="space-y-6 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
             <span>WORKSPACE OWNER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Buku Kas &amp; Pembayaran Midtrans
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Transaksi &amp; Pembayaran
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -260,7 +260,7 @@ export default function OwnerTransactionsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap self-start sm:self-auto">
-          <div className="px-3.5 py-1.5 rounded-xs bg-slate-50 border border-slate-200 text-right">
+          <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-right">
             <p className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400">Total Terbayar</p>
             <p className="text-sm font-bold text-slate-900 font-mono">{formatRupiah(totalLunas)}</p>
           </div>
@@ -268,7 +268,7 @@ export default function OwnerTransactionsPage() {
             type="button"
             onClick={handleExportCsv}
             disabled={loading || filtered.length === 0}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Ekspor CSV</span>
@@ -277,24 +277,24 @@ export default function OwnerTransactionsPage() {
             type="button"
             onClick={() => fetchTransactions(true)}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : "text-slate-500"}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-500"}`} />
             <span>Perbarui</span>
           </button>
         </div>
       </div>
 
       {actionSuccess && (
-        <div className="p-4 rounded-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs shadow-2xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 text-xs shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
             <span>{actionSuccess}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccess(null)}
-            className="font-bold text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
+            className="font-bold text-sky-700 hover:text-sky-900 p-1 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -302,7 +302,7 @@ export default function OwnerTransactionsPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 text-rose-800 text-xs shadow-2xs flex items-start justify-between gap-3">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs shadow-sm flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <div className="space-y-0.5">
@@ -313,23 +313,23 @@ export default function OwnerTransactionsPage() {
           <button
             type="button"
             onClick={() => fetchTransactions(true)}
-            className="px-2.5 py-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-xs font-semibold transition-colors shrink-0 cursor-pointer"
+            className="px-2.5 py-1 bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-xl font-semibold transition-colors shrink-0 cursor-pointer shadow-sm"
           >
             Coba Lagi
           </button>
         </div>
       )}
 
-      <div className="bg-white p-4 rounded-xs border border-slate-200 shadow-2xs flex flex-col lg:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-xs w-full lg:w-auto overflow-x-auto text-xs font-semibold">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-xl w-full lg:w-auto overflow-x-auto text-xs font-semibold">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-xs transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  ? "bg-white text-slate-900 shadow-sm font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
@@ -345,15 +345,15 @@ export default function OwnerTransactionsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari invoice / member / ruangan..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-16 text-center space-y-2">
-            <Loader2 className="w-6 h-6 text-[#006370] animate-spin mx-auto" />
+            <Loader2 className="w-6 h-6 text-sky-600 animate-spin mx-auto" />
             <p className="text-xs text-slate-500 font-medium">Memuat data transaksi...</p>
           </div>
         ) : filtered.length > 0 ? (
@@ -375,14 +375,14 @@ export default function OwnerTransactionsPage() {
                   const memberName = t.reservasi?.member?.namaMember || `Member #${t.reservasi?.memberId}`;
                   const spaceName = t.reservasi?.detailReservasi?.space?.namaSpace || `Space #${t.reservasiId}`;
                   return (
-                    <tr key={t.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="py-3.5 px-4">
                         <p className="font-mono font-bold text-slate-900">{t.nomorInvoice}</p>
                         <p className="text-[10px] text-slate-400 font-mono">ID Reservasi: #{t.reservasiId}</p>
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-xs bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
+                          <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0 border border-sky-100">
                             {memberName.charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -398,7 +398,7 @@ export default function OwnerTransactionsPage() {
                       <td className="py-3.5 px-4">
                         <p className="font-mono font-bold text-slate-900">{formatRupiah(t.jumlah)}</p>
                         {t.dibayarPada && (
-                          <p className="text-[10px] text-emerald-700 font-medium">
+                          <p className="text-[10px] text-sky-700 font-medium">
                             {new Date(t.dibayarPada).toLocaleDateString("id-ID")}
                           </p>
                         )}
@@ -410,7 +410,7 @@ export default function OwnerTransactionsPage() {
                         <button
                           type="button"
                           onClick={() => setSelected(t)}
-                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xs border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
+                          className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer shadow-sm"
                         >
                           <Eye className="w-3.5 h-3.5 text-slate-500" />
                           Detail
@@ -419,10 +419,10 @@ export default function OwnerTransactionsPage() {
                           type="button"
                           disabled={syncingId === t.id}
                           onClick={() => handleSync(t)}
-                          className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xs border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer disabled:opacity-60"
+                          className="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer disabled:opacity-60 shadow-sm"
                         >
                           {syncingId === t.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#006370]" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-600" />
                           ) : (
                             <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
                           )}
@@ -432,7 +432,7 @@ export default function OwnerTransactionsPage() {
                           <button
                             type="button"
                             onClick={() => setRefundTarget(t)}
-                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xs border border-rose-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer"
+                            className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl border border-rose-200 transition-colors inline-flex items-center gap-1 text-xs font-semibold cursor-pointer shadow-sm"
                           >
                             <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
                             Refund
@@ -447,7 +447,7 @@ export default function OwnerTransactionsPage() {
           </div>
         ) : (
           <div className="p-16 text-center max-w-md mx-auto space-y-2.5">
-            <div className="w-10 h-10 rounded-xs bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mx-auto border border-slate-200">
               <ReceiptText className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold text-slate-900">Tidak Ada Transaksi</h3>
@@ -462,10 +462,10 @@ export default function OwnerTransactionsPage() {
 
       {selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-xs max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-sm relative my-8 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center border border-[#BCE3DE]">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
                   <ReceiptText className="w-4 h-4" />
                 </div>
                 <div>
@@ -476,14 +476,14 @@ export default function OwnerTransactionsPage() {
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-xs hover:bg-slate-100 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-xl hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-xs bg-slate-50 border border-slate-200 space-y-2">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Informasi Pemesan</p>
                 <div className="flex items-center justify-between">
                   <div>
@@ -511,14 +511,14 @@ export default function OwnerTransactionsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xs bg-slate-50 border border-slate-200 space-y-1">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Ruangan</span>
                   <p className="font-bold text-slate-900">{selected.reservasi?.detailReservasi?.space?.namaSpace || "Space"}</p>
                   <p className="text-[11px] text-slate-500">
                     {selected.reservasi?.jamMulai} WIB ({selected.reservasi?.durasiJam} Jam)
                   </p>
                 </div>
-                <div className="p-3 rounded-xs bg-slate-50 border border-slate-200 space-y-1">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Status Reservasi</span>
                   <div className="pt-0.5">
                     <StatusBadge status={(selected.reservasi?.status || "") as any} />
@@ -526,7 +526,7 @@ export default function OwnerTransactionsPage() {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Total Tagihan</span>
                   <p className="text-lg font-bold text-slate-900 font-mono">{formatRupiah(selected.jumlah)}</p>
@@ -535,7 +535,7 @@ export default function OwnerTransactionsPage() {
                   type="button"
                   onClick={() => handleSync(selected)}
                   disabled={syncingId === selected.id}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs shadow-2xs cursor-pointer disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 cursor-pointer disabled:opacity-60"
                 >
                   {syncingId === selected.id ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -552,12 +552,12 @@ export default function OwnerTransactionsPage() {
 
       {refundTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white rounded-xs max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 border border-slate-200 shadow-sm animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <RotateCcw className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-slate-900 font-serif">Tandai sebagai Refund?</h3>
+              <h3 className="text-base font-bold text-slate-900">Tandai sebagai Refund?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Transaksi <span className="font-mono font-bold text-slate-900">{refundTarget.nomorInvoice}</span> sebesar{" "}
                 <span className="font-bold text-slate-900">{formatRupiah(refundTarget.jumlah)}</span> akan ditandai sebagai refund.
@@ -567,7 +567,7 @@ export default function OwnerTransactionsPage() {
               <button
                 type="button"
                 onClick={() => setRefundTarget(null)}
-                className="py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+                className="py-2 px-3 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-colors cursor-pointer shadow-sm"
               >
                 Batal
               </button>
@@ -575,7 +575,7 @@ export default function OwnerTransactionsPage() {
                 type="button"
                 onClick={handleRefund}
                 disabled={refunding}
-                className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60"
+                className="py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-60 shadow-sm shadow-rose-600/25"
               >
                 {refunding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <span>Konfirmasi Refund</span>}
               </button>

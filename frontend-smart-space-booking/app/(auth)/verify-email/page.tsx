@@ -10,18 +10,23 @@ import {
   getApiErrorMessage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { WorkNestLogo } from "@/components/WorkNestLogo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  ShieldCheck,
-  ArrowRight,
-  Clock,
-  Headphones,
-  AlertCircle,
-  Loader2,
-  Lock,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+  faEnvelope,
+  faLock,
+  faEye,
+  faEyeSlash,
+  faArrowRight,
+  faArrowLeft,
+  faCircleCheck,
+  faCircleExclamation,
+  faSpinner,
+  faKey,
+  faShieldHalved,
+  faClock,
+  faRotateRight,
+  faBuilding,
+} from "@fortawesome/free-solid-svg-icons";
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -77,9 +82,9 @@ function VerifyEmailContent() {
   };
 
   const maskPhone = (str: string) => {
-    if (!str) return "+62 812-****-9821";
+    if (!str) return "";
     const clean = str.replace(/\D/g, "");
-    if (clean.length < 8) return "+62 812-****-9821";
+    if (clean.length < 8) return "";
     const prefix = clean.startsWith("62") ? "+62 " : "0";
     const digits = clean.startsWith("62") ? clean.slice(2) : clean.slice(1);
     const head = digits.slice(0, 3);
@@ -139,7 +144,7 @@ function VerifyEmailContent() {
     }
 
     if (fullOtp.length !== 6) {
-      setErrorMessage("Silakan masukkan 6 digit kode keamanan dengan lengkap.");
+      setErrorMessage("Silakan masukkan 6 digit kode keamanan OTP dengan lengkap.");
       return;
     }
 
@@ -176,6 +181,8 @@ function VerifyEmailContent() {
             router.push("/dashboard/owner");
           } else if (r === "staff") {
             router.push("/dashboard/staff");
+          } else if (r === "super_admin") {
+            router.push("/dashboard/super-admin");
           } else {
             router.push("/dashboard/member");
           }
@@ -206,7 +213,7 @@ function VerifyEmailContent() {
         type: typeParam === "reset" ? "forgot_password" : "register",
       });
 
-      setSuccessMessage(res.message || "Kode OTP 6-digit baru telah dikirimkan.");
+      setSuccessMessage(res.message || "Kode OTP 6-digit baru telah dikirimkan ke email Anda.");
       setResendCooldown(60);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
@@ -218,179 +225,383 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-10 px-4 sm:px-6 bg-[#F4F7FA] text-slate-900 selection:bg-[#006370] selection:text-white">
-      
-      <div className="w-full max-w-[480px] bg-white rounded-xs shadow-xl shadow-slate-200/70 border border-slate-100 p-7 sm:p-9 transition-all">
+    <div className="fixed inset-0 w-screen h-screen overflow-x-hidden bg-white text-slate-900 z-50 selection:bg-sky-500 selection:text-white">
+      {/* DESKTOP VIEW (>= 1024px) */}
+      <div className="hidden lg:flex w-full h-full relative overflow-hidden bg-white">
         
-        <div className="flex items-center justify-between">
-          <WorkNestLogo size="md" />
-
-          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-[#E0F2FE] text-[#0369A1] font-mono text-[11px] font-bold border border-[#BAE6FD]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#0284C7]" />
-            <span>AKSES AMAN</span>
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <div className="w-13 h-13 rounded-xs bg-[#E6F4F6] text-[#006370] flex items-center justify-center shadow-xs">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6"
+        {/* ================= LEFT HALF: OTP VERIFICATION FORM PANEL ================= */}
+        <div className="w-1/2 h-full flex flex-col justify-between p-8 xl:p-12 2xl:p-14 overflow-y-auto bg-white">
+          {/* Top Nav */}
+          <div className="flex items-center justify-between">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
             >
-              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-              <path d="M21 3v5h-5" />
-              <rect x="9" y="11" width="6" height="5" rx="1" />
-              <path d="M10 11V9.5a2 2 0 1 1 4 0V11" />
-            </svg>
-          </div>
-        </div>
+              <FontAwesomeIcon icon={faArrowLeft} className="w-3 h-3" />
+              <span>Kembali ke Halaman Masuk</span>
+            </Link>
 
-        <div className="text-center mt-5 space-y-2">
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Verifikasi Email &amp; No. Telepon
-          </h1>
-          <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed max-w-sm mx-auto">
-            Kami telah mengirimkan 6 digit kode OTP verifikasi ke{" "}
-            <span className="font-mono bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded-xs font-semibold text-xs inline-block">
-              {maskEmail(email)}
-            </span>{" "}
-            <span className="text-slate-600 font-mono text-xs">
-              ({maskPhone(phone)}).
-            </span>
-          </p>
-        </div>
-
-        {errorMessage && (
-          <div className="mt-4 p-3 rounded-xs bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-            <span className="font-medium leading-relaxed">{errorMessage}</span>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="mt-4 p-3 rounded-xs bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-800 text-xs">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" />
-            <span className="font-medium leading-relaxed">{successMessage}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleVerify} className="mt-6 space-y-5">
-          
-          <div className="flex items-center justify-between gap-2 sm:gap-2.5">
-            {otp.map((digit, idx) => (
-              <input
-                key={idx}
-                ref={(el) => {
-                  inputRefs.current[idx] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(idx, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(idx, e)}
-                className="w-12 h-14 sm:w-13 sm:h-15 text-center text-xl sm:text-2xl font-bold font-mono bg-[#F8FAFC] hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] focus:ring-2 focus:ring-[#006370]/15 rounded-xs text-slate-900 focus:outline-none transition-all shadow-xs"
-              />
-            ))}
+            <Link
+              href="/"
+              className="text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
+            >
+              Beranda
+            </Link>
           </div>
 
-          {typeParam === "reset" && (
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <label className="block text-xs font-semibold text-slate-800">
-                Kata Sandi Baru
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Min. 8 karakter"
-                  className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+          {/* Form Content Box */}
+          <div className="max-w-md w-full mx-auto my-auto space-y-6">
+            <div className="space-y-1.5 text-left">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 border border-sky-200/60 text-sky-700 text-xs font-bold mb-1">
+                <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3 text-sky-600" />
+                <span>Otentikasi Keamanan Multi-Faktor</span>
               </div>
+              
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                {typeParam === "reset" ? "Reset Kata Sandi Akun" : "Verifikasi Kode OTP"}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                Masukkan 6 digit kode keamanan OTP yang telah kami kirimkan ke{" "}
+                <span className="font-semibold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded-md inline-block">
+                  {email ? maskEmail(email) : "email Anda"}
+                </span>
+                {phone && maskPhone(phone) ? (
+                  <span className="text-slate-500"> ({maskPhone(phone)})</span>
+                ) : null}
+                .
+              </p>
+            </div>
+
+            {/* Feedback Messages */}
+            {errorMessage && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
+                <FontAwesomeIcon icon={faCircleExclamation} className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <p className="font-medium">{errorMessage}</p>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
+                <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-emerald-600 shrink-0" />
+                <p className="font-medium">{successMessage}</p>
+              </div>
+            )}
+
+            {/* OTP Form */}
+            <form onSubmit={handleVerify} className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Kode Verifikasi 6-Digit
+                </label>
+                <div className="flex items-center justify-between gap-2">
+                  {otp.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => {
+                        inputRefs.current[idx] = el;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(idx, e)}
+                      className="w-12 h-14 sm:w-13 sm:h-15 text-center text-xl sm:text-2xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-all shadow-sm"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {typeParam === "reset" && (
+                <div className="space-y-1.5 text-left pt-2 border-t border-slate-100">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Kata Sandi Baru (Min. 8 Karakter)
+                  </label>
+                  <div className="relative">
+                    <FontAwesomeIcon
+                      icon={faLock}
+                      className="w-3.5 h-3.5 absolute left-3.5 top-3 text-slate-400 pointer-events-none"
+                    />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
+                      aria-label="Tampilkan atau sembunyikan kata sandi"
+                    >
+                      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Resend Action */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <div className="flex items-center gap-1.5 text-slate-500 font-medium">
+                  <FontAwesomeIcon icon={faClock} className="w-3.5 h-3.5 text-slate-400" />
+                  {resendCooldown > 0 ? (
+                    <span>Kirim ulang dalam <span className="font-mono font-bold text-slate-700">{formatTimer(resendCooldown)}</span></span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resending}
+                      className="inline-flex items-center gap-1.5 text-sky-600 hover:text-sky-700 font-bold hover:underline cursor-pointer disabled:opacity-60"
+                    >
+                      <FontAwesomeIcon icon={faRotateRight} className={`w-3 h-3 ${resending ? "animate-spin" : ""}`} />
+                      <span>{resending ? "Mengirim..." : "Kirim Ulang Kode OTP"}</span>
+                    </button>
+                  )}
+                </div>
+
+                <Link
+                  href="/register"
+                  className="font-semibold text-slate-600 hover:text-sky-600 hover:underline"
+                >
+                  Ganti Alamat Email
+                </Link>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {loading ? (
+                  <>
+                    <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" />
+                    <span>Memverifikasi Kode...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{typeParam === "reset" ? "Perbarui Sandi & Masuk" : "Konfirmasi & Aktifkan Akun"}</span>
+                    <FontAwesomeIcon icon={faArrowRight} className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="pt-2 text-center text-xs text-slate-500">
+              <span>Sudah memiliki akun aktif? </span>
+              <Link
+                href="/login"
+                className="font-bold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+              >
+                Masuk di sini
+              </Link>
+            </div>
+          </div>
+
+          <div className="text-center text-[11px] text-slate-400">
+            &copy; {new Date().getFullYear()} WorkNest Technologies Inc.
+          </div>
+        </div>
+
+        {/* ================= RIGHT HALF: IMAGE & BRANDING PANEL (50% WIDTH) ================= */}
+        <div className="w-1/2 h-full relative p-8 xl:p-12 2xl:p-14 flex flex-col justify-between overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.25)]">
+          {/* Background Workspace Image */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <img
+              src="/login.png"
+              alt="WorkNest Security & Smart Verification"
+              className="w-full h-full object-cover object-center absolute inset-0 scale-[1.01]"
+            />
+            {/* Clean dark gradient for high-contrast typography */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/50" />
+          </div>
+
+          {/* Top Branding */}
+          <div className="relative z-10">
+            <Link href="/" className="inline-flex items-center gap-2.5 group">
+              <div className="w-12 h-12 flex items-center justify-center text-white shadow-sm shadow-sky-600/30 group-hover:bg-sky-500 transition-colors">
+                <img
+                  src="/logo-worknest.png"
+                  alt="WorkNest Logo"
+                  className="w-full h-full object-contain rounded-xl"
+                />
+              </div>
+            </Link>
+          </div>
+
+          {/* Middle Content */}
+          <div className="relative z-10 space-y-5 my-auto max-w-lg text-white">
+            <h2 className="text-3xl xl:text-4xl font-extrabold text-white tracking-tight leading-tight drop-shadow-sm">
+              Proteksi Akun Terenkripsi <br />
+              <span className="text-sky-400">dengan Keamanan Multi-Faktor.</span>
+            </h2>
+
+            <p className="text-sm text-slate-200 leading-relaxed drop-shadow-sm">
+              WorkNest menerapkan standar keamanan tinggi dengan verifikasi kode OTP sekali pakai untuk memastikan hanya Anda yang memiliki kendali penuh atas reservasi dan akses fisik turnstile IoT.
+            </p>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <div className="w-6 h-6 rounded-lg bg-slate-900/60 border border-white/10 flex items-center justify-center text-sky-400 shrink-0">
+                  <FontAwesomeIcon icon={faShieldHalved} className="w-3 h-3" />
+                </div>
+                <span>Enkripsi end-to-end standar TLS 1.3 &amp; otentikasi multi-tenant</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <div className="w-6 h-6 rounded-lg bg-slate-900/60 border border-white/10 flex items-center justify-center text-sky-400 shrink-0">
+                  <FontAwesomeIcon icon={faKey} className="w-3 h-3" />
+                </div>
+                <span>Aktivasi otomatis smart lock &amp; kunci turnstile setelah verifikasi</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-200">
+                <div className="w-6 h-6 rounded-lg bg-slate-900/60 border border-white/10 flex items-center justify-center text-sky-400 shrink-0">
+                  <FontAwesomeIcon icon={faClock} className="w-3 h-3" />
+                </div>
+                <span>Masa berlaku kode 5 menit dengan proteksi anti brute-force</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Trust Badge */}
+          <div className="relative z-10 flex items-center gap-2 text-[11px] text-slate-300 font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>IDN-JKT-02 &bull; SECURE TOTP ENGINE ACTIVE</span>
+          </div>
+        </div>
+      </div>
+
+      {/* MOBILE SINGLE VIEW (< 1024px) */}
+      <div className="lg:hidden min-h-screen flex flex-col justify-between p-6 sm:p-8 bg-white">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs">
+              <FontAwesomeIcon icon={faBuilding} className="w-4 h-4" />
+            </div>
+            <span className="font-extrabold text-slate-900 text-base">WorkNest</span>
+          </Link>
+
+          <Link
+            href="/login"
+            className="text-xs font-bold text-sky-600 hover:text-sky-700"
+          >
+            Masuk
+          </Link>
+        </div>
+
+        {/* Mobile Form Content */}
+        <div className="my-auto py-6 space-y-5">
+          <div className="space-y-1 text-left">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200/60 text-sky-700 text-[11px] font-bold mb-1">
+              <FontAwesomeIcon icon={faShieldHalved} className="w-2.5 h-2.5 text-sky-600" />
+              <span>Verifikasi Keamanan OTP</span>
+            </div>
+            <h1 className="text-2xl font-extrabold text-slate-900">
+              {typeParam === "reset" ? "Reset Kata Sandi" : "Verifikasi OTP"}
+            </h1>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Masukkan 6 digit kode OTP yang telah dikirimkan ke{" "}
+              <span className="font-semibold text-slate-800">{email ? maskEmail(email) : "email Anda"}</span>.
+            </p>
+          </div>
+
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+              {errorMessage}
             </div>
           )}
 
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-            <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
+          {successMessage && (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
+              {successMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleVerify} className="space-y-4 text-left">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+              {otp.map((digit, idx) => (
+                <input
+                  key={idx}
+                  ref={(el) => {
+                    inputRefs.current[idx] = el;
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
+                  className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-slate-900 focus:outline-none shadow-sm"
+                />
+              ))}
+            </div>
+
+            {typeParam === "reset" && (
+              <div className="space-y-1 pt-1">
+                <label className="text-xs font-semibold text-slate-700">Kata Sandi Baru</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 8 karakter"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-xs text-slate-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-slate-600"
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
               {resendCooldown > 0 ? (
-                <span>Kirim ulang dalam {formatTimer(resendCooldown)}</span>
+                <span>Kirim ulang ({formatTimer(resendCooldown)})</span>
               ) : (
                 <button
                   type="button"
                   onClick={handleResend}
                   disabled={resending}
-                  className="text-[#006370] font-bold hover:underline cursor-pointer"
+                  className="text-sky-600 font-bold hover:underline"
                 >
-                  {resending ? "Mengirim..." : "Kirim Ulang Kode"}
+                  {resending ? "Mengirim..." : "Kirim Ulang OTP"}
                 </button>
               )}
+
+              <Link href="/register" className="text-slate-600 hover:underline">
+                Ganti email
+              </Link>
             </div>
 
             <button
-              type="button"
-              onClick={handleResend}
-              className="inline-flex items-center gap-1 font-semibold text-slate-700 hover:text-[#006370] transition-colors cursor-pointer"
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
             >
-              <span>Bantuan via SMS / Kontak</span>
-              <Headphones className="w-3.5 h-3.5 text-slate-500" />
+              {loading ? (
+                <>
+                  <FontAwesomeIcon icon={faSpinner} className="w-3.5 h-3.5 animate-spin" />
+                  <span>Memverifikasi...</span>
+                </>
+              ) : (
+                <span>{typeParam === "reset" ? "Simpan Sandi Baru" : "Konfirmasi & Lanjutkan"}</span>
+              )}
             </button>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xs font-bold text-xs sm:text-sm text-white bg-[#006370] hover:bg-[#004f59] active:bg-[#003e46] disabled:opacity-60 transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#006370]/25 cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Memverifikasi Kode OTP...</span>
-              </>
-            ) : (
-              <>
-                <span>Konfirmasi &amp; Aktifkan Akses</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-6 p-3.5 rounded-xs bg-[#F8FAFC] border border-slate-200/80 space-y-1">
-          <div className="flex items-center justify-between font-mono text-[11px] text-slate-700">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-semibold">NODE: IDN-JKT-02</span>
-            </div>
-            <span className="text-slate-400">SHA256 • TLS 1.3</span>
-          </div>
-          <p className="text-[11px] text-slate-500">
-            Tingkat Keamanan: Verifikasi Multi-Tenant TOTP &amp; Akses Terenkripsi
-          </p>
+          </form>
         </div>
 
-        <div className="mt-6 text-center text-xs text-slate-500">
-          Salah alamat email?{" "}
-          <Link
-            href="/register"
-            className="font-bold text-[#006370] hover:text-[#004f59] hover:underline"
-          >
-            Ganti email
-          </Link>
+        {/* Mobile Footer */}
+        <div className="text-center text-[11px] text-slate-400">
+          &copy; {new Date().getFullYear()} WorkNest Technologies Inc.
         </div>
       </div>
     </div>
@@ -401,8 +612,8 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center p-6 bg-[#F4F7FA]">
-          <Loader2 className="w-8 h-8 text-[#006370] animate-spin" />
+        <div className="min-h-screen bg-white flex items-center justify-center text-xs text-slate-500">
+          Memuat verifikasi OTP...
         </div>
       }
     >

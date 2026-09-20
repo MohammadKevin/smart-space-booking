@@ -93,6 +93,14 @@ export class FilterSpaceDto {
   duration?: string;
 
   @ApiPropertyOptional({
+    description: 'Hanya tampilkan ruangan yang tersedia (tidak bentrok jadwal)',
+    example: true,
+  })
+  @IsOptional()
+  @Type(() => Boolean)
+  onlyAvailable?: boolean;
+
+  @ApiPropertyOptional({
     description: 'Halaman data untuk pagination (1-indexed)',
     example: 1,
   })

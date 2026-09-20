@@ -121,7 +121,7 @@ export default function SuperAdminOwnersPage() {
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Mitra Space Owner
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -134,16 +134,16 @@ export default function SuperAdminOwnersPage() {
             type="button"
             onClick={fetchOwners}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-sky-600" : ""}`} />
             <span>Perbarui</span>
           </button>
           <button
             type="button"
             onClick={handleExportCsv}
             disabled={filteredOwners.length === 0}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Ekspor CSV</span>
@@ -152,19 +152,19 @@ export default function SuperAdminOwnersPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TOTAL MITRA OWNER
             </span>
-            <Building className="w-4 h-4 text-[#006370]" />
+            <Building className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
             {owners.length}
@@ -174,7 +174,7 @@ export default function SuperAdminOwnersPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TOTAL RUANGAN
@@ -189,14 +189,14 @@ export default function SuperAdminOwnersPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TOTAL GMV MITRA
             </span>
-            <CreditCard className="w-4 h-4 text-emerald-600" />
+            <CreditCard className="w-4 h-4 text-sky-600" />
           </div>
-          <div className="text-xl font-bold text-[#006370] font-mono">
+          <div className="text-xl font-bold text-sky-600 font-mono">
             {formatRupiah(totalGmv)}
           </div>
           <p className="text-[11px] text-slate-500">
@@ -204,7 +204,7 @@ export default function SuperAdminOwnersPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-bold uppercase tracking-wider font-mono">
               TOTAL NET PAYOUT
@@ -220,7 +220,7 @@ export default function SuperAdminOwnersPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
           <input
@@ -228,7 +228,7 @@ export default function SuperAdminOwnersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari nama coworking, pemilik, email, telepon..."
-            className="w-full pl-10 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
+            className="w-full pl-10 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none transition-colors"
           />
           {searchQuery && (
             <button
@@ -246,7 +246,7 @@ export default function SuperAdminOwnersPage() {
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xs text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
             >
               <option value="all">Semua Kota ({owners.length})</option>
               {availableCities.map((c) => (
@@ -263,10 +263,10 @@ export default function SuperAdminOwnersPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs overflow-hidden shadow-2xs">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider rounded-t-xl">
               <tr>
                 <th className="py-3.5 px-4 font-bold">COWORKING &amp; ALAMAT</th>
                 <th className="py-3.5 px-4 font-bold">PEMILIK &amp; KONTAK</th>
@@ -281,7 +281,7 @@ export default function SuperAdminOwnersPage() {
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#006370] mx-auto mb-2" />
+                    <Loader2 className="w-6 h-6 animate-spin text-sky-600 mx-auto mb-2" />
                     <span>Memuat direktori mitra...</span>
                   </td>
                 </tr>
@@ -294,7 +294,7 @@ export default function SuperAdminOwnersPage() {
                   >
                     <td className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0 border border-[#BCE3DE]">
+                        <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
                           <Building className="w-4 h-4" />
                         </div>
                         <div>
@@ -341,7 +341,7 @@ export default function SuperAdminOwnersPage() {
                       <div className="font-bold text-slate-900">
                         {o.totalBookings || 0} Total
                       </div>
-                      <div className="text-[11px] text-emerald-600 font-semibold">
+                      <div className="text-[11px] text-sky-700 font-semibold">
                         {o.paidBookings || 0} Lunas
                       </div>
                     </td>
@@ -350,7 +350,7 @@ export default function SuperAdminOwnersPage() {
                       {formatRupiah(o.gmv || 0)}
                     </td>
 
-                    <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">
+                    <td className="py-3.5 px-4 font-mono font-bold text-sky-700">
                       {formatRupiah(o.netPayout || 0)}
                     </td>
 
@@ -361,7 +361,7 @@ export default function SuperAdminOwnersPage() {
                           e.stopPropagation();
                           setSelectedOwner(o);
                         }}
-                        className="px-3 py-1.5 rounded-xs border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Detail
                       </button>
@@ -384,14 +384,14 @@ export default function SuperAdminOwnersPage() {
 
       {selectedOwner && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl max-w-lg w-full p-6 space-y-5 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                   <Building className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-base text-slate-900">
+                  <h3 className="font-bold text-base text-slate-900">
                     {selectedOwner.namaCoworking}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-mono">
@@ -402,7 +402,7 @@ export default function SuperAdminOwnersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOwner(null)}
-                className="p-1 rounded-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -410,7 +410,7 @@ export default function SuperAdminOwnersPage() {
 
             <div className="space-y-4 text-xs">
               
-              <div className="p-3.5 bg-slate-50 rounded-xs space-y-2 border border-slate-100">
+              <div className="p-3.5 bg-slate-50 rounded-xl space-y-2 border border-slate-100">
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                   INFORMASI PEMILIK &amp; KONTAK
                 </p>
@@ -441,8 +441,8 @@ export default function SuperAdminOwnersPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xs bg-[#E6F4F2]/50 border border-[#BCE3DE] space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#006370]">
+                <div className="p-3.5 rounded-xl bg-sky-50 border border-sky-100 space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-700">
                     TOTAL GMV TRANSAKSI
                   </span>
                   <p className="text-lg font-bold font-mono text-slate-900">
@@ -453,11 +453,11 @@ export default function SuperAdminOwnersPage() {
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xs bg-emerald-50/60 border border-emerald-200 space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-800">
+                <div className="p-3.5 rounded-xl bg-sky-50/60 border border-sky-100 space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-800">
                     NET PAYOUT MITRA
                   </span>
-                  <p className="text-lg font-bold font-mono text-emerald-800">
+                  <p className="text-lg font-bold font-mono text-sky-800">
                     {formatRupiah(selectedOwner.netPayout || 0)}
                   </p>
                   <p className="text-[10px] text-slate-500">
@@ -467,15 +467,15 @@ export default function SuperAdminOwnersPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-slate-50 rounded-xs border border-slate-100 space-y-0.5">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
                   <span className="text-slate-400 text-[11px] block">Inventaris Ruangan</span>
                   <span className="text-base font-bold text-slate-900">{selectedOwner.totalSpaces || 0} Unit Ruangan</span>
                   <span className="text-[10px] text-slate-500 block">{selectedOwner.totalStaffs || 0} Staff Terdaftar</span>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xs border border-slate-100 space-y-0.5">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-0.5">
                   <span className="text-slate-400 text-[11px] block">Performa Reservasi</span>
                   <span className="text-base font-bold text-slate-900">{selectedOwner.totalBookings || 0} Total Pesanan</span>
-                  <span className="text-[10px] text-emerald-600 font-semibold block">{selectedOwner.paidBookings || 0} Berhasil Lunas</span>
+                  <span className="text-[10px] text-sky-700 font-semibold block">{selectedOwner.paidBookings || 0} Berhasil Lunas</span>
                 </div>
               </div>
             </div>
@@ -484,7 +484,7 @@ export default function SuperAdminOwnersPage() {
               <button
                 type="button"
                 onClick={() => setSelectedOwner(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors cursor-pointer"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Tutup
               </button>

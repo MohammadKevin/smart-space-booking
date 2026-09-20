@@ -3,9 +3,11 @@ import {
   Logger,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
+import { ResetDataDto } from './dto/reset-data.dto';
 
 @Injectable()
 export class SuperAdminService {
@@ -40,8 +42,7 @@ export class SuperAdminService {
           return parsed;
         }
       }
-    } catch {
-    }
+    } catch {}
     return this.commissionPercent;
   }
 
@@ -440,6 +441,108 @@ export class SuperAdminService {
 
     return {
       message: `Akun '${user.email}' (${user.role}) berhasil dihapus dari platform.`,
+    };
+  }
+
+  async resetAllData(dto: ResetDataDto, executor: any, ipAddress: string) {
+    if (process.env.ALLOW_DATA_RESET !== 'true') {
+      throw new ForbiddenException(
+        'Data reset dinonaktifkan di environment ini.',
+      );
+    }
+
+    if (dto.confirmationText !== 'RESET ALL DATA') {
+      throw new BadRequestException('Teks konfirmasi tidak sesuai.');
+    }
+
+    const timestamp = new Date().toISOString();
+    const affectedTables = [
+      'detail_reservasi',
+      'review',
+      'waitlist',
+      'transaksi',
+      'reservasi',
+      'diskon',
+      'spaces',
+      'staffs',
+      'space_owners',
+      'members',
+      'users',
+    ];
+
+    this.logger.warn(
+      `[DATA_RESET_AUDIT] Action: DATA_RESET, ExecutedBy: ${executor?.email} (ID: ${executor?.id}), IP: ${ipAddress}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
+    );
+
+    const summary = await this.prisma.$transaction(async (tx) => {
+      const detailReservasi = await tx.detailReservasi.deleteMany({});
+      const review = await tx.review.deleteMany({});
+      const waitlist = await tx.waitlist.deleteMany({});
+      const transaksi = await tx.transaksi.deleteMany({});
+      const reservasi = await tx.reservasi.deleteMany({});
+      const diskon = await tx.diskon.deleteMany({});
+      const spaces = await tx.space.deleteMany({});
+      const staffs = await tx.staff.deleteMany({});
+      const spaceOwners = await tx.spaceOwner.deleteMany({});
+      const members = await tx.member.deleteMany({});
+      const usersDeleted = await tx.user.deleteMany({
+        where: {
+          role: {
+            not: Role.super_admin,
+          },
+        },
+      });
+
+      return {
+        detail_reservasi: detailReservasi.count,
+        review: review.count,
+        waitlist: waitlist.count,
+        transaksi: transaksi.count,
+        reservasi: reservasi.count,
+        diskon: diskon.count,
+        spaces: spaces.count,
+        staffs: staffs.count,
+        space_owners: spaceOwners.count,
+        members: members.count,
+        users_deleted: usersDeleted.count,
+      };
+    });
+
+    const tablesToResetAutoIncrement = [
+      'detail_reservasi',
+      'review',
+      'waitlist',
+      'transaksi',
+      'reservasi',
+      'diskon',
+      'spaces',
+      'staffs',
+      'space_owners',
+      'members',
+    ];
+
+    for (const table of tablesToResetAutoIncrement) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `ALTER TABLE ${table} AUTO_INCREMENT = 1;`,
+        );
+      } catch (autoIncErr: any) {
+        this.logger.warn(`Auto-increment reset warning: ${autoIncErr.message}`);
+      }
+    }
+
+    const executedAt = new Date().toISOString();
+
+    this.logger.log(
+      `[DATA_RESET_AUDIT] Completed DATA_RESET, ExecutedBy: ${executor?.email}, IP: ${ipAddress}, Timestamp: ${executedAt}, Summary: ${JSON.stringify(summary)}`,
+    );
+
+    return {
+      success: true,
+      message: 'Data berhasil direset. Akun super_admin dipertahankan.',
+      summary,
+      executedAt,
+      executedBy: executor?.email || 'super_admin',
     };
   }
 }

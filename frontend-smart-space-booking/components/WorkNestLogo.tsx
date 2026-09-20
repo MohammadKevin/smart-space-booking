@@ -28,24 +28,13 @@ export function WorkNestLogo({
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <div
-        className={`${iconDimensions} rounded-xs bg-gradient-to-br from-[#0284C7] via-[#0284C7] to-[#0D9488] flex items-center justify-center shadow-xs shrink-0 p-1.5`}
+        className={`${iconDimensions} rounded-xl bg-sky-600 flex items-center justify-center shadow-sm shrink-0 p-1`}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full text-white"
-        >
-          
-          <path
-            d="M4 17L9 8L12 13L15 8L20 17"
-            stroke="currentColor"
-            strokeWidth="2.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <circle cx="12" cy="7" r="1.6" fill="currentColor" />
-        </svg>
+        <img
+          src="/logo-worknest.png"
+          alt="WorkNest Logo"
+          className="w-full h-full object-contain rounded-lg"
+        />
       </div>
 
       {showText && (
@@ -56,7 +45,7 @@ export function WorkNestLogo({
             WorkNest
           </span>
           {tag && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200">
               {tag}
             </span>
           )}

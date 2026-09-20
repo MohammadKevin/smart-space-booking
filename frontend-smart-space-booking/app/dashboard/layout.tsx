@@ -148,7 +148,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 bg-[#FDFBF7]">
+      <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div className="flex flex-col items-center gap-3 text-slate-500 max-w-xs text-center">
           {loadingTimedOut ? (
             <>
@@ -164,14 +164,14 @@ export default function DashboardLayout({
                     logoutUser();
                     router.push("/login");
                   }}
-                  className="px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
                 >
                   Login Ulang
                 </button>
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xs transition-colors"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
                 >
                   Muat Ulang
                 </button>
@@ -179,8 +179,8 @@ export default function DashboardLayout({
             </>
           ) : (
             <>
-              <Loader2 className="w-6 h-6 text-[#006370] animate-spin" />
-              <p className="text-xs font-semibold">Memverifikasi Sesi...</p>
+              <Loader2 className="w-6 h-6 text-sky-600 animate-spin" />
+              <p className="text-xs font-semibold text-slate-600">Memverifikasi Sesi...</p>
             </>
           )}
         </div>
@@ -220,21 +220,21 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen flex bg-[#FDFBF7] text-slate-900 font-sans">
+    <div className="min-h-screen flex bg-slate-50/70 text-slate-900 font-sans">
       
-      <aside className="hidden lg:flex flex-col justify-between w-64 bg-white border-r border-slate-200 shrink-0 sticky top-0 h-screen z-30">
+      <aside className="hidden lg:flex flex-col justify-between w-64 bg-white border-r border-slate-200/80 shrink-0 sticky top-0 h-screen z-30">
         <div className="flex flex-col h-full overflow-hidden">
           
-          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-200 shrink-0">
+          <div className="h-16 px-4 flex items-center justify-between border-b border-slate-100 shrink-0">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xs bg-[#006370] flex items-center justify-center text-white shadow-xs">
-                <Building2 className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-sky-600 flex items-center justify-center text-white shrink-0 shadow-sm shadow-sky-600/20 group-hover:bg-sky-500 transition-colors">
+                <img src="/logo-worknest.png" alt="logo icon" className="w-10 h-10 rounded-xl" />
               </div>
               <div>
-                <span className="font-serif font-bold text-slate-900 text-base tracking-tight block leading-none">
+                <span className="font-extrabold text-slate-900 text-base tracking-tight block leading-none">
                   WorkNest
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium tracking-wide block mt-0.5">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">
                   {role === "super_admin"
                     ? "Super Admin"
                     : role === "owner"
@@ -269,13 +269,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
+                          ? "bg-sky-50 text-sky-700 font-semibold shadow-sm"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-sky-600" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -300,13 +300,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
+                          ? "bg-sky-50 text-sky-700 font-semibold shadow-sm"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-sky-600" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -332,13 +332,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
+                          ? "bg-sky-50 text-sky-700 font-bold shadow-sm"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-sky-600" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -362,13 +362,13 @@ export default function DashboardLayout({
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-all ${
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                         active
-                          ? "bg-[#006370]/10 text-[#006370] font-semibold"
+                          ? "bg-sky-50 text-sky-700 font-semibold shadow-sm"
                           : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${active ? "text-[#006370]" : "text-slate-400"}`} />
+                      <Icon className={`w-4 h-4 ${active ? "text-sky-600" : "text-slate-400"}`} />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -377,13 +377,13 @@ export default function DashboardLayout({
             )}
           </div>
 
-          <div className="p-3 border-t border-slate-200 space-y-2">
-            <div className="flex items-center gap-2.5 p-2 rounded-xs bg-slate-50 border border-slate-100">
-              <div className="w-8 h-8 rounded-full bg-[#006370] text-white font-bold text-xs flex items-center justify-center shrink-0">
+          <div className="p-3 border-t border-slate-100 space-y-2">
+            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-100">
+              <div className="w-8 h-8 rounded-xl bg-sky-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
                 {getInitials()}
               </div>
               <div className="truncate flex-1">
-                <p className="text-xs font-semibold text-slate-900 truncate">
+                <p className="text-xs font-bold text-slate-900 truncate">
                   {getDisplayName()}
                 </p>
                 <p className="text-[10px] text-slate-400 truncate font-mono">
@@ -395,7 +395,7 @@ export default function DashboardLayout({
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xs transition-colors cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 text-rose-500" />
               <span>Keluar Akun</span>
@@ -406,30 +406,29 @@ export default function DashboardLayout({
 
       <div className="flex-1 flex flex-col min-w-0">
         
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-2xs">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 rounded-xs text-slate-600 hover:bg-slate-100 cursor-pointer"
+              className="lg:hidden p-1.5 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer"
               aria-label="Toggle Menu"
             >
               {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
             <Link href="/" className="flex items-center gap-2 lg:hidden">
-              <div className="w-7 h-7 rounded-xs bg-[#006370] flex items-center justify-center text-white">
+              <div className="w-7 h-7 rounded-lg bg-sky-600 flex items-center justify-center text-white">
                 <Building2 className="w-3.5 h-3.5" />
               </div>
-              <span className="font-serif font-bold text-slate-900 text-sm tracking-tight">
+              <span className="font-extrabold text-slate-900 text-sm tracking-tight">
                 WorkNest
               </span>
             </Link>
 
             <div className="hidden lg:flex items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xs bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold shadow-2xs font-mono">
-                <Clock className="w-3.5 h-3.5 text-[#006370]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs font-semibold shadow-sm font-mono">
+                <Clock className="w-3.5 h-3.5 text-sky-600" />
                 <span>{currentTime || "00:00:00 WIB"}</span>
               </div>
             </div>
@@ -438,7 +437,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             {role === "owner" ? (
               <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold text-xs shrink-0 border border-[#BCE3DE]">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-100">
                   <Building className="w-4 h-4" />
                 </div>
                 <div className="hidden md:block text-left max-w-[240px]">
@@ -452,7 +451,7 @@ export default function DashboardLayout({
               </div>
             ) : (
               <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-full bg-[#006370] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                <div className="w-8 h-8 rounded-xl bg-sky-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                   {getInitials()}
                 </div>
                 <div className="hidden md:block text-left">
@@ -510,7 +509,7 @@ export default function DashboardLayout({
                   key={link.href}
                   href={link.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xs"
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   {link.label}
                 </Link>
@@ -526,7 +525,7 @@ export default function DashboardLayout({
                   key={link.href}
                   href={link.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xs"
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   {link.label}
                 </Link>
@@ -543,7 +542,7 @@ export default function DashboardLayout({
                   key={link.href}
                   href={link.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xs"
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   {link.label}
                 </Link>
@@ -558,7 +557,7 @@ export default function DashboardLayout({
                   key={link.href}
                   href={link.href}
                   onClick={() => setSidebarOpen(false)}
-                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xs"
+                  className="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl"
                 >
                   {link.label}
                 </Link>
@@ -567,7 +566,7 @@ export default function DashboardLayout({
           </div>
         )}
 
-        <main className="flex-1 p-4 sm:p-6 w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full">
           {children}
         </main>
       </div>

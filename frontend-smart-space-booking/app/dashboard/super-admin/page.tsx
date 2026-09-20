@@ -129,7 +129,7 @@ export default function SuperAdminOverviewPage() {
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Dashboard Super Admin
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -142,15 +142,15 @@ export default function SuperAdminOverviewPage() {
             type="button"
             onClick={fetchData}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-sky-600" : ""}`} />
             <span>Perbarui Data</span>
           </button>
           <button
             type="button"
             onClick={handleExportAudit}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-semibold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Ekspor Audit (CSV)</span>
@@ -159,7 +159,7 @@ export default function SuperAdminOverviewPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
@@ -167,13 +167,13 @@ export default function SuperAdminOverviewPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL GMV NASIONAL
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <CreditCard className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-slate-600">
+              <CreditCard className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -186,26 +186,26 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               PENDAPATAN PLATFORM
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <Coins className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-slate-600">
+              <Coins className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold font-mono text-[#006370]">
+            <div className="text-2xl font-bold font-mono text-sky-600">
               {loading ? "..." : formatRupiah(netTakeValue)}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E6F4F2] text-[#006370] border border-[#BCE3DE]">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
                 Tarif Komisi: {commissionRate}%
               </span>
               <Link
                 href="/dashboard/super-admin/commission"
-                className="text-[11px] text-[#006370] hover:underline font-medium"
+                className="text-[11px] text-sky-600 hover:underline font-medium"
               >
                 Ubah
               </Link>
@@ -213,13 +213,13 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL PAYOUT MITRA
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <Receipt className="w-4 h-4 text-emerald-600" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-slate-600">
+              <Receipt className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -232,13 +232,13 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL RESERVASI
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <CalendarCheck className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-slate-600">
+              <CalendarCheck className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -246,7 +246,7 @@ export default function SuperAdminOverviewPage() {
               {loading ? "..." : bookingsCount}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
                 {activeBookingsCount} Aktif
               </span>
               <span className="text-[11px] text-slate-500">
@@ -258,8 +258,8 @@ export default function SuperAdminOverviewPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/80 rounded-xs p-4 shadow-2xs flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0">
+        <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center shrink-0">
             <Building className="w-5 h-5" />
           </div>
           <div>
@@ -273,8 +273,8 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xs p-4 shadow-2xs flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xs bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+        <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
@@ -288,9 +288,9 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xs p-4 shadow-2xs flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xs bg-cyan-50 text-cyan-700 flex items-center justify-center shrink-0">
-            <Users className="w-5 h-5" />
+        <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 text-sky-600" />
           </div>
           <div>
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
@@ -303,9 +303,9 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 rounded-xs p-4 shadow-2xs flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xs bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-            <UserCheck className="w-5 h-5" />
+        <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+            <UserCheck className="w-5 h-5 text-sky-600" />
           </div>
           <div>
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
@@ -319,10 +319,10 @@ export default function SuperAdminOverviewPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-6">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="font-serif text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Tren Pendapatan Transaksi Bulanan ({selectedYear})
             </h2>
             <p className="text-xs text-slate-500">
@@ -333,11 +333,11 @@ export default function SuperAdminOverviewPage() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#006370]" />
+                <span className="w-3 h-3 rounded-md bg-sky-600" />
                 <span className="text-slate-600">GMV Bruto</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-emerald-500" />
+                <span className="w-3 h-3 rounded-md bg-sky-400" />
                 <span className="text-slate-600">Komisi Platform</span>
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function SuperAdminOverviewPage() {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xs text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
             >
               {[2024, 2025, 2026].map((yr) => (
                 <option key={yr} value={yr}>
@@ -366,7 +366,7 @@ export default function SuperAdminOverviewPage() {
                 return (
                   <div key={item.monthIndex} className="flex flex-col items-center justify-end h-full gap-1 group relative">
                     
-                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-xs shadow-lg z-20 whitespace-nowrap">
+                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-md shadow-lg z-20 whitespace-nowrap">
                       <span>{item.monthName}</span>
                       <span>GMV: {formatRupiah(item.gmv)}</span>
                       <span>Komisi: {formatRupiah(item.platformProfit)}</span>
@@ -375,7 +375,7 @@ export default function SuperAdminOverviewPage() {
                     <div className="w-full max-w-[28px] flex items-end justify-center gap-1 h-full">
                       <div
                         style={{ height: `${gmvHeight}%` }}
-                        className="w-full bg-[#006370] rounded-t-xs hover:opacity-90 transition-all"
+                        className="w-full bg-sky-600 rounded-t-md hover:opacity-90 transition-all"
                       />
                     </div>
 
@@ -388,7 +388,7 @@ export default function SuperAdminOverviewPage() {
             </div>
           </div>
         ) : (
-          <div className="py-12 text-center text-slate-400 text-xs bg-slate-50/60 rounded-xs">
+          <div className="py-12 text-center text-slate-400 text-xs bg-slate-50/60 rounded-md">
             Belum ada data transaksi bulanan untuk tahun {selectedYear}.
           </div>
         )}
@@ -396,10 +396,10 @@ export default function SuperAdminOverviewPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-4">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h2 className="font-serif text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-slate-900">
                 Sebaran Mitra Berdasarkan Wilayah
               </h2>
               <p className="text-xs text-slate-500">
@@ -408,7 +408,7 @@ export default function SuperAdminOverviewPage() {
             </div>
             <Link
               href="/dashboard/super-admin/owners"
-              className="text-xs font-semibold text-[#006370] hover:underline"
+              className="text-xs font-semibold text-sky-600 hover:underline"
             >
               Lihat Semua
             </Link>
@@ -419,7 +419,7 @@ export default function SuperAdminOverviewPage() {
               cityBreakdown.map((item) => (
                 <div
                   key={item.city}
-                  className="p-3 bg-slate-50/70 rounded-xs border border-slate-100 flex items-center justify-between text-xs"
+                  className="p-3 bg-slate-50/70 rounded-xl border border-slate-100 flex items-center justify-between text-xs"
                 >
                   <div>
                     <p className="font-bold text-slate-900">{item.city}</p>
@@ -441,9 +441,9 @@ export default function SuperAdminOverviewPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-4">
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
           <div className="border-b border-slate-100 pb-3">
-            <h2 className="font-serif text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900">
               Navigasi Kontrol Super Admin
             </h2>
             <p className="text-xs text-slate-500">
@@ -454,12 +454,12 @@ export default function SuperAdminOverviewPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <Link
               href="/dashboard/super-admin/owners"
-              className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
+              className="p-4 rounded-xl border border-slate-200 hover:border-sky-600 hover:bg-sky-50/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center transition-colors">
                 <Building className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
+              <h3 className="font-bold text-slate-900 group-hover:text-sky-600">
                 Mitra Space Owner
               </h3>
               <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -469,12 +469,12 @@ export default function SuperAdminOverviewPage() {
 
             <Link
               href="/dashboard/super-admin/commission"
-              className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
+              className="p-4 rounded-xl border border-slate-200 hover:border-sky-600 hover:bg-sky-50/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center transition-colors">
                 <TicketPercent className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
+              <h3 className="font-bold text-slate-900 group-hover:text-sky-600">
                 Komisi Platform
               </h3>
               <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -484,12 +484,12 @@ export default function SuperAdminOverviewPage() {
 
             <Link
               href="/dashboard/super-admin/transactions"
-              className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
+              className="p-4 rounded-xl border border-slate-200 hover:border-sky-600 hover:bg-sky-50/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center transition-colors">
                 <ReceiptText className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
+              <h3 className="font-bold text-slate-900 group-hover:text-sky-600">
                 Transaksi Global
               </h3>
               <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -499,12 +499,12 @@ export default function SuperAdminOverviewPage() {
 
             <Link
               href="/dashboard/super-admin/profile"
-              className="p-4 rounded-xs border border-slate-200 hover:border-[#006370] hover:bg-[#E6F4F2]/30 transition-all space-y-1.5 group"
+              className="p-4 rounded-xl border border-slate-200 hover:border-sky-600 hover:bg-sky-50/30 transition-all space-y-1.5 group"
             >
-              <div className="w-8 h-8 rounded-xs bg-slate-100 text-slate-700 group-hover:bg-[#006370] group-hover:text-white flex items-center justify-center transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 group-hover:bg-sky-600 group-hover:text-white flex items-center justify-center transition-colors">
                 <Users className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-slate-900 group-hover:text-[#006370]">
+              <h3 className="font-bold text-slate-900 group-hover:text-sky-600">
                 Pengaturan Akun
               </h3>
               <p className="text-[11px] text-slate-500 leading-relaxed">
@@ -515,10 +515,10 @@ export default function SuperAdminOverviewPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-serif text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Mitra Space Owner Terbaru
             </h2>
             <p className="text-xs text-slate-500">
@@ -528,16 +528,16 @@ export default function SuperAdminOverviewPage() {
 
           <Link
             href="/dashboard/super-admin/owners"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006370] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:underline"
           >
             <span>Buka Direktori Lengkap ({owners.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-t-xl">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
+            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider rounded-t-xl">
               <tr>
                 <th className="py-3 px-4 font-bold">NAMA COWORKING &amp; LOKASI</th>
                 <th className="py-3 px-4 font-bold">PEMILIK / KONTAK</th>
@@ -550,10 +550,10 @@ export default function SuperAdminOverviewPage() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {owners.length > 0 ? (
                 owners.slice(0, 5).map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={o.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center shrink-0">
                           <Building className="w-4 h-4" />
                         </div>
                         <div>
@@ -577,7 +577,7 @@ export default function SuperAdminOverviewPage() {
                     <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
                       {formatRupiah(o.gmv || 0)}
                     </td>
-                    <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">
+                    <td className="py-3.5 px-4 font-mono font-bold text-sky-700">
                       {formatRupiah(o.netPayout || 0)}
                     </td>
                   </tr>

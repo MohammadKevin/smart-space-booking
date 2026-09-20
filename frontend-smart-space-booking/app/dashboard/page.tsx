@@ -30,7 +30,7 @@ export default function DashboardRootRedirect() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
       <div className="flex flex-col items-center gap-2.5 text-slate-500">
-        <Loader2 className="w-7 h-7 text-cyan-600 animate-spin" />
+        <Loader2 className="w-7 h-7 text-sky-600 animate-spin" />
         <p className="text-xs font-semibold">Mengarahkan ke Dashboard...</p>
       </div>
     </div>

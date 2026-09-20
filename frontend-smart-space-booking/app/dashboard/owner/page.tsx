@@ -128,14 +128,14 @@ export default function OwnerOverviewPage() {
     <div className="space-y-8 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
             <span>WORKSPACE OWNER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               {coworkingName}
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Ringkasan Operasional Venue
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -148,24 +148,24 @@ export default function OwnerOverviewPage() {
             type="button"
             onClick={() => fetchAnalytics(selectedYear)}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
             <RefreshCw
-              className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`}
+              className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-sky-600" : ""}`}
             />
             <span>Perbarui</span>
           </button>
           <button
             type="button"
             onClick={handleExportReport}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Ekspor CSV</span>
           </button>
           <Link
             href="/dashboard/owner/spaces/create"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Tambah Ruangan</span>
@@ -174,20 +174,20 @@ export default function OwnerOverviewPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium flex items-center gap-2.5 shadow-2xs">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2.5 shadow-sm">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL PENDAPATAN
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <CreditCard className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+              <CreditCard className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -200,13 +200,13 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               OKUPANSI REAL-TIME
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <DoorOpen className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+              <DoorOpen className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -215,7 +215,7 @@ export default function OwnerOverviewPage() {
               <span className="text-xs font-normal text-slate-500 font-sans">Unit</span>
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#E6F4F2] text-[#006370] border border-[#BCE3DE]">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
                 {occupancyPercent}% Terpakai
               </span>
               <span className="text-[11px] text-slate-500">
@@ -225,13 +225,13 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL RESERVASI MASUK
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <CalendarCheck className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+              <CalendarCheck className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -244,13 +244,13 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-3">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               INVENTARIS RUANGAN
             </span>
-            <div className="w-8 h-8 rounded-xs bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600">
-              <Building2 className="w-4 h-4 text-[#006370]" />
+            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+              <Building2 className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div>
@@ -258,7 +258,7 @@ export default function OwnerOverviewPage() {
               {loading ? "..." : totalRoomsCount}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
                 {summary?.totalStaffs || 0} Staf
               </span>
               <span className="text-[11px] text-slate-500">
@@ -269,10 +269,10 @@ export default function OwnerOverviewPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-6">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="font-serif text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Tren Pendapatan Bulanan ({selectedYear})
             </h2>
             <p className="text-xs text-slate-500">
@@ -283,7 +283,7 @@ export default function OwnerOverviewPage() {
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#006370]" />
+                <span className="w-3 h-3 rounded-md bg-sky-600" />
                 <span className="text-slate-600">Pendapatan Kotor</span>
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function OwnerOverviewPage() {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xs text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
+              className="px-3 py-1.5 bg-slate-50 border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
             >
               {[2024, 2025, 2026].map((yr) => (
                 <option key={yr} value={yr}>
@@ -313,7 +313,7 @@ export default function OwnerOverviewPage() {
                     key={item.monthNumber || item.month}
                     className="flex flex-col items-center justify-end h-full gap-1 group relative"
                   >
-                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-xs shadow-lg z-20 whitespace-nowrap">
+                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-xl shadow-sm z-20 whitespace-nowrap">
                       <span>{item.month}</span>
                       <span>Pendapatan: {formatRupiah(item.revenue)}</span>
                       <span>Booking: {item.totalBookings || 0} Sesi</span>
@@ -322,7 +322,7 @@ export default function OwnerOverviewPage() {
                     <div className="w-full max-w-[28px] flex items-end justify-center gap-1 h-full">
                       <div
                         style={{ height: `${heightPercent}%` }}
-                        className="w-full bg-[#006370] rounded-t-xs hover:opacity-90 transition-all"
+                        className="w-full bg-sky-600 rounded-t-md hover:bg-sky-500 transition-all"
                       />
                     </div>
 
@@ -335,16 +335,16 @@ export default function OwnerOverviewPage() {
             </div>
           </div>
         ) : (
-          <div className="py-12 text-center text-slate-400 text-xs bg-slate-50/60 rounded-xs">
+          <div className="py-12 text-center text-slate-400 text-xs bg-slate-50/60 rounded-xl">
             Belum ada data pendapatan bulanan untuk tahun {selectedYear}.
           </div>
         )}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-serif text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900">
               Status Langsung Inventaris Ruangan
             </h2>
             <p className="text-xs text-slate-500">
@@ -354,14 +354,14 @@ export default function OwnerOverviewPage() {
 
           <Link
             href="/dashboard/owner/spaces"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#006370] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:underline"
           >
             <span>Buka Inventaris Lengkap ({spaces.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
               <tr>
@@ -385,10 +385,10 @@ export default function OwnerOverviewPage() {
                     : "SIAP-SEWA";
 
                   return (
-                    <tr key={sp.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={sp.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="py-3.5 px-4 font-semibold text-slate-900">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center shrink-0 border border-[#BCE3DE]">
+                          <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 border border-sky-100">
                             <Building className="w-4 h-4" />
                           </div>
                           <div>
@@ -408,26 +408,26 @@ export default function OwnerOverviewPage() {
                       </td>
                       <td className="py-3.5 px-4">
                         {isOccupied ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-cyan-50 text-cyan-800 font-semibold text-[10px] border border-cyan-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse" />
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold text-[10px] border border-amber-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
                             Terisi
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-emerald-50 text-emerald-800 font-semibold text-[10px] border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-semibold text-[10px] border border-sky-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
                             Kosong
                           </span>
                         )}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
                           {otpCode}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <Link
                           href={`/spaces/${sp.id}`}
-                          className="px-2.5 py-1 rounded-xs border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-xs transition-colors"
+                          className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm"
                         >
                           Detail
                         </Link>

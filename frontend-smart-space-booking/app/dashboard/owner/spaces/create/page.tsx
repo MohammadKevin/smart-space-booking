@@ -25,13 +25,9 @@ import {
   Coffee,
   Sun,
   Shield,
-  Radio,
-  Key,
   ArrowRight,
-  Save,
   Trash2,
   Loader2,
-  Zap,
   Layers,
 } from "lucide-react";
 
@@ -137,14 +133,12 @@ export default function CreateWorkspacePage() {
     "nespresso_bar",
   ]);
 
-  const [relayType, setRelayType] = useState("Zigbee 3.0 Door Strike / Magnetic Lock");
-  const [hardwareNodeId, setHardwareNodeId] = useState("ESP32-RELAY-MLG-304 (Online • Ping 14ms)");
-  const [autoDynamicPin, setAutoDynamicPin] = useState(true);
+  const [relayType] = useState("Zigbee 3.0 Door Strike / Magnetic Lock");
+  const [hardwareNodeId] = useState("ESP32-RELAY-MLG-304 (Online • Ping 14ms)");
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [pulseState, setPulseState] = useState<"idle" | "pulsing" | "success">("idle");
 
   const toggleAmenity = (id: string) => {
     setSelectedAmenities((prev) =>
@@ -192,14 +186,6 @@ export default function CreateWorkspacePage() {
     if (coverIndex >= updated.length) {
       setCoverIndex(Math.max(0, updated.length - 1));
     }
-  };
-
-  const handleSendTestPulse = () => {
-    setPulseState("pulsing");
-    setTimeout(() => {
-      setPulseState("success");
-      setTimeout(() => setPulseState("idle"), 3000);
-    }, 600);
   };
 
   const auditDetailsPass = Boolean(title.trim() && floorUnit.trim() && capacity > 0 && floorArea > 0);
@@ -270,14 +256,14 @@ export default function CreateWorkspacePage() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
             <span>WORKSPACE OWNER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Pendaftaran Unit Baru
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Tambah Ruangan Kerja Baru
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -288,7 +274,7 @@ export default function CreateWorkspacePage() {
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
           <Link
             href="/dashboard/owner/spaces"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors"
           >
             Batal
           </Link>
@@ -296,7 +282,7 @@ export default function CreateWorkspacePage() {
             type="button"
             onClick={handleSubmitPublish}
             disabled={submitting}
-            className="inline-flex items-center gap-2 px-5 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-all disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-all disabled:opacity-50 cursor-pointer"
           >
             {submitting ? (
               <>
@@ -314,24 +300,24 @@ export default function CreateWorkspacePage() {
       </div>
 
       {errorMsg && (
-        <div className="flex items-center gap-2.5 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium shadow-2xs">
+        <div className="flex items-center gap-2.5 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium shadow-sm">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
       {successMsg && (
-        <div className="flex items-center gap-2.5 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium shadow-2xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="flex items-center gap-2.5 p-4 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl text-xs font-medium shadow-sm">
+          <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <h2 className="font-serif text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900">
                   01 / Identitas &amp; Dimensi Ruangan
                 </h2>
                 <p className="text-xs text-slate-500">
@@ -352,7 +338,7 @@ export default function CreateWorkspacePage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Contoh: Semeru Creative Studio & Podcast Suite"
-                  className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900"
+                  className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900"
                 />
               </div>
 
@@ -364,7 +350,7 @@ export default function CreateWorkspacePage() {
                   <select
                     value={category}
                     onChange={handleCategoryChange}
-                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900 cursor-pointer"
                   >
                     <option value="Ruang Rapat & Presentasi">Ruang Rapat &amp; Presentasi</option>
                     <option value="Ruang Kerja Privat / VIP Suite">Ruang Kerja Privat / VIP Suite</option>
@@ -386,7 +372,7 @@ export default function CreateWorkspacePage() {
                       value={floorUnit}
                       onChange={(e) => setFloorUnit(e.target.value)}
                       placeholder="Lantai 3, Unit 304"
-                      className="w-full pl-9 pr-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900"
+                      className="w-full pl-9 pr-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900"
                     />
                   </div>
                 </div>
@@ -405,7 +391,7 @@ export default function CreateWorkspacePage() {
                       max={500}
                       value={capacity}
                       onChange={(e) => setCapacity(Number(e.target.value))}
-                      className="w-full pl-9 pr-14 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900"
+                      className="w-full pl-9 pr-14 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900"
                     />
                     <span className="absolute right-3.5 top-2.5 text-[11px] font-mono font-bold text-slate-400">
                       PAX
@@ -425,7 +411,7 @@ export default function CreateWorkspacePage() {
                       max={1000}
                       value={floorArea}
                       onChange={(e) => setFloorArea(Number(e.target.value))}
-                      className="w-full pl-9 pr-14 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900"
+                      className="w-full pl-9 pr-14 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900"
                     />
                     <span className="absolute right-3.5 top-2.5 text-[11px] font-mono font-bold text-slate-400">
                       SQM
@@ -436,22 +422,22 @@ export default function CreateWorkspacePage() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <h2 className="font-serif text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900">
                   02 / Galeri Foto Ruangan
                 </h2>
                 <p className="text-xs text-slate-500">
                   Foto display resolusi tinggi untuk katalog publik calon member.
                 </p>
               </div>
-              <span className="px-2 py-0.5 rounded-xs bg-slate-100 border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
                 {photos.length} / 8 Foto
               </span>
             </div>
 
-            <div className="border-2 border-dashed border-slate-200 hover:border-[#006370]/50 rounded-xs p-6 text-center transition-colors bg-slate-50/40">
+            <div className="border-2 border-dashed border-slate-200 hover:border-sky-500/50 rounded-xl p-6 text-center transition-colors bg-slate-50/40">
               <input
                 type="file"
                 id="photo-upload-input"
@@ -463,11 +449,11 @@ export default function CreateWorkspacePage() {
                 htmlFor="photo-upload-input"
                 className="cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="w-10 h-10 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center mb-2.5 border border-[#BCE3DE]">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-2.5 border border-sky-100">
                   <UploadCloud className="w-5 h-5" />
                 </div>
                 <p className="text-xs font-semibold text-slate-800">
-                  <span className="text-[#006370] underline underline-offset-2">Pilih file foto</span> atau unggah gambar ruangan
+                  <span className="text-sky-600 underline underline-offset-2">Pilih file foto</span> atau unggah gambar ruangan
                 </p>
                 <p className="text-[11px] text-slate-400 mt-1">
                   Format JPG, PNG atau WebP (Rekomendasi minimal 1920x1080px)
@@ -478,7 +464,7 @@ export default function CreateWorkspacePage() {
                 <button
                   type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="text-[11px] text-[#006370] hover:underline font-semibold cursor-pointer"
+                  className="text-[11px] text-sky-600 hover:underline font-semibold cursor-pointer"
                 >
                   {showUrlInput ? "Tutup input URL" : "+ Tambah via Image URL"}
                 </button>
@@ -491,12 +477,12 @@ export default function CreateWorkspacePage() {
                     placeholder="https://images.unsplash.com/..."
                     value={customPhotoInput}
                     onChange={(e) => setCustomPhotoInput(e.target.value)}
-                    className="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-xs bg-white outline-none focus:border-[#006370]"
+                    className="flex-1 px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-white outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                   />
                   <button
                     type="button"
                     onClick={handleAddPhoto}
-                    className="px-3 py-1.5 bg-[#006370] text-white text-xs font-bold rounded-xs cursor-pointer"
+                    className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl cursor-pointer shadow-sm shadow-sky-600/25"
                   >
                     Tambah
                   </button>
@@ -509,9 +495,9 @@ export default function CreateWorkspacePage() {
                 {photos.map((url, idx) => (
                   <div
                     key={idx}
-                    className={`group relative aspect-4/3 rounded-xs overflow-hidden border-2 transition-all ${
+                    className={`group relative aspect-4/3 rounded-xl overflow-hidden border-2 transition-all ${
                       coverIndex === idx
-                        ? "border-[#006370] ring-1 ring-[#006370]/20"
+                        ? "border-sky-600 ring-2 ring-sky-600/20"
                         : "border-slate-200 hover:border-slate-300"
                     }`}
                   >
@@ -521,7 +507,7 @@ export default function CreateWorkspacePage() {
                       className="w-full h-full object-cover"
                     />
                     {coverIndex === idx && (
-                      <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-[#006370] text-white text-[9px] font-mono font-bold rounded-xs shadow-xs">
+                      <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-sky-600 text-white text-[9px] font-mono font-bold rounded-md shadow-xs">
                         UTAMA
                       </span>
                     )}
@@ -530,7 +516,7 @@ export default function CreateWorkspacePage() {
                         <button
                           type="button"
                           onClick={() => setCoverIndex(idx)}
-                          className="px-2 py-1 bg-white/90 hover:bg-white text-slate-800 text-[10px] font-bold rounded-xs cursor-pointer"
+                          className="px-2 py-1 bg-white/90 hover:bg-white text-slate-800 text-[10px] font-bold rounded-lg cursor-pointer"
                         >
                           Cover
                         </button>
@@ -538,7 +524,7 @@ export default function CreateWorkspacePage() {
                       <button
                         type="button"
                         onClick={() => handleRemovePhoto(idx)}
-                        className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xs cursor-pointer"
+                        className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -549,17 +535,17 @@ export default function CreateWorkspacePage() {
             )}
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <h2 className="font-serif text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900">
                   03 / Konfigurasi Tarif &amp; Pemesanan
                 </h2>
                 <p className="text-xs text-slate-500">
                   Penetapan harga per jam, paket sewa harian, dan buffer pembersihan.
                 </p>
               </div>
-              <span className="px-2 py-0.5 rounded-xs bg-[#E6F4F2] border border-[#BCE3DE] text-[10px] font-mono font-bold text-[#006370]">
+              <span className="px-2 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[10px] font-mono font-bold text-sky-700">
                 MATA UANG: IDR
               </span>
             </div>
@@ -580,7 +566,7 @@ export default function CreateWorkspacePage() {
                       min={0}
                       value={hourlyRate}
                       onChange={(e) => setHourlyRate(Number(e.target.value))}
-                      className="w-full pl-10 pr-12 py-2.5 text-xs font-bold bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 font-mono"
+                      className="w-full pl-10 pr-12 py-2.5 text-xs font-bold bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900 font-mono"
                     />
                     <span className="absolute right-3.5 top-2.5 text-[11px] font-medium text-slate-400">
                       / jam
@@ -602,7 +588,7 @@ export default function CreateWorkspacePage() {
                       min={0}
                       value={fullDayRate}
                       onChange={(e) => setFullDayRate(Number(e.target.value))}
-                      className="w-full pl-10 pr-12 py-2.5 text-xs font-bold bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 font-mono"
+                      className="w-full pl-10 pr-12 py-2.5 text-xs font-bold bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900 font-mono"
                     />
                     <span className="absolute right-3.5 top-2.5 text-[11px] font-medium text-slate-400">
                       / hari
@@ -619,7 +605,7 @@ export default function CreateWorkspacePage() {
                   <select
                     value={minDuration}
                     onChange={(e) => setMinDuration(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900 cursor-pointer"
                   >
                     <option value="1 Jam Minimal">1 Jam Minimal</option>
                     <option value="2 Jam Minimal">2 Jam Minimal</option>
@@ -635,7 +621,7 @@ export default function CreateWorkspacePage() {
                   <select
                     value={turnoverBuffer}
                     onChange={(e) => setTurnoverBuffer(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none transition-colors text-slate-900 cursor-pointer"
+                    className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none transition-colors text-slate-900 cursor-pointer"
                   >
                     <option value="15 Menit buffer antar reservasi">15 Menit buffer antar reservasi</option>
                     <option value="30 Menit buffer antar reservasi">30 Menit buffer antar reservasi</option>
@@ -647,17 +633,17 @@ export default function CreateWorkspacePage() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xs p-6 shadow-2xs space-y-5">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
             <div className="flex items-start justify-between border-b border-slate-100 pb-3">
               <div>
-                <h2 className="font-serif text-base font-bold text-slate-900">
+                <h2 className="text-base font-bold text-slate-900">
                   04 / Fasilitas &amp; Perlengkapan
                 </h2>
                 <p className="text-xs text-slate-500">
                   Pilih fasilitas resmi yang tersedia di ruangan ini.
                 </p>
               </div>
-              <span className="px-2 py-0.5 rounded-xs bg-slate-100 border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-mono font-bold text-slate-600">
                 {selectedAmenities.length} Terpilih
               </span>
             </div>
@@ -670,16 +656,16 @@ export default function CreateWorkspacePage() {
                     key={item.id}
                     type="button"
                     onClick={() => toggleAmenity(item.id)}
-                    className={`flex items-start gap-3 p-3.5 rounded-xs border text-left transition-all cursor-pointer ${
+                    className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                       checked
-                        ? "bg-[#E6F4F2]/50 border-[#006370] shadow-2xs"
+                        ? "bg-sky-50/60 border-sky-600 shadow-sm"
                         : "bg-white border-slate-200 hover:border-slate-300"
                     }`}
                   >
                     <div
-                      className={`w-4 h-4 mt-0.5 rounded-xs border flex items-center justify-center transition-colors shrink-0 ${
+                      className={`w-4 h-4 mt-0.5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
                         checked
-                          ? "bg-[#006370] border-[#006370] text-white"
+                          ? "bg-sky-600 border-sky-600 text-white"
                           : "border-slate-300 bg-white"
                       }`}
                     >
@@ -697,28 +683,28 @@ export default function CreateWorkspacePage() {
         </div>
 
         <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
-          <div className="bg-white border border-slate-200 rounded-xs p-5 shadow-2xs space-y-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5" />
                 PREVIEW KATALOG
               </span>
-              <span className="px-2 py-0.5 rounded-xs bg-emerald-50 border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">
+              <span className="px-2 py-0.5 rounded-md bg-sky-50 border border-sky-100 text-[10px] font-mono font-bold text-sky-700">
                 Siap Publikasi
               </span>
             </div>
 
-            <div className="border border-slate-200 rounded-xs overflow-hidden bg-white shadow-2xs">
+            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
               <div className="relative aspect-16/10 overflow-hidden bg-slate-100">
                 <img
                   src={photos[coverIndex] || photos[0] || PRESET_SAMPLE_PHOTOS[0]}
                   alt="Pratinjau Katalog"
                   className="w-full h-full object-cover"
                 />
-                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-xs bg-[#006370] text-white text-[10px] font-bold shadow-2xs font-mono">
+                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md bg-sky-600 text-white text-[10px] font-bold shadow-sm font-mono">
                   Booking Instan
                 </span>
-                <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-xs bg-slate-900/80 text-white text-[10px] font-mono backdrop-blur-xs">
+                <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-mono backdrop-blur-xs">
                   {floorUnit || "Lantai 3 • Unit 304"}
                 </span>
               </div>
@@ -740,7 +726,7 @@ export default function CreateWorkspacePage() {
                     return (
                       <span
                         key={id}
-                        className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-xs border border-slate-200"
+                        className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md border border-slate-200"
                       >
                         {found.tag}
                       </span>
@@ -764,20 +750,20 @@ export default function CreateWorkspacePage() {
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-xs p-5 shadow-2xs space-y-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" />
                 VERIFIKASI KELENGKAPAN
               </span>
-              <span className="px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 text-[10px] font-mono font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-mono font-bold">
                 {passedCount} / 4 Lolos
               </span>
             </div>
 
             <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#006370] transition-all duration-300"
+                className="h-full bg-sky-600 transition-all duration-300"
                 style={{ width: `${(passedCount / 4) * 100}%` }}
               />
             </div>
@@ -785,9 +771,9 @@ export default function CreateWorkspacePage() {
             <div className="space-y-2 text-xs text-slate-600 pt-1">
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-4 h-4 rounded-xs flex items-center justify-center ${
+                  className={`w-4 h-4 rounded-md flex items-center justify-center ${
                     auditDetailsPass
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-sky-100 text-sky-700"
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >
@@ -798,9 +784,9 @@ export default function CreateWorkspacePage() {
 
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-4 h-4 rounded-xs flex items-center justify-center ${
+                  className={`w-4 h-4 rounded-md flex items-center justify-center ${
                     auditPricingPass
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-sky-100 text-sky-700"
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >
@@ -811,9 +797,9 @@ export default function CreateWorkspacePage() {
 
               <div className="flex items-center gap-2">
                 <div
-                  className={`w-4 h-4 rounded-xs flex items-center justify-center ${
+                  className={`w-4 h-4 rounded-md flex items-center justify-center ${
                     auditPhotosPass
-                      ? "bg-emerald-100 text-emerald-700"
+                      ? "bg-sky-100 text-sky-700"
                       : "bg-slate-100 text-slate-400"
                   }`}
                 >

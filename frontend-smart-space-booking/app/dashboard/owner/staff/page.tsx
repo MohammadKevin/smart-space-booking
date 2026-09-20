@@ -14,9 +14,6 @@ import {
   UserCheck,
   Plus,
   Trash2,
-  Phone,
-  Mail,
-  Lock,
   Eye,
   EyeOff,
   Loader2,
@@ -28,13 +25,7 @@ import {
   Download,
   Clock,
   Radio,
-  SlidersHorizontal,
-  Key,
-  ChevronDown,
-  Check,
-  History,
   Shield,
-  ArrowRight,
 } from "lucide-react";
 
 export default function OwnerStaffPage() {
@@ -46,7 +37,6 @@ export default function OwnerStaffPage() {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -148,14 +138,14 @@ export default function OwnerStaffPage() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
             <span>WORKSPACE OWNER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Direktori {staffs.length} Staf Operasional
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Manajemen Staf &amp; Frontdesk
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -168,9 +158,9 @@ export default function OwnerStaffPage() {
             type="button"
             onClick={fetchStaffs}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-[#006370]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loading ? "animate-spin text-sky-600" : ""}`} />
             <span>Perbarui</span>
           </button>
           <button
@@ -188,7 +178,7 @@ export default function OwnerStaffPage() {
               a.download = `worknest-staff-audit-${Date.now()}.csv`;
               a.click();
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xs shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl shadow-sm transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Ekspor CSV</span>
@@ -196,7 +186,7 @@ export default function OwnerStaffPage() {
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold rounded-xs shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Undang Staf Baru</span>
@@ -205,15 +195,15 @@ export default function OwnerStaffPage() {
       </div>
 
       {actionSuccess && (
-        <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xs text-xs font-medium shadow-2xs">
+        <div className="flex items-center justify-between p-4 bg-sky-50 border border-sky-200 text-sky-800 rounded-xl text-xs font-medium shadow-sm">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
             <span>{actionSuccess}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccess(null)}
-            className="text-emerald-700 hover:text-emerald-900 p-0.5 cursor-pointer"
+            className="text-sky-700 hover:text-sky-900 p-0.5 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -221,7 +211,7 @@ export default function OwnerStaffPage() {
       )}
 
       {error && (
-        <div className="flex items-center justify-between p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xs text-xs font-medium shadow-2xs">
+        <div className="flex items-center justify-between p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium shadow-sm">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
@@ -237,12 +227,12 @@ export default function OwnerStaffPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL STAF TERDAFTAR
             </span>
-            <UserCheck className="w-4 h-4 text-[#006370]" />
+            <UserCheck className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
             {staffs.length}
@@ -252,14 +242,14 @@ export default function OwnerStaffPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               STATUS TERMINAL
             </span>
-            <Clock className="w-4 h-4 text-emerald-600" />
+            <Clock className="w-4 h-4 text-sky-600" />
           </div>
-          <div className="text-2xl font-bold text-emerald-700 font-mono">
+          <div className="text-2xl font-bold text-sky-700 font-mono">
             Online
           </div>
           <p className="text-[11px] text-slate-500">
@@ -267,7 +257,7 @@ export default function OwnerStaffPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               LINGKUP OTORITAS
@@ -282,23 +272,23 @@ export default function OwnerStaffPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 shadow-2xs space-y-2">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               KEAMANAN AUTENTIKASI
             </span>
-            <Shield className="w-4 h-4 text-[#006370]" />
+            <Shield className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-xl font-bold text-slate-900 font-mono">
             JWT Token
           </div>
-          <p className="text-[11px] text-emerald-700 font-medium">
+          <p className="text-[11px] text-sky-700 font-medium">
             Enkripsi bcrypt terverifikasi
           </p>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-3" />
           <input
@@ -306,7 +296,7 @@ export default function OwnerStaffPage() {
             placeholder="Cari nama, email, atau no. telepon..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-[#006370] rounded-xs outline-none text-slate-900 transition-colors"
+            className="w-full pl-9 pr-4 py-2 text-xs font-medium bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl outline-none text-slate-900 transition-colors"
           />
         </div>
 
@@ -315,10 +305,10 @@ export default function OwnerStaffPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs overflow-hidden shadow-2xs">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-12 text-center">
-            <Loader2 className="w-6 h-6 animate-spin text-[#006370] mx-auto mb-2" />
+            <Loader2 className="w-6 h-6 animate-spin text-sky-600 mx-auto mb-2" />
             <p className="text-xs text-slate-500">Memuat direktori staf...</p>
           </div>
         ) : filteredStaffs.length === 0 ? (
@@ -343,10 +333,10 @@ export default function OwnerStaffPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredStaffs.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center font-bold text-xs shrink-0 border border-[#BCE3DE]">
+                        <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-100">
                           {(s.namaStaff || "ST").slice(0, 2).toUpperCase()}
                         </div>
                         <div>
@@ -365,7 +355,7 @@ export default function OwnerStaffPage() {
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-xs bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">
                         Frontdesk Scanner
                       </span>
                     </td>
@@ -374,7 +364,7 @@ export default function OwnerStaffPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(s)}
-                        className="px-2.5 py-1 rounded-xs border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer"
+                        className="px-2.5 py-1 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
                       >
                         Cabut Akses
                       </button>
@@ -389,25 +379,25 @@ export default function OwnerStaffPage() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white border border-slate-200 rounded-xs max-w-md w-full p-6 shadow-xl space-y-4 animate-in fade-in zoom-in-95">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-sm space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                   <UserCheck className="w-4 h-4" />
                 </div>
-                <h3 className="font-serif text-base font-bold text-slate-900">Undang Anggota Staf Baru</h3>
+                <h3 className="text-base font-bold text-slate-900">Undang Anggota Staf Baru</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-xl cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xs">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl">
                 {formError}
               </div>
             )}
@@ -420,7 +410,7 @@ export default function OwnerStaffPage() {
                   placeholder="Contoh: Bayu Pratama"
                   value={namaStaff}
                   onChange={(e) => setNamaStaff(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900"
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-slate-900"
                   required
                 />
               </div>
@@ -432,7 +422,7 @@ export default function OwnerStaffPage() {
                   placeholder="bayu.front@worknest.id"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900 font-mono"
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-slate-900 font-mono"
                   required
                 />
               </div>
@@ -444,7 +434,7 @@ export default function OwnerStaffPage() {
                   placeholder="08123456789"
                   value={telp}
                   onChange={(e) => setTelp(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900 font-mono"
+                  className="w-full px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-slate-900 font-mono"
                   required
                 />
               </div>
@@ -457,7 +447,7 @@ export default function OwnerStaffPage() {
                     placeholder="Minimal 6 karakter"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-3 pr-9 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xs outline-none focus:border-[#006370] text-slate-900"
+                    className="w-full pl-3 pr-9 py-2 border border-slate-200 bg-slate-50 hover:bg-white focus:bg-white rounded-xl outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-slate-900"
                     required
                   />
                   <button
@@ -481,7 +471,7 @@ export default function OwnerStaffPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white font-bold rounded-xs shadow-2xs disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-bold rounded-xl shadow-sm shadow-sky-600/25 disabled:opacity-50 cursor-pointer"
                 >
                   {formLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Kirim Undangan
@@ -494,12 +484,12 @@ export default function OwnerStaffPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white border border-slate-200 rounded-xs max-w-sm w-full p-6 shadow-xl space-y-4 text-center animate-in fade-in zoom-in-95">
-            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 shadow-sm space-y-4 text-center animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <Trash2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-serif text-base font-bold text-slate-900">Cabut Akses Staf?</h3>
+              <h3 className="text-base font-bold text-slate-900">Cabut Akses Staf?</h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 Apakah Anda yakin ingin mencabut seluruh kredensial &amp; akses sistem milik{" "}
                 <strong>"{deleteTarget.namaStaff}"</strong>?
@@ -509,7 +499,7 @@ export default function OwnerStaffPage() {
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-xs cursor-pointer"
+                className="flex-1 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 border border-slate-200 bg-white rounded-xl cursor-pointer shadow-sm"
               >
                 Batal
               </button>
@@ -517,7 +507,7 @@ export default function OwnerStaffPage() {
                 type="button"
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xs shadow-2xs disabled:opacity-50 cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-sm shadow-rose-600/25 disabled:opacity-50 cursor-pointer"
               >
                 {deleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Cabut Akses

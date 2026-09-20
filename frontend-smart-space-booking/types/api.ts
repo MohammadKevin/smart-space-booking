@@ -198,6 +198,9 @@ export interface FilterSpaceDto {
   tanggal?: string;
   jamMulai?: string;
   durasiJam?: number;
+  date?: string;
+  duration?: string;
+  onlyAvailable?: boolean;
 }
 
 export interface Discount {

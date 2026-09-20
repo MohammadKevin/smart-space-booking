@@ -85,7 +85,7 @@ const PAYMENT_OPTIONS: PaymentOption[] = [
     badge: "BNI",
     desc: "Transfer via BNI Mobile Banking atau ATM BNI",
     bankCode: "BNI",
-    iconBg: "bg-teal-50 text-teal-700 border-teal-200",
+    iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   {
     key: "bri_va",
@@ -111,7 +111,7 @@ const PAYMENT_OPTIONS: PaymentOption[] = [
     category: "qris",
     badge: "QRIS",
     desc: "BCA, GoPay, OVO, DANA, ShopeePay, LinkAja",
-    iconBg: "bg-cyan-50 text-[#006370] border-[#BCE3DE]",
+    iconBg: "bg-sky-50 text-sky-600 border-sky-200",
   },
   {
     key: "gopay",
@@ -182,7 +182,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [guideTab, setGuideTab] = useState<"mbanking" | "atm" | "internet">("mbanking");
 
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const redirectTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -420,7 +419,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     return (
       <DashboardLayout>
         <div className="py-24 flex flex-col items-center justify-center text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-[#006370] mb-2" />
+          <Loader2 className="w-8 h-8 animate-spin text-sky-600 mb-2" />
           <p className="text-xs">Memuat rincian checkout...</p>
         </div>
       </DashboardLayout>
@@ -431,10 +430,10 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     return (
       <DashboardLayout>
         <div className="max-w-md mx-auto py-16 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="font-serif text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900">
             Reservasi Tidak Ditemukan
           </h2>
           <p className="text-xs text-slate-500">
@@ -442,7 +441,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
           </p>
           <Link
             href="/dashboard/member/spaces"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#006370] hover:bg-[#004f59] text-white text-xs font-semibold rounded-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Katalog Ruangan</span>
@@ -457,14 +456,14 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
       <div className="space-y-6 pb-16">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
               <span>CHECKOUT RESERVASI</span>
               <span className="text-slate-300">•</span>
               <span className="text-slate-500 font-sans font-normal">
                 Tagihan #{reservation.id}
               </span>
             </div>
-            <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Pembayaran &amp; Konfirmasi
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -473,38 +472,38 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
           </div>
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-[#006370] bg-[#E6F4F2] px-3 py-1.5 rounded-xs border border-[#BCE3DE]">
-              <Clock className="w-3.5 h-3.5 text-[#006370]" />
+            <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-sky-700 bg-sky-50 px-3.5 py-1.5 rounded-xl border border-sky-200">
+              <Clock className="w-3.5 h-3.5 text-sky-600" />
               <span>Sisa Waktu: {formatTime(holdTimer)}</span>
             </div>
           </div>
         </div>
 
         {payError && (
-          <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5 shadow-2xs">
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5 shadow-sm">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
             <span>{payError}</span>
           </div>
         )}
 
         {paySuccess ? (
-          <div className="bg-white border border-slate-200 rounded-xs p-8 text-center space-y-6 shadow-2xl max-w-lg mx-auto relative overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-2xl max-w-lg mx-auto relative overflow-hidden animate-in fade-in zoom-in-95">
             <div className="absolute -top-12 -left-12 w-36 h-36 bg-emerald-100 rounded-full blur-3xl pointer-events-none opacity-60" />
-            <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-[#E6F4F2] rounded-full blur-3xl pointer-events-none opacity-60" />
+            <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-sky-100 rounded-full blur-3xl pointer-events-none opacity-60" />
 
             <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
               <div className="absolute inset-0 rounded-full bg-emerald-100/70 animate-ping opacity-75" />
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
                 <Check className="w-9 h-9 stroke-[3]" />
               </div>
             </div>
 
             <div className="space-y-1.5 relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-xs bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold font-mono uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold font-mono uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Transaksi Lunas &amp; Terverifikasi</span>
               </div>
-              <h2 className="font-serif text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-extrabold text-slate-900">
                 Pembayaran Berhasil!
               </h2>
               <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
@@ -512,13 +511,13 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               </p>
             </div>
 
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xs text-left space-y-2 text-xs relative z-10">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2 text-xs relative z-10">
               <div className="flex justify-between items-center border-b border-slate-200/70 pb-2">
                 <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                  <Ticket className="w-4 h-4 text-[#006370]" />
+                  <Ticket className="w-4 h-4 text-sky-600" />
                   <span>{roomName}</span>
                 </div>
-                <span className="font-mono text-[11px] font-bold text-[#006370] bg-[#E6F4F2] px-2 py-0.5 rounded-xs border border-[#BCE3DE]">
+                <span className="font-mono text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-lg border border-sky-200">
                   {reservation?.qrCode || `RES-${reservation?.id}`}
                 </span>
               </div>
@@ -537,14 +536,14 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
             <div className="space-y-1.5 text-xs text-slate-500 font-medium relative z-10">
               <div className="flex items-center justify-between text-[11px]">
                 <span className="flex items-center gap-1.5">
-                  <Loader2 className="w-3 h-3 text-[#006370] animate-spin" />
+                  <Loader2 className="w-3 h-3 text-sky-600 animate-spin" />
                   <span>Mengalihkan ke halaman tiket...</span>
                 </span>
                 <span className="font-mono font-bold text-slate-900">{countdown}s</span>
               </div>
               <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#006370] transition-all duration-1000 ease-linear rounded-full"
+                  className="h-full bg-sky-600 transition-all duration-1000 ease-linear rounded-full"
                   style={{ width: `${((4 - countdown) / 4) * 100}%` }}
                 />
               </div>
@@ -553,14 +552,14 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
             <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center relative z-10">
               <Link
                 href={targetRedirectUrl}
-                className="flex-1 py-2.5 px-4 bg-[#006370] text-white rounded-xs text-xs font-bold shadow-2xs hover:bg-[#004f59] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="flex-1 py-2.5 px-4 bg-sky-600 text-white rounded-xl text-xs font-bold shadow-sm shadow-sky-600/25 hover:bg-sky-500 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Ticket className="w-3.5 h-3.5" />
                 <span>Buka Tiket Saya Sekarang</span>
               </Link>
               <Link
                 href="/dashboard/member/transactions"
-                className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xs text-xs font-semibold hover:bg-slate-50 transition-colors"
+                className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm"
               >
                 Lihat Invoice
               </Link>
@@ -569,10 +568,10 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-8 space-y-6">
-              <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-5 shadow-2xs">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-sm">
                 <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
                   <div>
-                    <h2 className="font-serif text-base font-bold text-slate-900">
+                    <h2 className="text-base font-bold text-slate-900">
                       Pilihan Metode Pembayaran Midtrans
                     </h2>
                     <p className="text-xs text-slate-500">
@@ -587,7 +586,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
                       TRANSFER VIRTUAL ACCOUNT (VERIFIKASI OTOMATIS 24 JAM)
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                       {PAYMENT_OPTIONS.filter((p) => p.category === "va").map((opt) => {
                         const isSelected = selectedMethod === opt.key;
                         return (
@@ -595,17 +594,17 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                             key={opt.key}
                             type="button"
                             onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xs border text-left transition-all cursor-pointer ${
+                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                               isSelected
-                                ? "border-[#006370] bg-[#E6F4F2]/50 shadow-2xs ring-1 ring-[#006370]/20"
+                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
                                 : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                           >
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-xs text-[9px] font-mono font-bold border ${opt.iconBg}`}>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
                                 {opt.bankCode || opt.badge}
                               </span>
-                              <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? "bg-[#006370] border-[#006370]" : "border-slate-300"}`}>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
                                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </div>
                             </div>
@@ -621,7 +620,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
                       QRIS &amp; INSTANT E-WALLET
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {PAYMENT_OPTIONS.filter((p) => p.category === "qris").map((opt) => {
                         const isSelected = selectedMethod === opt.key;
                         return (
@@ -629,17 +628,17 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                             key={opt.key}
                             type="button"
                             onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xs border text-left transition-all cursor-pointer ${
+                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                               isSelected
-                                ? "border-[#006370] bg-[#E6F4F2]/50 shadow-2xs ring-1 ring-[#006370]/20"
+                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
                                 : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                           >
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-xs text-[9px] font-mono font-bold border ${opt.iconBg}`}>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
                                 {opt.badge}
                               </span>
-                              <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? "bg-[#006370] border-[#006370]" : "border-slate-300"}`}>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
                                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </div>
                             </div>
@@ -655,7 +654,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
                       KARTU KREDIT &amp; GERAI RETAIL
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {PAYMENT_OPTIONS.filter((p) => p.category === "other").map((opt) => {
                         const isSelected = selectedMethod === opt.key;
                         return (
@@ -663,17 +662,17 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                             key={opt.key}
                             type="button"
                             onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xs border text-left transition-all cursor-pointer ${
+                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
                               isSelected
-                                ? "border-[#006370] bg-[#E6F4F2]/50 shadow-2xs ring-1 ring-[#006370]/20"
+                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
                                 : "border-slate-200 hover:border-slate-300 bg-white"
                             }`}
                           >
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-xs text-[9px] font-mono font-bold border ${opt.iconBg}`}>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
                                 {opt.badge}
                               </span>
-                              <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? "bg-[#006370] border-[#006370]" : "border-slate-300"}`}>
+                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
                                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                               </div>
                             </div>
@@ -687,8 +686,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xs border border-slate-200 p-6 space-y-4 shadow-2xs">
-                <h3 className="font-serif text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                   Rincian Pemesanan Ruangan
                 </h3>
 
@@ -721,8 +720,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
             </div>
 
             <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-20">
-              <div className="bg-white rounded-xs border border-slate-200 p-5 space-y-4 shadow-2xs">
-                <h3 className="font-serif text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                   Ringkasan Tagihan
                 </h3>
 
@@ -739,16 +738,16 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <span className="font-bold text-slate-900 text-sm">Total Pembayaran</span>
-                    <span className="text-lg font-bold text-[#006370] font-mono">
+                    <span className="text-xl font-bold text-sky-600 font-mono">
                       {formatRupiah(amountDue)}
                     </span>
                   </div>
 
-                  <div className="p-2.5 bg-slate-50 rounded-xs border border-slate-200 text-[11px] text-slate-500 space-y-1">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                      <CreditCard className="w-3.5 h-3.5 text-[#006370]" />
+                      <CreditCard className="w-3.5 h-3.5 text-sky-600" />
                       <span>{selectedOption.name}</span>
                     </div>
                     <p className="leading-relaxed">Nomor VA &amp; panduan akan langsung muncul pada popup setelah klik Bayar Sekarang.</p>
@@ -756,13 +755,13 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
 
                 {holdTimer <= 0 && !paySuccess ? (
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xs text-xs text-amber-900 space-y-2 text-center">
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-2 text-center">
                     <p className="font-semibold">Sesi Pembayaran Telah Berakhir</p>
                     <p className="text-[11px] text-amber-700 leading-relaxed">Batas waktu penahanan slot (15 menit) telah habis. Slot ruangan telah dilepaskan kembali.</p>
                     <div className="pt-1">
                       <Link
                         href={`/booking/${reservation?.detailReservasi?.spaceId || ""}`}
-                        className="inline-block px-3.5 py-1.5 bg-[#006370] hover:bg-[#004f59] text-white rounded-xs text-xs font-bold transition-colors"
+                        className="inline-block px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-sky-600/25"
                       >
                         Pesan Ulang Ruangan
                       </Link>
@@ -773,7 +772,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     type="button"
                     onClick={handlePayNow}
                     disabled={paying || holdTimer <= 0}
-                    className="w-full py-2.5 px-4 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
                   >
                     {paying ? (
                       <>
@@ -796,10 +795,10 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
       {modalOpen && paymentDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="bg-white rounded-xs max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center border border-[#BCE3DE]">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200">
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <div>
@@ -812,20 +811,20 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-xs hover:bg-slate-100 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-4 rounded-xs bg-slate-50 border border-slate-200 space-y-3">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 {selectedOption.category === "qris" ? (
                   <div className="flex flex-col items-center justify-center text-center space-y-2">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                       SCAN QRIS CODE DI BAWAH
                     </span>
-                    <div className="p-3 bg-white rounded-xs border border-slate-200 shadow-xs">
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
                       <QrCodeCard
                         value={paymentDetails.qrString || reservation.qrCode}
                         size={170}
@@ -840,7 +839,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 ) : selectedMethod === "mandiri_bill" ? (
                   <div className="space-y-2.5">
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 bg-white rounded-xs border border-slate-200">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
                         <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Kode Perusahaan (Biller)</span>
                         <div className="flex items-center justify-between mt-1">
                           <span className="font-mono text-sm font-bold text-slate-900">{paymentDetails.billerCode || "70012"}</span>
@@ -849,17 +848,17 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                             onClick={() => {
                               navigator.clipboard.writeText(paymentDetails.billerCode || "70012");
                             }}
-                            className="text-[#006370] text-[10px] font-bold hover:underline cursor-pointer"
+                            className="text-sky-600 text-[10px] font-bold hover:underline cursor-pointer"
                           >
                             Salin
                           </button>
                         </div>
                       </div>
 
-                      <div className="p-2.5 bg-white rounded-xs border border-slate-200">
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
                         <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Nomor Pelanggan (Bill Key)</span>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="font-mono text-sm font-bold text-[#006370]">{paymentDetails.billKey || paymentDetails.vaNumber || String(reservation.id)}</span>
+                          <span className="font-mono text-sm font-bold text-sky-600">{paymentDetails.billKey || paymentDetails.vaNumber || String(reservation.id)}</span>
                           <button
                             type="button"
                             onClick={() => {
@@ -867,7 +866,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                               setCopiedBillKey(true);
                               setTimeout(() => setCopiedBillKey(false), 2000);
                             }}
-                            className="text-[#006370] text-[10px] font-bold hover:underline cursor-pointer"
+                            className="text-sky-600 text-[10px] font-bold hover:underline cursor-pointer"
                           >
                             {copiedBillKey ? "Tersalin" : "Salin"}
                           </button>
@@ -880,8 +879,8 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
                       NOMOR VIRTUAL ACCOUNT {selectedOption.bankCode || ""}
                     </span>
-                    <div className="flex items-center justify-between p-3 bg-white rounded-xs border border-slate-200">
-                      <span className="font-mono text-base font-bold text-[#006370] tracking-wider select-all">
+                    <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm">
+                      <span className="font-mono text-base font-bold text-sky-600 tracking-wider select-all">
                         {paymentDetails.vaNumber || "Membuat VA..."}
                       </span>
                       {paymentDetails.vaNumber && (
@@ -892,7 +891,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                             setCopiedVA(true);
                             setTimeout(() => setCopiedVA(false), 2000);
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition-colors cursor-pointer border border-slate-200"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition-colors cursor-pointer border border-slate-200 shadow-sm"
                         >
                           {copiedVA ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                           <span>{copiedVA ? "Tersalin" : "Salin VA"}</span>
@@ -914,7 +913,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                       setCopiedAmount(true);
                       setTimeout(() => setCopiedAmount(false), 2000);
                     }}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xs bg-white hover:bg-slate-100 text-slate-700 font-semibold text-[10px] transition-colors cursor-pointer border border-slate-200"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-semibold text-[10px] transition-colors cursor-pointer border border-slate-200 shadow-sm"
                   >
                     {copiedAmount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedAmount ? "Tersalin" : "Salin Nominal"}</span>
@@ -922,35 +921,35 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 bg-[#E6F4F2]/50 border border-[#BCE3DE] rounded-xs text-[11px] text-[#006370]">
+              <div className="flex items-center justify-between p-3 bg-sky-50/70 border border-sky-200 rounded-xl text-[11px] text-sky-800">
                 <div className="flex items-center gap-2 font-medium">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
-                  <span>Sistem otomatis mengecek status pembayaran Anda setiap 2 detik...</span>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0 text-sky-600" />
+                  <span>Sistem otomatis mengecek status pembayaran Anda secara berkala...</span>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xs border border-slate-200 p-4 space-y-3">
+              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <h4 className="font-bold text-slate-900 text-xs">Panduan Pembayaran ({selectedOption.badge})</h4>
                   <div className="flex items-center gap-1 text-[11px] font-semibold">
                     <button
                       type="button"
                       onClick={() => setGuideTab("mbanking")}
-                      className={`px-2 py-0.5 rounded-xs transition-colors cursor-pointer ${guideTab === "mbanking" ? "bg-[#006370] text-white font-bold" : "text-slate-500 hover:bg-slate-100"}`}
+                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "mbanking" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
                     >
                       M-Banking
                     </button>
                     <button
                       type="button"
                       onClick={() => setGuideTab("atm")}
-                      className={`px-2 py-0.5 rounded-xs transition-colors cursor-pointer ${guideTab === "atm" ? "bg-[#006370] text-white font-bold" : "text-slate-500 hover:bg-slate-100"}`}
+                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "atm" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
                     >
                       ATM
                     </button>
                     <button
                       type="button"
                       onClick={() => setGuideTab("internet")}
-                      className={`px-2 py-0.5 rounded-xs transition-colors cursor-pointer ${guideTab === "internet" ? "bg-[#006370] text-white font-bold" : "text-slate-500 hover:bg-slate-100"}`}
+                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "internet" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
                     >
                       Internet Banking
                     </button>
@@ -997,12 +996,12 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
                   type="button"
                   onClick={handleManualCheckStatus}
                   disabled={syncingStatus}
-                  className="w-full py-2.5 px-4 bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white font-bold rounded-xs shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {syncingStatus ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    <RefreshCw className="w-3.5 h-3.5" />
+                    <RefreshCw className="w-4 h-4" />
                   )}
                   <span>Cek Status Sekarang</span>
                 </button>

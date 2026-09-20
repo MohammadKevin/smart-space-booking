@@ -116,6 +116,25 @@ export class SpaceService {
       } else if (filter.duration.includes('17:00 - 21:00')) {
         jamMulai = '17:00';
         durasiJam = 4;
+      } else if (filter.duration.includes('10:00 - 12:00')) {
+        jamMulai = '10:00';
+        durasiJam = 2;
+      } else {
+        const matchRange = filter.duration.match(
+          /(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/,
+        );
+        if (matchRange) {
+          jamMulai = matchRange[1].padStart(5, '0');
+          const startM = timeStringToMinutes(matchRange[1]);
+          const endM = timeStringToMinutes(matchRange[2]);
+          durasiJam = Math.max(1, Math.round((endM - startM) / 60));
+        } else {
+          const matchHours = filter.duration.match(/(\d+)\s*jam/i);
+          if (matchHours) {
+            durasiJam = parseInt(matchHours[1], 10);
+            jamMulai = '09:00';
+          }
+        }
       }
     }
 
@@ -192,14 +211,22 @@ export class SpaceService {
       });
     }
 
+    const isOnlyAvailable =
+      filter.onlyAvailable === true || (filter.onlyAvailable as any) === 'true';
+
+    if (isOnlyAvailable) {
+      processedSpaces = processedSpaces.filter((s) => s.isAvailable !== false);
+    }
+
     if (page !== undefined || limit !== undefined) {
       const l = limit || 10;
+      const effectiveTotal = isOnlyAvailable ? processedSpaces.length : total;
       return {
         data: processedSpaces,
-        total,
+        total: effectiveTotal,
         page: page || 1,
         limit: l,
-        totalPages: Math.ceil(total / l),
+        totalPages: Math.max(1, Math.ceil(effectiveTotal / l)),
       };
     }
 

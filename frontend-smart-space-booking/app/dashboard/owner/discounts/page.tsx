@@ -27,10 +27,8 @@ import {
   X,
   Search,
   Building2,
-  Download,
   TrendingUp,
   DollarSign,
-  Zap,
 } from "lucide-react";
 
 export default function OwnerDiscountsPage() {
@@ -44,8 +42,6 @@ export default function OwnerDiscountsPage() {
 
   const [activeTab, setActiveTab] = useState<"all" | "active" | "scheduled" | "expired">("all");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [yieldAutomation, setYieldAutomation] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
@@ -174,12 +170,12 @@ export default function OwnerDiscountsPage() {
     const end = new Date(d.tanggalAkhir);
 
     if (now < start) {
-      return { label: "Terjadwal", color: "bg-blue-50 text-blue-700 border-blue-200" };
+      return { label: "Terjadwal", color: "bg-sky-50 text-sky-700 border-sky-200" };
     }
     if (now > end) {
       return { label: "Berakhir", color: "bg-slate-100 text-slate-500 border-slate-200" };
     }
-    return { label: "Aktif", color: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+    return { label: "Aktif", color: "bg-sky-50 text-sky-700 border-sky-100" };
   };
 
   const filteredDiscounts = useMemo(() => {
@@ -232,14 +228,14 @@ export default function OwnerDiscountsPage() {
     <div className="space-y-6 pb-16">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#006370] mb-1">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
             <span>WORKSPACE OWNER</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               Program Promo &amp; Voucher
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Diskon &amp; Kode Promo
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
@@ -252,15 +248,15 @@ export default function OwnerDiscountsPage() {
             type="button"
             onClick={fetchDiscountsAndSpaces}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xs border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#006370]" : "text-slate-500"}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-sky-600" : "text-slate-500"}`} />
             <span>Perbarui</span>
           </button>
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xs bg-[#006370] hover:bg-[#004f59] active:bg-[#003d45] text-white text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Buat Kode Promo</span>
@@ -269,19 +265,19 @@ export default function OwnerDiscountsPage() {
       </div>
 
       {actionSuccess && (
-        <div className="p-4 rounded-xs bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs text-emerald-800 shadow-2xs">
+        <div className="p-4 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-between text-xs text-sky-800 shadow-sm">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
             <span className="font-semibold">{actionSuccess}</span>
           </div>
-          <button type="button" onClick={() => setActionSuccess(null)} className="text-emerald-700 hover:text-emerald-900 font-bold p-0.5 cursor-pointer">
+          <button type="button" onClick={() => setActionSuccess(null)} className="text-sky-700 hover:text-sky-900 font-bold p-0.5 cursor-pointer">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-xs bg-rose-50 border border-rose-200 flex items-center justify-between text-xs text-rose-800 shadow-2xs">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-xs text-rose-800 shadow-sm">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span className="font-semibold">{error}</span>
@@ -293,13 +289,13 @@ export default function OwnerDiscountsPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 space-y-2 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               VOUCHER AKTIF
             </span>
-            <div className="w-7 h-7 rounded-xs bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center">
-              <TicketPercent className="w-4 h-4 text-[#006370]" />
+            <div className="w-7 h-7 rounded-xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center">
+              <TicketPercent className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
@@ -310,13 +306,13 @@ export default function OwnerDiscountsPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 space-y-2 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TERJADWAL
             </span>
-            <div className="w-7 h-7 rounded-xs bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-cyan-600" />
+            <div className="w-7 h-7 rounded-xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-sky-600" />
             </div>
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
@@ -327,12 +323,12 @@ export default function OwnerDiscountsPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 space-y-2 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               KADALUARSA
             </span>
-            <div className="w-7 h-7 rounded-xs bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center">
               <DollarSign className="w-4 h-4 text-slate-400" />
             </div>
           </div>
@@ -344,12 +340,12 @@ export default function OwnerDiscountsPage() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xs p-5 space-y-2 shadow-2xs">
+        <div className="bg-white border border-slate-200/90 rounded-xl p-5 space-y-2 shadow-sm">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL KAMPANYE
             </span>
-            <span className="px-2 py-0.5 rounded-xs text-[10px] font-bold bg-[#E6F4F2] text-[#006370] border border-[#BCE3DE]">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
               {discounts.length} Promo
             </span>
           </div>
@@ -362,7 +358,7 @@ export default function OwnerDiscountsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xs p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold w-full sm:w-auto">
           {[
             { id: "all", label: `Semua (${counts.all})` },
@@ -374,9 +370,9 @@ export default function OwnerDiscountsPage() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-xs transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-[#006370] text-white font-bold shadow-2xs"
+                  ? "bg-sky-600 text-white font-bold shadow-sm"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
@@ -392,20 +388,20 @@ export default function OwnerDiscountsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari kode atau nama promo..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#006370] transition-colors"
+            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 transition-colors"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-xs border border-slate-200 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
         {loading ? (
           <div className="p-12 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-[#006370]" />
+            <Loader2 className="w-4 h-4 animate-spin text-sky-600" />
             <span>Memuat data voucher promo...</span>
           </div>
         ) : filteredDiscounts.length === 0 ? (
           <div className="p-12 text-center space-y-3">
-            <div className="w-10 h-10 rounded-xs bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto">
+            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto">
               <TicketPercent className="w-5 h-5" />
             </div>
             <div className="space-y-1">
@@ -419,7 +415,7 @@ export default function OwnerDiscountsPage() {
             <button
               type="button"
               onClick={handleOpenCreate}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-sm shadow-sky-600/25"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Buat Kode Promo Baru</span>
@@ -450,7 +446,7 @@ export default function OwnerDiscountsPage() {
                       <td className="py-3.5 px-4">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 px-2 py-0.5 rounded-xs border border-slate-200">
+                            <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-200">
                               {d.kodeDiskon}
                             </span>
                             <button
@@ -460,7 +456,7 @@ export default function OwnerDiscountsPage() {
                               title="Salin Kode"
                             >
                               {isCopied ? (
-                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <Check className="w-3.5 h-3.5 text-sky-600" />
                               ) : (
                                 <Copy className="w-3.5 h-3.5" />
                               )}
@@ -496,7 +492,7 @@ export default function OwnerDiscountsPage() {
 
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs text-[10px] font-bold border ${status.color}`}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border ${status.color}`}
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-current" />
                           <span>{status.label}</span>
@@ -508,14 +504,14 @@ export default function OwnerDiscountsPage() {
                           <button
                             type="button"
                             onClick={() => handleOpenEdit(d)}
-                            className="px-2.5 py-1 rounded-xs border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                            className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => setDeleteTarget(d)}
-                            className="p-1 rounded-xs hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                            className="p-1 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                             title="Hapus"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -533,27 +529,27 @@ export default function OwnerDiscountsPage() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xs bg-[#E6F4F2] text-[#006370] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
                   <TicketPercent className="w-4 h-4" />
                 </div>
-                <h3 className="font-serif text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-slate-900">
                   {editingDiscount ? "Ubah Kode Promo" : "Terbitkan Kode Promo Baru"}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-xl cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {formError && (
-              <div className="p-3 rounded-xs bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
                 <span>{formError}</span>
               </div>
@@ -570,7 +566,7 @@ export default function OwnerDiscountsPage() {
                   value={namaDiskon}
                   onChange={(e) => setNamaDiskon(e.target.value)}
                   placeholder="Contoh: Early Bird Workspace 20%"
-                  className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-slate-900 focus:outline-none focus:border-[#006370]"
+                  className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                 />
               </div>
 
@@ -585,7 +581,7 @@ export default function OwnerDiscountsPage() {
                     value={kodeDiskon}
                     onChange={(e) => setKodeDiskon(e.target.value.toUpperCase())}
                     placeholder="Contoh: WORKNEST20"
-                    className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#006370]"
+                    className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                   />
                   <button
                     type="button"
@@ -593,7 +589,7 @@ export default function OwnerDiscountsPage() {
                       const rand = `WN${Math.floor(100 + Math.random() * 900)}`;
                       setKodeDiskon(rand);
                     }}
-                    className="px-3 py-2 rounded-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold shrink-0 cursor-pointer border border-slate-200"
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold shrink-0 cursor-pointer border border-slate-200"
                   >
                     Auto
                   </button>
@@ -611,7 +607,7 @@ export default function OwnerDiscountsPage() {
                   required
                   value={persentaseDiskon}
                   onChange={(e) => setPersentaseDiskon(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-[#006370]"
+                  className="w-full px-3.5 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                 />
               </div>
 
@@ -625,7 +621,7 @@ export default function OwnerDiscountsPage() {
                     required
                     value={tanggalAwal}
                     onChange={(e) => setTanggalAwal(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-slate-800 focus:outline-none focus:border-[#006370]"
+                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                   />
                 </div>
                 <div className="space-y-1">
@@ -637,7 +633,7 @@ export default function OwnerDiscountsPage() {
                     required
                     value={tanggalAkhir}
                     onChange={(e) => setTanggalAkhir(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-slate-800 focus:outline-none focus:border-[#006370]"
+                    className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15"
                   />
                 </div>
               </div>
@@ -649,7 +645,7 @@ export default function OwnerDiscountsPage() {
                 <select
                   value={spaceId}
                   onChange={(e) => setSpaceId(e.target.value ? Number(e.target.value) : "")}
-                  className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xs text-slate-800 focus:outline-none focus:border-[#006370] cursor-pointer"
+                  className="w-full px-3 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 cursor-pointer"
                 >
                   <option value="">Semua Ruangan</option>
                   {spaces.map((sp) => (
@@ -664,14 +660,14 @@ export default function OwnerDiscountsPage() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 rounded-xs border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs font-semibold cursor-pointer shadow-sm"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="px-4 py-2 rounded-xs bg-[#006370] hover:bg-[#004f59] text-white text-xs font-bold shadow-2xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold shadow-sm shadow-sky-600/25 cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
                 >
                   {formLoading ? (
                     <>
@@ -690,12 +686,12 @@ export default function OwnerDiscountsPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xs shadow-xl border border-slate-200 max-w-sm w-full p-6 space-y-4 text-center animate-in fade-in zoom-in-95">
-            <div className="w-10 h-10 rounded-xs bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 max-w-sm w-full p-6 space-y-4 text-center animate-in fade-in zoom-in-95">
+            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-100">
               <Trash2 className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-serif text-base font-bold text-slate-900">Hapus Kode Promo?</h3>
+              <h3 className="text-base font-bold text-slate-900">Hapus Kode Promo?</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Apakah Anda yakin ingin menghapus kode promo{" "}
                 <strong className="text-slate-800 font-mono">{deleteTarget.kodeDiskon}</strong>? Tindakan ini tidak dapat dibatalkan.
@@ -706,7 +702,7 @@ export default function OwnerDiscountsPage() {
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
-                className="flex-1 px-4 py-2 rounded-xs border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer"
+                className="flex-1 px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-semibold cursor-pointer shadow-sm"
               >
                 Batal
               </button>
@@ -714,7 +710,7 @@ export default function OwnerDiscountsPage() {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 px-4 py-2 rounded-xs bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold cursor-pointer shadow-2xs flex items-center justify-center gap-1.5 disabled:opacity-60"
+                className="flex-1 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold cursor-pointer shadow-sm shadow-rose-600/25 flex items-center justify-center gap-1.5 disabled:opacity-60"
               >
                 {deleting ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
