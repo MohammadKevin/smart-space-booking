@@ -500,3 +500,30 @@ export interface SuperAdminTransaction extends Transaksi {
   platformFee: number;
   ownerPayout: number;
 }
+
+export interface ResetDataSummary {
+  detail_reservasi: number;
+  review: number;
+  waitlist: number;
+  transaksi: number;
+  reservasi: number;
+  diskon: number;
+  spaces: number;
+  staffs: number;
+  space_owners: number;
+  members: number;
+  users_deleted: number;
+}
+
+export interface ResetDataResponse {
+  success: boolean;
+  message: string;
+  summary: ResetDataSummary;
+  executedAt: string;
+  executedBy: string;
+}
+
+export interface ResetDataDto {
+  confirmationText: string;
+  excludeSuperAdmin?: boolean;
+}

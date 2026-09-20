@@ -49,6 +49,8 @@ import {
   SuperAdminMonthlyRevenueItem,
   SuperAdminSpaceOwner,
   SuperAdminTransaction,
+  ResetDataDto,
+  ResetDataResponse,
 } from "@/types/api";
 
 export * from "@/types/api";
@@ -612,6 +614,16 @@ export async function getSuperAdminTransactions(
     params: { limit },
   });
   return Array.isArray(data) ? data : [];
+}
+
+export async function resetAllData(
+  dto: ResetDataDto
+): Promise<ResetDataResponse> {
+  const { data } = await api.post<ResetDataResponse>(
+    "/super-admin/system/reset-data",
+    dto
+  );
+  return data;
 }
 
 export async function provisionSuperAdmin(
