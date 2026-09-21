@@ -152,3 +152,15 @@ html {
   opacity: 1;
   transform: translateX(0);
 }
+
+#interactive-qr-reader video,
+#interactive-qr-reader canvas,
+div[id^="interactive-qr-reader"] video,
+div[id^="html5qr-code"] video {
+  transform: scaleX(1) !important;
+  -webkit-transform: scaleX(1) !important;
+  -moz-transform: scaleX(1) !important;
+  -ms-transform: scaleX(1) !important;
+  -o-transform: scaleX(1) !important;
+  object-fit: cover !important;
+}
