@@ -310,7 +310,6 @@ export default function StaffReservationHistoryPage() {
           </div>
         </div>
 
-        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -430,7 +429,6 @@ export default function StaffReservationHistoryPage() {
           </table>
         </div>
 
-        {/* Mobile Card List View */}
         <div className="md:hidden divide-y divide-slate-100">
           {loading ? (
             <div className="py-12 text-center text-slate-400">

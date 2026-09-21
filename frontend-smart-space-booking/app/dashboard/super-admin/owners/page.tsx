@@ -264,7 +264,6 @@ export default function SuperAdminOwnersPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider rounded-t-xl">
@@ -382,7 +381,6 @@ export default function SuperAdminOwnersPage() {
           </table>
         </div>
 
-        {/* Mobile Card List View */}
         <div className="md:hidden divide-y divide-slate-100">
           {loading ? (
             <div className="py-12 text-center text-slate-400">

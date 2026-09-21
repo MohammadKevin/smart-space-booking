@@ -304,9 +304,11 @@ export class ReservationService implements OnModuleInit {
           }
 
           const nowCheck = new Date();
-          const isValidDate =
-            nowCheck >= selectedDiskon.tanggalAwal &&
-            nowCheck <= selectedDiskon.tanggalAkhir;
+          const tglAwal = new Date(selectedDiskon.tanggalAwal);
+          tglAwal.setHours(0, 0, 0, 0);
+          const tglAkhir = new Date(selectedDiskon.tanggalAkhir);
+          tglAkhir.setHours(23, 59, 59, 999);
+          const isValidDate = nowCheck >= tglAwal && nowCheck <= tglAkhir;
 
           if (!isValidDate) {
             throw new BadRequestException(

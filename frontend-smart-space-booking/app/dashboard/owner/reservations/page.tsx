@@ -32,7 +32,7 @@ export default function OwnerReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "aktif" | "selesai" | "dibatalkan">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "disetujui" | "aktif" | "selesai" | "dibatalkan">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
@@ -97,6 +97,7 @@ export default function OwnerReservationsPage() {
     return {
       all: realReservations.length,
       pending: realReservations.filter((i) => i.status === "pending").length,
+      disetujui: realReservations.filter((i) => i.status === "disetujui").length,
       aktif: realReservations.filter((i) => i.status === "aktif").length,
       selesai: realReservations.filter((i) => i.status === "selesai").length,
       dibatalkan: realReservations.filter((i) => i.status === "dibatalkan").length,
@@ -282,6 +283,7 @@ export default function OwnerReservationsPage() {
             {[
               { id: "all", label: "Semua", count: counts.all },
               { id: "pending", label: "Pending", count: counts.pending },
+              { id: "disetujui", label: "Disetujui", count: counts.disetujui },
               { id: "aktif", label: "Aktif", count: counts.aktif },
               { id: "selesai", label: "Selesai", count: counts.selesai },
               { id: "dibatalkan", label: "Dibatalkan", count: counts.dibatalkan },
@@ -323,7 +325,6 @@ export default function OwnerReservationsPage() {
           </div>
         </div>
 
-        {/* Desktop Table View */}
         <div className="hidden md:block overflow-x-auto rounded-xl">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
@@ -488,7 +489,6 @@ export default function OwnerReservationsPage() {
           </table>
         </div>
 
-        {/* Mobile Card List View */}
         <div className="md:hidden divide-y divide-slate-100">
           {loading ? (
             <div className="py-12 text-center text-slate-400">

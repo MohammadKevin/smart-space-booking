@@ -57,7 +57,12 @@ export default function SpaceDetailPage({ params }: SpaceDetailPageProps) {
         ]);
 
         setSpace(spaceData);
-        setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+        const parsedReviews = Array.isArray((reviewsData as any)?.data)
+          ? (reviewsData as any).data
+          : Array.isArray(reviewsData)
+          ? reviewsData
+          : [];
+        setReviews(parsedReviews);
         setRatingSummary(ratingData);
       } catch (err: unknown) {
         setError(getApiErrorMessage(err) || "Gagal memuat detail ruangan.");

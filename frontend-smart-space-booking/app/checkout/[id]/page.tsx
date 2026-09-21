@@ -790,7 +790,6 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
               </div>
             </div>
 
-            {/* Mobile Sticky Bottom Pay Bar */}
             {!paySuccess && holdTimer > 0 && (
               <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3.5 z-40 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
                 <div className="min-w-0">

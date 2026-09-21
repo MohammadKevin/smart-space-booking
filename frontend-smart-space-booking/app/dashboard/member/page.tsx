@@ -637,7 +637,6 @@ export default function MemberDashboardPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          {/* Desktop Table View */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
@@ -707,7 +706,6 @@ export default function MemberDashboardPage() {
             </table>
           </div>
 
-          {/* Mobile Card List View */}
           <div className="md:hidden divide-y divide-slate-100">
             {pastReservations.length > 0 ? (
               pastReservations.map((res) => {

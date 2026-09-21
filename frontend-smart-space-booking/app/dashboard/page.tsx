@@ -18,7 +18,9 @@ export default function DashboardRootRedirect() {
     }
 
     const role = user.role?.toLowerCase();
-    if (role === "admin_space" || role === "owner") {
+    if (role === "super_admin") {
+      router.replace("/dashboard/super-admin");
+    } else if (role === "admin_space" || role === "owner") {
       router.replace("/dashboard/owner");
     } else if (role === "staff") {
       router.replace("/dashboard/staff");

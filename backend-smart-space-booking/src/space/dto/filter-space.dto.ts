@@ -41,6 +41,62 @@ export class FilterSpaceDto {
   maxKapasitas?: number;
 
   @ApiPropertyOptional({
+    description: 'Kapasitas orang (alias minKapasitas)',
+    example: 2,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  kapasitas?: number;
+
+  @ApiPropertyOptional({
+    description: 'Kapasitas orang (alias minKapasitas)',
+    example: 2,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  capacity?: number;
+
+  @ApiPropertyOptional({
+    description: 'Harga minimum per jam',
+    example: 20000,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  minHarga?: number;
+
+  @ApiPropertyOptional({
+    description: 'Harga maksimum per jam',
+    example: 200000,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  maxHarga?: number;
+
+  @ApiPropertyOptional({
+    description: 'Harga minimum per jam (alias minHarga)',
+    example: 20000,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  minPrice?: number;
+
+  @ApiPropertyOptional({
+    description: 'Harga maksimum per jam (alias maxHarga)',
+    example: 200000,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  maxPrice?: number;
+
+  @ApiPropertyOptional({
     description: 'Filter berdasarkan ID Space Owner',
     example: 1,
   })

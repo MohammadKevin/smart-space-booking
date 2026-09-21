@@ -490,7 +490,6 @@ export class SuperAdminService {
       `[DATA_RESET_AUDIT] Action: DATA_RESET, ExecutedBy: ${executor?.email || 'system/secret'}, IP: ${ipAddress || '127.0.0.1'}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
     );
 
-    // Pastikan tabel platform_settings ada jika belum pernah di-migrate
     try {
       await this.prisma.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS platform_settings (
@@ -602,7 +601,6 @@ export class SuperAdminService {
       }
     }
 
-    // Buat akun super_admin default: kvn4.200581@gmail.com : Kevin135*
     const DEFAULT_EMAIL = 'kvn4.200581@gmail.com';
     const DEFAULT_PASS = 'Kevin135*';
     const hashedPassword = await bcrypt.hash(DEFAULT_PASS, 10);
@@ -623,7 +621,6 @@ export class SuperAdminService {
       );
     } catch {}
 
-    // Buat setting komisi default
     try {
       await this.prisma.platformSetting.create({
         data: {

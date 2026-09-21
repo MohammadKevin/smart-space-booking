@@ -104,6 +104,20 @@ function SpacesContent() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedType,
+    selectedMetro,
+    minCapacity,
+    maxPrice,
+    selectedAmenity,
+    selectedDate,
+    selectedDuration,
+    sortBy,
+  ]);
+
+  useEffect(() => {
     fetchSpacesData();
   }, [selectedDate, selectedDuration]);
 

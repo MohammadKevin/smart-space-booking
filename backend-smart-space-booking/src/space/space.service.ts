@@ -58,13 +58,27 @@ export class SpaceService {
       where.tipe = filter.tipe;
     }
 
-    if (filter.minKapasitas || filter.maxKapasitas) {
+    const minCap = filter.minKapasitas || filter.kapasitas || filter.capacity;
+    const maxCap = filter.maxKapasitas;
+    if (minCap || maxCap) {
       where.kapasitas = {};
-      if (filter.minKapasitas) {
-        where.kapasitas.gte = filter.minKapasitas;
+      if (minCap) {
+        where.kapasitas.gte = minCap;
       }
-      if (filter.maxKapasitas) {
-        where.kapasitas.lte = filter.maxKapasitas;
+      if (maxCap) {
+        where.kapasitas.lte = maxCap;
+      }
+    }
+
+    const minPrice = filter.minHarga ?? filter.minPrice;
+    const maxPrice = filter.maxHarga ?? filter.maxPrice;
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.hargaPerJam = {};
+      if (minPrice !== undefined) {
+        where.hargaPerJam.gte = minPrice;
+      }
+      if (maxPrice !== undefined) {
+        where.hargaPerJam.lte = maxPrice;
       }
     }
 

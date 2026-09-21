@@ -491,7 +491,6 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Mobile Drawer Navigation with backdrop */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 lg:hidden flex">
             <div

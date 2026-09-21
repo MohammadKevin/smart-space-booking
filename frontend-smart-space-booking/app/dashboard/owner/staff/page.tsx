@@ -321,7 +321,6 @@ export default function OwnerStaffPage() {
           </div>
         ) : (
           <div>
-            {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
@@ -377,7 +376,6 @@ export default function OwnerStaffPage() {
               </table>
             </div>
 
-            {/* Mobile Card List View */}
             <div className="md:hidden divide-y divide-slate-100">
               {filteredStaffs.map((s) => (
                 <div key={s.id} className="p-4 space-y-3">

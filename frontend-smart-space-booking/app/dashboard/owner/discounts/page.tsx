@@ -121,12 +121,17 @@ export default function OwnerDiscountsPage() {
     setFormLoading(true);
     setFormError(null);
 
+    const startDate = new Date(tanggalAwal);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(tanggalAkhir);
+    endDate.setHours(23, 59, 59, 999);
+
     const dto: CreateDiscountDto = {
       namaDiskon,
       kodeDiskon: kodeDiskon.toUpperCase().trim(),
       persentaseDiskon: Number(persentaseDiskon),
-      tanggalAwal: new Date(tanggalAwal).toISOString(),
-      tanggalAkhir: new Date(tanggalAkhir).toISOString(),
+      tanggalAwal: startDate.toISOString(),
+      tanggalAkhir: endDate.toISOString(),
       spaceId: spaceId ? Number(spaceId) : undefined,
     };
 
@@ -423,7 +428,6 @@ export default function OwnerDiscountsPage() {
           </div>
         ) : (
           <div>
-            {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
@@ -527,7 +531,6 @@ export default function OwnerDiscountsPage() {
               </table>
             </div>
 
-            {/* Mobile Card List View */}
             <div className="md:hidden divide-y divide-slate-100">
               {filteredDiscounts.map((d) => {
                 const status = getDiscountStatus(d);
