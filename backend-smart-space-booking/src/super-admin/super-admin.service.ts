@@ -445,22 +445,29 @@ export class SuperAdminService {
     };
   }
 
-  async resetAllData(dto?: ResetDataDto, executor?: any, ipAddress?: string) {
-    const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
-    const isSecretValid =
-      dto?.secretKey &&
-      configuredSecret &&
-      dto.secretKey === configuredSecret;
-    const isResetAllowed = process.env.ALLOW_DATA_RESET === 'true';
+  async resetAllData(
+    dto?: ResetDataDto,
+    executor?: any,
+    ipAddress?: string,
+    forceReset: boolean = false,
+  ) {
+    if (!forceReset) {
+      const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
+      const isSecretValid =
+        dto?.secretKey &&
+        configuredSecret &&
+        dto.secretKey === configuredSecret;
+      const isResetAllowed = process.env.ALLOW_DATA_RESET === 'true';
 
-    if (!isResetAllowed && !isSecretValid) {
-      throw new ForbiddenException(
-        'Data reset dinonaktifkan di environment ini atau kunci rahasia tidak sesuai.',
-      );
-    }
+      if (!isResetAllowed && !isSecretValid) {
+        throw new ForbiddenException(
+          'Data reset dinonaktifkan di environment ini atau kunci rahasia tidak sesuai.',
+        );
+      }
 
-    if (dto?.confirmationText && dto.confirmationText !== 'RESET ALL DATA') {
-      throw new BadRequestException('Teks konfirmasi tidak sesuai.');
+      if (dto?.confirmationText && dto.confirmationText !== 'RESET ALL DATA') {
+        throw new BadRequestException('Teks konfirmasi tidak sesuai.');
+      }
     }
 
     const timestamp = new Date().toISOString();
