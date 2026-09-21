@@ -540,6 +540,7 @@ export class TransactionService {
       const invoiceNum = updated.nomorInvoice;
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
+      const qrCode = updated.reservasi.qrCode;
 
       this.buildInvoicePdf(updated)
         .then((pdfBuf) => {
@@ -550,6 +551,7 @@ export class TransactionService {
             invoiceNum,
             totalAmount,
             method,
+            qrCode,
             pdfBuf,
           );
         })
@@ -665,6 +667,7 @@ export class TransactionService {
       const invoiceNum = updated.nomorInvoice;
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
+      const qrCode = updated.reservasi.qrCode;
 
       this.buildInvoicePdf(updated)
         .then((pdfBuf) => {
@@ -675,6 +678,7 @@ export class TransactionService {
             invoiceNum,
             totalAmount,
             method,
+            qrCode,
             pdfBuf,
           );
         })

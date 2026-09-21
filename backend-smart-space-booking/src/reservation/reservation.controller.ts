@@ -117,4 +117,24 @@ export class ReservationController {
   ) {
     return this.reservationService.cancelMyReservation(id, memberUserId);
   }
+
+  @Post(':id/extend')
+  @Roles(Role.member, Role.admin_space, Role.staff)
+  @ApiOperation({
+    summary: 'Perpanjang Jam Sewa Reservasi Aktif (Auto-Extend Rental)',
+    description:
+      'Menambah durasi sewa ruangan per jam jika slot waktu berikutnya masih tersedia tanpa bentrok jadwal.',
+  })
+  @ApiResponse({ status: 200, description: 'Durasi sewa berhasil diperpanjang.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Slot waktu berikutnya telah terisi atau melebihi jam operasional.',
+  })
+  extendReservation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('tambahJam', ParseIntPipe) tambahJam: number,
+    @GetUser() user: any,
+  ) {
+    return this.reservationService.extendReservation(id, tambahJam, user);
+  }
 }

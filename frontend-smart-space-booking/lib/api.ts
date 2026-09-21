@@ -316,6 +316,17 @@ export async function cancelBooking(id: number | string): Promise<ReservationCan
 
 export const cancelReservation = cancelBooking;
 
+export async function extendReservation(
+  id: number | string,
+  tambahJam = 1
+): Promise<{ message: string; data: Reservation }> {
+  const { data } = await api.post<{ message: string; data: Reservation }>(
+    `/reservations/${id}/extend`,
+    { tambahJam }
+  );
+  return data;
+}
+
 export async function updateReservationStatus(
   id: number | string,
   status: ReservationStatus

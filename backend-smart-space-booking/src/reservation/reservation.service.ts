@@ -623,4 +623,121 @@ export class ReservationService implements OnModuleInit {
       data: updated,
     };
   }
+
+  async extendReservation(id: number, tambahJam: number, user: any) {
+    if (!tambahJam || tambahJam < 1) {
+      throw new BadRequestException('Durasi perpanjangan minimal 1 jam.');
+    }
+
+    const res = await this.prisma.reservasi.findUnique({
+      where: { id },
+      include: {
+        member: true,
+        transaksi: true,
+        detailReservasi: { include: { space: true } },
+      },
+    });
+
+    if (!res) {
+      throw new NotFoundException('Reservasi tidak ditemukan.');
+    }
+
+    if (user.role === Role.member && user.member?.id !== res.memberId) {
+      throw new ForbiddenException('Anda tidak berhak memperpanjang reservasi ini.');
+    }
+    if (user.role === Role.admin_space && user.spaceOwner?.id !== res.ownerId) {
+      throw new ForbiddenException('Reservasi ini bukan milik coworking space Anda.');
+    }
+    if (user.role === Role.staff && user.staff?.ownerId !== res.ownerId) {
+      throw new ForbiddenException('Reservasi ini bukan milik coworking space tempat Anda bertugas.');
+    }
+
+    if (res.status !== ReservasiStatus.aktif && res.status !== ReservasiStatus.disetujui) {
+      throw new BadRequestException(
+        `Hanya reservasi aktif atau disetujui yang dapat diperpanjang (status saat ini: ${res.status}).`,
+      );
+    }
+
+    const spaceId = res.detailReservasi?.spaceId;
+    const targetDate = normalizeDateToStartOfDay(res.tanggalReservasi);
+    const currentStartMinutes = timeStringToMinutes(res.jamMulai);
+    const currentEndMinutes = currentStartMinutes + res.durasiJam * 60;
+    const newEndMinutes = currentEndMinutes + tambahJam * 60;
+
+    if (newEndMinutes > 24 * 60) {
+      throw new BadRequestException(
+        'Perpanjangan waktu melebihi batas jam operasional harian (24:00 WIB).',
+      );
+    }
+
+    const overlapping = await this.prisma.reservasi.findMany({
+      where: {
+        id: { not: res.id },
+        detailReservasi: { spaceId },
+        status: {
+          in: [
+            ReservasiStatus.pending,
+            ReservasiStatus.disetujui,
+            ReservasiStatus.aktif,
+          ],
+        },
+      },
+    });
+
+    for (const ex of overlapping) {
+      const exDate = normalizeDateToStartOfDay(ex.tanggalReservasi);
+      if (exDate.getTime() === targetDate.getTime()) {
+        const exStartM = timeStringToMinutes(ex.jamMulai);
+        const exEndM = exStartM + ex.durasiJam * 60;
+        if (isTimeOverlapping(currentEndMinutes, newEndMinutes, exStartM, exEndM)) {
+          throw new BadRequestException(
+            `Tidak dapat memperpanjang! Slot waktu berikutnya telah dipesan (${ex.jamMulai} - ${minutesToTimeString(exEndM)} WIB).`,
+          );
+        }
+      }
+    }
+
+    const updatedDurasi = res.durasiJam + tambahJam;
+    const ratePerHour = res.detailReservasi?.space?.hargaPerJam || 0;
+    const extraCost = ratePerHour * tambahJam;
+    const newTotal = (res.detailReservasi?.totalHarga || 0) + extraCost;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const r = await tx.reservasi.update({
+        where: { id: res.id },
+        data: { durasiJam: updatedDurasi },
+        include: {
+          member: true,
+          transaksi: true,
+          detailReservasi: { include: { space: true, diskon: true } },
+        },
+      });
+
+      if (res.detailReservasi) {
+        await tx.detailReservasi.update({
+          where: { id: res.detailReservasi.id },
+          data: { totalHarga: newTotal },
+        });
+      }
+
+      if (res.transaksi) {
+        await tx.transaksi.update({
+          where: { id: res.transaksi.id },
+          data: { jumlah: newTotal },
+        });
+      }
+
+      return r;
+    });
+
+    const jamSelesaiStr = minutesToTimeString(newEndMinutes);
+    return {
+      message: `Sewa berhasil diperpanjang +${tambahJam} jam sampai pukul ${jamSelesaiStr} WIB.`,
+      data: {
+        ...updated,
+        durasiJam: updatedDurasi,
+        jamSelesai: jamSelesaiStr,
+      },
+    };
+  }
 }

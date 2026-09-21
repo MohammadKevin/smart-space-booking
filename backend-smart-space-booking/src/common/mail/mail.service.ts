@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class MailService {
@@ -201,22 +202,54 @@ export class MailService {
     invoiceNumber: string,
     total: number,
     method: string,
+    qrCode?: string,
     pdfBuffer?: Buffer,
   ) {
     const from =
       process.env.SMTP_FROM || '"WorkNest Payments" <billing@worknest.app>';
-    const subject = `[WorkNest] Bukti Pembayaran & Invoice #${invoiceNumber} - ${spaceName}`;
+    const subject = `[WorkNest] Bukti Pembayaran & Tiket QR Akses #${invoiceNumber} - ${spaceName}`;
+
+    let qrImageBuffer: Buffer | null = null;
+    if (qrCode) {
+      try {
+        qrImageBuffer = await QRCode.toBuffer(qrCode, {
+          type: 'png',
+          margin: 1,
+          width: 240,
+        });
+      } catch {}
+    }
+
     const html = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; color: #0f172a;">
         <div style="background-color: #0284c7; padding: 24px; text-align: center;">
           <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">WorkNest</h1>
-          <p style="color: #e0f2fe; margin: 4px 0 0 0; font-size: 12px;">Bukti Pembayaran & Faktur Resmi</p>
+          <p style="color: #e0f2fe; margin: 4px 0 0 0; font-size: 12px;">Bukti Pembayaran &amp; Tiket Masuk Digital</p>
         </div>
         <div style="padding: 28px; font-size: 13px; line-height: 1.6; color: #334155;">
           <h2 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 0;">Halo ${memberName},</h2>
-          <p>Terima kasih! Pembayaran untuk reservasi <strong>${spaceName}</strong> telah berhasil diverifikasi.</p>
+          <p>Terima kasih! Pembayaran untuk reservasi ruangan <strong>${spaceName}</strong> telah berhasil diverifikasi.</p>
+
+          ${
+            qrCode
+              ? `
+          <div style="text-align: center; margin: 24px 0; padding: 20px; background-color: #f0fdf4; border: 2px dashed #16a34a; border-radius: 12px;">
+            <p style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #15803d;">TIKET QR MASUK RUANGAN (SIAP CHECK-IN)</p>
+            ${
+              qrImageBuffer
+                ? `<img src="cid:ticket_qr_code" style="width: 175px; height: 175px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px; background: white;" alt="QR Code Ticket" />`
+                : ''
+            }
+            <p style="font-family: monospace; font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #0284c7; margin: 10px 0 4px 0;">${qrCode}</p>
+            <p style="font-size: 11px; color: #475569; margin: 0;">Tunjukkan kode QR ini ke staf resepsionis atau scan pada terminal pintu saat tiba di lokasi tanpa perlu login kembali ke website.</p>
+          </div>
+          `
+              : ''
+          }
+
           <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 12px; line-height: 1.8;">
             <div><strong>Nomor Invoice:</strong> ${invoiceNumber}</div>
+            <div><strong>Ruangan:</strong> ${spaceName}</div>
             <div><strong>Total Pembayaran:</strong> Rp ${total.toLocaleString('id-ID')}</div>
             <div><strong>Metode Pembayaran:</strong> ${(method || 'Midtrans').toUpperCase()}</div>
             <div><strong>Status Transaksi:</strong> <span style="color: #16a34a; font-weight: 700;">LUNAS (PAID)</span></div>
@@ -232,7 +265,7 @@ export class MailService {
     `;
 
     this.logger.log(
-      `[EMAIL NOTIFICATION] Payment success for ${email}: ${invoiceNumber} (PDF Attached: ${!!pdfBuffer})`,
+      `[EMAIL NOTIFICATION] Payment success for ${email}: ${invoiceNumber} (QR: ${qrCode}, PDF Attached: ${!!pdfBuffer})`,
     );
 
     if (this.transporter) {
@@ -242,17 +275,27 @@ export class MailService {
           to: email,
           subject,
           html,
-          ...(pdfBuffer
-            ? {
-                attachments: [
+          attachments: [
+            ...(pdfBuffer
+              ? [
                   {
                     filename: `Invoice-${invoiceNumber}.pdf`,
                     content: pdfBuffer,
                     contentType: 'application/pdf',
                   },
-                ],
-              }
-            : {}),
+                ]
+              : []),
+            ...(qrImageBuffer && qrCode
+              ? [
+                  {
+                    filename: `Tiket-QR-${qrCode}.png`,
+                    content: qrImageBuffer,
+                    cid: 'ticket_qr_code',
+                    contentType: 'image/png',
+                  },
+                ]
+              : []),
+          ],
         };
         await this.transporter.sendMail(mailOptions);
       } catch (err: any) {

@@ -1,4 +1,5 @@
 import * as PDFDocument from 'pdfkit';
+import * as QRCode from 'qrcode';
 
 export interface InvoicePdfData {
   nomorInvoice: string;
@@ -83,7 +84,17 @@ function formatDateTimeStr(dateInput?: Date | string | null): string {
   }
 }
 
-export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
+export async function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
+  const qrImageBuffer = await QRCode.toBuffer(data.qrCode, {
+    type: 'png',
+    margin: 1,
+    width: 180,
+    color: {
+      dark: '#0f172a',
+      light: '#ffffff',
+    },
+  }).catch(() => null);
+
   return new Promise((resolve, reject) => {
     const doc = new (PDFDocument as any)({
       size: 'A4',
@@ -170,7 +181,7 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
       .fontSize(8)
       .font('Helvetica-Bold')
       .fillColor('#0284c7')
-      .text('LOKASI COWOKING SPACE (MERCHANT):', 310, 140);
+      .text('LOKASI COWORKING SPACE (MERCHANT):', 310, 140);
 
     doc
       .fontSize(10)
@@ -240,30 +251,35 @@ export function generateInvoicePdf(data: InvoicePdfData): Promise<Buffer> {
     const summaryY = itemY + 60;
 
     doc
-      .rect(45, summaryY, 260, 95)
+      .rect(45, summaryY, 260, 110)
       .fillAndStroke('#eff6ff', '#bfdbfe');
 
     doc
       .fontSize(8)
       .font('Helvetica-Bold')
       .fillColor('#1e40af')
-      .text('KODE TIKET QR AKSES RUANGAN:', 55, summaryY + 10);
+      .text('TIKET QR AKSES RUANGAN:', 55, summaryY + 8);
 
+    if (qrImageBuffer) {
+      doc.image(qrImageBuffer, 55, summaryY + 20, { width: 75, height: 75 });
+    }
+
+    const textX = qrImageBuffer ? 138 : 55;
     doc
-      .fontSize(14)
+      .fontSize(10)
       .font('Courier-Bold')
       .fillColor('#0284c7')
-      .text(data.qrCode, 55, summaryY + 25);
+      .text(data.qrCode, textX, summaryY + 22, { width: 160 });
 
     doc
-      .fontSize(7.5)
+      .fontSize(7)
       .font('Helvetica')
       .fillColor('#334155')
       .text(
-        'Tunjukkan kode tiket QR ini kepada staf resepsionis atau lakukan scan pada terminal pintu saat memasuki coworking space.',
-        55,
-        summaryY + 46,
-        { width: 240 }
+        'Pindai barcode QR ini pada terminal pintu atau tunjukkan ke staf frontdesk saat tiba di lokasi tanpa perlu login ulang.',
+        textX,
+        summaryY + 40,
+        { width: 160 }
       );
 
     const calcX = 320;

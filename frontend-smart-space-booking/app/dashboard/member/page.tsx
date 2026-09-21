@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   getMyBookings,
   cancelBooking,
+  extendReservation,
   getTransactions,
   syncPayment,
   downloadInvoicePdf,
@@ -53,6 +54,25 @@ export default function MemberDashboardPage() {
 
   const [copiedPin, setCopiedPin] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [extendLoadingId, setExtendLoadingId] = useState<number | null>(null);
+
+  const handleExtend = async (resId: number, hours = 1) => {
+    setExtendLoadingId(resId);
+    setError(null);
+    setCancelSuccessMsg(null);
+    try {
+      const res = await extendReservation(resId, hours);
+      setCancelSuccessMsg(res.message || `Sewa berhasil diperpanjang +${hours} jam.`);
+      await fetchBookings(false);
+      if (selectedTicket && selectedTicket.id === resId) {
+        setSelectedTicket((prev) => (prev ? { ...prev, ...res.data } : null));
+      }
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err));
+    } finally {
+      setExtendLoadingId(null);
+    }
+  };
 
   const fetchBookings = useCallback(async (autoSync = true) => {
     setLoading(true);
@@ -604,10 +624,26 @@ export default function MemberDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="font-mono text-slate-500 text-[11px]">
-                      PIN: [{pin}]
-                    </span>
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                    {isConfirmed && (res.status === "aktif" || res.status === "disetujui") ? (
+                      <button
+                        type="button"
+                        onClick={() => handleExtend(res.id, 1)}
+                        disabled={extendLoadingId === res.id}
+                        className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] font-bold border border-sky-200 transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        {extendLoadingId === res.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Plus className="w-3 h-3" />
+                        )}
+                        <span>+1 Jam</span>
+                      </button>
+                    ) : (
+                      <span className="font-mono text-slate-500 text-[11px]">
+                        PIN: [{pin}]
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => setSelectedTicket(res)}
