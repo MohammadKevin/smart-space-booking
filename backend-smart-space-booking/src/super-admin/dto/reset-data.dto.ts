@@ -1,20 +1,30 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class ResetDataDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'RESET ALL DATA',
-    description: 'Teks konfirmasi wajib persis sama dengan "RESET ALL DATA"',
+    description:
+      'Teks konfirmasi ("RESET ALL DATA") opsional jika menggunakan secretKey atau diizinkan di dev',
+    default: 'RESET ALL DATA',
   })
+  @IsOptional()
   @IsString({ message: 'Teks konfirmasi harus berupa teks' })
-  @IsNotEmpty({ message: 'Teks konfirmasi tidak boleh kosong' })
-  confirmationText: string;
+  confirmationText?: string;
+
+  @ApiPropertyOptional({
+    example: 'WorkNest_CEO_SuperAdmin_Secret_Key_2026*',
+    description: 'Kunci rahasia SUPER_ADMIN_SECRET_KEY jika dipanggil tanpa JWT super_admin',
+  })
+  @IsOptional()
+  @IsString({ message: 'secretKey harus berupa teks' })
+  secretKey?: string;
 
   @ApiPropertyOptional({
     example: true,
     description:
-      'Konfirmasi pengecualian akun super_admin agar tidak ikut terhapus',
-    default: true,
+      'Flag excludeSuperAdmin (opsional)',
+    default: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'excludeSuperAdmin harus berupa boolean' })

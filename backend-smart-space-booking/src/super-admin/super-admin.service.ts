@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
 import { ResetDataDto } from './dto/reset-data.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SuperAdminService {
@@ -444,14 +445,21 @@ export class SuperAdminService {
     };
   }
 
-  async resetAllData(dto: ResetDataDto, executor: any, ipAddress: string) {
-    if (process.env.ALLOW_DATA_RESET !== 'true') {
+  async resetAllData(dto?: ResetDataDto, executor?: any, ipAddress?: string) {
+    const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
+    const isSecretValid =
+      dto?.secretKey &&
+      configuredSecret &&
+      dto.secretKey === configuredSecret;
+    const isResetAllowed = process.env.ALLOW_DATA_RESET === 'true';
+
+    if (!isResetAllowed && !isSecretValid) {
       throw new ForbiddenException(
-        'Data reset dinonaktifkan di environment ini.',
+        'Data reset dinonaktifkan di environment ini atau kunci rahasia tidak sesuai.',
       );
     }
 
-    if (dto.confirmationText !== 'RESET ALL DATA') {
+    if (dto?.confirmationText && dto.confirmationText !== 'RESET ALL DATA') {
       throw new BadRequestException('Teks konfirmasi tidak sesuai.');
     }
 
@@ -468,10 +476,11 @@ export class SuperAdminService {
       'space_owners',
       'members',
       'users',
+      'platform_settings',
     ];
 
     this.logger.warn(
-      `[DATA_RESET_AUDIT] Action: DATA_RESET, ExecutedBy: ${executor?.email} (ID: ${executor?.id}), IP: ${ipAddress}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
+      `[DATA_RESET_AUDIT] Action: DATA_RESET, ExecutedBy: ${executor?.email || 'system/secret'}, IP: ${ipAddress || '127.0.0.1'}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
     );
 
     const summary = await this.prisma.$transaction(async (tx) => {
@@ -485,13 +494,8 @@ export class SuperAdminService {
       const staffs = await tx.staff.deleteMany({});
       const spaceOwners = await tx.spaceOwner.deleteMany({});
       const members = await tx.member.deleteMany({});
-      const usersDeleted = await tx.user.deleteMany({
-        where: {
-          role: {
-            not: Role.super_admin,
-          },
-        },
-      });
+      const usersDeleted = await tx.user.deleteMany({});
+      await tx.platformSetting.deleteMany({});
 
       return {
         detail_reservasi: detailReservasi.count,
@@ -519,6 +523,8 @@ export class SuperAdminService {
       'staffs',
       'space_owners',
       'members',
+      'users',
+      'platform_settings',
     ];
 
     for (const table of tablesToResetAutoIncrement) {
@@ -531,18 +537,53 @@ export class SuperAdminService {
       }
     }
 
+    // Buat akun super_admin default: kvn4.200581@gmail.com : Kevin135*
+    const DEFAULT_EMAIL = 'kvn4.200581@gmail.com';
+    const DEFAULT_PASS = 'Kevin135*';
+    const hashedPassword = await bcrypt.hash(DEFAULT_PASS, 10);
+
+    const createdSuperAdmin = await this.prisma.user.create({
+      data: {
+        email: DEFAULT_EMAIL,
+        password: hashedPassword,
+        role: Role.super_admin,
+        isVerified: true,
+      },
+    });
+
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `UPDATE users SET role = 'super_admin' WHERE id = ?;`,
+        createdSuperAdmin.id,
+      );
+    } catch {}
+
+    // Buat setting komisi default
+    await this.prisma.platformSetting.create({
+      data: {
+        key: 'PLATFORM_COMMISSION_PERCENT',
+        value: process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
+      },
+    });
+
     const executedAt = new Date().toISOString();
 
     this.logger.log(
-      `[DATA_RESET_AUDIT] Completed DATA_RESET, ExecutedBy: ${executor?.email}, IP: ${ipAddress}, Timestamp: ${executedAt}, Summary: ${JSON.stringify(summary)}`,
+      `[DATA_RESET_AUDIT] Completed DATA_RESET. Created super_admin user: ${DEFAULT_EMAIL}. Summary: ${JSON.stringify(summary)}`,
     );
 
     return {
       success: true,
-      message: 'Data berhasil direset. Akun super_admin dipertahankan.',
+      message: `Seluruh data database berhasil direset menjadi 0 dan akun super_admin '${DEFAULT_EMAIL}' berhasil dibuat otomatis.`,
+      defaultSuperAdmin: {
+        id: createdSuperAdmin.id,
+        email: DEFAULT_EMAIL,
+        role: Role.super_admin,
+        passwordHint: DEFAULT_PASS,
+      },
       summary,
       executedAt,
-      executedBy: executor?.email || 'super_admin',
+      executedBy: executor?.email || 'super_admin_system',
     };
   }
 }

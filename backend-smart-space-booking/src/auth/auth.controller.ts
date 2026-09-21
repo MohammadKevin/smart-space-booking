@@ -3,6 +3,7 @@ import {
   Post,
   Body,
   Get,
+  Req,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -23,6 +24,7 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SecretProvisionDto } from './dto/secret-provision.dto';
+import { ResetDataDto } from '../super-admin/dto/reset-data.dto';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RolesGuard } from './guard/roles.guard';
 import { Roles } from './decorators/roles.decorator';
@@ -180,6 +182,32 @@ export class AuthController {
   })
   secretSuperAdminProvision(@Body() secretProvisionDto: SecretProvisionDto) {
     return this.authService.provisionSuperAdmin(secretProvisionDto);
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-database')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset Seluruh Isi Database dan Buat Akun Super Admin Default',
+    description:
+      'Mengosongkan semua data database menjadi 0 dan otomatis membuat akun super_admin (kvn4.200581@gmail.com : Kevin135*). Dapat diakses saat ALLOW_DATA_RESET=true atau dengan secretKey.',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Database berhasil direset menjadi 0 dan akun super_admin berhasil dibuat.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Akses ditolak atau reset dinonaktifkan.',
+  })
+  resetDatabase(@Body() dto: ResetDataDto, @Req() req: any) {
+    const ipAddress =
+      req.ip ||
+      req.headers['x-forwarded-for'] ||
+      req.socket.remoteAddress ||
+      '127.0.0.1';
+    return this.authService.resetDatabase(dto, String(ipAddress));
   }
 
   @Post('staff')

@@ -175,14 +175,15 @@ export class SuperAdminController {
   }
 
   @Post('system/reset-data')
+  @Post('reset-database')
   @ApiOperation({
     summary: 'Reset / Kosongkan Seluruh Data Testing Platform (Super Admin)',
     description:
-      'Menghapus seluruh data reservasi, transaksi, ruangan, diskon, staf, member, dan space owner secara transaksional, serta mempertahankan akun super_admin. Hanya aktif jika ALLOW_DATA_RESET=true pada environment.',
+      'Menghapus seluruh data tabel menjadi 0 dan otomatis membuat akun super_admin (kvn4.200581@gmail.com : Kevin135*). Hanya aktif jika ALLOW_DATA_RESET=true pada environment.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Seluruh data testing berhasil direset.',
+    description: 'Seluruh data berhasil direset dan super_admin dibuat.',
   })
   @ApiResponse({
     status: 400,

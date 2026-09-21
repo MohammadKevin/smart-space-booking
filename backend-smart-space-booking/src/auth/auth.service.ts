@@ -20,6 +20,7 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SecretProvisionDto } from './dto/secret-provision.dto';
+import { ResetDataDto } from '../super-admin/dto/reset-data.dto';
 import { Role } from '@prisma/client';
 
 @Injectable()
@@ -672,5 +673,147 @@ export class AuthService {
       ...sanitizedUser
     } = user;
     return sanitizedUser;
+  }
+
+  async resetDatabase(dto?: ResetDataDto, ipAddress: string = '127.0.0.1') {
+    const configuredSecret = process.env.SUPER_ADMIN_SECRET_KEY;
+    const isSecretValid =
+      dto?.secretKey &&
+      configuredSecret &&
+      dto.secretKey === configuredSecret;
+    const isResetAllowed = process.env.ALLOW_DATA_RESET === 'true';
+
+    if (!isResetAllowed && !isSecretValid) {
+      throw new ForbiddenException(
+        'Data reset dinonaktifkan di environment ini atau kunci rahasia salah.',
+      );
+    }
+
+    if (dto?.confirmationText && dto.confirmationText !== 'RESET ALL DATA') {
+      throw new BadRequestException('Teks konfirmasi tidak sesuai.');
+    }
+
+    const timestamp = new Date().toISOString();
+    const affectedTables = [
+      'detail_reservasi',
+      'review',
+      'waitlist',
+      'transaksi',
+      'reservasi',
+      'diskon',
+      'spaces',
+      'staffs',
+      'space_owners',
+      'members',
+      'users',
+      'platform_settings',
+    ];
+
+    this.logger.warn(
+      `[DATA_RESET_AUDIT] Action: DATA_RESET, IP: ${ipAddress}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
+    );
+
+    const summary = await this.prisma.$transaction(async (tx) => {
+      const detailReservasi = await tx.detailReservasi.deleteMany({});
+      const review = await tx.review.deleteMany({});
+      const waitlist = await tx.waitlist.deleteMany({});
+      const transaksi = await tx.transaksi.deleteMany({});
+      const reservasi = await tx.reservasi.deleteMany({});
+      const diskon = await tx.diskon.deleteMany({});
+      const spaces = await tx.space.deleteMany({});
+      const staffs = await tx.staff.deleteMany({});
+      const spaceOwners = await tx.spaceOwner.deleteMany({});
+      const members = await tx.member.deleteMany({});
+      const usersDeleted = await tx.user.deleteMany({});
+      await tx.platformSetting.deleteMany({});
+
+      return {
+        detail_reservasi: detailReservasi.count,
+        review: review.count,
+        waitlist: waitlist.count,
+        transaksi: transaksi.count,
+        reservasi: reservasi.count,
+        diskon: diskon.count,
+        spaces: spaces.count,
+        staffs: staffs.count,
+        space_owners: spaceOwners.count,
+        members: members.count,
+        users_deleted: usersDeleted.count,
+      };
+    });
+
+    const tablesToResetAutoIncrement = [
+      'detail_reservasi',
+      'review',
+      'waitlist',
+      'transaksi',
+      'reservasi',
+      'diskon',
+      'spaces',
+      'staffs',
+      'space_owners',
+      'members',
+      'users',
+      'platform_settings',
+    ];
+
+    for (const table of tablesToResetAutoIncrement) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `ALTER TABLE ${table} AUTO_INCREMENT = 1;`,
+        );
+      } catch (autoIncErr: any) {
+        this.logger.warn(`Auto-increment reset warning: ${autoIncErr.message}`);
+      }
+    }
+
+    const DEFAULT_EMAIL = 'kvn4.200581@gmail.com';
+    const DEFAULT_PASS = 'Kevin135*';
+    const hashedPassword = await bcrypt.hash(DEFAULT_PASS, 10);
+
+    const createdSuperAdmin = await this.prisma.user.create({
+      data: {
+        email: DEFAULT_EMAIL,
+        password: hashedPassword,
+        role: Role.super_admin,
+        isVerified: true,
+      },
+    });
+
+    try {
+      await this.prisma.$executeRawUnsafe(
+        `UPDATE users SET role = 'super_admin' WHERE id = ?;`,
+        createdSuperAdmin.id,
+      );
+    } catch {}
+
+    await this.prisma.platformSetting.create({
+      data: {
+        key: 'PLATFORM_COMMISSION_PERCENT',
+        value: process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
+      },
+    });
+
+    const payload = {
+      sub: createdSuperAdmin.id,
+      email: createdSuperAdmin.email,
+      role: createdSuperAdmin.role,
+    };
+    const token = this.jwtService.sign(payload);
+
+    return {
+      success: true,
+      message: `Seluruh database berhasil direset menjadi 0 dan akun super_admin '${DEFAULT_EMAIL}' berhasil dibuat otomatis.`,
+      defaultSuperAdmin: {
+        id: createdSuperAdmin.id,
+        email: DEFAULT_EMAIL,
+        role: Role.super_admin,
+        passwordHint: DEFAULT_PASS,
+      },
+      access_token: token,
+      summary,
+      executedAt: timestamp,
+      executedBy: 'auth_reset_database',
+    };
   }
 }
