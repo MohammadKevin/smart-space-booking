@@ -24,6 +24,7 @@ import {
   Building2,
   ArrowRight,
   CreditCard,
+  Download,
 } from "lucide-react";
 
 type PaymentTab = "all" | "lunas" | "menunggu_pembayaran" | "belum_bayar" | "refund" | "gagal";
@@ -183,6 +184,37 @@ export default function MemberTransactionsPage() {
     }
   };
 
+  const handleExportCsv = () => {
+    if (!transactions.length) return;
+    const headers = [
+      "No. Invoice",
+      "Ruangan",
+      "Metode Pembayaran",
+      "Total Bayar",
+      "Status Pembayaran",
+      "Tanggal Dibuat",
+    ];
+
+    const rows = filtered.map((t) => [
+      t.nomorInvoice,
+      `"${(t.reservasi?.detailReservasi?.space?.namaSpace || "Ruangan").replace(/"/g, '""')}"`,
+      t.metodePembayaran || "Midtrans",
+      t.jumlah || 0,
+      t.statusPembayaran,
+      t.createdAt ? t.createdAt.split("T")[0] : "-",
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `WorkNest-Tagihan-Member-${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const canPay = (t: Transaksi) =>
     t.statusPembayaran !== "lunas" && t.statusPembayaran !== "refund";
 
@@ -214,6 +246,15 @@ export default function MemberTransactionsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={loading || filtered.length === 0}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Ekspor CSV</span>
+          </button>
           <button
             type="button"
             onClick={() => loadTransactions(true)}
