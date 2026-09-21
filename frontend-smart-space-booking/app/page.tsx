@@ -451,7 +451,7 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10 pt-20">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <ScrollReveal animation="fade-up" duration={700} className="lg:col-span-7 space-y-5 text-left">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.18]">
@@ -592,7 +592,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. KATALOG RUANGAN */}
       <section id="ruang-kerja" className="py-14 sm:py-16 border-b border-slate-100 w-full">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-8">
           <ScrollReveal animation="fade-up" duration={600}>
@@ -716,7 +715,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. TATA CARA PEMESANAN */}
       <section id="tata-cara" className="py-14 sm:py-16 border-b border-slate-100 bg-slate-50/50 w-full">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
           <ScrollReveal animation="fade-up" duration={600}>
@@ -774,7 +772,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. STRUKTUR TARIF */}
       <section id="tarif" className="py-14 sm:py-16 border-b border-slate-100 w-full">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
           <ScrollReveal animation="fade-up" duration={600}>
@@ -789,7 +786,6 @@ export default function HomePage() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Flex Desk */}
             <ScrollReveal animation="unfold" delay={0} duration={700} className="h-full">
               <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6 h-full hover:shadow-md hover:border-sky-200 transition-all">
                 <div className="space-y-4">
@@ -849,7 +845,6 @@ export default function HomePage() {
               </div>
             </ScrollReveal>
 
-            {/* Ruang Rapat */}
             <ScrollReveal animation="unfold" delay={150} duration={700} className="h-full">
               <div className="bg-white rounded-2xl border-2 border-sky-500 p-6 flex flex-col justify-between space-y-6 shadow-sm h-full hover:shadow-lg transition-all">
                 <div className="space-y-4">
@@ -909,7 +904,6 @@ export default function HomePage() {
               </div>
             </ScrollReveal>
 
-            {/* Suite Privat */}
             <ScrollReveal animation="unfold" delay={300} duration={700} className="h-full">
               <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6 h-full hover:shadow-md hover:border-sky-200 transition-all">
                 <div className="space-y-4">
@@ -972,7 +966,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. FAQ */}
       <section id="faq" className="py-12 sm:py-16 lg:py-20 border-b border-slate-100 w-full bg-slate-50/40">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
           <ScrollReveal animation="fade-up" duration={600}>

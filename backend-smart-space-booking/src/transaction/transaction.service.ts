@@ -584,7 +584,6 @@ export class TransactionService {
     const where: any = {};
 
     if (user.role === Role.super_admin) {
-      // Super admin can access all transactions
     } else if (user.role === Role.member) {
       if (!user.member) {
         throw new ForbiddenException('Profil member tidak ditemukan.');

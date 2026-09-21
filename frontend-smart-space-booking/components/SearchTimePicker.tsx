@@ -221,7 +221,6 @@ export function SearchTimePicker({
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-sm bg-white rounded-2xl shadow-xl border border-slate-200/90 p-5 animate-in zoom-in-95 duration-150 space-y-4"
             >
-              {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
@@ -242,7 +241,6 @@ export function SearchTimePicker({
               </div>
 
               {!showCustom ? (
-                /* Preset Sessions */
                 <div className="space-y-2">
                   <div className="space-y-1.5">
                     {PRESET_SESSIONS.map((preset) => {
@@ -291,7 +289,6 @@ export function SearchTimePicker({
                   </button>
                 </div>
               ) : (
-                /* Custom Selection */
                 <div className="space-y-3.5">
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">

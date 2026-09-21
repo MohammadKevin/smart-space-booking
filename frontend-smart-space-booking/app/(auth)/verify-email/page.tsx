@@ -12,7 +12,6 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEnvelope,
   faLock,
   faEye,
   faEyeSlash,
@@ -26,6 +25,7 @@ import {
   faClock,
   faRotateRight,
   faBuilding,
+  faPaste,
 } from "@fortawesome/free-solid-svg-icons";
 
 function VerifyEmailContent() {
@@ -33,11 +33,15 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const { loginUser } = useAuth();
 
-  const emailParam = searchParams.get("email") || "";
   const typeParam = searchParams.get("type") === "reset" ? "reset" : "register";
 
-  const [email, setEmail] = useState(emailParam);
-  const [phone, setPhone] = useState("");
+  const [email] = useState(() => searchParams.get("email") || "");
+  const [phone] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("registered_phone") || "";
+    }
+    return "";
+  });
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,16 +53,6 @@ function VerifyEmailContent() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-    if (typeof window !== "undefined") {
-      const storedPhone = sessionStorage.getItem("registered_phone");
-      if (storedPhone) setPhone(storedPhone);
-    }
-  }, [emailParam]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -98,22 +92,46 @@ function VerifyEmailContent() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      const pastedDigits = value.replace(/\D/g, "").slice(0, 6).split("");
-      if (pastedDigits.length > 0) {
-        const newOtp = [...otp];
-        pastedDigits.forEach((digit, idx) => {
-          if (idx < 6) newOtp[idx] = digit;
-        });
-        setOtp(newOtp);
-        const nextFocus = Math.min(pastedDigits.length, 5);
-        inputRefs.current[nextFocus]?.focus();
-        return;
+  const applyPastedCode = (pastedText: string) => {
+    const digits = pastedText.replace(/\D/g, "").slice(0, 6).split("");
+    if (digits.length === 0) return;
+
+    const newOtp = ["", "", "", "", "", ""];
+    digits.forEach((digit, idx) => {
+      if (idx < 6) newOtp[idx] = digit;
+    });
+    setOtp(newOtp);
+
+    const nextFocus = Math.min(digits.length, 5);
+    inputRefs.current[nextFocus]?.focus();
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text") || "";
+    applyPastedCode(pastedText);
+  };
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          applyPastedCode(text);
+        }
       }
+    } catch {
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    const cleanDigits = value.replace(/\D/g, "");
+    if (cleanDigits.length > 1) {
+      applyPastedCode(cleanDigits);
+      return;
     }
 
-    const digit = value.slice(-1).replace(/\D/g, "");
+    const digit = cleanDigits.slice(-1);
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
@@ -124,8 +142,23 @@ function VerifyEmailContent() {
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
+    if (e.key === "Backspace") {
+      if (!otp[index] && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+      } else if (otp[index]) {
+        const newOtp = [...otp];
+        newOtp[index] = "";
+        setOtp(newOtp);
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      e.preventDefault();
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      e.preventDefault();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
@@ -138,7 +171,7 @@ function VerifyEmailContent() {
     const targetEmail = email.trim();
 
     if (!targetEmail) {
-      setErrorMessage("Alamat email tidak ditemukan. Mengalihkan ke halaman login...");
+      setErrorMessage("Alamat email tidak ditemukan. Mengalihkan ke halaman masuk...");
       setTimeout(() => router.push("/login"), 1500);
       return;
     }
@@ -153,7 +186,7 @@ function VerifyEmailContent() {
     try {
       if (typeParam === "reset") {
         if (!newPassword || newPassword.length < 8) {
-          setErrorMessage("Kata sandi baru minimal 8 karakter.");
+          setErrorMessage("Kata sandi baru minimal 8 karakter demi keamanan akun Anda.");
           setLoading(false);
           return;
         }
@@ -164,7 +197,7 @@ function VerifyEmailContent() {
           password: newPassword,
         });
 
-        setSuccessMessage(res.message || "Kata sandi berhasil diperbarui! Mengarahkan ke halaman masuk...");
+        setSuccessMessage(res.message || "Kata sandi Anda berhasil diperbarui! Mengalihkan ke halaman masuk...");
         setTimeout(() => router.push("/login"), 1200);
       } else {
         const res = await verifyEmail({
@@ -173,7 +206,7 @@ function VerifyEmailContent() {
         });
 
         loginUser(res.access_token, res.user);
-        setSuccessMessage("Verifikasi berhasil! Mengaktifkan akses akun Anda...");
+        setSuccessMessage("Verifikasi berhasil! Akun Anda telah aktif dan siap digunakan. Mengalihkan ke dashboard...");
 
         setTimeout(() => {
           const r = res.user.role?.toLowerCase();
@@ -189,7 +222,14 @@ function VerifyEmailContent() {
         }, 900);
       }
     } catch (err: unknown) {
-      setErrorMessage(getApiErrorMessage(err));
+      const errorText = getApiErrorMessage(err);
+      if (errorText.toLowerCase().includes("salah") || errorText.toLowerCase().includes("invalid")) {
+        setErrorMessage("Kode OTP yang Anda masukkan tidak sesuai. Pastikan Anda memasukkan 6 digit kode keamanan terbaru dari email Anda.");
+      } else if (errorText.toLowerCase().includes("kedaluwarsa") || errorText.toLowerCase().includes("expired")) {
+        setErrorMessage("Kode OTP telah kedaluwarsa. Silakan klik tombol 'Kirim Ulang Kode OTP' di bawah untuk mendapatkan kode baru.");
+      } else {
+        setErrorMessage(errorText);
+      }
     } finally {
       setLoading(false);
     }
@@ -203,7 +243,7 @@ function VerifyEmailContent() {
 
     const targetEmail = email.trim();
     if (!targetEmail) {
-      setErrorMessage("Alamat email tidak ditemukan. Silakan kembali ke halaman login atau registrasi.");
+      setErrorMessage("Alamat email tidak ditemukan. Silakan kembali ke halaman pendaftaran.");
       return;
     }
 
@@ -213,7 +253,7 @@ function VerifyEmailContent() {
         type: typeParam === "reset" ? "forgot_password" : "register",
       });
 
-      setSuccessMessage(res.message || "Kode OTP 6-digit baru telah dikirimkan ke email Anda.");
+      setSuccessMessage(res.message || "Kode OTP baru telah berhasil dikirimkan ke email Anda. Silakan periksa kotak masuk atau folder spam.");
       setResendCooldown(60);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
@@ -226,12 +266,8 @@ function VerifyEmailContent() {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-x-hidden bg-white text-slate-900 z-50 selection:bg-sky-500 selection:text-white">
-      {/* DESKTOP VIEW (>= 1024px) */}
       <div className="hidden lg:flex w-full h-full relative overflow-hidden bg-white">
-        
-        {/* ================= LEFT HALF: OTP VERIFICATION FORM PANEL ================= */}
         <div className="w-1/2 h-full flex flex-col justify-between p-8 xl:p-12 2xl:p-14 overflow-y-auto bg-white">
-          {/* Top Nav */}
           <div className="flex items-center justify-between">
             <Link
               href="/login"
@@ -249,7 +285,6 @@ function VerifyEmailContent() {
             </Link>
           </div>
 
-          {/* Form Content Box */}
           <div className="max-w-md w-full mx-auto my-auto space-y-6">
             <div className="space-y-1.5 text-left">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 border border-sky-200/60 text-sky-700 text-xs font-bold mb-1">
@@ -272,27 +307,46 @@ function VerifyEmailContent() {
               </p>
             </div>
 
-            {/* Feedback Messages */}
             {errorMessage && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                <FontAwesomeIcon icon={faCircleExclamation} className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <p className="font-medium">{errorMessage}</p>
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-3 shadow-xs">
+                <div className="w-5 h-5 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <FontAwesomeIcon icon={faCircleExclamation} className="w-3.5 h-3.5" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <p className="font-bold text-rose-900">Verifikasi Belum Berhasil</p>
+                  <p className="font-normal text-rose-700 leading-relaxed">{errorMessage}</p>
+                </div>
               </div>
             )}
 
             {successMessage && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
-                <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4 text-emerald-600 shrink-0" />
-                <p className="font-medium">{successMessage}</p>
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-3 shadow-xs">
+                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5" />
+                </div>
+                <div className="space-y-0.5 text-left">
+                  <p className="font-bold text-emerald-900">Berhasil</p>
+                  <p className="font-normal text-emerald-700 leading-relaxed">{successMessage}</p>
+                </div>
               </div>
             )}
 
-            {/* OTP Form */}
             <form onSubmit={handleVerify} className="space-y-5">
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Kode Verifikasi 6-Digit
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Kode Verifikasi 6-Digit
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handlePasteFromClipboard}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+                    title="Tempel kode OTP dari clipboard"
+                  >
+                    <FontAwesomeIcon icon={faPaste} className="w-3 h-3" />
+                    <span>Tempel Kode</span>
+                  </button>
+                </div>
                 <div className="flex items-center justify-between gap-2">
                   {otp.map((digit, idx) => (
                     <input
@@ -302,11 +356,13 @@ function VerifyEmailContent() {
                       }}
                       type="text"
                       inputMode="numeric"
-                      maxLength={1}
+                      autoComplete="one-time-code"
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(idx, e)}
-                      className="w-12 h-14 sm:w-13 sm:h-15 text-center text-xl sm:text-2xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-all shadow-sm"
+                      onPaste={handlePaste}
+                      onFocus={(e) => e.target.select()}
+                      className="w-12 h-14 sm:w-13 sm:h-15 text-center text-xl sm:text-2xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-slate-900 focus:outline-none transition-all shadow-sm select-all"
                     />
                   ))}
                 </div>
@@ -342,7 +398,6 @@ function VerifyEmailContent() {
                 </div>
               )}
 
-              {/* Resend Action */}
               <div className="flex items-center justify-between text-xs pt-1">
                 <div className="flex items-center gap-1.5 text-slate-500 font-medium">
                   <FontAwesomeIcon icon={faClock} className="w-3.5 h-3.5 text-slate-400" />
@@ -369,7 +424,6 @@ function VerifyEmailContent() {
                 </Link>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -405,20 +459,16 @@ function VerifyEmailContent() {
           </div>
         </div>
 
-        {/* ================= RIGHT HALF: IMAGE & BRANDING PANEL (50% WIDTH) ================= */}
         <div className="w-1/2 h-full relative p-8 xl:p-12 2xl:p-14 flex flex-col justify-between overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.25)]">
-          {/* Background Workspace Image */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             <img
               src="/login.png"
               alt="WorkNest Security & Smart Verification"
               className="w-full h-full object-cover object-center absolute inset-0 scale-[1.01]"
             />
-            {/* Clean dark gradient for high-contrast typography */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/50" />
           </div>
 
-          {/* Top Branding */}
           <div className="relative z-10">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
               <div className="w-12 h-12 flex items-center justify-center text-white shadow-sm shadow-sky-600/30 group-hover:bg-sky-500 transition-colors">
@@ -431,7 +481,6 @@ function VerifyEmailContent() {
             </Link>
           </div>
 
-          {/* Middle Content */}
           <div className="relative z-10 space-y-5 my-auto max-w-lg text-white">
             <h2 className="text-3xl xl:text-4xl font-extrabold text-white tracking-tight leading-tight drop-shadow-sm">
               Proteksi Akun Terenkripsi <br />
@@ -466,7 +515,6 @@ function VerifyEmailContent() {
             </div>
           </div>
 
-          {/* Bottom Trust Badge */}
           <div className="relative z-10 flex items-center gap-2 text-[11px] text-slate-300 font-mono">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>IDN-JKT-02 &bull; SECURE TOTP ENGINE ACTIVE</span>
@@ -474,9 +522,7 @@ function VerifyEmailContent() {
         </div>
       </div>
 
-      {/* MOBILE SINGLE VIEW (< 1024px) */}
       <div className="lg:hidden min-h-screen flex flex-col justify-between p-6 sm:p-8 bg-white">
-        {/* Mobile Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center text-xs">
@@ -493,7 +539,6 @@ function VerifyEmailContent() {
           </Link>
         </div>
 
-        {/* Mobile Form Content */}
         <div className="my-auto py-6 space-y-5">
           <div className="space-y-1 text-left">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200/60 text-sky-700 text-[11px] font-bold mb-1">
@@ -510,34 +555,57 @@ function VerifyEmailContent() {
           </div>
 
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
-              {errorMessage}
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
+              <FontAwesomeIcon icon={faCircleExclamation} className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold text-rose-900">Verifikasi Belum Berhasil</p>
+                <p className="font-normal text-rose-700 leading-relaxed">{errorMessage}</p>
+              </div>
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs">
-              {successMessage}
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2.5">
+              <FontAwesomeIcon icon={faCircleCheck} className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold text-emerald-900">Berhasil</p>
+                <p className="font-normal text-emerald-700 leading-relaxed">{successMessage}</p>
+              </div>
             </div>
           )}
 
           <form onSubmit={handleVerify} className="space-y-4 text-left">
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-              {otp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => {
-                    inputRefs.current[idx] = el;
-                  }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-slate-900 focus:outline-none shadow-sm"
-                />
-              ))}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-700">Kode 6-Digit</label>
+                <button
+                  type="button"
+                  onClick={handlePasteFromClipboard}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+                >
+                  <FontAwesomeIcon icon={faPaste} className="w-2.5 h-2.5" />
+                  <span>Tempel Kode</span>
+                </button>
+              </div>
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => {
+                      inputRefs.current[idx] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                    onPaste={handlePaste}
+                    onFocus={(e) => e.target.select()}
+                    className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold font-mono bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-slate-900 focus:outline-none shadow-sm select-all"
+                  />
+                ))}
+              </div>
             </div>
 
             {typeParam === "reset" && (
@@ -599,7 +667,6 @@ function VerifyEmailContent() {
           </form>
         </div>
 
-        {/* Mobile Footer */}
         <div className="text-center text-[11px] text-slate-400">
           &copy; {new Date().getFullYear()} WorkNest Technologies Inc.
         </div>

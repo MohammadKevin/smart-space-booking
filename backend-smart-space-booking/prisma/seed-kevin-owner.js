@@ -10,7 +10,6 @@ async function main() {
   const plainPassword = 'Kevin135*';
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
-  // 1. Cek atau Buat/Update User mhmdkevin198@gmail.com
   let user = await prisma.user.findUnique({
     where: { email },
     include: { spaceOwner: true, staff: true, member: true },
@@ -37,13 +36,11 @@ async function main() {
     });
     console.log('✓ Akun Space Owner baru berhasil dibuat:', user.email);
   } else {
-    // Jika sebelumnya staff atau member, hapus relasi lama yang bentrok
     if (user.staff) {
       await prisma.staff.delete({ where: { id: user.staff.id } });
       console.log('✓ Relasi staff lama dihapus.');
     }
     if (user.member) {
-      // Jika ada member tanpa reservasi
       try {
         await prisma.member.delete({ where: { id: user.member.id } });
         console.log('✓ Relasi member lama dihapus.');
@@ -52,7 +49,6 @@ async function main() {
       }
     }
 
-    // Pastikan SpaceOwner profil tersedia
     let spaceOwner = await prisma.spaceOwner.findUnique({
       where: { userId: user.id },
     });
@@ -83,7 +79,6 @@ async function main() {
       console.log('✓ Profil Space Owner diperbarui.');
     }
 
-    // Update password & role
     user = await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -98,9 +93,7 @@ async function main() {
 
   const ownerId = user.spaceOwner.id;
 
-  // 2. Siapkan 2 Ruangan per Kategori (Total 6 Ruangan)
   const spacesData = [
-    // --- Kategori: DESK (2 Ruangan) ---
     {
       namaSpace: 'Dedicated Flex Desk Senopati',
       tipe: SpaceTipe.desk,
@@ -119,8 +112,6 @@ async function main() {
       foto: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=80',
       ownerId: ownerId,
     },
-
-    // --- Kategori: MEETING ROOM (2 Ruangan) ---
     {
       namaSpace: 'Executive Boardroom Platinum',
       tipe: SpaceTipe.meeting_room,
@@ -139,8 +130,6 @@ async function main() {
       foto: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1000&q=80',
       ownerId: ownerId,
     },
-
-    // --- Kategori: PRIVATE OFFICE (2 Ruangan) ---
     {
       namaSpace: 'Private Office Suite Skyview',
       tipe: SpaceTipe.private_office,
@@ -161,7 +150,6 @@ async function main() {
     },
   ];
 
-  // 3. Masukkan / Upsert Ruangan ke Database
   console.log('Menyimpan inventaris 6 ruangan (2 per kategori)...');
   for (const s of spacesData) {
     const existing = await prisma.space.findFirst({
@@ -183,7 +171,6 @@ async function main() {
     }
   }
 
-  // 4. Pastikan Diskon Aktif untuk Space Owner ini
   const existingDiscount = await prisma.diskon.findFirst({
     where: { ownerId: ownerId },
   });

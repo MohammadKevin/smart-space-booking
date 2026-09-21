@@ -274,10 +274,7 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-x-hidden bg-white text-slate-900 z-50 selection:bg-sky-500 selection:text-white">
-      {/* DESKTOP FULL-SCREEN DOUBLE-SLIDER ANIMATION (>= 1024px) */}
       <div className="hidden lg:flex w-full h-full relative overflow-hidden bg-white">
-        
-        {/* ================= LEFT HALF: REGISTER FORM PANEL ================= */}
         <div
           className={`w-1/2 h-full flex flex-col justify-between p-8 xl:p-12 2xl:p-14 overflow-y-auto bg-white transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
             mode === "register"
@@ -285,7 +282,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               : "opacity-0 -translate-x-12 pointer-events-none z-0"
           }`}
         >
-          {/* Top Nav */}
           <div className="flex items-center justify-between">
             <Link
               href="/"
@@ -296,7 +292,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
             </Link>
           </div>
 
-          {/* Register Form Box */}
           <div className="max-w-md w-full mx-auto my-auto space-y-4">
             <div className="space-y-1 text-left">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -307,7 +302,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               </p>
             </div>
 
-            {/* Role Segmented Selector */}
             <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
               <button
                 type="button"
@@ -342,7 +336,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               </button>
             </div>
 
-            {/* Feedback Messages */}
             {regError && (
               <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
                 <FontAwesomeIcon icon={faCircleExclamation} className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -357,7 +350,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               </div>
             )}
 
-            {/* Form Fields */}
             <form onSubmit={handleRegisterSubmit} className="space-y-3">
               {registerRole === "owner" && (
                 <div className="space-y-1 text-left">
@@ -544,7 +536,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
           </div>
         </div>
 
-        {/* ================= RIGHT HALF: LOGIN FORM PANEL ================= */}
         <div
           className={`w-1/2 h-full flex flex-col justify-between p-8 xl:p-12 2xl:p-14 overflow-y-auto bg-white transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] ${
             mode === "login"
@@ -552,7 +543,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               : "opacity-0 translate-x-12 pointer-events-none z-0"
           }`}
         >
-          {/* Top Nav */}
           <div className="flex items-center justify-between">
             <Link
               href="/"
@@ -563,7 +553,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
             </Link>
           </div>
 
-          {/* Login Form Box */}
           <div className="max-w-md w-full mx-auto my-auto space-y-6">
             <div className="space-y-1.5 text-left">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -574,7 +563,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               </p>
             </div>
 
-            {/* Feedback Messages */}
             {loginError && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
                 <FontAwesomeIcon icon={faCircleExclamation} className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -599,7 +587,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
               </div>
             )}
 
-            {/* Login Form */}
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1.5 text-left">
                 <label className="block text-xs font-semibold text-slate-700">
@@ -710,14 +697,12 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
           </div>
         </div>
 
-        {/* ================= SLIDING IMAGE & BENEFIT OVERLAY PANEL (50% WIDTH) ================= */}
         <div
           className="absolute inset-y-0 left-0 w-1/2 z-20 transition-all duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] p-8 xl:p-12 2xl:p-14 flex flex-col justify-between overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.25)]"
           style={{
             transform: mode === "login" ? "translateX(0%)" : "translateX(100%)",
           }}
         >
-          {/* Background Workspace Images (Crisp & Sharp without Blur) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             <img
               src="/login.png"
@@ -733,11 +718,9 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
                 mode === "register" ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
               }`}
             />
-            {/* Clean, unblurred dark gradient to ensure high-contrast text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/50" />
           </div>
 
-          {/* Top Branding */}
           <div className="relative z-10">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
               <div className="w-12 h-12 flex items-center justify-center text-white shadow-sm shadow-sky-600/30 group-hover:bg-sky-500 transition-colors">
@@ -803,7 +786,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
         </div>
       </div>
 
-      {/* MOBILE SINGLE VIEW (< 1024px) */}
       <div className="lg:hidden min-h-screen flex flex-col justify-between p-6 sm:p-8 bg-white">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <Link href="/" className="flex items-center gap-2">
@@ -835,7 +817,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
           </div>
         </div>
 
-        {/* Mobile Form Content */}
         <div className="my-auto py-6">
           {mode === "login" ? (
             <div className="space-y-5">
@@ -972,7 +953,6 @@ export function AuthSplitScreen({ initialMode }: AuthSplitScreenProps) {
         </div>
       </div>
 
-      {/* FORGOT PASSWORD MODAL */}
       {forgotModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in"
