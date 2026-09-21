@@ -490,34 +490,92 @@ export class SuperAdminService {
       `[DATA_RESET_AUDIT] Action: DATA_RESET, ExecutedBy: ${executor?.email || 'system/secret'}, IP: ${ipAddress || '127.0.0.1'}, Timestamp: ${timestamp}, AffectedTables: ${affectedTables.join(', ')}`,
     );
 
-    const summary = await this.prisma.$transaction(async (tx) => {
-      const detailReservasi = await tx.detailReservasi.deleteMany({});
-      const review = await tx.review.deleteMany({});
-      const waitlist = await tx.waitlist.deleteMany({});
-      const transaksi = await tx.transaksi.deleteMany({});
-      const reservasi = await tx.reservasi.deleteMany({});
-      const diskon = await tx.diskon.deleteMany({});
-      const spaces = await tx.space.deleteMany({});
-      const staffs = await tx.staff.deleteMany({});
-      const spaceOwners = await tx.spaceOwner.deleteMany({});
-      const members = await tx.member.deleteMany({});
-      const usersDeleted = await tx.user.deleteMany({});
-      await tx.platformSetting.deleteMany({});
+    // Pastikan tabel platform_settings ada jika belum pernah di-migrate
+    try {
+      await this.prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS platform_settings (
+          id INT NOT NULL AUTO_INCREMENT,
+          \`key\` VARCHAR(191) NOT NULL UNIQUE,
+          \`value\` TEXT NOT NULL,
+          createdAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          updatedAt DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+          PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      `);
+    } catch {}
 
-      return {
-        detail_reservasi: detailReservasi.count,
-        review: review.count,
-        waitlist: waitlist.count,
-        transaksi: transaksi.count,
-        reservasi: reservasi.count,
-        diskon: diskon.count,
-        spaces: spaces.count,
-        staffs: staffs.count,
-        space_owners: spaceOwners.count,
-        members: members.count,
-        users_deleted: usersDeleted.count,
-      };
-    });
+    const summary = {
+      detail_reservasi: 0,
+      review: 0,
+      waitlist: 0,
+      transaksi: 0,
+      reservasi: 0,
+      diskon: 0,
+      spaces: 0,
+      staffs: 0,
+      space_owners: 0,
+      members: 0,
+      users_deleted: 0,
+    };
+
+    try {
+      const res = await this.prisma.detailReservasi.deleteMany({});
+      summary.detail_reservasi = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.review.deleteMany({});
+      summary.review = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.waitlist.deleteMany({});
+      summary.waitlist = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.transaksi.deleteMany({});
+      summary.transaksi = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.reservasi.deleteMany({});
+      summary.reservasi = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.diskon.deleteMany({});
+      summary.diskon = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.space.deleteMany({});
+      summary.spaces = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.staff.deleteMany({});
+      summary.staffs = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.spaceOwner.deleteMany({});
+      summary.space_owners = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.member.deleteMany({});
+      summary.members = res.count;
+    } catch {}
+
+    try {
+      const res = await this.prisma.user.deleteMany({});
+      summary.users_deleted = res.count;
+    } catch {}
+
+    try {
+      await this.prisma.platformSetting.deleteMany({});
+    } catch {}
 
     const tablesToResetAutoIncrement = [
       'detail_reservasi',
@@ -566,12 +624,14 @@ export class SuperAdminService {
     } catch {}
 
     // Buat setting komisi default
-    await this.prisma.platformSetting.create({
-      data: {
-        key: 'PLATFORM_COMMISSION_PERCENT',
-        value: process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
-      },
-    });
+    try {
+      await this.prisma.platformSetting.create({
+        data: {
+          key: 'PLATFORM_COMMISSION_PERCENT',
+          value: process.env.PLATFORM_COMMISSION_PERCENT || '5.0',
+        },
+      });
+    } catch {}
 
     const executedAt = new Date().toISOString();
 
