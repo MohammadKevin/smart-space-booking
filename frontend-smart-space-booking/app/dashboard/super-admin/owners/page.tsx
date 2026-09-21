@@ -264,7 +264,8 @@ export default function SuperAdminOwnersPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider rounded-t-xl">
               <tr>
@@ -379,6 +380,64 @@ export default function SuperAdminOwnersPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {loading ? (
+            <div className="py-12 text-center text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin text-sky-600 mx-auto mb-2" />
+              <span>Memuat direktori mitra...</span>
+            </div>
+          ) : filteredOwners.length > 0 ? (
+            filteredOwners.map((o) => (
+              <div
+                key={o.id}
+                className="p-4 space-y-3 cursor-pointer hover:bg-slate-50/60 transition-colors"
+                onClick={() => setSelectedOwner(o)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100 mt-0.5">
+                      <Building className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900">{o.namaCoworking}</h4>
+                      <p className="text-xs text-slate-500">{o.namaPemilik}</p>
+                      <p className="text-[11px] text-slate-400 truncate max-w-[200px] mt-0.5">{o.alamat || "-"}</p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <p className="font-mono font-bold text-xs text-slate-900">{formatRupiah(o.gmv || 0)}</p>
+                    <p className="text-[10px] text-sky-700 font-mono font-semibold">{formatRupiah(o.netPayout || 0)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-500 border-t border-slate-50 pt-2">
+                  <span className="text-[11px]">
+                    🏠 <strong>{o.totalSpaces || 0}</strong> Ruang &bull; 👥 <strong>{o.totalStaffs || 0}</strong> Staf
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOwner(o);
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs"
+                  >
+                    Detail
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-12 text-center text-slate-400 text-xs p-4">
+              {searchQuery
+                ? "Tidak ada mitra space owner yang sesuai dengan kata kunci pencarian."
+                : "Belum ada mitra space owner terdaftar di platform."}
+            </div>
+          )}
         </div>
       </div>
 

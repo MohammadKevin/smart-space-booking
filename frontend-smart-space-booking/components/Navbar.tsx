@@ -654,33 +654,62 @@ export function Navbar() {
           </div>
 
           {mobileMenuOpen && (
-            <div className="mt-2 w-full max-w-lg mx-auto rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/80 shadow-[0_24px_50px_rgba(15,23,42,0.15)] ring-1 ring-slate-900/5 p-4 space-y-3 pointer-events-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="mt-2 w-full max-w-lg mx-auto rounded-3xl bg-white/95 backdrop-blur-2xl border border-white/90 shadow-[0_24px_50px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/10 p-4 space-y-3 pointer-events-auto max-h-[82vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    setMobileMenuOpen(false);
+                    router.push(`/spaces?search=${encodeURIComponent(searchQuery.trim())}`);
+                  }
+                }}
+                className="relative flex items-center"
+              >
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari nama atau jenis ruangan..."
+                  className="w-full pl-10 pr-9 py-2.5 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </form>
+
               <div className="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-700 pb-2 border-b border-slate-200/60">
                 <Link
                   href="/#ruang-kerja"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-2xl bg-white/70 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
+                  className="px-3 py-2.5 rounded-2xl bg-slate-50 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
                 >
                   Lihat Ruangan
                 </Link>
                 <Link
                   href="/#tata-cara"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-2xl bg-white/70 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
+                  className="px-3 py-2.5 rounded-2xl bg-slate-50 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
                 >
                   Tata Cara
                 </Link>
                 <Link
                   href="/#tarif"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-2xl bg-white/70 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
+                  className="px-3 py-2.5 rounded-2xl bg-slate-50 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
                 >
                   Tarif
                 </Link>
                 <Link
                   href="/#faq"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-2xl bg-white/70 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
+                  className="px-3 py-2.5 rounded-2xl bg-slate-50 hover:bg-sky-50 hover:text-sky-700 transition-colors text-center border border-slate-100"
                 >
                   FAQ
                 </Link>
@@ -688,80 +717,231 @@ export function Navbar() {
 
               {isAuthenticated && user ? (
                 <div className="space-y-2 pt-1 border-t border-slate-100">
-                  <div className="px-3 py-2 bg-sky-50/60 rounded-xl border border-sky-100">
+                  <div className="px-3 py-2 bg-sky-50/70 rounded-2xl border border-sky-100">
                     <p className="text-xs font-bold text-slate-900">{getDisplayName()}</p>
                     <p className="text-[11px] text-sky-700 font-medium">Peran: {getRoleLabel()}</p>
                   </div>
 
-                  {currentRole === "member" && (
-                    <>
-                      <Link
-                        href="/dashboard/member"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
-                      >
-                        <CalendarCheck className="w-4 h-4 text-sky-600" />
-                        <span>Jadwal &amp; Tiket Saya</span>
-                      </Link>
-                      <Link
-                        href="/dashboard/member/transactions"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
-                      >
-                        <Wallet className="w-4 h-4 text-sky-600" />
-                        <span>Transaksi &amp; Invoice</span>
-                      </Link>
-                    </>
-                  )}
+                  <div className="space-y-1">
+                    {currentRole === "super_admin" && (
+                      <>
+                        <Link
+                          href="/dashboard/super-admin"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-sky-600" />
+                          <span>Overview Platform</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/owners"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <Building className="w-4 h-4 text-sky-600" />
+                          <span>Mitra Space Owner</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/commission"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <TicketPercent className="w-4 h-4 text-sky-600" />
+                          <span>Komisi Platform</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/transactions"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <ReceiptText className="w-4 h-4 text-sky-600" />
+                          <span>Transaksi Global</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/super-admin/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <UserCog className="w-4 h-4 text-sky-600" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
+                    )}
 
-                  {currentRole === "owner" && (
-                    <>
-                      <Link
-                        href="/dashboard/owner"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
-                      >
-                        <LayoutDashboard className="w-4 h-4 text-sky-600" />
-                        <span>Dashboard Owner</span>
-                      </Link>
-                      <Link
-                        href="/dashboard/owner/spaces"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
-                      >
-                        <Building className="w-4 h-4 text-sky-600" />
-                        <span>Kelola Ruangan</span>
-                      </Link>
-                    </>
-                  )}
+                    {currentRole === "owner" && (
+                      <>
+                        <Link
+                          href="/dashboard/owner"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-sky-600" />
+                          <span>Dashboard KPI</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/reservations"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <CalendarClock className="w-4 h-4 text-sky-600" />
+                          <span>Manajemen Reservasi</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/spaces"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <Building className="w-4 h-4 text-sky-600" />
+                          <span>Inventory Ruangan</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/discounts"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <TicketPercent className="w-4 h-4 text-sky-600" />
+                          <span>Kode Promo Diskon</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/staff"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <UserCheck className="w-4 h-4 text-sky-600" />
+                          <span>Tim Staff</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/transactions"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <ReceiptText className="w-4 h-4 text-sky-600" />
+                          <span>Transaksi &amp; Finansial</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/owner/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <UserCog className="w-4 h-4 text-sky-600" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
+                    )}
+
+                    {currentRole === "staff" && (
+                      <>
+                        <Link
+                          href="/dashboard/staff"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <QrCode className="w-4 h-4 text-sky-600" />
+                          <span>Terminal Check-In</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/staff/history"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <CalendarCheck className="w-4 h-4 text-sky-600" />
+                          <span>Log Reservasi</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/staff/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <UserCog className="w-4 h-4 text-sky-600" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
+                    )}
+
+                    {currentRole === "member" && (
+                      <>
+                        <Link
+                          href="/dashboard/member"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <CalendarCheck className="w-4 h-4 text-sky-600" />
+                          <span>Tiket &amp; Jadwal Saya</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/member/transactions"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <Wallet className="w-4 h-4 text-sky-600" />
+                          <span>Transaksi &amp; Invoice</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/member/spaces"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <Compass className="w-4 h-4 text-slate-500" />
+                          <span>Katalog Ruangan</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/member/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 rounded-xl"
+                        >
+                          <UserCog className="w-4 h-4 text-slate-500" />
+                          <span>Pengaturan Akun</span>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+
+                  <Link
+                    href="/spaces"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition-colors shadow-sm"
+                  >
+                    <span>Pesan Ruangan</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
 
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-600 bg-rose-50 rounded-xl cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl cursor-pointer transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Keluar Akun</span>
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <div className="space-y-2 pt-1 border-t border-slate-100">
                   <Link
-                    href="/login"
+                    href="/spaces"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-1.5 text-center px-4 py-2 text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition-colors shadow-sm"
                   >
-                    <User className="w-3.5 h-3.5 text-slate-500" />
-                    <span>Masuk</span>
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-center gap-1.5 text-center px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 rounded-full shadow-sm shadow-sky-600/30 transition-all"
-                  >
-                    <span>Daftar</span>
+                    <span>Jelajahi Ruangan</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Masuk</span>
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-1.5 text-center px-4 py-2.5 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl transition-colors"
+                    >
+                      <span>Daftar</span>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

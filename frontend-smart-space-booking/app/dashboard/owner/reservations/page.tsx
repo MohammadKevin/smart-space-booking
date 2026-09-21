@@ -323,7 +323,8 @@ export default function OwnerReservationsPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto rounded-xl">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-[10px] font-mono font-bold uppercase text-slate-400 bg-slate-50/80">
@@ -485,6 +486,124 @@ export default function OwnerReservationsPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {loading ? (
+            <div className="py-12 text-center text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-sky-600" />
+              <span>Memuat data reservasi...</span>
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 p-4">
+              <Calendar className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+              <p className="font-semibold text-slate-700">Belum ada data reservasi</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Reservasi yang dilakukan oleh member akan muncul di sini.
+              </p>
+            </div>
+          ) : (
+            filteredItems.map((r) => {
+              const space = r.detailReservasi?.space;
+              const memberName = r.member?.namaMember || `Member #${r.memberId}`;
+              const roomName = space?.namaSpace || `Ruang #${r.id}`;
+              const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
+              const total = r.detailReservasi?.totalHarga || 0;
+              const isPending = r.status === "pending";
+              const isAktif = r.status === "aktif";
+              const isSelesai = r.status === "selesai";
+              const isDibatalkan = r.status === "dibatalkan";
+
+              return (
+                <div key={r.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-xs text-slate-900">#{r.id}</span>
+                        {isPending && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            Pending
+                          </span>
+                        )}
+                        {isAktif && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                            Aktif
+                          </span>
+                        )}
+                        {isSelesai && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            Selesai
+                          </span>
+                        )}
+                        {isDibatalkan && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            Batal
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-sm text-slate-900 mt-1">{roomName}</h4>
+                      <p className="text-xs text-slate-500">{memberName}</p>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <p className="font-mono font-bold text-sm text-slate-900">{formatRupiah(total)}</p>
+                      <span className={`text-[10px] font-semibold ${r.transaksi?.statusPembayaran === "lunas" ? "text-sky-600" : "text-amber-600"}`}>
+                        {r.transaksi?.statusPembayaran === "lunas" ? "• Lunas" : "• Belum Lunas"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 border-t border-slate-50 pt-2">
+                    <div>
+                      <span>📅 {date}</span> &bull; <span className="font-mono">{r.jamMulai} WIB ({r.durasiJam}j)</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDetail(r)}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs"
+                      >
+                        Detail
+                      </button>
+                      {isPending && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(r.id, "aktif")}
+                            disabled={actionLoadingId === r.id}
+                            className="px-2.5 py-1 rounded-lg bg-sky-600 text-white text-xs font-bold shadow-2xs"
+                          >
+                            Konfirmasi
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(r.id, "dibatalkan")}
+                            disabled={actionLoadingId === r.id}
+                            className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold"
+                          >
+                            Tolak
+                          </button>
+                        </>
+                      )}
+                      {isAktif && (
+                        <button
+                          type="button"
+                          onClick={() => handleStatusChange(r.id, "selesai")}
+                          disabled={actionLoadingId === r.id}
+                          className="px-2.5 py-1 rounded-lg bg-sky-600 text-white text-xs font-bold shadow-2xs"
+                        >
+                          Selesai
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

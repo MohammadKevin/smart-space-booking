@@ -786,6 +786,32 @@ export default function BookingPage({ params }: BookingPageProps) {
             </div>
           </div>
         </div>
+
+        {/* Mobile Sticky Booking Bar */}
+        <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3.5 z-40 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] text-slate-400 uppercase font-mono font-bold">Total ({durationHours} Jam)</p>
+            <p className="text-base font-bold text-sky-600 font-mono leading-tight">{formatRupiah(totalPayable)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleProceedCheckout}
+            disabled={submitting}
+            className="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-60 shrink-0"
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Memproses...</span>
+              </>
+            ) : (
+              <>
+                <span>Pembayaran</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

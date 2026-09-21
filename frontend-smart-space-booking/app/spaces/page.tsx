@@ -261,8 +261,8 @@ function SpacesContent() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            <div className="md:col-span-4 relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
+            <div className="sm:col-span-2 lg:col-span-4 relative">
               <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 pointer-events-none" />
               <input
                 type="text"
@@ -282,7 +282,7 @@ function SpacesContent() {
               )}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-1 lg:col-span-2">
               <select
                 value={selectedMetro}
                 onChange={(e) => setSelectedMetro(e.target.value)}
@@ -297,7 +297,7 @@ function SpacesContent() {
               </select>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-1 lg:col-span-2">
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
@@ -310,7 +310,7 @@ function SpacesContent() {
               </select>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-1 lg:col-span-2">
               <select
                 value={minCapacity}
                 onChange={(e) => setMinCapacity(e.target.value)}
@@ -324,7 +324,7 @@ function SpacesContent() {
               </select>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="sm:col-span-1 lg:col-span-2">
               <select
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}

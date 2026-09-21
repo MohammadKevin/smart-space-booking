@@ -213,8 +213,8 @@ export function LiveQrScanner({ onScanSuccess, isProcessing = false }: LiveQrSca
         )}
 
         {isScanning && (
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-52 h-52 border-2 border-sky-500 rounded-xl relative shadow-[0_0_20px_rgba(2,132,199,0.4)]">
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-4">
+            <div className="w-48 sm:w-52 h-48 sm:h-52 max-w-[70vw] max-h-[70vw] border-2 border-sky-500 rounded-xl relative shadow-[0_0_20px_rgba(2,132,199,0.4)]">
               <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-sky-400 rounded-tl" />
               <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-sky-400 rounded-tr" />
               <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-sky-400 rounded-bl" />

@@ -320,59 +320,95 @@ export default function OwnerStaffPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  <th className="py-3 px-4">IDENTITAS STAF</th>
-                  <th className="py-3 px-4">EMAIL LOGIN</th>
-                  <th className="py-3 px-4">TELEPON / WA</th>
-                  <th className="py-3 px-4">HAK AKSES</th>
-                  <th className="py-3 px-4 text-right">AKSI</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredStaffs.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-100">
-                          {(s.namaStaff || "ST").slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900">{s.namaStaff || "Staf"}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">ID: #STF-{String(s.id).padStart(3, "0")}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-slate-900">
-                      {s.user?.email || "-"}
-                    </td>
-
-                    <td className="py-3.5 px-4 font-mono text-slate-700">
-                      {s.telp || "-"}
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">
-                        Frontdesk Scanner
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(s)}
-                        className="px-2.5 py-1 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
-                      >
-                        Cabut Akses
-                      </button>
-                    </td>
+          <div>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                    <th className="py-3 px-4">IDENTITAS STAF</th>
+                    <th className="py-3 px-4">EMAIL LOGIN</th>
+                    <th className="py-3 px-4">TELEPON / WA</th>
+                    <th className="py-3 px-4">HAK AKSES</th>
+                    <th className="py-3 px-4 text-right">AKSI</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {filteredStaffs.map((s) => (
+                    <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-100">
+                            {(s.namaStaff || "ST").slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900">{s.namaStaff || "Staf"}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">ID: #STF-{String(s.id).padStart(3, "0")}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-4 font-mono text-slate-900">
+                        {s.user?.email || "-"}
+                      </td>
+
+                      <td className="py-3.5 px-4 font-mono text-slate-700">
+                        {s.telp || "-"}
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold">
+                          Frontdesk Scanner
+                        </span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(s)}
+                          className="px-2.5 py-1 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+                        >
+                          Cabut Akses
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List View */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filteredStaffs.map((s) => (
+                <div key={s.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs shrink-0 border border-sky-100">
+                        {(s.namaStaff || "ST").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-slate-900">{s.namaStaff || "Staf"}</p>
+                        <p className="text-xs text-slate-500 font-mono">{s.user?.email || "-"}</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-mono font-semibold shrink-0">
+                      Frontdesk
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-slate-500 border-t border-slate-50 pt-2">
+                    <span className="font-mono text-[11px]">📞 {s.telp || "-"}</span>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteTarget(s)}
+                      className="px-2.5 py-1 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      Cabut Akses
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -47,13 +47,6 @@ export function SpaceCard({ space }: SpaceCardProps) {
               {getTypePaxLabel()}
             </span>
           </div>
-
-          <div className="absolute top-2.5 right-2.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/95 backdrop-blur-md text-emerald-800 border border-emerald-200 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Tersedia</span>
-            </span>
-          </div>
         </div>
 
         <div className="p-4 space-y-2.5">
@@ -93,29 +86,29 @@ export function SpaceCard({ space }: SpaceCardProps) {
         </div>
       </div>
 
-      <div className="p-4 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
-        <div>
+      <div className="p-3.5 sm:p-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5 bg-white mt-auto">
+        <div className="min-w-0">
           <span className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider font-mono">
             Tarif Sewa
           </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-base font-bold text-slate-900 font-mono">
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm sm:text-base font-bold text-slate-900 font-mono tracking-tight">
               {formatRupiah(space.hargaPerJam)}
             </span>
-            <span className="text-[11px] text-slate-500">/ jam</span>
+            <span className="text-[11px] sm:text-xs text-slate-500 whitespace-nowrap">/ jam</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
           <Link
             href={`/spaces/${space.id}`}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition-colors"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
           >
             Detail
           </Link>
           <Link
             href={`/booking/${space.id}`}
-            className="px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 cursor-pointer"
+            className="px-3 sm:px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 cursor-pointer"
           >
             Pesan
           </Link>

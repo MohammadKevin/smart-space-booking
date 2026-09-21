@@ -422,107 +422,173 @@ export default function OwnerDiscountsPage() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  <th className="py-3 px-4">KODE &amp; KAMPANYE</th>
-                  <th className="py-3 px-4">BESARAN DISKON</th>
-                  <th className="py-3 px-4">RUANGAN BERLAKU</th>
-                  <th className="py-3 px-4">PERIODE BERLAKU</th>
-                  <th className="py-3 px-4">STATUS</th>
-                  <th className="py-3 px-4 text-right">AKSI</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredDiscounts.map((d) => {
-                  const status = getDiscountStatus(d);
-                  const isCopied = copiedCode === d.kodeDiskon;
-                  const rawStart = d.tanggalAwal ? d.tanggalAwal.split("T")[0] : "-";
-                  const rawEnd = d.tanggalAkhir ? d.tanggalAkhir.split("T")[0] : "-";
+          <div>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/80 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                    <th className="py-3 px-4">KODE &amp; KAMPANYE</th>
+                    <th className="py-3 px-4">BESARAN DISKON</th>
+                    <th className="py-3 px-4">RUANGAN BERLAKU</th>
+                    <th className="py-3 px-4">PERIODE BERLAKU</th>
+                    <th className="py-3 px-4">STATUS</th>
+                    <th className="py-3 px-4 text-right">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {filteredDiscounts.map((d) => {
+                    const status = getDiscountStatus(d);
+                    const isCopied = copiedCode === d.kodeDiskon;
+                    const rawStart = d.tanggalAwal ? d.tanggalAwal.split("T")[0] : "-";
+                    const rawEnd = d.tanggalAkhir ? d.tanggalAkhir.split("T")[0] : "-";
 
-                  return (
-                    <tr key={d.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-200">
-                              {d.kodeDiskon}
+                    return (
+                      <tr key={d.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-200">
+                                {d.kodeDiskon}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyCode(d.kodeDiskon || "")}
+                                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                                title="Salin Kode"
+                              >
+                                {isCopied ? (
+                                  <Check className="w-3.5 h-3.5 text-sky-600" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
+                              {d.namaDiskon}
+                            </p>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <p className="font-bold text-slate-900 font-mono text-sm">
+                            {d.persentaseDiskon}%
+                          </p>
+                          <span className="text-[10px] text-slate-400">Potongan Harga</span>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate max-w-xs">
+                              {d.space ? d.space.namaSpace : "Semua Ruangan Venue"}
                             </span>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 font-mono">
+                          <p className="font-medium text-[11px] text-slate-900">
+                            {rawStart} &ndash; {rawEnd}
+                          </p>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border ${status.color}`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            <span>{status.label}</span>
+                          </span>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
-                              onClick={() => handleCopyCode(d.kodeDiskon || "")}
-                              className="text-slate-400 hover:text-slate-700 cursor-pointer"
-                              title="Salin Kode"
+                              onClick={() => handleOpenEdit(d)}
+                              className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
                             >
-                              {isCopied ? (
-                                <Check className="w-3.5 h-3.5 text-sky-600" />
-                              ) : (
-                                <Copy className="w-3.5 h-3.5" />
-                              )}
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(d)}
+                              className="p-1 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                              title="Hapus"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
-                          <p className="text-[11px] text-slate-500 font-medium truncate max-w-xs">
-                            {d.namaDiskon}
-                          </p>
-                        </div>
-                      </td>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-                      <td className="py-3.5 px-4">
-                        <p className="font-bold text-slate-900 font-mono text-sm">
-                          {d.persentaseDiskon}%
-                        </p>
-                        <span className="text-[10px] text-slate-400">Potongan Harga</span>
-                      </td>
+            {/* Mobile Card List View */}
+            <div className="md:hidden divide-y divide-slate-100">
+              {filteredDiscounts.map((d) => {
+                const status = getDiscountStatus(d);
+                const isCopied = copiedCode === d.kodeDiskon;
+                const rawStart = d.tanggalAwal ? d.tanggalAwal.split("T")[0] : "-";
+                const rawEnd = d.tanggalAkhir ? d.tanggalAkhir.split("T")[0] : "-";
 
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                          <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate max-w-xs">
-                            {d.space ? d.space.namaSpace : "Semua Ruangan Venue"}
+                return (
+                  <div key={d.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 px-2 py-0.5 rounded-md border border-slate-200">
+                            {d.kodeDiskon}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyCode(d.kodeDiskon || "")}
+                            className="text-slate-400 hover:text-slate-700 p-0.5"
+                          >
+                            {isCopied ? <Check className="w-3.5 h-3.5 text-sky-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${status.color}`}>
+                            <span>{status.label}</span>
                           </span>
                         </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 font-mono">
-                        <p className="font-medium text-[11px] text-slate-900">
-                          {rawStart} &ndash; {rawEnd}
+                        <h4 className="font-bold text-sm text-slate-900 mt-1">{d.namaDiskon}</h4>
+                        <p className="text-xs text-slate-500 font-medium">
+                          {d.space ? d.space.namaSpace : "Semua Ruangan Venue"}
                         </p>
-                      </td>
+                      </div>
 
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold border ${status.color}`}
+                      <div className="text-right shrink-0">
+                        <p className="font-mono font-bold text-base text-slate-900">{d.persentaseDiskon}%</p>
+                        <span className="text-[10px] text-slate-400">Potongan</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-50 pt-2 font-mono">
+                      <span>{rawStart} &ndash; {rawEnd}</span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(d)}
+                          className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs"
                         >
-                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                          <span>{status.label}</span>
-                        </span>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenEdit(d)}
-                            className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer shadow-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget(d)}
-                            className="p-1 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
-                            title="Hapus"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(d)}
+                          className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>

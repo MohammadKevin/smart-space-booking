@@ -303,8 +303,8 @@ export default function OwnerOverviewPage() {
         </div>
 
         {hasRevenueData ? (
-          <div className="space-y-3 pt-2">
-            <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 h-52 items-end border-b border-slate-100 pb-3">
+          <div className="space-y-3 pt-2 overflow-x-auto">
+            <div className="grid grid-cols-12 gap-2 h-52 min-w-[520px] items-end border-b border-slate-100 pb-3">
               {monthlyRevenue.map((item) => {
                 const heightPercent = maxMonthlyRevenue > 0 ? Math.max(8, (item.revenue / maxMonthlyRevenue) * 100) : 8;
 

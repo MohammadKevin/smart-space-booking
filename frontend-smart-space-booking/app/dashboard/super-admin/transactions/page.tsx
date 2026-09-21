@@ -279,7 +279,8 @@ export default function SuperAdminTransactionsPage() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider rounded-t-xl">
               <tr>
@@ -390,6 +391,76 @@ export default function SuperAdminTransactionsPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card List View */}
+        <div className="md:hidden divide-y divide-slate-100">
+          {loading ? (
+            <div className="py-12 text-center text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin text-sky-600 mx-auto mb-2" />
+              <span>Memuat riwayat transaksi...</span>
+            </div>
+          ) : filteredTransactions.length > 0 ? (
+            filteredTransactions.map((tx) => {
+              const gross = tx.jumlah || 0;
+              const dateStr = tx.createdAt
+                ? new Date(tx.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "-";
+
+              return (
+                <div
+                  key={tx.id}
+                  className="p-4 space-y-3 cursor-pointer hover:bg-slate-50/60 transition-colors"
+                  onClick={() => setSelectedTx(tx)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-mono font-bold text-xs text-slate-900 block">
+                        {tx.nomorInvoice || `INV-${tx.id}`}
+                      </span>
+                      <h4 className="font-bold text-sm text-slate-900 mt-0.5">
+                        {tx.reservasi?.detailReservasi?.space?.namaSpace || "Ruangan"}
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        {tx.reservasi?.member?.namaMember || "Member"} &bull; {tx.reservasi?.owner?.namaCoworking || "WorkNest Hub"}
+                      </p>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <p className="font-mono font-bold text-sm text-slate-900">{formatRupiah(gross)}</p>
+                      <div className="mt-1 flex justify-end">
+                        <PaymentStatusBadge status={tx.statusPembayaran} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-50 pt-2">
+                    <span>📅 {dateStr} ({tx.reservasi?.durasiJam || 1} Jam)</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTx(tx);
+                      }}
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs"
+                    >
+                      Detail
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="py-12 text-center text-slate-400 text-xs p-4">
+              {searchQuery
+                ? "Tidak ada transaksi yang cocok dengan kata kunci pencarian."
+                : "Belum ada riwayat transaksi yang tercatat di platform."}
+            </div>
+          )}
         </div>
       </div>
 

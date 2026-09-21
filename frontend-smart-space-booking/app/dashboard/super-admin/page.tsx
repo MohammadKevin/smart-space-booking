@@ -357,8 +357,8 @@ export default function SuperAdminOverviewPage() {
         </div>
 
         {revenueItems.length > 0 ? (
-          <div className="space-y-3 pt-2">
-            <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 h-52 items-end border-b border-slate-100 pb-3">
+          <div className="space-y-3 pt-2 overflow-x-auto">
+            <div className="grid grid-cols-12 gap-2 h-52 min-w-[520px] items-end border-b border-slate-100 pb-3">
               {revenueItems.map((item) => {
                 const gmvHeight = maxMonthlyGmv > 0 ? Math.max(8, (item.gmv / maxMonthlyGmv) * 100) : 8;
                 const profitHeight = maxMonthlyGmv > 0 ? Math.max(4, (item.platformProfit / maxMonthlyGmv) * 100) : 4;

@@ -636,8 +636,9 @@ export default function MemberDashboardPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
                 <tr>
@@ -686,7 +687,7 @@ export default function MemberDashboardPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedReceipt(res)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer border border-slate-200 shadow-sm"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer border border-slate-200 shadow-2xs"
                           >
                             <FileText className="w-3 h-3 text-slate-500" />
                             <span>PDF</span>
@@ -704,6 +705,53 @@ export default function MemberDashboardPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {pastReservations.length > 0 ? (
+              pastReservations.map((res) => {
+                const rawDate = res.tanggalReservasi ? res.tanggalReservasi.split("T")[0] : "-";
+                const space = res.detailReservasi?.space;
+                const amount = res.detailReservasi?.totalHarga || (space?.hargaPerJam || 0) * (res.durasiJam || 1);
+
+                return (
+                  <div key={res.id} className="p-4 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-900 leading-snug">
+                          {space?.namaSpace || `Ruangan #${res.id}`}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          {space?.owner?.namaCoworking || "WorkNest Hub"} &bull; <span className="uppercase font-mono">{space?.tipe || "ROOM"}</span>
+                        </p>
+                      </div>
+                      <span className="font-mono text-xs font-bold text-slate-900 shrink-0">
+                        {formatRupiah(amount)}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-slate-600 border-t border-slate-50">
+                      <div className="text-[11px]">
+                        <span>📅 {rawDate}</span> &bull; <span className="font-mono">{res.jamMulai} WIB ({res.durasiJam || 1}j)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedReceipt(res)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer border border-slate-200"
+                      >
+                        <FileText className="w-3 h-3 text-slate-500" />
+                        <span>Faktur</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-8 text-center text-slate-400 text-xs p-4">
+                Belum ada riwayat kunjungan yang tercatat.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -811,29 +859,27 @@ export default function MemberDashboardPage() {
             </div>
 
             <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
-              <div className="bg-slate-50/80 p-3 font-bold text-slate-700 border-b border-slate-200 grid grid-cols-12">
-                <span className="col-span-6">Item Ruangan</span>
-                <span className="col-span-2 text-center">Durasi</span>
-                <span className="col-span-4 text-right">Subtotal</span>
+              <div className="bg-slate-50/80 p-3 font-bold text-slate-700 border-b border-slate-200 flex items-center justify-between">
+                <span>Item Ruangan &amp; Durasi</span>
+                <span className="text-right">Subtotal</span>
               </div>
-              <div className="p-3 grid grid-cols-12 items-center text-slate-800">
-                <div className="col-span-6 font-semibold">
+              <div className="p-3 flex items-center justify-between gap-3 text-slate-800">
+                <div className="font-semibold">
                   {selectedReceipt.detailReservasi?.space?.namaSpace}
                   <span className="block text-[11px] text-slate-400 font-normal">
-                    {formatRupiah(selectedReceipt.detailReservasi?.space?.hargaPerJam || 0)} / jam
+                    {formatRupiah(selectedReceipt.detailReservasi?.space?.hargaPerJam || 0)} / jam &bull; {selectedReceipt.durasiJam || 1} Jam
                   </span>
                 </div>
-                <span className="col-span-2 text-center">{selectedReceipt.durasiJam || 1} Jam</span>
-                <span className="col-span-4 text-right font-mono font-bold">
+                <span className="text-right font-mono font-bold shrink-0">
                   {formatRupiah(
                     (selectedReceipt.detailReservasi?.space?.hargaPerJam || 0) * (selectedReceipt.durasiJam || 1)
                   )}
                 </span>
               </div>
 
-              <div className="p-3 bg-slate-50/80 border-t border-slate-200 grid grid-cols-12 text-slate-900 font-bold text-sm">
-                <span className="col-span-6">Total Pembayaran</span>
-                <span className="col-span-6 text-right font-mono text-sky-700">
+              <div className="p-3 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between text-slate-900 font-bold text-sm">
+                <span>Total Pembayaran</span>
+                <span className="text-right font-mono text-sky-700">
                   {formatRupiah(selectedReceipt.detailReservasi?.totalHarga || 0)}
                 </span>
               </div>

@@ -10,7 +10,6 @@ import {
   faLocationDot,
   faClock,
   faArrowRight,
-  faStar,
   faWifi,
   faChevronDown,
   faChevronLeft,
@@ -165,7 +164,6 @@ function RealSpaceCard({
 
   const ownerName = space.owner?.namaCoworking || "WorkNest Hub";
   const locationText = space.owner?.alamat || ownerName;
-  const rating = (4.7 + ((Number(space.id) * 3) % 3) / 10).toFixed(1);
 
   const bookingHref = selectedDate
     ? `/booking/${space.id}?date=${selectedDate}&jamMulai=${jamMulai || "09:00"}&durasiJam=${durasiJam || 9}`
@@ -191,32 +189,11 @@ function RealSpaceCard({
               {getTypePaxLabel()}
             </span>
           </div>
-
-          <div className="absolute top-2.5 right-2.5">
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold backdrop-blur-md shadow-sm border ${
-                isAvailable
-                  ? "bg-white/95 text-emerald-800 border-emerald-200"
-                  : "bg-slate-900/80 text-amber-300 border-amber-500/30"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  isAvailable ? "bg-emerald-500" : "bg-amber-400"
-                }`}
-              />
-              <span>{isAvailable ? "Tersedia" : "Terjadwal"}</span>
-            </span>
-          </div>
         </div>
 
         <div className="p-4 sm:p-5 space-y-2.5">
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-semibold text-slate-700 truncate max-w-[150px]">{ownerName}</span>
-            <div className="flex items-center gap-1 font-bold text-slate-800">
-              <FontAwesomeIcon icon={faStar} className="w-3 h-3 text-amber-400" />
-              <span>{rating}</span>
-            </div>
+          <div className="text-xs text-slate-500">
+            <span className="font-semibold text-slate-700 truncate block">{ownerName}</span>
           </div>
 
           <Link href={`/spaces/${space.id}`} className="block group-hover:text-sky-600 transition-colors">
@@ -253,34 +230,34 @@ function RealSpaceCard({
         </div>
       </div>
 
-      <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
-        <div>
-          <span className="text-[10px] uppercase font-mono font-medium text-slate-400 block">Tarif Sewa</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-base font-bold text-slate-900 font-mono">
+      <div className="p-3.5 sm:p-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5 bg-white mt-auto">
+        <div className="min-w-0">
+          <span className="text-[10px] uppercase font-mono font-medium text-slate-400 block tracking-wider">Tarif Sewa</span>
+          <div className="flex items-baseline gap-1 flex-wrap">
+            <span className="text-sm sm:text-base font-bold text-slate-900 font-mono tracking-tight">
               {formatRupiah(space.hargaPerJam)}
             </span>
-            <span className="text-xs text-slate-500">/ jam</span>
+            <span className="text-[11px] sm:text-xs text-slate-500 whitespace-nowrap">/ jam</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
           <Link
             href={`/spaces/${space.id}`}
-            className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
+            className="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-colors"
           >
             Detail
           </Link>
           <Link
             href={bookingHref}
-            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition-all ${
+            className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold shadow-2xs active:scale-95 transition-all ${
               isAvailable
                 ? "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/25"
                 : "bg-slate-200 hover:bg-slate-300 text-slate-700"
             }`}
           >
             <span>{isAvailable ? "Pesan" : "Cek Slot"}</span>
-            <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
+            <FontAwesomeIcon icon={faArrowRight} className="w-2.5 h-2.5" />
           </Link>
         </div>
       </div>
@@ -440,7 +417,7 @@ export default function HomePage() {
 
   return (
     <div className="w-full bg-white min-h-screen text-slate-900">
-      <section id="home" className="relative pt-12 pb-14 lg:pb-20 overflow-hidden min-h-[700px] flex flex-col justify-center h-screen w-full">
+      <section id="home" className="relative pt-24 pb-14 sm:pt-28 sm:pb-16 lg:py-24 overflow-hidden min-h-[100svh] flex flex-col justify-center w-full">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src="/1.png"
@@ -451,22 +428,22 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10 pt-20">
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            <ScrollReveal animation="fade-up" duration={700} className="lg:col-span-7 space-y-5 text-left">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.18]">
+            <ScrollReveal animation="fade-up" duration={700} className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.18]">
                 Sewa ruang kerja &amp; meeting <br />
                 <span className="text-sky-600">per jam</span> tanpa ribet.
               </h1>
 
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-xl">
+              <p className="text-xs sm:text-sm lg:text-base text-slate-700 leading-relaxed max-w-xl">
                 Temukan flex desk, ruang meeting berfasilitas lengkap, dan kantor privat di lokasi strategis. Pesan langsung, bayar via QRIS/VA, dan akses pintu dengan kunci digital tanpa antre di resepsionis.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-2">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
                 <Link
                   href="/spaces"
-                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-bold shadow-sm active:scale-95 transition-all flex items-center gap-2"
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-bold shadow-sm active:scale-95 transition-all flex items-center gap-2"
                 >
                   <span>Cari Ruangan Sekarang</span>
                   <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
@@ -474,7 +451,7 @@ export default function HomePage() {
 
                 <a
                   href="#tata-cara"
-                  className="px-5 py-2.5 rounded-xl bg-white/90 border border-slate-200 hover:bg-white text-slate-700 text-xs sm:text-sm font-semibold transition-colors shadow-sm backdrop-blur-xs"
+                  className="px-4 sm:px-5 py-2.5 rounded-xl bg-white/90 border border-slate-200 hover:bg-white text-slate-700 text-xs sm:text-sm font-semibold transition-colors shadow-sm backdrop-blur-xs"
                 >
                   Tata Cara
                 </a>
@@ -482,9 +459,9 @@ export default function HomePage() {
             </ScrollReveal>
           </div>
 
-          <ScrollReveal animation="unfold" delay={150} duration={800} className="pt-[74px] sm:pt-[84px]">
-            <div className="bg-white/60 backdrop-blur-2xl rounded-2xl border border-white/80 shadow-[0_12px_40px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] ring-1 ring-sky-500/10 p-4 sm:p-5">
-              <div className="flex items-center gap-1.5 pb-3.5 border-b border-slate-200/50 overflow-x-auto text-xs">
+          <ScrollReveal animation="unfold" delay={150} duration={800} className="pt-2 sm:pt-4">
+            <div className="bg-white/75 backdrop-blur-2xl rounded-2xl border border-white/80 shadow-[0_12px_40px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] ring-1 ring-sky-500/10 p-3.5 sm:p-5">
+              <div className="flex items-center gap-1.5 pb-3 border-b border-slate-200/50 overflow-x-auto text-xs [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <button
                   type="button"
                   onClick={() => setActiveTab("all")}
