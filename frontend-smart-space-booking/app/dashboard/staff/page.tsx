@@ -18,20 +18,23 @@ import {
   AlertCircle,
   Clock,
   Loader2,
-  Zap,
   Radio,
-  Delete,
   Lock,
   Unlock,
   Volume2,
   VolumeX,
   Camera,
-  Keyboard,
   Building,
   Users,
   RefreshCw,
   CalendarCheck,
   ArrowRight,
+  Maximize2,
+  Minimize2,
+  Search,
+  X,
+  Check,
+  Calendar,
 } from "lucide-react";
 
 export default function StaffTerminalPage() {
@@ -40,17 +43,17 @@ export default function StaffTerminalPage() {
   const [currentTime, setCurrentTime] = useState<string>("");
   const [currentDate, setCurrentDate] = useState<string>("");
 
-  const [cameraActive, setCameraActive] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [manualCodeInput, setManualCodeInput] = useState("");
-  const [pinDigits, setPinDigits] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CheckinResponse | null>(null);
   const [gateUnlocked, setGateUnlocked] = useState(false);
 
-  const [muted, setMuted] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [fetchingData, setFetchingData] = useState(true);
+  const [searchFilter, setSearchFilter] = useState("");
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "aktif" | "selesai">("all");
 
   useEffect(() => {
     const updateTime = () => {
@@ -96,46 +99,15 @@ export default function StaffTerminalPage() {
   }, [reservations]);
 
   const pendingReservations = useMemo(() => {
-    return reservations.filter((r) => r.status?.toLowerCase() === "pending");
+    return reservations.filter(
+      (r) =>
+        r.status?.toLowerCase() === "pending" ||
+        r.status?.toLowerCase() === "disetujui"
+    );
   }, [reservations]);
 
-  const playChime = useCallback(
-    (type: "success" | "error") => {
-      if (muted) return;
-      try {
-        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        if (type === "success") {
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
-          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16);
-          gain.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.35);
-        } else {
-          osc.type = "sawtooth";
-          osc.frequency.setValueAtTime(220, ctx.currentTime);
-          gain.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.3);
-        }
-      } catch {}
-    },
-    [muted]
-  );
-
   const executeCheckin = useCallback(
-    async (code: string) => {
+    async (code: string, action: "checkin" | "checkout" = "checkin") => {
       if (!code.trim() || loading) return;
       setLoading(true);
       setError(null);
@@ -144,89 +116,146 @@ export default function StaffTerminalPage() {
       try {
         const res = await processCheckIn({
           qrCode: code.trim(),
-          action: "checkin",
+          action,
         });
         setResult(res);
         setGateUnlocked(true);
-        playChime("success");
 
         setTimeout(() => {
           setGateUnlocked(false);
           setResult(null);
-          setPinDigits([]);
           setManualCodeInput("");
-        }, 4000);
+        }, 5000);
 
         fetchReservations();
       } catch (err: unknown) {
         const msg = getApiErrorMessage(err);
         setError(msg);
-        playChime("error");
       } finally {
         setLoading(false);
       }
     },
-    [loading, playChime, fetchReservations]
+    [loading, fetchReservations]
   );
 
-  const handleKeypadPress = (digit: string) => {
-    if (pinDigits.length < 6) {
-      setPinDigits((prev) => [...prev, digit]);
-    }
-  };
+  const filteredReservations = useMemo(() => {
+    return reservations.filter((r) => {
+      const q = searchFilter.toLowerCase().trim();
+      const code = (r.qrCode || "").toLowerCase();
+      const member = (r.member?.namaMember || "").toLowerCase();
+      const space = (r.detailReservasi?.space?.namaSpace || "").toLowerCase();
+      const matchSearch = !q || code.includes(q) || member.includes(q) || space.includes(q);
 
-  const handleClearPin = () => {
-    setPinDigits([]);
-    setError(null);
-  };
+      const status = r.status?.toLowerCase() || "";
+      const matchTab =
+        activeTab === "all" ||
+        (activeTab === "pending" && (status === "pending" || status === "disetujui")) ||
+        (activeTab === "aktif" && status === "aktif") ||
+        (activeTab === "selesai" && status === "selesai");
 
-  const handleBackspacePin = () => {
-    setPinDigits((prev) => prev.slice(0, -1));
-  };
-
-  const handleVerifyPin = useCallback(() => {
-    if (pinDigits.length === 0) return;
-    executeCheckin(pinDigits.join(""));
-  }, [pinDigits, executeCheckin]);
+      return matchSearch && matchTab;
+    });
+  }, [reservations, searchFilter, activeTab]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === "INPUT") return;
-
-      if (e.key >= "0" && e.key <= "9") {
-        if (pinDigits.length < 6) {
-          setPinDigits((prev) => [...prev, e.key]);
-        }
-      } else if (e.key === "Backspace") {
-        setPinDigits((prev) => prev.slice(0, -1));
-      } else if (e.key === "Enter") {
-        if (pinDigits.length > 0) {
-          handleVerifyPin();
-        }
-      } else if (e.key === "Escape") {
-        setPinDigits([]);
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [pinDigits, handleVerifyPin]);
+  }, [isFullscreen]);
 
   return (
     <div className="space-y-6 pb-16">
+      <style jsx global>{`
+        #interactive-qr-reader video {
+          transform: scaleX(1) !important;
+          -webkit-transform: scaleX(1) !important;
+          object-fit: cover !important;
+        }
+      `}</style>
+
+      {/* Fullscreen Overlay Mode */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden animate-in fade-in">
+          <div className="p-4 sm:p-6 bg-gradient-to-b from-black/90 via-black/60 to-transparent flex items-center justify-between text-white z-20 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_#34d399]" />
+              <div>
+                <span className="font-extrabold text-base tracking-tight block">
+                  WorkNest Fullscreen Terminal
+                </span>
+                <span className="text-xs text-slate-400 font-mono">
+                  {currentTime} • {currentDate}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsFullscreen(false)}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white text-xs font-bold rounded-xl backdrop-blur-md border border-white/20 transition-all flex items-center gap-2 cursor-pointer shadow-lg"
+            >
+              <Minimize2 className="w-4 h-4" />
+              <span>Keluar Layar Penuh (ESC)</span>
+            </button>
+          </div>
+
+          <div className="flex-1 relative flex items-center justify-center p-4">
+            <LiveQrScanner
+              onScanSuccess={(scannedCode) => executeCheckin(scannedCode)}
+              isProcessing={loading}
+              isFullscreen={true}
+              onToggleFullscreen={() => setIsFullscreen(false)}
+            />
+
+            {result && (
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 max-w-md w-full mx-4 p-4 rounded-2xl bg-emerald-500 text-white shadow-2xl z-30 flex items-center gap-3 animate-in zoom-in-95">
+                <CheckCircle2 className="w-6 h-6 shrink-0" />
+                <div className="flex-1">
+                  <p className="font-extrabold text-sm">Akses Diterima • Check-In Berhasil</p>
+                  <p className="text-xs text-emerald-100">{result.message}</p>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 max-w-md w-full mx-4 p-4 rounded-2xl bg-rose-600 text-white shadow-2xl z-30 flex items-center gap-3 animate-in zoom-in-95">
+                <AlertCircle className="w-6 h-6 shrink-0" />
+                <div className="flex-1">
+                  <p className="font-extrabold text-sm">Gagal Verifikasi</p>
+                  <p className="text-xs text-rose-100">{error}</p>
+                </div>
+                <button type="button" onClick={() => setError(null)} className="font-bold text-lg p-1">
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-center text-xs text-slate-400 z-20 shrink-0">
+            Arahkan barcode QR tiket ponsel tamu ke dalam area scanner kamera untuk validasi instan.
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
             <span>TERMINAL FRONTDESK</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
-              Otorisasi &amp; Validasi Masuk
+              Check-In &amp; Validasi Masuk Ruangan
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Terminal Check-In &amp; Pintu Otomatis
+            Terminal Check-In Resepsionis
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Pindai QR code tiket reservasi atau masukkan PIN akses 6-digit untuk memvalidasi check-in tamu dan membuka akses pintu.
+            Pindai kode QR tiket reservasi tamu atau masukkan kode tiket manual untuk mengaktifkan sesi sewa.
           </p>
         </div>
 
@@ -240,11 +269,11 @@ export default function StaffTerminalPage() {
 
           <button
             type="button"
-            onClick={() => setMuted(!muted)}
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer shadow-sm"
-            title={muted ? "Nyalakan Audio Beep" : "Bisukan Audio"}
+            onClick={() => setIsFullscreen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer"
           >
-            {muted ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-slate-600" />}
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span>Mode Layar Penuh</span>
           </button>
 
           <button
@@ -259,6 +288,7 @@ export default function StaffTerminalPage() {
         </div>
       </div>
 
+      {/* Error & Success Feedback Alerts */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-3 text-xs text-rose-800 shadow-sm animate-in fade-in">
           <div className="flex items-center gap-2 font-medium">
@@ -289,39 +319,40 @@ export default function StaffTerminalPage() {
             </div>
           </div>
           <span className="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded-md border border-sky-200 text-sky-800 shadow-sm">
-            OPEN: 4.0s
+            STATUS AKTIF
           </span>
         </div>
       )}
 
+      {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              STATUS GERBANG IOT
+              STATUS GERBANG AKSES
             </span>
             <Radio className="w-4 h-4 text-sky-600" />
           </div>
           <div className="text-xl font-bold font-mono">
             {gateUnlocked ? (
               <span className="text-sky-600 flex items-center gap-1.5">
-                <Unlock className="w-4 h-4" /> TERBUKA
+                <Unlock className="w-4 h-4" /> TERBUKA (OPEN)
               </span>
             ) : (
               <span className="text-slate-900 flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-slate-400" /> TERKUNCI AMAN
+                <Lock className="w-4 h-4 text-slate-400" /> SIAGA SCANNER
               </span>
             )}
           </div>
           <p className="text-[11px] text-slate-500">
-            {gateUnlocked ? "Siklus pembukaan 4 detik" : "Siaga menerima verifikasi"}
+            {gateUnlocked ? "Akses pintu sedang dibuka" : "Siaga menerima verifikasi tiket"}
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              TAMU AKTIF DI VENUE
+              SESI TAMU AKTIF
             </span>
             <Users className="w-4 h-4 text-sky-600" />
           </div>
@@ -329,14 +360,14 @@ export default function StaffTerminalPage() {
             {activeReservations.length}
           </div>
           <p className="text-[11px] text-sky-600 font-semibold">
-            Sesi sedang berjalan
+            Tamu sedang menggunakan ruangan
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              MENUNGGU CHECK-IN
+              SIAP CHECK-IN
             </span>
             <CalendarCheck className="w-4 h-4 text-amber-500" />
           </div>
@@ -344,14 +375,14 @@ export default function StaffTerminalPage() {
             {pendingReservations.length}
           </div>
           <p className="text-[11px] text-slate-500">
-            Perlu verifikasi tiket
+            Tamu terjadwal hari ini
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              TOTAL LOG HARI INI
+              TOTAL RESERVASI VENUE
             </span>
             <Building className="w-4 h-4 text-slate-400" />
           </div>
@@ -359,286 +390,194 @@ export default function StaffTerminalPage() {
             {reservations.length}
           </div>
           <p className="text-[11px] text-slate-500">
-            Riwayat reservasi terdaftar
+            Seluruh log reservasi
           </p>
         </div>
       </div>
 
+      {/* Main Action Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Col: Camera Scanner Card */}
         <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <div>
               <span className="text-[10px] font-mono font-bold text-sky-600 uppercase block">
-                METODE 01
+                SCANNER KAMERA OPTIK
               </span>
               <h2 className="text-base font-bold text-slate-900">
-                Pindai QR Code Tiket
+                Pindai Barcode QR Tiket
               </h2>
             </div>
-            <QrCode className="w-4 h-4 text-sky-600" />
-          </div>
-
-          <div className="space-y-4">
-            {cameraActive ? (
-              <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 relative">
-                <LiveQrScanner
-                  onScanSuccess={(scannedCode: string) => {
-                    executeCheckin(scannedCode);
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setCameraActive(false)}
-                  className="absolute top-3 right-3 px-3 py-1 bg-black/70 hover:bg-black text-white text-xs font-semibold rounded-xl border border-white/20 cursor-pointer shadow-sm"
-                >
-                  Tutup Kamera
-                </button>
-              </div>
-            ) : (
-              <div className="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center space-y-3 bg-slate-50/50">
-                <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto border border-sky-100">
-                  <Camera className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Scanner Kamera</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Nyalakan kamera depan/belakang untuk memindai barcode QR member secara otomatis.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCameraActive(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors cursor-pointer"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>Nyalakan Kamera Scanner</span>
-                </button>
-              </div>
-            )}
-
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <label className="block text-xs font-bold text-slate-700">
-                Atau Masukkan Kode QR Manual
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={manualCodeInput}
-                  onChange={(e) => setManualCodeInput(e.target.value)}
-                  placeholder="Contoh: WN-BOK-123456"
-                  className="flex-1 px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => executeCheckin(manualCodeInput)}
-                  disabled={!manualCodeInput.trim() || loading}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  Verifikasi
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
-          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-mono font-bold text-sky-600 uppercase block">
-                METODE 02
-              </span>
-              <h2 className="text-base font-bold text-slate-900">
-                Input Keypad PIN 6-Digit
-              </h2>
-            </div>
-            <Keyboard className="w-4 h-4 text-slate-400" />
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-center gap-2">
-              {[0, 1, 2, 3, 4, 5].map((index) => {
-                const digit = pinDigits[index];
-                const isActive = pinDigits.length === index;
-                return (
-                  <div
-                    key={index}
-                    className={`w-10 h-12 sm:w-11 sm:h-13 rounded-xl flex items-center justify-center font-mono text-xl font-bold border transition-all ${
-                      digit
-                        ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
-                        : isActive
-                        ? "bg-white text-slate-400 border-sky-500 ring-2 ring-sky-500/15"
-                        : "bg-slate-50 text-slate-300 border-slate-200"
-                    }`}
-                  >
-                    {digit ? digit : "-"}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="max-w-xs mx-auto w-full grid grid-cols-3 gap-2 pt-1">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handleKeypadPress(num)}
-                  className="h-11 rounded-xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm select-none"
-                >
-                  {num}
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={handleClearPin}
-                className="h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center cursor-pointer select-none"
-              >
-                HAPUS
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleKeypadPress("0")}
-                className="h-11 rounded-xl bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-800 font-bold text-lg border border-slate-200 transition-colors flex items-center justify-center cursor-pointer shadow-sm select-none"
-              >
-                0
-              </button>
-
-              <button
-                type="button"
-                onClick={handleBackspacePin}
-                className="h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors flex items-center justify-center cursor-pointer select-none"
-                aria-label="Backspace"
-              >
-                <Delete className="w-4 h-4" />
-              </button>
-            </div>
-
             <button
               type="button"
-              onClick={handleVerifyPin}
-              disabled={pinDigits.length === 0 || loading}
-              className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
-                pinDigits.length === 6
-                  ? "bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white shadow-sky-600/25"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-600 disabled:opacity-50"
-              }`}
+              onClick={() => setIsFullscreen(true)}
+              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              title="Perbesar Layar Penuh"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Memverifikasi PIN...</span>
-                </>
-              ) : gateUnlocked ? (
-                <>
-                  <Unlock className="w-4 h-4 text-sky-600" />
-                  <span>Pintu Terbuka!</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4 text-slate-400" />
-                  <span>Verifikasi PIN &amp; Buka Pintu</span>
-                </>
-              )}
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span className="text-[11px]">Layar Penuh</span>
             </button>
           </div>
-        </div>
-      </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-base font-bold text-slate-900">
-              Daftar Reservasi Terbaru
-            </h2>
-            <p className="text-xs text-slate-500">
-              Monitoring tamu yang memiliki jadwal reservasi di venue Anda
-            </p>
+          <LiveQrScanner
+            onScanSuccess={(scannedCode) => executeCheckin(scannedCode)}
+            isProcessing={loading}
+            onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+          />
+
+          <div className="pt-3 border-t border-slate-100 space-y-2">
+            <label className="block text-xs font-bold text-slate-700">
+              Atau Verifikasi Kode Tiket Manual
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={manualCodeInput}
+                onChange={(e) => setManualCodeInput(e.target.value)}
+                placeholder="Contoh: SSB-1790016-XXXXXX"
+                className="flex-1 px-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/15 rounded-xl text-xs font-mono font-bold text-slate-900 outline-none transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => executeCheckin(manualCodeInput)}
+                disabled={!manualCodeInput.trim() || loading}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Verifikasi"}
+              </button>
+            </div>
           </div>
-          <Link
-            href="/dashboard/staff/history"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline"
-          >
-            <span>Buka Log Lengkap ({reservations.length})</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-              <tr>
-                <th className="py-3 px-4 font-bold">KODE TIKET</th>
-                <th className="py-3 px-4 font-bold">TAMU / MEMBER</th>
-                <th className="py-3 px-4 font-bold">RUANGAN</th>
-                <th className="py-3 px-4 font-bold">JADWAL</th>
-                <th className="py-3 px-4 font-bold">STATUS</th>
-                <th className="py-3 px-4 font-bold text-right">AKSI CEPAT</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {reservations.length > 0 ? (
-                reservations.slice(0, 5).map((r) => {
-                  const space = r.detailReservasi?.space;
-                  const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
-                  const isAktif = r.status === "aktif";
-                  const isPending = r.status === "pending";
+        {/* Right Col: Today's Reservation List & Quick Actions */}
+        <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+          <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase block">
+                DAFTAR TAMU VENUE
+              </span>
+              <h2 className="text-base font-bold text-slate-900">
+                Log Reservasi Hari Ini
+              </h2>
+            </div>
 
-                  return (
-                    <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
-                        {r.qrCode || `RES-${r.id}`}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <p className="font-semibold text-slate-900">{r.member?.namaMember || "Member"}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">{r.member?.telp || "-"}</p>
-                      </td>
-                      <td className="py-3.5 px-4 font-medium text-slate-700">
-                        {space?.namaSpace || "Ruangan"}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono">
-                        <p className="font-semibold text-slate-900">{date}</p>
-                        <p className="text-[10px] text-slate-400">{r.jamMulai} WIB ({r.durasiJam} Jam)</p>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {isAktif && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-semibold text-[10px] border border-sky-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
-                            Aktif
-                          </span>
-                        )}
-                        {isPending && (
-                          <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold text-[10px] border border-amber-200">
-                            Pending
-                          </span>
-                        )}
-                        {!isAktif && !isPending && (
-                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[10px] border border-slate-200">
-                            {r.status}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+              {[
+                { id: "all", label: "Semua" },
+                { id: "pending", label: "Terjadwal" },
+                { id: "aktif", label: "Aktif" },
+                { id: "selesai", label: "Selesai" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                    activeTab === tab.id
+                      ? "bg-white text-slate-900 font-bold shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              placeholder="Cari nama member, kode tiket #SSB, ruangan..."
+              className="w-full pl-10 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 focus:border-sky-500 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-colors"
+            />
+            {searchFilter && (
+              <button
+                type="button"
+                onClick={() => setSearchFilter("")}
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+            {filteredReservations.length > 0 ? (
+              filteredReservations.map((r) => {
+                const space = r.detailReservasi?.space;
+                const status = r.status?.toLowerCase();
+                const isPaid =
+                  !r.transaksi || r.transaksi.statusPembayaran === "lunas";
+
+                return (
+                  <div
+                    key={r.id}
+                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300 transition-colors flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 truncate">
+                          {r.member?.namaMember || "Member"}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                            status === "aktif"
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : status === "selesai"
+                              ? "bg-slate-100 text-slate-600"
+                              : status === "disetujui"
+                              ? "bg-sky-50 text-sky-700 border border-sky-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          {status.toUpperCase()}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate">
+                        {space?.namaSpace || "Ruangan"} • Pukul {r.jamMulai} WIB ({r.durasiJam || 1} Jam)
+                      </p>
+                      <p className="font-mono text-[10px] text-sky-600 font-semibold truncate">
+                        {r.qrCode}
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {status === "aktif" ? (
                         <button
                           type="button"
-                          onClick={() => executeCheckin(r.qrCode || String(r.id))}
-                          className="px-3 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs shadow-sm transition-colors cursor-pointer"
+                          onClick={() => executeCheckin(r.qrCode, "checkout")}
+                          disabled={loading}
+                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer"
                         >
-                          Validasi
+                          Check-Out
                         </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={6} className="py-10 text-center text-slate-400 text-xs">
-                    Belum ada data reservasi tercatat pada venue ini.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                      ) : status === "disetujui" || isPaid ? (
+                        <button
+                          type="button"
+                          onClick={() => executeCheckin(r.qrCode, "checkin")}
+                          disabled={loading}
+                          className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shadow-xs shadow-sky-600/20"
+                        >
+                          Check-In
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-amber-600 font-semibold">
+                          Belum Lunas
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-8 text-center text-slate-400 text-xs">
+                Tidak ada data reservasi yang sesuai filter.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
