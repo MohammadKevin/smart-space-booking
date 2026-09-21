@@ -29,46 +29,41 @@ import { faHeart as faHeartRegular } from "@fortawesome/free-regular-svg-icons";
 import { formatRupiah } from "@/lib/utils";
 import { SearchDatePicker } from "@/components/SearchDatePicker";
 import { SearchTimePicker } from "@/components/SearchTimePicker";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
-function HeroWorkspaceCard() {
+function HeroWorkspaceCard({ spaces }: { spaces: Space[] }) {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const items = [
-    {
-      type: "Ruang Rapat",
-      title: "Boardroom Sudirman",
-      location: "SCBD Tower, Jakarta Selatan",
-      image:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80",
-      rate: "Rp 150.000 / jam",
-      capacity: "10 Orang",
-      rating: "4.9",
-    },
-    {
-      type: "Focus Pod",
-      title: "Private Studio Pod",
-      location: "Kuningan City, Jakarta",
-      image:
-        "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=80",
-      rate: "Rp 45.000 / jam",
-      capacity: "1-2 Orang",
-      rating: "4.9",
-    },
-    {
-      type: "Flex Desk",
-      title: "Open Workstation",
-      location: "Senopati Hub, Jakarta",
-      image:
-        "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=1000&q=80",
-      rate: "Rp 25.000 / jam",
-      capacity: "1 Orang",
-      rating: "4.8",
-    },
-  ];
+  const items = useMemo(() => {
+    if (spaces && spaces.length > 0) {
+      return spaces.slice(0, 5).map((s) => ({
+        id: s.id,
+        type:
+          s.tipe === "meeting_room"
+            ? "Ruang Rapat"
+            : s.tipe === "private_office"
+            ? "Suite Privat"
+            : "Flex Desk",
+        title: s.namaSpace,
+        location: s.owner?.alamat || s.owner?.namaCoworking || "WorkNest Hub",
+        image:
+          s.foto ||
+          (s.tipe === "meeting_room"
+            ? "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80"
+            : s.tipe === "private_office"
+            ? "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=80"
+            : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=1000&q=80"),
+        rate: `${formatRupiah(s.hargaPerJam)} / jam`,
+        capacity: `${s.kapasitas} Orang`,
+        rating: (4.7 + ((Number(s.id) * 3) % 3) / 10).toFixed(1),
+      }));
+    }
+    return [];
+  }, [spaces]);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || items.length <= 1) return;
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % items.length);
     }, 3500);
@@ -77,7 +72,7 @@ function HeroWorkspaceCard() {
 
   return (
     <div
-      className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-3"
+      className="w-full max-w-lg mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -98,41 +93,45 @@ function HeroWorkspaceCard() {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            setActiveTab((prev) => (prev === 0 ? items.length - 1 : prev - 1))
-          }
-          aria-label="Foto Sebelumnya"
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs opacity-80 hover:opacity-100"
-        >
-          <FontAwesomeIcon icon={faChevronLeft} className="w-3 h-3" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab((prev) => (prev + 1) % items.length)}
-          aria-label="Foto Berikutnya"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs opacity-80 hover:opacity-100"
-        >
-          <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
-        </button>
-
-        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 pointer-events-auto">
-          {items.map((_, idx) => (
+        {items.length > 1 && (
+          <>
             <button
-              key={idx}
               type="button"
-              onClick={() => setActiveTab(idx)}
-              aria-label={`Slide ${idx + 1}`}
-              className={`transition-all rounded-full cursor-pointer ${
-                activeTab === idx
-                  ? "w-4 h-1.5 bg-white shadow-xs"
-                  : "w-1.5 h-1.5 bg-white/50 hover:bg-white/80"
-              }`}
-            />
-          ))}
-        </div>
+              onClick={() =>
+                setActiveTab((prev) => (prev === 0 ? items.length - 1 : prev - 1))
+              }
+              aria-label="Foto Sebelumnya"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs opacity-80 hover:opacity-100"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} className="w-3 h-3" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab((prev) => (prev + 1) % items.length)}
+              aria-label="Foto Berikutnya"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs opacity-80 hover:opacity-100"
+            >
+              <FontAwesomeIcon icon={faChevronRight} className="w-3 h-3" />
+            </button>
+
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 z-10 pointer-events-auto">
+              {items.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveTab(idx)}
+                  aria-label={`Slide ${idx + 1}`}
+                  className={`transition-all rounded-full cursor-pointer ${
+                    activeTab === idx
+                      ? "w-4 h-1.5 bg-white shadow-xs"
+                      : "w-1.5 h-1.5 bg-white/50 hover:bg-white/80"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -151,8 +150,6 @@ function RealSpaceCard({
   jamMulai,
   durasiJam,
 }: RealSpaceCardProps) {
-  const [saved, setSaved] = useState(false);
-
   const fallbackImage =
     space.tipe === "meeting_room"
       ? "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1000&q=80"
@@ -160,12 +157,11 @@ function RealSpaceCard({
       ? "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1000&q=80"
       : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=1000&q=80";
 
-  const typeLabel =
-    space.tipe === "meeting_room"
-      ? "Ruang Rapat"
-      : space.tipe === "private_office"
-      ? "Suite Privat"
-      : "Flex Desk";
+  const getTypePaxLabel = () => {
+    if (space.tipe === "desk") return `Flex Desk • ${space.kapasitas} Orang`;
+    if (space.tipe === "meeting_room") return `Ruang Rapat • ${space.kapasitas} Orang`;
+    return `Suite Privat • ${space.kapasitas} Orang`;
+  };
 
   const ownerName = space.owner?.namaCoworking || "WorkNest Hub";
   const locationText = space.owner?.alamat || ownerName;
@@ -175,8 +171,10 @@ function RealSpaceCard({
     ? `/booking/${space.id}?date=${selectedDate}&jamMulai=${jamMulai || "09:00"}&durasiJam=${durasiJam || 9}`
     : `/booking/${space.id}`;
 
+  const isAvailable = space.isAvailable !== false;
+
   return (
-    <div className="group bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all duration-200">
+    <div className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all duration-200 h-full">
       <div>
         <div className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden">
           <img
@@ -187,46 +185,77 @@ function RealSpaceCard({
               (e.target as HTMLImageElement).src = fallbackImage;
             }}
           />
+
+          <div className="absolute top-2.5 left-2.5">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-slate-950/75 backdrop-blur-md text-white border border-white/10 shadow-sm">
+              {getTypePaxLabel()}
+            </span>
+          </div>
+
+          <div className="absolute top-2.5 right-2.5">
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold backdrop-blur-md shadow-sm border ${
+                isAvailable
+                  ? "bg-white/95 text-emerald-800 border-emerald-200"
+                  : "bg-slate-900/80 text-amber-300 border-amber-500/30"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isAvailable ? "bg-emerald-500" : "bg-amber-400"
+                }`}
+              />
+              <span>{isAvailable ? "Tersedia" : "Terjadwal"}</span>
+            </span>
+          </div>
         </div>
 
         <div className="p-4 sm:p-5 space-y-2.5">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-medium truncate max-w-[150px]">{ownerName}</span>
+            <span className="font-semibold text-slate-700 truncate max-w-[150px]">{ownerName}</span>
             <div className="flex items-center gap-1 font-bold text-slate-800">
               <FontAwesomeIcon icon={faStar} className="w-3 h-3 text-amber-400" />
               <span>{rating}</span>
             </div>
           </div>
 
-          <h3 className="text-base font-bold text-slate-900 leading-snug group-hover:text-sky-600 transition-colors line-clamp-1">
-            {space.namaSpace}
-          </h3>
+          <Link href={`/spaces/${space.id}`} className="block group-hover:text-sky-600 transition-colors">
+            <h3 className="text-base font-bold text-slate-900 leading-snug line-clamp-1">
+              {space.namaSpace}
+            </h3>
+          </Link>
 
           <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
             <FontAwesomeIcon icon={faLocationDot} className="w-3 h-3 text-slate-400 shrink-0" />
             <span className="truncate">{locationText}</span>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-100 text-xs font-medium text-slate-600">
+          {space.deskripsi && (
+            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+              {space.deskripsi}
+            </p>
+          )}
+
+          <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] text-slate-600 font-medium">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-100">
               <FontAwesomeIcon icon={faUsers} className="w-3 h-3 text-sky-600" />
-              {space.kapasitas} Orang
+              <span>{space.kapasitas} Orang</span>
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-100 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-100">
               <FontAwesomeIcon icon={faWifi} className="w-3 h-3 text-sky-600" />
-              WiFi
+              <span>WiFi Cepat</span>
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-sky-50 border border-sky-100 text-xs font-medium text-sky-800">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-sky-50 border border-sky-100 text-sky-800">
               <FontAwesomeIcon icon={faKey} className="w-3 h-3 text-sky-600" />
-              Kunci QR
+              <span>Akses QR</span>
             </span>
           </div>
         </div>
       </div>
 
-      <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+      <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 flex items-center justify-between bg-white">
         <div>
-          <span className="text-xs text-slate-400 block">Tarif</span>
+          <span className="text-[10px] uppercase font-mono font-medium text-slate-400 block">Tarif Sewa</span>
           <div className="flex items-baseline gap-1">
             <span className="text-base font-bold text-slate-900 font-mono">
               {formatRupiah(space.hargaPerJam)}
@@ -235,17 +264,25 @@ function RealSpaceCard({
           </div>
         </div>
 
-        <Link
-          href={bookingHref}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition-all ${
-            space.isAvailable === false
-              ? "bg-slate-200 hover:bg-slate-300 text-slate-700"
-              : "bg-sky-600 hover:bg-sky-500 text-white"
-          }`}
-        >
-          <span>{space.isAvailable === false ? "Cek Slot" : "Pesan"}</span>
-          <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/spaces/${space.id}`}
+            className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition-colors"
+          >
+            Detail
+          </Link>
+          <Link
+            href={bookingHref}
+            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold shadow-xs active:scale-95 transition-all ${
+              isAvailable
+                ? "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/25"
+                : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+            }`}
+          >
+            <span>{isAvailable ? "Pesan" : "Cek Slot"}</span>
+            <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -296,17 +333,17 @@ export default function HomePage() {
   const officeSpaces = useMemo(() => spaces.filter((s) => s.tipe === "private_office"), [spaces]);
 
   const minDeskRate = useMemo(() => {
-    if (deskSpaces.length === 0) return 25000;
+    if (deskSpaces.length === 0) return null;
     return Math.min(...deskSpaces.map((s) => s.hargaPerJam));
   }, [deskSpaces]);
 
   const minMeetingRate = useMemo(() => {
-    if (meetingSpaces.length === 0) return 150000;
+    if (meetingSpaces.length === 0) return null;
     return Math.min(...meetingSpaces.map((s) => s.hargaPerJam));
   }, [meetingSpaces]);
 
   const minOfficeRate = useMemo(() => {
-    if (officeSpaces.length === 0) return 350000;
+    if (officeSpaces.length === 0) return null;
     return Math.min(...officeSpaces.map((s) => s.hargaPerJam));
   }, [officeSpaces]);
 
@@ -402,8 +439,8 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="bg-white min-h-screen text-slate-900">
-      <section id="home" className="relative pt-12 pb-14 lg:pb-20 overflow-hidden min-h-[700px] flex flex-col justify-center h-screen min-w-fit">
+    <div className="w-full bg-white min-h-screen text-slate-900">
+      <section id="home" className="relative pt-12 pb-14 lg:pb-20 overflow-hidden min-h-[700px] flex flex-col justify-center h-screen w-full">
         <div className="absolute inset-0 z-0 pointer-events-none">
           <img
             src="/1.png"
@@ -414,9 +451,9 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-white" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            <div className="lg:col-span-7 space-y-5 text-left">
+            <ScrollReveal animation="fade-up" duration={700} className="lg:col-span-7 space-y-5 text-left">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.18]">
                 Sewa ruang kerja &amp; meeting <br />
                 <span className="text-sky-600">per jam</span> tanpa ribet.
@@ -442,15 +479,10 @@ export default function HomePage() {
                   Tata Cara
                 </a>
               </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <HeroWorkspaceCard />
-            </div>
+            </ScrollReveal>
           </div>
 
-          {/* DOCKED SEARCH BAR (LIQUID GLASS EFFECT) */}
-          <div className="pt-4">
+          <ScrollReveal animation="unfold" delay={150} duration={800} className="pt-[74px] sm:pt-[84px]">
             <div className="bg-white/60 backdrop-blur-2xl rounded-2xl border border-white/80 shadow-[0_12px_40px_rgba(2,132,199,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)] ring-1 ring-sky-500/10 p-4 sm:p-5">
               <div className="flex items-center gap-1.5 pb-3.5 border-b border-slate-200/50 overflow-x-auto text-xs">
                 <button
@@ -556,35 +588,37 @@ export default function HomePage() {
                 </div>
               </form>
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* 2. KATALOG RUANGAN */}
-      <section id="ruang-kerja" className="py-14 sm:py-16 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
-                KATALOG RUANGAN
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-                Pilihan Ruang Kerja Tersedia Hari Ini
-              </h2>
-            </div>
+      <section id="ruang-kerja" className="py-14 sm:py-16 border-b border-slate-100 w-full">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-8">
+          <ScrollReveal animation="fade-up" duration={600}>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
+                  KATALOG RUANGAN
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+                  Pilihan Ruang Kerja Tersedia Hari Ini
+                </h2>
+              </div>
 
-            <Link
-              href="/spaces"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors"
-            >
-              <span>Lihat semua {spaces.length > 0 ? `(${spaces.length}) ` : ""}ruangan</span>
-              <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
-            </Link>
-          </div>
+              <Link
+                href="/spaces"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 transition-colors"
+              >
+                <span>Lihat semua {spaces.length > 0 ? `(${spaces.length}) ` : ""}ruangan</span>
+                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
+              </Link>
+            </div>
+          </ScrollReveal>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <div
                   key={i}
                   className="bg-white rounded-2xl border border-slate-200 p-4 animate-pulse space-y-3"
@@ -623,290 +657,384 @@ export default function HomePage() {
                     .catch(() => setFetchError(true))
                     .finally(() => setLoading(false));
                 }}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition-colors"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Coba Lagi
               </button>
             </div>
           ) : displayedSpaces.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {displayedSpaces.slice(0, 6).map((space) => (
-                <RealSpaceCard
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+              {displayedSpaces.slice(0, 8).map((space, idx) => (
+                <ScrollReveal
                   key={space.id}
-                  space={space}
-                  selectedDate={selectedDate}
-                  jamMulai={selectedJamMulai}
-                  durasiJam={selectedDurasiJam}
-                />
+                  animation="unfold"
+                  delay={(idx % 4) * 90}
+                  duration={650}
+                >
+                  <RealSpaceCard
+                    space={space}
+                    selectedDate={selectedDate}
+                    jamMulai={selectedJamMulai}
+                    durasiJam={selectedDurasiJam}
+                  />
+                </ScrollReveal>
               ))}
             </div>
           ) : (
-            <div className="py-12 text-center bg-slate-50 rounded-2xl border border-slate-200 space-y-3 max-w-lg mx-auto">
-              <p className="text-sm font-bold text-slate-800">Belum Ada Ruangan yang Cocok</p>
-              <p className="text-xs text-slate-500">
-                Silakan ganti kategori atau filter kota untuk melihat inventaris lainnya.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("all");
-                  setSelectedCity("Semua Kota");
-                }}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition-colors"
-              >
-                Reset Filter
-              </button>
-            </div>
+            <ScrollReveal animation="scale" duration={600}>
+              <div className="py-16 px-6 text-center bg-slate-50/80 rounded-2xl border border-slate-200/90 space-y-4 w-full">
+                <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto border border-sky-100">
+                  <FontAwesomeIcon icon={faBuilding} className="w-6 h-6" />
+                </div>
+                <div className="space-y-1.5 max-w-md mx-auto">
+                  <p className="text-base font-bold text-slate-900">Belum Ada Ruangan yang Terdaftar</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Inventaris sedang disiapkan oleh mitra venue. Silakan daftarkan coworking Anda atau reset filter pencarian.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("all");
+                      setSelectedCity("Semua Kota");
+                    }}
+                    className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-xs"
+                  >
+                    Reset Filter
+                  </button>
+                  <Link
+                    href="/register?role=owner"
+                    className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl transition-colors shadow-xs"
+                  >
+                    Daftarkan Coworking Anda
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
           )}
         </div>
       </section>
 
       {/* 3. TATA CARA PEMESANAN */}
-      <section id="tata-cara" className="py-14 sm:py-16 border-b border-slate-100 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="text-center max-w-xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
-              ALUR PEMESANAN
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Cara Mudah Menggunakan WorkNest
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
-              <span className="text-2xl font-bold font-mono text-sky-600">01</span>
-              <h3 className="text-base font-bold text-slate-900">Pilih Ruangan &amp; Waktu</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Tentukan tipe ruangan, lokasi kota, tanggal, dan durasi jam sesuai kebutuhan aktivitas Anda.
-              </p>
+      <section id="tata-cara" className="py-14 sm:py-16 border-b border-slate-100 bg-slate-50/50 w-full">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
+          <ScrollReveal animation="fade-up" duration={600}>
+            <div className="text-center max-w-xl mx-auto space-y-2">
+              <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
+                ALUR PEMESANAN
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Cara Mudah Menggunakan WorkNest
+              </h2>
             </div>
+          </ScrollReveal>
 
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
-              <span className="text-2xl font-bold font-mono text-sky-600">02</span>
-              <h3 className="text-base font-bold text-slate-900">Bayar Instan Online</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Selesaikan pembayaran lewat QRIS, Virtual Account bank, atau kartu kredit secara aman.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            <ScrollReveal animation="unfold" delay={0} duration={650} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <span className="text-2xl font-bold font-mono text-sky-600">01</span>
+                <h3 className="text-base font-bold text-slate-900">Pilih Ruangan &amp; Waktu</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Tentukan tipe ruangan, lokasi kota, tanggal, dan durasi jam sesuai kebutuhan aktivitas Anda.
+                </p>
+              </div>
+            </ScrollReveal>
 
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
-              <span className="text-2xl font-bold font-mono text-sky-600">03</span>
-              <h3 className="text-base font-bold text-slate-900">Pindai QR Masuk Pintu</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Buka kunci pintu pintar di lokasi menggunakan kode QR di ponsel Anda tanpa melapor resepsionis.
-              </p>
-            </div>
+            <ScrollReveal animation="unfold" delay={120} duration={650} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <span className="text-2xl font-bold font-mono text-sky-600">02</span>
+                <h3 className="text-base font-bold text-slate-900">Bayar Instan Online</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Selesaikan pembayaran lewat QRIS, Virtual Account bank, atau e-wallet secara aman dan instan.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal animation="unfold" delay={240} duration={650} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <span className="text-2xl font-bold font-mono text-sky-600">03</span>
+                <h3 className="text-base font-bold text-slate-900">Pindai QR Masuk Pintu</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Buka kunci pintu pintar di lokasi menggunakan kode QR di ponsel Anda tanpa melapor resepsionis.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal animation="unfold" delay={360} duration={650} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <span className="text-2xl font-bold font-mono text-sky-600">04</span>
+                <h3 className="text-base font-bold text-slate-900">Kerja Nyaman &amp; Selesai</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Nikmati fasilitas Wi-Fi cepat, kopi, dan check-out otomatis begitu durasi sewa berakhir.
+                </p>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* 4. STRUKTUR TARIF */}
-      <section id="tarif" className="py-14 sm:py-16 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          <div className="max-w-xl space-y-2">
-            <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
-              STRUKTUR TARIF
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Tarif Transparan Tanpa Biaya Tersembunyi
-            </h2>
-          </div>
+      <section id="tarif" className="py-14 sm:py-16 border-b border-slate-100 w-full">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-10">
+          <ScrollReveal animation="fade-up" duration={600}>
+            <div className="max-w-xl space-y-2">
+              <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
+                STRUKTUR TARIF
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Tarif Transparan Tanpa Biaya Tersembunyi
+              </h2>
+            </div>
+          </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Flex Desk */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faChair} className="w-4 h-4" />
+            <ScrollReveal animation="unfold" delay={0} duration={700} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                      <FontAwesomeIcon icon={faChair} className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                      Solo Work
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                    Solo Work
-                  </span>
+
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Flex Desk</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Meja kerja di area open-space untuk fokus individu atau remote worker.
+                    </p>
+                  </div>
+
+                  <div className="flex items-baseline gap-1">
+                    {minDeskRate !== null ? (
+                      <>
+                        <span className="text-2xl font-bold font-mono text-slate-900">
+                          {formatRupiah(minDeskRate)}
+                        </span>
+                        <span className="text-xs text-slate-500">/ jam</span>
+                      </>
+                    ) : (
+                      <span className="text-sm font-semibold text-slate-400 font-mono">
+                        Belum ada unit
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>WiFi kecepatan tinggi</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Kursi ergonomis &amp; power outlet</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Akses gratis kopi &amp; teh</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">Flex Desk</h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Meja kerja di area open-space untuk fokus individu atau remote worker.
-                  </p>
-                </div>
-
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold font-mono text-slate-900">
-                    {formatRupiah(minDeskRate)}
-                  </span>
-                  <span className="text-xs text-slate-500">/ jam</span>
-                </div>
-
-                <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>WiFi kecepatan tinggi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Kursi ergonomis &amp; power outlet</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Akses gratis kopi &amp; teh</span>
-                  </div>
-                </div>
+                <Link
+                  href="/spaces?tipe=desk"
+                  className="w-full py-2.5 px-4 text-center rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs transition-colors"
+                >
+                  Pesan Flex Desk
+                </Link>
               </div>
-
-              <Link
-                href="/spaces?tipe=desk"
-                className="w-full py-2.5 px-4 text-center rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold text-xs transition-colors"
-              >
-                Pesan Flex Desk
-              </Link>
-            </div>
+            </ScrollReveal>
 
             {/* Ruang Rapat */}
-            <div className="bg-white rounded-2xl border-2 border-sky-500 p-6 flex flex-col justify-between space-y-6 shadow-sm">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center">
-                    <FontAwesomeIcon icon={faUsers} className="w-4 h-4" />
+            <ScrollReveal animation="unfold" delay={150} duration={700} className="h-full">
+              <div className="bg-white rounded-2xl border-2 border-sky-500 p-6 flex flex-col justify-between space-y-6 shadow-sm h-full hover:shadow-lg transition-all">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center">
+                      <FontAwesomeIcon icon={faUsers} className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-sky-600 text-white">
+                      Paling Populer
+                    </span>
                   </div>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-sky-600 text-white">
-                    Paling Populer
-                  </span>
+
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Ruang Rapat</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Ruang meeting privat untuk presentasi klien, diskusi tim, dan video call.
+                    </p>
+                  </div>
+
+                  <div className="flex items-baseline gap-1">
+                    {minMeetingRate !== null ? (
+                      <>
+                        <span className="text-2xl font-bold font-mono text-slate-900">
+                          {formatRupiah(minMeetingRate)}
+                        </span>
+                        <span className="text-xs text-slate-500">/ jam</span>
+                      </>
+                    ) : (
+                      <span className="text-sm font-semibold text-slate-400 font-mono">
+                        Belum ada unit
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Kapasitas 4 hingga 14 orang</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Layar Smart TV 4K &amp; Whiteboard</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Insulasi dinding kedap suara</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">Ruang Rapat</h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Ruang meeting privat untuk presentasi klien, diskusi tim, dan video call.
-                  </p>
-                </div>
-
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold font-mono text-slate-900">
-                    {formatRupiah(minMeetingRate)}
-                  </span>
-                  <span className="text-xs text-slate-500">/ jam</span>
-                </div>
-
-                <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Kapasitas 4 hingga 14 orang</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Layar Smart TV 4K &amp; Whiteboard</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Insulasi dinding kedap suara</span>
-                  </div>
-                </div>
+                <Link
+                  href="/spaces?tipe=meeting_room"
+                  className="w-full py-2.5 px-4 text-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-xs transition-colors"
+                >
+                  Pesan Ruang Rapat
+                </Link>
               </div>
-
-              <Link
-                href="/spaces?tipe=meeting_room"
-                className="w-full py-2.5 px-4 text-center rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-xs transition-colors"
-              >
-                Pesan Ruang Rapat
-              </Link>
-            </div>
+            </ScrollReveal>
 
             {/* Suite Privat */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
-                    <FontAwesomeIcon icon={faBuilding} className="w-4 h-4" />
+            <ScrollReveal animation="unfold" delay={300} duration={700} className="h-full">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between space-y-6 h-full hover:shadow-md hover:border-sky-200 transition-all">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                      <FontAwesomeIcon icon={faBuilding} className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                      Dedicated Tim
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                    Dedicated Tim
-                  </span>
+
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Suite Privat</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Kantor privat tertutup dengan kunci mandiri untuk tim bisnis &amp; startup.
+                    </p>
+                  </div>
+
+                  <div className="flex items-baseline gap-1">
+                    {minOfficeRate !== null ? (
+                      <>
+                        <span className="text-2xl font-bold font-mono text-slate-900">
+                          {formatRupiah(minOfficeRate)}
+                        </span>
+                        <span className="text-xs text-slate-500">/ jam</span>
+                      </>
+                    ) : (
+                      <span className="text-sm font-semibold text-slate-400 font-mono">
+                        Belum ada unit
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Ruang privat terkunci smart lock</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Akses 24 jam</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                      <span>Alamat bisnis &amp; penanganan surat</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">Suite Privat</h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Kantor privat tertutup dengan kunci mandiri untuk tim bisnis &amp; startup.
-                  </p>
-                </div>
-
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold font-mono text-slate-900">
-                    {formatRupiah(minOfficeRate)}
-                  </span>
-                  <span className="text-xs text-slate-500">/ jam</span>
-                </div>
-
-                <div className="space-y-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Ruang privat terkunci smart lock</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Akses 24 jam</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faCheck} className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                    <span>Alamat bisnis &amp; penanganan surat</span>
-                  </div>
-                </div>
+                <Link
+                  href="/spaces?tipe=private_office"
+                  className="w-full py-2.5 px-4 text-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
+                >
+                  Pesan Suite Privat
+                </Link>
               </div>
-
-              <Link
-                href="/spaces?tipe=private_office"
-                className="w-full py-2.5 px-4 text-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
-              >
-                Pesan Suite Privat
-              </Link>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
 
       {/* 5. FAQ */}
-      <section id="faq" className="py-14 sm:py-16 border-b border-slate-100">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          <div className="text-center space-y-1">
-            <span className="text-xs font-bold text-sky-600 uppercase tracking-wider">
-              FAQ
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-              Pertanyaan yang Sering Diajukan
-            </h2>
-          </div>
+      <section id="faq" className="py-12 sm:py-16 lg:py-20 border-b border-slate-100 w-full bg-slate-50/40">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10">
+          <ScrollReveal animation="fade-up" duration={600}>
+            <div className="text-center space-y-2 max-w-2xl mx-auto">
+              <span className="text-xs font-bold text-sky-600 tracking-wider uppercase">
+                FAQ
+              </span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Pertanyaan yang Sering Diajukan
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto leading-relaxed">
+                Informasi penting mengenai cara pemesanan, sistem kunci digital QR, hingga fleksibilitas waktu sewa.
+              </p>
+            </div>
+          </ScrollReveal>
 
-          <div className="space-y-3">
+          <div className="max-w-3xl mx-auto space-y-3.5 sm:space-y-4 w-full">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
               return (
-                <div
+                <ScrollReveal
                   key={index}
-                  className="rounded-2xl border border-slate-200 bg-white overflow-hidden"
+                  animation="unfold"
+                  delay={index * 70}
+                  duration={600}
                 >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-4 text-left cursor-pointer focus:outline-none"
+                  <div
+                    className={`rounded-2xl border transition-all duration-200 bg-white overflow-hidden ${
+                      isOpen
+                        ? "border-sky-300 shadow-sm ring-1 ring-sky-500/10"
+                        : "border-slate-200/90 hover:border-slate-300 hover:shadow-xs"
+                    }`}
                   >
-                    <span className="text-xs sm:text-sm font-bold text-slate-900">
-                      {faq.q}
-                    </span>
-                    <FontAwesomeIcon
-                      icon={isOpen ? faMinus : faPlus}
-                      className="w-3.5 h-3.5 text-slate-400 shrink-0"
-                    />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : index)}
+                      className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 group"
+                    >
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                        {faq.q}
+                      </span>
+                      <div
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                          isOpen ? "bg-sky-50 text-sky-600" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
+                        }`}
+                      >
+                        <FontAwesomeIcon
+                          icon={faChevronDown}
+                          className={`w-3 h-3 transition-transform duration-300 ${
+                            isOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        />
+                      </div>
+                    </button>
 
-                  {isOpen && (
-                    <div className="px-4 sm:px-5 pb-5 pt-1 text-xs text-slate-600 leading-relaxed border-t border-slate-100">
-                      {faq.a}
-                    </div>
-                  )}
-                </div>
+                    {isOpen && (
+                      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 text-xs sm:text-[13px] text-slate-600 leading-relaxed border-t border-slate-100">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                </ScrollReveal>
               );
             })}
           </div>

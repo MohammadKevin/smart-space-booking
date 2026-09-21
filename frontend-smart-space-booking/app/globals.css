@@ -84,3 +84,72 @@ input[type="number"] {
 html {
   scroll-behavior: smooth;
 }
+
+@keyframes navbarEntrance {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-navbar-entrance {
+  animation: navbarEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Scroll Reveal & Unfold Animations */
+.reveal-base {
+  transition-property: transform, opacity, filter;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal-unfold {
+  opacity: 0;
+  transform: perspective(1200px) rotateX(14deg) translateY(32px) scale(0.96);
+  filter: blur(4px);
+}
+.reveal-unfold.is-visible {
+  opacity: 1;
+  transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
+  filter: blur(0px);
+}
+
+.reveal-fade-up {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.reveal-fade-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94) translateY(20px);
+}
+.reveal-scale.is-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.reveal-slide-left {
+  opacity: 0;
+  transform: translateX(-36px);
+}
+.reveal-slide-left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-slide-right {
+  opacity: 0;
+  transform: translateX(36px);
+}
+.reveal-slide-right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
