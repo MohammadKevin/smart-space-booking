@@ -40,6 +40,50 @@ export class ReservationService implements OnModuleInit {
     this.cleanupExpiredReservations().catch((err) => {
       this.logger.error('Error during initial reservation cleanup:', err);
     });
+    this.autoCheckoutCompletedReservations().catch((err) => {
+      this.logger.error('Error during initial auto-checkout check:', err);
+    });
+  }
+
+  @Cron('*/1 * * * *')
+  async autoCheckoutCompletedReservations() {
+    try {
+      const now = new Date();
+      const wibNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+      const todayWibStr = wibNow.toISOString().split('T')[0];
+      const todayDate = normalizeDateToStartOfDay(todayWibStr);
+      const currentWibMinutes =
+        wibNow.getUTCHours() * 60 + wibNow.getUTCMinutes();
+
+      const activeReservations = await this.prisma.reservasi.findMany({
+        where: {
+          status: ReservasiStatus.aktif,
+        },
+      });
+
+      for (const res of activeReservations) {
+        const resDate = normalizeDateToStartOfDay(res.tanggalReservasi);
+        const startMinutes = timeStringToMinutes(res.jamMulai);
+        const endMinutes = startMinutes + res.durasiJam * 60;
+
+        const isPastDay = resDate.getTime() < todayDate.getTime();
+        const isTodayAndPastTime =
+          resDate.getTime() === todayDate.getTime() &&
+          currentWibMinutes >= endMinutes;
+
+        if (isPastDay || isTodayAndPastTime) {
+          await this.prisma.reservasi.update({
+            where: { id: res.id },
+            data: { status: ReservasiStatus.selesai },
+          });
+          this.logger.log(
+            `[Auto-Checkout] Reservasi #${res.id} (${res.qrCode}) otomatis selesai karena telah melewati jam pemakaian (${res.jamMulai} + ${res.durasiJam} jam).`,
+          );
+        }
+      }
+    } catch (err) {
+      this.logger.error('Error during auto-checkout process:', err);
+    }
   }
 
   @Cron('*/15 * * * *')
@@ -332,6 +376,8 @@ export class ReservationService implements OnModuleInit {
   }
 
   async findAll(filter: FilterReservationDto, user: any) {
+    await this.autoCheckoutCompletedReservations();
+
     const where: Prisma.ReservasiWhereInput = {};
 
     if (user.role === Role.member) {
