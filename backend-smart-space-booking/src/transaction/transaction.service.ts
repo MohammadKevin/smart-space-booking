@@ -9,6 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MidtransService, SnapTokenResult } from './midtrans.service';
 import { MailService } from '../common/mail/mail.service';
 import { ReservasiStatus, PembayaranStatus, Role } from '@prisma/client';
+import {
+  generateInvoicePdf,
+  InvoicePdfData,
+} from '../common/utils/pdf-invoice.util';
+import {
+  timeStringToMinutes,
+  minutesToTimeString,
+} from '../common/utils/time.util';
 
 @Injectable()
 export class TransactionService {
@@ -19,6 +27,102 @@ export class TransactionService {
     private readonly midtrans: MidtransService,
     private readonly mailService: MailService,
   ) {}
+
+  private async buildInvoicePdf(tx: any): Promise<Buffer> {
+    const reservasi = tx.reservasi || {};
+    const member = reservasi.member || {};
+    const owner = reservasi.owner || {};
+    const detail = reservasi.detailReservasi || {};
+    const space = detail.space || {};
+    const diskon = detail.diskon || null;
+
+    const durasi = reservasi.durasiJam || 1;
+    const startM = reservasi.jamMulai ? timeStringToMinutes(reservasi.jamMulai) : 9 * 60;
+    const endM = startM + durasi * 60;
+    const jamSelesaiStr = minutesToTimeString(endM);
+
+    const basePrice = (space.hargaPerJam || 0) * durasi;
+    let potongan = 0;
+    if (diskon && diskon.persentaseDiskon) {
+      potongan = (basePrice * diskon.persentaseDiskon) / 100;
+    }
+
+    const invoiceData: InvoicePdfData = {
+      nomorInvoice: tx.nomorInvoice,
+      qrCode: reservasi.qrCode || `SSB-${tx.reservasiId}`,
+      tanggalTransaksi: tx.createdAt,
+      dibayarPada: tx.dibayarPada || new Date(),
+      metodePembayaran: tx.metodePembayaran || 'Midtrans',
+      statusPembayaran: 'LUNAS',
+      member: {
+        namaMember: member.namaMember || 'Member',
+        email: member.user?.email || member.email || 'customer@worknest.app',
+        telp: member.telp,
+        instansi: member.instansi,
+        alamat: member.alamat,
+      },
+      owner: {
+        namaCoworking: owner.namaCoworking || 'WorkNest Coworking Space',
+        namaPemilik: owner.namaPemilik,
+        alamat: owner.alamat,
+        telp: owner.telp,
+      },
+      space: {
+        namaSpace: space.namaSpace || 'Ruangan Kerja',
+        tipe: space.tipe || 'desk',
+        hargaPerJam: space.hargaPerJam || 0,
+      },
+      reservasi: {
+        tanggalReservasi: reservasi.tanggalReservasi || tx.createdAt,
+        jamMulai: reservasi.jamMulai || '09:00',
+        jamSelesai: jamSelesaiStr,
+        durasiJam: durasi,
+      },
+      diskon: diskon
+        ? {
+            namaDiskon: diskon.namaDiskon,
+            kodeDiskon: diskon.kodeDiskon,
+            persentaseDiskon: diskon.persentaseDiskon,
+            potongan,
+          }
+        : null,
+      subtotal: basePrice > 0 ? basePrice : tx.jumlah,
+      total: tx.jumlah,
+    };
+
+    return generateInvoicePdf(invoiceData);
+  }
+
+  async getInvoicePdf(id: number, user: any): Promise<{ buffer: Buffer; filename: string }> {
+    const tx = await this.findScoped(id, user);
+
+    const fullTx = await this.prisma.transaksi.findUnique({
+      where: { id: tx.id },
+      include: {
+        reservasi: {
+          include: {
+            member: {
+              include: { user: true },
+            },
+            owner: true,
+            detailReservasi: {
+              include: { space: true, diskon: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!fullTx) {
+      throw new NotFoundException('Data invoice tidak ditemukan.');
+    }
+
+    const buffer = await this.buildInvoicePdf(fullTx);
+    return {
+      buffer,
+      filename: `Invoice-${fullTx.nomorInvoice}.pdf`,
+    };
+  }
 
   private generateInvoiceNumber(
     reservationId: number,
@@ -411,6 +515,7 @@ export class TransactionService {
             member: {
               include: { user: true },
             },
+            owner: true,
             detailReservasi: { include: { space: true, diskon: true } },
           },
         },
@@ -436,18 +541,21 @@ export class TransactionService {
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
 
-      this.mailService
-        .sendPaymentSuccessEmail(
-          email,
-          memberName,
-          spaceName,
-          invoiceNum,
-          totalAmount,
-          method,
-        )
+      this.buildInvoicePdf(updated)
+        .then((pdfBuf) => {
+          return this.mailService.sendPaymentSuccessEmail(
+            email,
+            memberName,
+            spaceName,
+            invoiceNum,
+            totalAmount,
+            method,
+            pdfBuf,
+          );
+        })
         .catch((err) => {
           this.logger.error(
-            `Gagal mengirim email konfirmasi pembayaran: ${(err as Error).message}`,
+            `Gagal mengirim email konfirmasi pembayaran dengan PDF: ${(err as Error).message}`,
           );
         });
     }
@@ -529,6 +637,7 @@ export class TransactionService {
             member: {
               include: { user: true },
             },
+            owner: true,
             detailReservasi: { include: { space: true, diskon: true } },
           },
         },
@@ -557,18 +666,21 @@ export class TransactionService {
       const totalAmount = updated.jumlah;
       const method = updated.metodePembayaran || 'Midtrans';
 
-      this.mailService
-        .sendPaymentSuccessEmail(
-          email,
-          memberName,
-          spaceName,
-          invoiceNum,
-          totalAmount,
-          method,
-        )
+      this.buildInvoicePdf(updated)
+        .then((pdfBuf) => {
+          return this.mailService.sendPaymentSuccessEmail(
+            email,
+            memberName,
+            spaceName,
+            invoiceNum,
+            totalAmount,
+            method,
+            pdfBuf,
+          );
+        })
         .catch((err) => {
           this.logger.error(
-            `Gagal mengirim email konfirmasi pembayaran sync: ${(err as Error).message}`,
+            `Gagal mengirim email konfirmasi pembayaran sync dengan PDF: ${(err as Error).message}`,
           );
         });
     }

@@ -646,4 +646,31 @@ export async function provisionSuperAdmin(
   return data;
 }
 
+export async function downloadInvoicePdf(transactionId: number | string): Promise<void> {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") ||
+        localStorage.getItem("access_token") ||
+        sessionStorage.getItem("token")
+      : null;
+
+  const res = await fetch(`${API_BASE_URL}/transactions/${transactionId}/invoice/pdf`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (!res.ok) {
+    throw new Error("Gagal mengunduh berkas invoice PDF.");
+  }
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Invoice-${transactionId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
 export default api;

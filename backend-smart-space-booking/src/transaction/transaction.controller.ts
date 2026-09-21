@@ -6,9 +6,11 @@ import {
   Body,
   Param,
   Query,
+  Res,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -29,6 +31,30 @@ import { Role } from '@prisma/client';
 @ApiBearerAuth()
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
+
+  @Get(':id/invoice/pdf')
+  @ApiOperation({
+    summary: 'Unduh Berkas Invoice PDF Resmi',
+    description:
+      'Menghasilkan berkas faktur/bukti pembayaran resmi dalam format PDF standar A4.',
+  })
+  async downloadInvoicePdf(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: any,
+    @Res() res: Response,
+  ) {
+    const { buffer, filename } = await this.transactionService.getInvoicePdf(
+      id,
+      user,
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${filename}"`,
+    );
+    res.setHeader('Content-Length', buffer.length);
+    res.end(buffer);
+  }
 
   @Post(':reservationId/pay')
   @Roles(Role.member)

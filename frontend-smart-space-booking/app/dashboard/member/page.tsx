@@ -7,6 +7,7 @@ import {
   cancelBooking,
   getTransactions,
   syncPayment,
+  downloadInvoicePdf,
   Reservation,
   Transaksi,
   getApiErrorMessage,
@@ -886,11 +887,24 @@ export default function MemberDashboardPage() {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => {
+                  const txId = selectedReceipt.transaksi?.id || selectedReceipt.id;
+                  downloadInvoicePdf(txId).catch((err) => {
+                    setError(getApiErrorMessage(err));
+                  });
+                }}
                 className="py-2.5 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-sky-600/25"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Cetak Faktur</span>
+                <Download className="w-3.5 h-3.5" />
+                <span>Unduh Invoice PDF</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-slate-500" />
+                <span>Cetak</span>
               </button>
             </div>
           </div>

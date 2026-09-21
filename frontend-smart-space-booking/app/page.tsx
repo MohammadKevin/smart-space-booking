@@ -478,7 +478,7 @@ export default function HomePage() {
                   onClick={() => setActiveTab("flex")}
                   className={`px-3.5 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                     activeTab === "flex"
-                      ? "bg-sky-600 text-white shadow-xs"
+                      ? "bg-sky-600 text-white shadow-xs" 
                       : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
                   }`}
                 >
