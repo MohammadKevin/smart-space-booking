@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
+import DashboardLayout from "@/app/dashboard/layout";
 import { QrCodeCard } from "@/components/QrCodeCard";
 import {
   Clock,
@@ -450,8 +451,9 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   // ==========================================
   if (paySuccess) {
     return (
-      <div className="min-h-[80vh] py-10 sm:py-16 px-4 flex items-center justify-center">
-        <div className="max-w-xl w-full bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95">
+      <DashboardLayout>
+        <div className="py-6 sm:py-10 px-2 flex items-center justify-center">
+          <div className="max-w-xl w-full bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95">
           {/* Ambient background glow */}
           <div className="absolute -top-16 -left-16 w-48 h-48 bg-emerald-100/70 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-sky-100/70 rounded-full blur-3xl pointer-events-none" />

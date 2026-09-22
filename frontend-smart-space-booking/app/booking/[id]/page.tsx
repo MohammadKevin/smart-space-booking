@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
+import DashboardLayout from "@/app/dashboard/layout";
 import {
   Calendar,
   Clock,
@@ -423,8 +424,8 @@ export default function BookingPage({ params }: BookingPageProps) {
       : "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?auto=format&fit=crop&w=800&q=80";
 
   return (
-    <div className="min-h-screen bg-slate-50/70 py-8 sm:py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pb-16">
+    <DashboardLayout>
+      <div className="space-y-6 pb-16">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
@@ -441,6 +442,7 @@ export default function BookingPage({ params }: BookingPageProps) {
               Pilih tanggal, tentukan durasi jam sewa, dan konfirmasikan pemesanan ruangan Anda.
             </p>
           </div>
+        </div>
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <Link
@@ -886,6 +888,6 @@ export default function BookingPage({ params }: BookingPageProps) {
           </button>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

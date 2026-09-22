@@ -116,13 +116,7 @@ export function Navbar() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const isDashboard = pathname?.startsWith("/dashboard");
-  const isAuthPage =
-    pathname?.startsWith("/login") ||
-    pathname?.startsWith("/register") ||
-    pathname?.startsWith("/verify-email");
-
-  if (!pathname || isDashboard || isAuthPage) {
+  if (pathname !== "/") {
     return null;
   }
 
@@ -948,8 +942,6 @@ export function Navbar() {
           )}
         </div>
       </header>
-
-      {pathname !== "/" && <div className="h-20 sm:h-24 w-full shrink-0" aria-hidden="true" />}
     </>
   );
 }
