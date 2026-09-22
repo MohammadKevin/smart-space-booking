@@ -18,8 +18,52 @@ export class ReportService {
     return owner;
   }
 
+  private async getActiveCommissionRate(): Promise<number> {
+    try {
+      const setting = await this.prisma.platformSetting.findUnique({
+        where: { key: 'PLATFORM_COMMISSION_PERCENT' },
+      });
+      if (setting?.value) {
+        const parsed = parseFloat(setting.value);
+        if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return 10;
+  }
+
+  private calculateOwnerNetRevenue(res: any, defaultRate: number): number {
+    const gross = res.transaksi?.jumlah || res.detailReservasi?.totalHarga || 0;
+    if (res.transaksi) {
+      if (
+        res.transaksi.pendapatanOwner !== null &&
+        res.transaksi.pendapatanOwner !== undefined &&
+        res.transaksi.pendapatanOwner >= 0
+      ) {
+        return res.transaksi.pendapatanOwner;
+      }
+      if (
+        res.transaksi.komisiPlatform !== null &&
+        res.transaksi.komisiPlatform !== undefined
+      ) {
+        return Math.max(0, gross - res.transaksi.komisiPlatform);
+      }
+      if (
+        res.transaksi.persentaseKomisiPlatform !== null &&
+        res.transaksi.persentaseKomisiPlatform !== undefined
+      ) {
+        const komisi = (gross * res.transaksi.persentaseKomisiPlatform) / 100;
+        return Math.max(0, gross - komisi);
+      }
+    }
+    const komisi = (gross * defaultRate) / 100;
+    return Math.max(0, gross - komisi);
+  }
+
   async getDashboardSummary(ownerUserId: number) {
     const owner = await this.getOwner(ownerUserId);
+    const activeRate = await this.getActiveCommissionRate();
 
     const reservations = await this.prisma.reservasi.findMany({
       where: { ownerId: owner.id },
@@ -29,7 +73,10 @@ export class ReportService {
       },
     });
 
-    let totalRevenue = 0;
+    let totalNetRevenue = 0;
+    let totalGrossRevenue = 0;
+    let totalPlatformCommission = 0;
+
     const bookingCounts = {
       total: reservations.length,
       pending: 0,
@@ -49,9 +96,13 @@ export class ReportService {
         res.transaksi?.statusPembayaran !== PembayaranStatus.gagal;
 
       if (isPaid && isNotCancelled) {
-        if (res.detailReservasi?.totalHarga) {
-          totalRevenue += res.detailReservasi.totalHarga;
-        }
+        const gross = res.transaksi?.jumlah || res.detailReservasi?.totalHarga || 0;
+        const net = this.calculateOwnerNetRevenue(res, activeRate);
+        const commission = Math.max(0, gross - net);
+
+        totalGrossRevenue += gross;
+        totalNetRevenue += net;
+        totalPlatformCommission += commission;
       }
     }
 
@@ -73,7 +124,11 @@ export class ReportService {
     return {
       coworkingName: owner.namaCoworking,
       ownerName: owner.namaPemilik,
-      totalRevenue,
+      totalRevenue: totalNetRevenue, // Pendapatan bersih mitra (setelah dipotong komisi super admin)
+      totalNetRevenue,
+      totalGrossRevenue,
+      totalPlatformCommission,
+      commissionRate: activeRate,
       totalSpaces,
       totalStaffs,
       totalMembers,
@@ -86,6 +141,7 @@ export class ReportService {
     year: number = new Date().getFullYear(),
   ) {
     const owner = await this.getOwner(ownerUserId);
+    const activeRate = await this.getActiveCommissionRate();
 
     const startOfYear = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
     const endOfYear = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0));
@@ -123,6 +179,8 @@ export class ReportService {
       monthIndex: index + 1,
       monthName: name,
       revenue: 0,
+      grossRevenue: 0,
+      commission: 0,
       totalBookings: 0,
     }));
 
@@ -136,16 +194,24 @@ export class ReportService {
       if (isPaid && isNotCancelled) {
         const monthIdx = new Date(res.tanggalReservasi).getUTCMonth();
         if (monthIdx >= 0 && monthIdx < 12) {
+          const gross = res.transaksi?.jumlah || res.detailReservasi?.totalHarga || 0;
+          const net = this.calculateOwnerNetRevenue(res, activeRate);
+          const commission = Math.max(0, gross - net);
+
           monthlyStats[monthIdx].totalBookings += 1;
-          if (res.detailReservasi?.totalHarga) {
-            monthlyStats[monthIdx].revenue += res.detailReservasi.totalHarga;
-          }
+          monthlyStats[monthIdx].revenue += net; // Net revenue (setelah dipotong komisi super admin)
+          monthlyStats[monthIdx].grossRevenue += gross;
+          monthlyStats[monthIdx].commission += commission;
         }
       }
     }
 
     const grandTotalRevenue = monthlyStats.reduce(
       (acc, curr) => acc + curr.revenue,
+      0,
+    );
+    const grandTotalGrossRevenue = monthlyStats.reduce(
+      (acc, curr) => acc + curr.grossRevenue,
       0,
     );
     const grandTotalBookings = monthlyStats.reduce(
@@ -156,13 +222,16 @@ export class ReportService {
     return {
       year,
       grandTotalRevenue,
+      grandTotalGrossRevenue,
       grandTotalBookings,
+      commissionRate: activeRate,
       months: monthlyStats,
     };
   }
 
   async getSpaceTypeDistribution(ownerUserId: number) {
     const owner = await this.getOwner(ownerUserId);
+    const activeRate = await this.getActiveCommissionRate();
 
     const spaces = await this.prisma.space.findMany({
       where: { ownerId: owner.id },
@@ -235,10 +304,9 @@ export class ReportService {
       if (isPaid && isNotCancelled) {
         const spaceType = res.detailReservasi?.space?.tipe;
         if (spaceType && distribution[spaceType]) {
+          const net = this.calculateOwnerNetRevenue(res, activeRate);
           distribution[spaceType].totalBookings += 1;
-          if (res.detailReservasi?.totalHarga) {
-            distribution[spaceType].revenue += res.detailReservasi.totalHarga;
-          }
+          distribution[spaceType].revenue += net;
         }
       }
     }

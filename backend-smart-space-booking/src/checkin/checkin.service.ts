@@ -20,6 +20,9 @@ export class CheckinService {
     reservationOwnerId: number,
     user: any,
   ) {
+    if (user.role === Role.super_admin) {
+      return;
+    }
     if (user.role === Role.admin_space) {
       if (user.spaceOwner?.id !== reservationOwnerId) {
         throw new ForbiddenException(

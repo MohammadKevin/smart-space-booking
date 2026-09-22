@@ -93,11 +93,7 @@ export async function GET(req: NextRequest) {
         });
         if (resCheck.ok) {
           const resObj = await resCheck.json();
-          if (
-            resObj?.transaksi?.statusPembayaran === "lunas" ||
-            resObj?.status === "disetujui" ||
-            resObj?.status === "aktif"
-          ) {
+          if (resObj?.transaksi?.statusPembayaran === "lunas") {
             isPaid = true;
             transactionStatus = "settlement";
           }

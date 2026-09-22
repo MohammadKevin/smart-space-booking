@@ -55,15 +55,16 @@ export default function StaffReservationHistoryPage() {
     fetchReservations();
   }, [fetchReservations]);
 
-  const handleManualCheckIn = async (qrCode: string, id: number) => {
+  const handleManualCheckIn = async (qrCode: string, id: number, action: "auto" | "checkin" | "checkout" = "auto") => {
     setActionLoadingId(id);
     setActionSuccess(null);
     try {
-      await processCheckIn({
+      const res = await processCheckIn({
         qrCode,
-        action: "checkin",
+        action,
       });
-      setActionSuccess(`Check-in reservasi #${id} (${qrCode}) berhasil divalidasi.`);
+      const actionText = res.actionPerformed === "checkout" ? "Check-out" : "Check-in";
+      setActionSuccess(`${actionText} reservasi #${id} (${qrCode}) berhasil diproses.`);
       await fetchReservations();
     } catch (err) {
       setError(getApiErrorMessage(err));
@@ -347,9 +348,11 @@ export default function StaffReservationHistoryPage() {
                   const roomName = space?.namaSpace || `Ruang #${r.id}`;
                   const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
                   const isPending = r.status === "pending";
+                  const isDisetujui = r.status === "disetujui";
                   const isAktif = r.status === "aktif";
                   const isSelesai = r.status === "selesai";
                   const isDibatalkan = r.status === "dibatalkan";
+                  const isPaid = !r.transaksi || r.transaksi.statusPembayaran === "lunas";
 
                   return (
                     <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
@@ -382,14 +385,19 @@ export default function StaffReservationHistoryPage() {
                             Pending
                           </span>
                         )}
+                        {isDisetujui && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                            Disetujui
+                          </span>
+                        )}
                         {isAktif && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-semibold text-[10px] border border-sky-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold text-[10px] border border-emerald-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Aktif
                           </span>
                         )}
                         {isSelesai && (
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                             Selesai
                           </span>
                         )}
@@ -410,14 +418,45 @@ export default function StaffReservationHistoryPage() {
                           <Eye className="w-3.5 h-3.5" />
                         </button>
 
-                        {isPending && (
+                        {isAktif && (
                           <button
                             type="button"
-                            onClick={() => handleManualCheckIn(r.qrCode, r.id)}
+                            onClick={() => handleManualCheckIn(r.qrCode, r.id, "checkout")}
+                            disabled={actionLoadingId === r.id}
+                            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[10px] shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Check-Out"}
+                          </button>
+                        )}
+
+                        {isDisetujui && isPaid && (
+                          <button
+                            type="button"
+                            onClick={() => handleManualCheckIn(r.qrCode, r.id, "checkin")}
                             disabled={actionLoadingId === r.id}
                             className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold text-[10px] shadow-sm shadow-sky-600/25 transition-colors cursor-pointer disabled:opacity-50"
                           >
-                            {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Validasi Check-In"}
+                            {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Check-In"}
+                          </button>
+                        )}
+
+                        {isSelesai && (
+                          <button
+                            type="button"
+                            disabled
+                            className="px-2.5 py-1.5 bg-slate-100 text-slate-400 text-[10px] font-bold rounded-lg cursor-not-allowed border border-slate-200"
+                          >
+                            Check-In Off
+                          </button>
+                        )}
+
+                        {isDibatalkan && (
+                          <button
+                            type="button"
+                            disabled
+                            className="px-2.5 py-1.5 bg-rose-50 text-rose-400 text-[10px] font-bold rounded-lg cursor-not-allowed border border-rose-100"
+                          >
+                            Batal (Off)
                           </button>
                         )}
                       </td>
@@ -450,15 +489,17 @@ export default function StaffReservationHistoryPage() {
               const roomName = space?.namaSpace || `Ruang #${r.id}`;
               const date = r.tanggalReservasi ? r.tanggalReservasi.split("T")[0] : "-";
               const isPending = r.status === "pending";
+              const isDisetujui = r.status === "disetujui";
               const isAktif = r.status === "aktif";
               const isSelesai = r.status === "selesai";
               const isDibatalkan = r.status === "dibatalkan";
+              const isPaid = !r.transaksi || r.transaksi.statusPembayaran === "lunas";
 
               return (
                 <div key={r.id} className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-mono font-bold text-xs text-slate-900">#{r.id}</span>
                         <span className="font-mono text-[10px] text-sky-700 font-bold bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">
                           {r.qrCode || "QR-PENDING"}
@@ -468,14 +509,19 @@ export default function StaffReservationHistoryPage() {
                             Pending
                           </span>
                         )}
+                        {isDisetujui && (
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
+                            Disetujui
+                          </span>
+                        )}
                         {isAktif && (
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Aktif
                           </span>
                         )}
                         {isSelesai && (
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                             Selesai
                           </span>
                         )}
@@ -499,18 +545,37 @@ export default function StaffReservationHistoryPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedDetail(r)}
-                        className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs"
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold shadow-2xs cursor-pointer"
                       >
                         Detail
                       </button>
-                      {isPending && (
+                      {isAktif && (
                         <button
                           type="button"
-                          onClick={() => handleManualCheckIn(r.qrCode, r.id)}
+                          onClick={() => handleManualCheckIn(r.qrCode, r.id, "checkout")}
                           disabled={actionLoadingId === r.id}
-                          className="px-3 py-1 rounded-lg bg-sky-600 text-white text-xs font-bold shadow-2xs"
+                          className="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold shadow-2xs cursor-pointer"
+                        >
+                          {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Check-Out"}
+                        </button>
+                      )}
+                      {isDisetujui && isPaid && (
+                        <button
+                          type="button"
+                          onClick={() => handleManualCheckIn(r.qrCode, r.id, "checkin")}
+                          disabled={actionLoadingId === r.id}
+                          className="px-3 py-1 rounded-lg bg-sky-600 text-white text-xs font-bold shadow-2xs cursor-pointer"
                         >
                           {actionLoadingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : "Check-In"}
+                        </button>
+                      )}
+                      {isSelesai && (
+                        <button
+                          type="button"
+                          disabled
+                          className="px-2.5 py-1 bg-slate-100 text-slate-400 text-xs font-semibold rounded-lg cursor-not-allowed border border-slate-200"
+                        >
+                          Check-In Off
                         </button>
                       )}
                     </div>

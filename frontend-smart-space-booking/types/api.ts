@@ -311,6 +311,9 @@ export interface Transaksi {
   nomorInvoice: string;
   reservasiId: number;
   jumlah: number;
+  persentaseKomisiPlatform?: number | null;
+  komisiPlatform?: number | null;
+  pendapatanOwner?: number | null;
   metodePembayaran?: string | null;
   snapToken?: string | null;
   snapRedirectUrl?: string | null;
@@ -377,7 +380,10 @@ export interface ProcessCheckinDto {
 }
 
 export interface CheckinResponse {
+  success?: boolean;
+  actionPerformed?: "checkin" | "checkout";
   message: string;
+  reservation?: Reservation;
   data?: {
     id: number;
     reservasiId: number;
@@ -390,9 +396,22 @@ export interface CheckinResponse {
 
 export interface DashboardSummary {
   totalRevenue: number;
+  totalNetRevenue?: number;
+  totalGrossRevenue?: number;
+  totalPlatformCommission?: number;
+  commissionRate?: number;
   totalSpaces: number;
   totalStaffs: number;
-  totalReservations: number;
+  totalReservations?: number;
+  totalMembers?: number;
+  bookingCounts?: {
+    total: number;
+    pending: number;
+    disetujui: number;
+    aktif: number;
+    selesai: number;
+    dibatalkan: number;
+  };
   statusCounts?: {
     pending: number;
     disetujui: number;
@@ -404,8 +423,12 @@ export interface DashboardSummary {
 
 export interface MonthlyRevenueItem {
   month: string;
-  monthNumber: number;
+  monthIndex?: number;
+  monthName?: string;
+  monthNumber?: number;
   revenue: number;
+  grossRevenue?: number;
+  commission?: number;
   totalBookings: number;
 }
 

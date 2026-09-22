@@ -12,7 +12,6 @@ import {
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRupiah } from "@/components/SpaceCard";
-import DashboardLayout from "@/app/dashboard/layout";
 import { QrCodeCard } from "@/components/QrCodeCard";
 import {
   Clock,
@@ -31,6 +30,11 @@ import {
   ArrowRight,
   Ticket,
   Building,
+  Calendar,
+  ShieldCheck,
+  Receipt,
+  Download,
+  CheckCheck,
 } from "lucide-react";
 
 interface CheckoutPageProps {
@@ -163,7 +167,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   const [paying, setPaying] = useState(false);
   const [paySuccess, setPaySuccess] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState<{
@@ -206,11 +210,9 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     try {
       const data = await getReservationById(reservationId);
       setReservation(data);
-      if (
-        data.transaksi?.statusPembayaran === "lunas" ||
-        data.status === "disetujui" ||
-        data.status === "aktif"
-      ) {
+
+      // ONLY set paySuccess if the payment is strictly "lunas"
+      if (data.transaksi?.statusPembayaran === "lunas") {
         setPaySuccess(true);
       }
     } catch (err) {
@@ -236,7 +238,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   }, [user]);
 
   useEffect(() => {
-    if (!paySuccess) return;
+    if (!paySuccess || countdown === null) return;
 
     if (countdown <= 0) {
       router.push(targetRedirectUrl);
@@ -244,7 +246,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     }
 
     const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
+      setCountdown((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -289,11 +291,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     if (!isSettled && reservationId) {
       try {
         const checkData = await getReservationById(reservationId);
-        if (
-          checkData.transaksi?.statusPembayaran === "lunas" ||
-          checkData.status === "disetujui" ||
-          checkData.status === "aktif"
-        ) {
+        if (checkData.transaksi?.statusPembayaran === "lunas") {
           isSettled = true;
           setReservation(checkData);
         }
@@ -317,7 +315,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
     if (modalOpen && !paySuccess) {
       pollingRef.current = setInterval(async () => {
         await verifyStatus(paymentDetails?.orderId);
-      }, 6000);
+      }, 5000);
     } else {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
@@ -417,617 +415,507 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="py-24 flex flex-col items-center justify-center text-slate-400">
-          <Loader2 className="w-8 h-8 animate-spin text-sky-600 mb-2" />
-          <p className="text-xs">Memuat rincian checkout...</p>
-        </div>
-      </DashboardLayout>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-slate-400">
+        <Loader2 className="w-8 h-8 text-sky-600 animate-spin mb-2" />
+        <p className="text-xs font-semibold text-slate-600">Memuat rincian pembayaran...</p>
+      </div>
     );
   }
 
   if (error || !reservation) {
     return (
-      <DashboardLayout>
-        <div className="max-w-md mx-auto py-16 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto border border-rose-200">
+      <div className="min-h-[70vh] flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-center space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center border border-rose-100">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900">
-            Reservasi Tidak Ditemukan
-          </h2>
+          <h2 className="text-lg font-bold text-slate-900">Gagal Memuat Checkout</h2>
           <p className="text-xs text-slate-500">
             {error || "Rincian reservasi tidak tersedia atau telah kedaluwarsa."}
           </p>
           <Link
-            href="/dashboard/member/spaces"
+            href="/spaces"
             className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Katalog Ruangan</span>
           </Link>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
-  return (
-    <DashboardLayout>
-      <div className="space-y-6 pb-16">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
-              <span>CHECKOUT RESERVASI</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-slate-500 font-sans font-normal">
-                Tagihan #{reservation.id}
-              </span>
+  // ==========================================
+  // SUCCESS SCREEN (Payment is actually paid)
+  // ==========================================
+  if (paySuccess) {
+    return (
+      <div className="min-h-[80vh] py-10 sm:py-16 px-4 flex items-center justify-center">
+        <div className="max-w-xl w-full bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95">
+          {/* Ambient background glow */}
+          <div className="absolute -top-16 -left-16 w-48 h-48 bg-emerald-100/70 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 w-48 h-48 bg-sky-100/70 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Success Animated Icon */}
+          <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-60" />
+            <div className="relative w-16 h-16 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <CheckCheck className="w-8 h-8 stroke-[2.5]" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold font-mono uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Pembayaran Berhasil Diverifikasi</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Pembayaran &amp; Konfirmasi
+              Selamat, Tiket Anda Telah Aktif!
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-              Pilih metode pembayaran di bawah. Setelah menekan tombol bayar, popup rincian nomor VA / QRIS dan panduan pembayaran akan langsung muncul.
+            <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+              Transaksi pembayaran telah lunas. Simpan dan gunakan QR Code di bawah untuk check-in di terminal resepsionis venue.
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
-            <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-sky-700 bg-sky-50 px-3.5 py-1.5 rounded-xl border border-sky-200">
-              <Clock className="w-3.5 h-3.5 text-sky-600" />
-              <span>Sisa Waktu: {formatTime(holdTimer)}</span>
+          {/* Digital Ticket Card */}
+          <div className="p-4 sm:p-5 bg-slate-50 border border-slate-200/80 rounded-2xl text-left space-y-3.5 relative z-10">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center">
+                  <Ticket className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm">{roomName}</h3>
+                  <p className="text-[10px] text-slate-400 font-mono">{address}</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                LUNAS
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200/60">
+                <span className="text-[10px] text-slate-400 block font-mono">TANGGAL SEWA</span>
+                <span className="font-bold text-slate-800">{reservationDate}</span>
+              </div>
+              <div className="p-2.5 bg-white rounded-xl border border-slate-200/60">
+                <span className="text-[10px] text-slate-400 block font-mono">JAM PEMAKAIAN</span>
+                <span className="font-bold text-slate-800">{startTime} - {endTime} WIB</span>
+              </div>
+            </div>
+
+            {/* Render Ticket QR Code */}
+            {reservation.qrCode && (
+              <div className="pt-1">
+                <QrCodeCard
+                  value={reservation.qrCode}
+                  label="KODE QR TIKET MASUK"
+                  size={140}
+                  showDownload={true}
+                  className="bg-white border-slate-200"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-200/60">
+              <span className="text-slate-500 font-medium">Total Terbayar:</span>
+              <span className="font-mono font-bold text-emerald-600 text-sm">
+                {formatRupiah(amountDue)}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-2.5 relative z-10 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <Link
+                href="/dashboard/member"
+                className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Ticket className="w-4 h-4" />
+                <span>Buka Tiket Saya</span>
+              </Link>
+              <Link
+                href="/dashboard/member/transactions"
+                className="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Receipt className="w-4 h-4 text-slate-500" />
+                <span>Riwayat Transaksi</span>
+              </Link>
+            </div>
+
+            <Link
+              href="/spaces"
+              className="inline-block text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline pt-1"
+            >
+              &larr; Sewa Ruangan Lainnya
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // NORMAL CHECKOUT & PAYMENT METHOD SELECTOR
+  // ==========================================
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+      {/* Breadcrumb & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-600 mb-1">
+            <Link href="/spaces" className="hover:underline">KATALOG</Link>
+            <span className="text-slate-300">&gt;</span>
+            <Link href={`/spaces/${space?.id || ""}`} className="hover:underline">DETAIL</Link>
+            <span className="text-slate-300">&gt;</span>
+            <span>CHECKOUT #{reservation.id}</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Pembayaran &amp; Konfirmasi
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Pilih metode pembayaran di bawah. Setelah menekan tombol bayar, popup nomor VA atau barcode QRIS resmi akan langsung muncul.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-sky-700 bg-sky-50 px-3.5 py-1.5 rounded-xl border border-sky-200 shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-sky-600" />
+            <span>Sisa Waktu: {formatTime(holdTimer)}</span>
+          </div>
+        </div>
+      </div>
+
+      {payError && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start justify-between gap-2.5 shadow-sm animate-in fade-in">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+            <span>{payError}</span>
+          </div>
+          <button type="button" onClick={() => setPayError(null)} className="font-bold text-rose-600 p-0.5 cursor-pointer">
+            &times;
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Col: Payment Method Selector */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-sky-600" />
+                <h2 className="text-sm font-bold text-slate-900">Pilih Metode Pembayaran</h2>
+              </div>
+              <span className="text-[11px] font-mono text-slate-400">Midtrans Payment Gateway</span>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                Virtual Account Otomatis
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {PAYMENT_OPTIONS.filter((p) => p.category === "va").map((opt) => {
+                  const isSelected = selectedMethod === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSelectedMethod(opt.key)}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                        isSelected
+                          ? "border-sky-500 bg-sky-50/60 ring-2 ring-sky-500/20"
+                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 bg-white"
+                      }`}
+                    >
+                      <div className={`w-10 h-7 rounded-md font-bold text-[10px] font-mono flex items-center justify-center shrink-0 border ${opt.iconBg}`}>
+                        {opt.badge}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs text-slate-900 truncate">{opt.name}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{opt.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                QRIS &amp; E-Wallet
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {PAYMENT_OPTIONS.filter((p) => p.category === "qris").map((opt) => {
+                  const isSelected = selectedMethod === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSelectedMethod(opt.key)}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                        isSelected
+                          ? "border-sky-500 bg-sky-50/60 ring-2 ring-sky-500/20"
+                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 bg-white"
+                      }`}
+                    >
+                      <div className={`w-10 h-7 rounded-md font-bold text-[10px] font-mono flex items-center justify-center shrink-0 border ${opt.iconBg}`}>
+                        {opt.badge}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs text-slate-900 truncate">{opt.name}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{opt.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                Lainnya (Kartu &amp; Gerai)
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {PAYMENT_OPTIONS.filter((p) => p.category === "other").map((opt) => {
+                  const isSelected = selectedMethod === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSelectedMethod(opt.key)}
+                      className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
+                        isSelected
+                          ? "border-sky-500 bg-sky-50/60 ring-2 ring-sky-500/20"
+                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 bg-white"
+                      }`}
+                    >
+                      <div className={`w-10 h-7 rounded-md font-bold text-[10px] font-mono flex items-center justify-center shrink-0 border ${opt.iconBg}`}>
+                        {opt.badge}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs text-slate-900 truncate">{opt.name}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{opt.desc}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        {payError && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2.5 shadow-sm">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-            <span>{payError}</span>
-          </div>
-        )}
-
-        {paySuccess ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-2xl max-w-lg mx-auto relative overflow-hidden animate-in fade-in zoom-in-95">
-            <div className="absolute -top-12 -left-12 w-36 h-36 bg-emerald-100 rounded-full blur-3xl pointer-events-none opacity-60" />
-            <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-sky-100 rounded-full blur-3xl pointer-events-none opacity-60" />
-
-            <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-emerald-100/70 animate-ping opacity-75" />
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <Check className="w-9 h-9 stroke-[3]" />
-              </div>
+        {/* Right Col: Summary & Pay Button */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+            <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">Ringkasan Tagihan</h2>
+              <span className="text-[10px] font-mono font-bold bg-sky-50 text-sky-700 px-2 py-0.5 rounded border border-sky-100 uppercase">
+                {spaceType}
+              </span>
             </div>
 
-            <div className="space-y-1.5 relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold font-mono uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Transaksi Lunas &amp; Terverifikasi</span>
-              </div>
-              <h2 className="text-2xl font-extrabold text-slate-900">
-                Pembayaran Berhasil!
-              </h2>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                Reservasi ruangan Anda telah lunas. Akses kode QR dan kunci digital telah diaktifkan secara instan.
-              </p>
-            </div>
-
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-2 text-xs relative z-10">
-              <div className="flex justify-between items-center border-b border-slate-200/70 pb-2">
-                <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                  <Ticket className="w-4 h-4 text-sky-600" />
-                  <span>{roomName}</span>
+            <div className="space-y-3 text-xs text-slate-600">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="w-10 h-10 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 font-bold">
+                  <Building className="w-5 h-5" />
                 </div>
-                <span className="font-mono text-[11px] font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-lg border border-sky-200">
-                  {reservation?.qrCode || `RES-${reservation?.id}`}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-slate-600 text-[11px]">
-                <div>
-                  <span className="text-slate-400 block text-[10px] uppercase font-mono">Waktu Sesi</span>
-                  <span className="font-semibold text-slate-900">{reservationDate} • {startTime} WIB</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-slate-400 block text-[10px] uppercase font-mono">Total Dibayar</span>
-                  <span className="font-mono font-bold text-emerald-700 text-xs">{formatRupiah(amountDue)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-1.5 text-xs text-slate-500 font-medium relative z-10">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="flex items-center gap-1.5">
-                  <Loader2 className="w-3 h-3 text-sky-600 animate-spin" />
-                  <span>Mengalihkan ke halaman tiket...</span>
-                </span>
-                <span className="font-mono font-bold text-slate-900">{countdown}s</span>
-              </div>
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-sky-600 transition-all duration-1000 ease-linear rounded-full"
-                  style={{ width: `${((4 - countdown) / 4) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center relative z-10">
-              <Link
-                href={targetRedirectUrl}
-                className="flex-1 py-2.5 px-4 bg-sky-600 text-white rounded-xl text-xs font-bold shadow-sm shadow-sky-600/25 hover:bg-sky-500 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Ticket className="w-3.5 h-3.5" />
-                <span>Buka Tiket Saya Sekarang</span>
-              </Link>
-              <Link
-                href="/dashboard/member/transactions"
-                className="py-2.5 px-4 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm"
-              >
-                Lihat Invoice
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-8 space-y-6">
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-sm">
-                <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900">
-                      Pilihan Metode Pembayaran Midtrans
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      Pilih kanal transfer bank (BCA, Mandiri, BNI, BRI, Permata) atau QRIS / E-Wallet.
-                    </p>
-                  </div>
-                  <Lock className="w-4 h-4 text-slate-400" />
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
-                      TRANSFER VIRTUAL ACCOUNT (VERIFIKASI OTOMATIS 24 JAM)
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {PAYMENT_OPTIONS.filter((p) => p.category === "va").map((opt) => {
-                        const isSelected = selectedMethod === opt.key;
-                        return (
-                          <button
-                            key={opt.key}
-                            type="button"
-                            onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
-                                {opt.bankCode || opt.badge}
-                              </span>
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
-                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                              </div>
-                            </div>
-                            <p className="font-bold text-slate-900 text-xs leading-snug">{opt.name}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5">{opt.desc}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
-                      QRIS &amp; INSTANT E-WALLET
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {PAYMENT_OPTIONS.filter((p) => p.category === "qris").map((opt) => {
-                        const isSelected = selectedMethod === opt.key;
-                        return (
-                          <button
-                            key={opt.key}
-                            type="button"
-                            onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
-                                {opt.badge}
-                              </span>
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
-                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                              </div>
-                            </div>
-                            <p className="font-bold text-slate-900 text-xs leading-snug">{opt.name}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5">{opt.desc}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
-                      KARTU KREDIT &amp; GERAI RETAIL
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {PAYMENT_OPTIONS.filter((p) => p.category === "other").map((opt) => {
-                        const isSelected = selectedMethod === opt.key;
-                        return (
-                          <button
-                            key={opt.key}
-                            type="button"
-                            onClick={() => setSelectedMethod(opt.key)}
-                            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                              isSelected
-                                ? "border-sky-500 bg-sky-50/60 shadow-sm ring-1 ring-sky-500/30"
-                                : "border-slate-200 hover:border-slate-300 bg-white"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-mono font-bold border ${opt.iconBg}`}>
-                                {opt.badge}
-                              </span>
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-sky-600 border-sky-600" : "border-slate-300"}`}>
-                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                              </div>
-                            </div>
-                            <p className="font-bold text-slate-900 text-xs leading-snug">{opt.name}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5">{opt.desc}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-                  Rincian Pemesanan Ruangan
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <span className="text-slate-400 block text-[10px] font-mono uppercase">Ruangan</span>
-                    <strong className="text-slate-900 text-sm">{roomName}</strong>
-                    <span className="text-[11px] text-slate-500 block font-mono mt-0.5">{spaceType} • {capacity} Orang</span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400 block text-[10px] font-mono uppercase">Lokasi Venue</span>
-                    <strong className="text-slate-900">{space?.owner?.namaCoworking || "WorkNest Hub"}</strong>
-                    <span className="text-[11px] text-slate-500 block truncate">{address}</span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400 block text-[10px] font-mono uppercase">Jadwal Sesi</span>
-                    <strong className="text-slate-900">{reservationDate}</strong>
-                    <span className="text-[11px] text-slate-500 block font-mono">{startTime} - {endTime} WIB ({duration} Jam)</span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400 block text-[10px] font-mono uppercase">Nama Pemesan</span>
-                    <strong className="text-slate-900">{user?.member?.namaMember || user?.email || "Member"}</strong>
-                    <span className="text-[11px] text-slate-500 block font-mono">{user?.member?.telp || "-"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-20">
-              <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
-                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-                  Ringkasan Tagihan
-                </h3>
-
-                <div className="space-y-2.5 text-xs text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Sewa ({formatRupiah(hourlyRate)} &times; {duration} jam)</span>
-                    <span className="font-mono font-semibold text-slate-900">{formatRupiah(rentalSubtotal)}</span>
-                  </div>
-
-                  {amountDue < rentalSubtotal && (
-                    <div className="flex justify-between text-emerald-700 font-semibold">
-                      <span>Potongan Diskon</span>
-                      <span className="font-mono">-{formatRupiah(rentalSubtotal - amountDue)}</span>
-                    </div>
-                  )}
-
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm">Total Pembayaran</span>
-                    <span className="text-xl font-bold text-sky-600 font-mono">
-                      {formatRupiah(amountDue)}
-                    </span>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-500 space-y-1">
-                    <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                      <CreditCard className="w-3.5 h-3.5 text-sky-600" />
-                      <span>{selectedOption.name}</span>
-                    </div>
-                    <p className="leading-relaxed">Nomor VA &amp; panduan akan langsung muncul pada popup setelah klik Bayar Sekarang.</p>
-                  </div>
-                </div>
-
-                {holdTimer <= 0 && !paySuccess ? (
-                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-2 text-center">
-                    <p className="font-semibold">Sesi Pembayaran Telah Berakhir</p>
-                    <p className="text-[11px] text-amber-700 leading-relaxed">Batas waktu penahanan slot (15 menit) telah habis. Slot ruangan telah dilepaskan kembali.</p>
-                    <div className="pt-1">
-                      <Link
-                        href={`/booking/${reservation?.detailReservasi?.spaceId || ""}`}
-                        className="inline-block px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-sky-600/25"
-                      >
-                        Pesan Ulang Ruangan
-                      </Link>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handlePayNow}
-                    disabled={paying || holdTimer <= 0}
-                    className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
-                  >
-                    {paying ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Menyiapkan Nomor VA...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Bayar Sekarang ({formatRupiah(amountDue)})</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {!paySuccess && holdTimer > 0 && (
-              <div className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3.5 z-40 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[10px] text-slate-400 uppercase font-mono font-bold">Total Pembayaran</p>
-                  <p className="text-base font-bold text-slate-900 font-mono leading-tight">{formatRupiah(amountDue)}</p>
+                  <p className="font-bold text-slate-900 text-sm truncate">{roomName}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{address}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handlePayNow}
-                  disabled={paying || holdTimer <= 0}
-                  className="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
-                >
-                  {paying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
-                  <span>Bayar Sekarang</span>
-                </button>
               </div>
-            )}
+
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Jadwal Reservasi</span>
+                  <span className="font-bold text-slate-900">{reservationDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Jam Pemakaian</span>
+                  <span className="font-mono text-slate-900 font-semibold">{startTime} - {endTime} WIB ({duration} Jam)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Tarif Sewa</span>
+                  <span className="font-mono text-slate-900">{formatRupiah(hourlyRate)} / jam</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Metode Terpilih</span>
+                  <span className="font-bold text-sky-700">{selectedOption.name}</span>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-3 flex justify-between items-center text-sm">
+                <div>
+                  <p className="font-bold text-slate-900">Total Pembayaran</p>
+                  <p className="text-[10px] text-slate-400">Termasuk pajak &amp; biaya platform</p>
+                </div>
+                <span className="text-xl font-extrabold font-mono text-sky-600">
+                  {formatRupiah(amountDue)}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handlePayNow}
+              disabled={paying}
+              className="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-sm font-bold rounded-xl shadow-md shadow-sky-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {paying ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memproses Pembayaran...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Bayar Sekarang ({formatRupiah(amountDue)})</span>
+                </>
+              )}
+            </button>
+
+            <p className="text-[10px] text-center text-slate-400 leading-tight">
+              Pembayaran aman dan terenkripsi menggunakan sistem Midtrans Payment Gateway.
+            </p>
           </div>
-        )}
+        </div>
       </div>
 
+      {/* Payment Instructions / VA Modal Popup */}
       {modalOpen && paymentDetails && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-slate-200 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200">
-                  <CreditCard className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">
-                    {selectedOption.name}
-                  </h3>
-                  <p className="text-[11px] text-slate-400">Instruksi Pembayaran &amp; Konfirmasi Real-Time</p>
-                </div>
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 max-w-lg w-full shadow-2xl space-y-5 animate-in fade-in zoom-in-95 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[10px] font-mono font-bold text-sky-600 uppercase">
+                  PETUNJUK PEMBAYARAN
+                </span>
+                <h3 className="text-base font-bold text-slate-900">
+                  {selectedOption.name}
+                </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors"
+                className="p-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                {selectedOption.category === "qris" ? (
-                  <div className="flex flex-col items-center justify-center text-center space-y-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                      SCAN QRIS CODE DI BAWAH
-                    </span>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
-                      <QrCodeCard
-                        value={paymentDetails.qrString || reservation.qrCode}
-                        size={170}
-                        showDownload={true}
-                        label="QRIS Standar Bank Indonesia"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-500">
-                      Buka aplikasi BCA Mobile, GoPay, OVO, DANA, atau ShopeePay lalu scan QRIS ini.
-                    </p>
-                  </div>
-                ) : selectedMethod === "mandiri_bill" ? (
-                  <div className="space-y-2.5">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
-                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Kode Perusahaan (Biller)</span>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="font-mono text-sm font-bold text-slate-900">{paymentDetails.billerCode || "70012"}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(paymentDetails.billerCode || "70012");
-                            }}
-                            className="text-sky-600 text-[10px] font-bold hover:underline cursor-pointer"
-                          >
-                            Salin
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm">
-                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400 block">Nomor Pelanggan (Bill Key)</span>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="font-mono text-sm font-bold text-sky-600">{paymentDetails.billKey || paymentDetails.vaNumber || String(reservation.id)}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(paymentDetails.billKey || paymentDetails.vaNumber || String(reservation.id));
-                              setCopiedBillKey(true);
-                              setTimeout(() => setCopiedBillKey(false), 2000);
-                            }}
-                            className="text-sky-600 text-[10px] font-bold hover:underline cursor-pointer"
-                          >
-                            {copiedBillKey ? "Tersalin" : "Salin"}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
-                      NOMOR VIRTUAL ACCOUNT {selectedOption.bankCode || ""}
-                    </span>
-                    <div className="flex items-center justify-between p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm">
-                      <span className="font-mono text-base font-bold text-sky-600 tracking-wider select-all">
-                        {paymentDetails.vaNumber || "Membuat VA..."}
-                      </span>
-                      {paymentDetails.vaNumber && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(paymentDetails.vaNumber || "");
-                            setCopiedVA(true);
-                            setTimeout(() => setCopiedVA(false), 2000);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] transition-colors cursor-pointer border border-slate-200 shadow-sm"
-                        >
-                          {copiedVA ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedVA ? "Tersalin" : "Salin VA"}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200/70 text-xs">
-                  <div>
-                    <span className="text-[10px] font-mono text-slate-400 uppercase block">Total yang Harus Dibayar</span>
-                    <strong className="text-base font-mono font-bold text-slate-900">{formatRupiah(amountDue)}</strong>
-                  </div>
+            {/* VA or QRIS Display */}
+            {paymentDetails.vaNumber && (
+              <div className="p-4 bg-sky-50/70 border border-sky-100 rounded-2xl space-y-2 text-center">
+                <span className="text-[11px] font-medium text-slate-500">Nomor Virtual Account</span>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xl sm:text-2xl font-mono font-extrabold text-slate-900 select-all">
+                    {paymentDetails.vaNumber}
+                  </span>
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(String(amountDue));
-                      setCopiedAmount(true);
-                      setTimeout(() => setCopiedAmount(false), 2000);
+                      navigator.clipboard.writeText(paymentDetails.vaNumber || "");
+                      setCopiedVA(true);
+                      setTimeout(() => setCopiedVA(false), 2000);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-semibold text-[10px] transition-colors cursor-pointer border border-slate-200 shadow-sm"
+                    className="p-1.5 rounded-lg bg-white border border-sky-200 text-sky-700 hover:bg-sky-50 cursor-pointer shadow-2xs"
+                    title="Salin Nomor VA"
                   >
-                    {copiedAmount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedAmount ? "Tersalin" : "Salin Nominal"}</span>
+                    {copiedVA ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
+                <p className="text-[10px] text-slate-400 font-mono">
+                  Order ID: {paymentDetails.orderId || `TRX-${reservation.id}`}
+                </p>
               </div>
+            )}
 
-              <div className="flex items-center justify-between p-3 bg-sky-50/70 border border-sky-200 rounded-xl text-[11px] text-sky-800">
-                <div className="flex items-center gap-2 font-medium">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0 text-sky-600" />
-                  <span>Sistem otomatis mengecek status pembayaran Anda secara berkala...</span>
+            {paymentDetails.qrString && selectedOption.category === "qris" && (
+              <div className="text-center space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <span className="text-xs font-bold text-slate-700 block">Pindai QRIS Menggunakan Aplikasi Bank / E-Wallet</span>
+                <div className="flex justify-center">
+                  <QrCodeCard value={paymentDetails.qrString} size={180} showCopy={false} />
                 </div>
               </div>
+            )}
 
-              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <h4 className="font-bold text-slate-900 text-xs">Panduan Pembayaran ({selectedOption.badge})</h4>
-                  <div className="flex items-center gap-1 text-[11px] font-semibold">
+            {paymentDetails.billKey && paymentDetails.billerCode && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 text-xs">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                  <span className="text-slate-500">Kode Perusahaan (Biller Code):</span>
+                  <strong className="font-mono text-slate-900">{paymentDetails.billerCode}</strong>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-500">Nomor Bill Key:</span>
+                  <div className="flex items-center gap-1.5">
+                    <strong className="font-mono text-slate-900 select-all">{paymentDetails.billKey}</strong>
                     <button
                       type="button"
-                      onClick={() => setGuideTab("mbanking")}
-                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "mbanking" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
+                      onClick={() => {
+                        navigator.clipboard.writeText(paymentDetails.billKey || "");
+                        setCopiedBillKey(true);
+                        setTimeout(() => setCopiedBillKey(false), 2000);
+                      }}
+                      className="p-1 text-sky-600 hover:text-sky-800 cursor-pointer"
                     >
-                      M-Banking
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGuideTab("atm")}
-                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "atm" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
-                    >
-                      ATM
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGuideTab("internet")}
-                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${guideTab === "internet" ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/20" : "text-slate-500 hover:bg-slate-100"}`}
-                    >
-                      Internet Banking
+                      {copiedBillKey ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </div>
-
-                <div className="text-[11px] text-slate-600 space-y-1.5 leading-relaxed">
-                  {guideTab === "mbanking" && (
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>Buka aplikasi Mobile Banking pada ponsel Anda ({selectedOption.bankCode || "Bank Anda"}).</li>
-                      <li>Pilih menu <strong>Transfer &gt; Virtual Account</strong> (atau <strong>Bayar / Beli</strong> untuk Mandiri).</li>
-                      <li>
-                        Masukkan nomor VA / Bill Key:{" "}
-                        <strong className="font-mono text-slate-900">
-                          {paymentDetails.billKey || paymentDetails.vaNumber || "Nomor VA"}
-                        </strong>.
-                      </li>
-                      <li>Pastikan nama merchant tertera <strong>WorkNest / {space?.owner?.namaCoworking || "Coworking"}</strong> dan nominal <strong>{formatRupiah(amountDue)}</strong>.</li>
-                      <li>Konfirmasikan transaksi dengan memasukkan PIN M-Banking Anda.</li>
-                    </ol>
-                  )}
-                  {guideTab === "atm" && (
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>Masukkan kartu ATM dan PIN Anda di mesin ATM terdekat.</li>
-                      <li>Pilih menu <strong>Transaksi Lainnya &gt; Transfer &gt; Ke Rek Virtual Account</strong>.</li>
-                      <li>Masukkan nomor Virtual Account di atas.</li>
-                      <li>Periksa detail pembayaran di layar dan tekan <strong>Ya / Benar</strong>.</li>
-                      <li>Simpan struk ATM sebagai bukti pembayaran resmi Anda.</li>
-                    </ol>
-                  )}
-                  {guideTab === "internet" && (
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>Login ke akun Internet Banking Anda.</li>
-                      <li>Pilih menu <strong>Pembayaran &gt; Pembayaran Tagihan / Virtual Account</strong>.</li>
-                      <li>Pilih rekening sumber dan masukkan nomor Virtual Account.</li>
-                      <li>Masukkan kode Token / Key untuk memvalidasi pembayaran.</li>
-                    </ol>
-                  )}
-                </div>
               </div>
+            )}
 
-              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+            {/* Total Amount to Pay */}
+            <div className="p-3 bg-slate-100 rounded-xl flex items-center justify-between text-xs">
+              <span className="text-slate-600">Total Tagihan:</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-extrabold text-slate-900 text-sm">
+                  {formatRupiah(amountDue)}
+                </span>
                 <button
                   type="button"
-                  onClick={handleManualCheckStatus}
-                  disabled={syncingStatus}
-                  className="w-full py-3 px-4 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-bold rounded-xl shadow-sm shadow-sky-600/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  onClick={() => {
+                    navigator.clipboard.writeText(String(amountDue));
+                    setCopiedAmount(true);
+                    setTimeout(() => setCopiedAmount(false), 2000);
+                  }}
+                  className="p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
                 >
-                  {syncingStatus ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4" />
-                  )}
-                  <span>Cek Status Sekarang</span>
+                  {copiedAmount ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
+            </div>
+
+            {/* Manual Check Status Action */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleManualCheckStatus}
+                disabled={syncingStatus}
+                className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {syncingStatus ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Memeriksa Status Pembayaran...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Saya Sudah Bayar (Cek Status Sekarang)</span>
+                  </>
+                )}
+              </button>
+              <p className="text-[10px] text-center text-slate-400">
+                Sistem otomatis memverifikasi pembayaran Anda setiap beberapa detik.
+              </p>
             </div>
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </div>
   );
 }

@@ -12,5 +12,5 @@ export class UpdateCommissionDto {
   @IsNumber({}, { message: 'Persentase komisi harus berupa angka' })
   @Min(0, { message: 'Persentase komisi minimal 0%' })
   @Max(50, { message: 'Persentase komisi maksimal 50%' })
-  commissionPercent: number;
+  commissionPercent!: number;
 }

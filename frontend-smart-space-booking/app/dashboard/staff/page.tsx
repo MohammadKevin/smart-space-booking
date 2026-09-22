@@ -35,6 +35,9 @@ import {
   X,
   Check,
   Calendar,
+  Sparkles,
+  LogOut as LogOutIcon,
+  LogIn as LogInIcon,
 } from "lucide-react";
 
 export default function StaffTerminalPage() {
@@ -53,7 +56,7 @@ export default function StaffTerminalPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [fetchingData, setFetchingData] = useState(true);
   const [searchFilter, setSearchFilter] = useState("");
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "aktif" | "selesai">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "pending" | "disetujui" | "aktif" | "selesai">("all");
 
   useEffect(() => {
     const updateTime = () => {
@@ -98,16 +101,20 @@ export default function StaffTerminalPage() {
     return reservations.filter((r) => r.status?.toLowerCase() === "aktif");
   }, [reservations]);
 
-  const pendingReservations = useMemo(() => {
+  const scheduledReservations = useMemo(() => {
     return reservations.filter(
       (r) =>
-        r.status?.toLowerCase() === "pending" ||
-        r.status?.toLowerCase() === "disetujui"
+        r.status?.toLowerCase() === "disetujui" ||
+        r.status?.toLowerCase() === "pending"
     );
   }, [reservations]);
 
+  const completedReservations = useMemo(() => {
+    return reservations.filter((r) => r.status?.toLowerCase() === "selesai");
+  }, [reservations]);
+
   const executeCheckin = useCallback(
-    async (code: string, action: "checkin" | "checkout" = "checkin") => {
+    async (code: string, action: "auto" | "checkin" | "checkout" = "auto") => {
       if (!code.trim() || loading) return;
       setLoading(true);
       setError(null);
@@ -118,6 +125,7 @@ export default function StaffTerminalPage() {
           qrCode: code.trim(),
           action,
         });
+
         setResult(res);
         setGateUnlocked(true);
 
@@ -125,7 +133,7 @@ export default function StaffTerminalPage() {
           setGateUnlocked(false);
           setResult(null);
           setManualCodeInput("");
-        }, 5000);
+        }, 6000);
 
         fetchReservations();
       } catch (err: unknown) {
@@ -149,7 +157,8 @@ export default function StaffTerminalPage() {
       const status = r.status?.toLowerCase() || "";
       const matchTab =
         activeTab === "all" ||
-        (activeTab === "pending" && (status === "pending" || status === "disetujui")) ||
+        (activeTab === "pending" && status === "pending") ||
+        (activeTab === "disetujui" && status === "disetujui") ||
         (activeTab === "aktif" && status === "aktif") ||
         (activeTab === "selesai" && status === "selesai");
 
@@ -169,14 +178,6 @@ export default function StaffTerminalPage() {
 
   return (
     <div className="space-y-6 pb-16">
-      <style jsx global>{`
-        #interactive-qr-reader video {
-          transform: scaleX(1) !important;
-          -webkit-transform: scaleX(1) !important;
-          object-fit: cover !important;
-        }
-      `}</style>
-
       {/* Fullscreen Overlay Mode */}
       {isFullscreen && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden animate-in fade-in">
@@ -205,7 +206,7 @@ export default function StaffTerminalPage() {
 
           <div className="flex-1 relative flex items-center justify-center p-4">
             <LiveQrScanner
-              onScanSuccess={(scannedCode) => executeCheckin(scannedCode)}
+              onScanSuccess={(scannedCode) => executeCheckin(scannedCode, "auto")}
               isProcessing={loading}
               isFullscreen={true}
               onToggleFullscreen={() => setIsFullscreen(false)}
@@ -215,7 +216,9 @@ export default function StaffTerminalPage() {
               <div className="absolute top-8 left-1/2 -translate-x-1/2 max-w-md w-full mx-4 p-4 rounded-2xl bg-emerald-500 text-white shadow-2xl z-30 flex items-center gap-3 animate-in zoom-in-95">
                 <CheckCircle2 className="w-6 h-6 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-extrabold text-sm">Akses Diterima • Check-In Berhasil</p>
+                  <p className="font-extrabold text-sm">
+                    {result.actionPerformed === "checkout" ? "Check-Out Berhasil" : "Check-In Berhasil • Akses Diterima"}
+                  </p>
                   <p className="text-xs text-emerald-100">{result.message}</p>
                 </div>
               </div>
@@ -228,7 +231,11 @@ export default function StaffTerminalPage() {
                   <p className="font-extrabold text-sm">Gagal Verifikasi</p>
                   <p className="text-xs text-rose-100">{error}</p>
                 </div>
-                <button type="button" onClick={() => setError(null)} className="font-bold text-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="font-bold text-lg p-1 hover:text-rose-200 cursor-pointer"
+                >
                   ✕
                 </button>
               </div>
@@ -236,7 +243,7 @@ export default function StaffTerminalPage() {
           </div>
 
           <div className="p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent text-center text-xs text-slate-400 z-20 shrink-0">
-            Arahkan barcode QR tiket ponsel tamu ke dalam area scanner kamera untuk validasi instan.
+            Arahkan barcode QR tiket ponsel tamu ke dalam area scanner kamera untuk validasi otomatis.
           </div>
         </div>
       )}
@@ -255,7 +262,7 @@ export default function StaffTerminalPage() {
             Terminal Check-In Resepsionis
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Pindai kode QR tiket reservasi tamu atau masukkan kode tiket manual untuk mengaktifkan sesi sewa.
+            Pindai kode QR tiket tamu untuk Check-In atau Check-Out otomatis, serta kelola log kedatangan secara real-time.
           </p>
         </div>
 
@@ -291,7 +298,7 @@ export default function StaffTerminalPage() {
       {/* Error & Success Feedback Alerts */}
       {error && (
         <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-3 text-xs text-rose-800 shadow-sm animate-in fade-in">
-          <div className="flex items-center gap-2 font-medium">
+          <div className="flex items-center gap-2.5 font-medium">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
@@ -312,14 +319,20 @@ export default function StaffTerminalPage() {
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-bold text-sm text-slate-900">Akses Diberikan • Check-In Berhasil</p>
+              <p className="font-bold text-sm text-slate-900">
+                {result.actionPerformed === "checkout" ? "Check-Out Selesai" : "Akses Diberikan • Check-In Berhasil"}
+              </p>
               <p className="text-[11px] text-sky-800">
-                {result.message || "Validasi tiket berhasil. Sesi reservasi telah diaktifkan."}
+                {result.message || "Validasi tiket berhasil."}
               </p>
             </div>
           </div>
-          <span className="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded-md border border-sky-200 text-sky-800 shadow-sm">
-            STATUS AKTIF
+          <span className={`font-mono font-bold text-xs px-2.5 py-1 rounded-md border shadow-sm ${
+            result.actionPerformed === "checkout"
+              ? "bg-slate-100 text-slate-700 border-slate-200"
+              : "bg-white text-sky-800 border-sky-200"
+          }`}>
+            {result.actionPerformed === "checkout" ? "STATUS SELESAI" : "STATUS AKTIF"}
           </span>
         </div>
       )}
@@ -335,8 +348,8 @@ export default function StaffTerminalPage() {
           </div>
           <div className="text-xl font-bold font-mono">
             {gateUnlocked ? (
-              <span className="text-sky-600 flex items-center gap-1.5">
-                <Unlock className="w-4 h-4" /> TERBUKA (OPEN)
+              <span className="text-emerald-600 flex items-center gap-1.5">
+                <Unlock className="w-4 h-4" /> GERBANG TERBUKA
               </span>
             ) : (
               <span className="text-slate-900 flex items-center gap-1.5">
@@ -345,58 +358,58 @@ export default function StaffTerminalPage() {
             )}
           </div>
           <p className="text-[11px] text-slate-500">
-            {gateUnlocked ? "Akses pintu sedang dibuka" : "Siaga menerima verifikasi tiket"}
+            {gateUnlocked ? "Akses pintu berhasil dibuka" : "Siaga menerima verifikasi tiket"}
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              SESI TAMU AKTIF
+              TAMU AKTIF (DI VENUE)
             </span>
             <Users className="w-4 h-4 text-sky-600" />
           </div>
-          <div className="text-2xl font-bold text-slate-900 font-mono">
+          <div className="text-2xl font-bold text-sky-600 font-mono">
             {activeReservations.length}
           </div>
-          <p className="text-[11px] text-sky-600 font-semibold">
-            Tamu sedang menggunakan ruangan
+          <p className="text-[11px] text-slate-500">
+            Sesi yang sedang berlangsung saat ini
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              SIAP CHECK-IN
+              JADWAL TERDAFTAR
             </span>
             <CalendarCheck className="w-4 h-4 text-amber-500" />
           </div>
           <div className="text-2xl font-bold text-amber-600 font-mono">
-            {pendingReservations.length}
+            {scheduledReservations.length}
           </div>
           <p className="text-[11px] text-slate-500">
-            Tamu terjadwal hari ini
+            Menunggu kedatangan tamu
           </p>
         </div>
 
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-2">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              TOTAL RESERVASI VENUE
+              SESI SELESAI HARI INI
             </span>
             <Building className="w-4 h-4 text-slate-400" />
           </div>
           <div className="text-2xl font-bold text-slate-900 font-mono">
-            {reservations.length}
+            {completedReservations.length}
           </div>
           <p className="text-[11px] text-slate-500">
-            Seluruh log reservasi
+            Tamu yang telah check-out
           </p>
         </div>
       </div>
 
-      {/* Main Action Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Grid: Scanner Left & Quick Table Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Col: Camera Scanner Card */}
         <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
@@ -420,7 +433,7 @@ export default function StaffTerminalPage() {
           </div>
 
           <LiveQrScanner
-            onScanSuccess={(scannedCode) => executeCheckin(scannedCode)}
+            onScanSuccess={(scannedCode) => executeCheckin(scannedCode, "auto")}
             isProcessing={loading}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
           />
@@ -439,9 +452,9 @@ export default function StaffTerminalPage() {
               />
               <button
                 type="button"
-                onClick={() => executeCheckin(manualCodeInput)}
+                onClick={() => executeCheckin(manualCodeInput, "auto")}
                 disabled={!manualCodeInput.trim() || loading}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Verifikasi"}
               </button>
@@ -461,10 +474,10 @@ export default function StaffTerminalPage() {
               </h2>
             </div>
 
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-semibold overflow-x-auto">
               {[
                 { id: "all", label: "Semua" },
-                { id: "pending", label: "Terjadwal" },
+                { id: "disetujui", label: "Siap Masuk" },
                 { id: "aktif", label: "Aktif" },
                 { id: "selesai", label: "Selesai" },
               ].map((tab) => (
@@ -472,7 +485,7 @@ export default function StaffTerminalPage() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                     activeTab === tab.id
                       ? "bg-white text-slate-900 font-bold shadow-xs"
                       : "text-slate-500 hover:text-slate-800"
@@ -527,9 +540,11 @@ export default function StaffTerminalPage() {
                             status === "aktif"
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                               : status === "selesai"
-                              ? "bg-slate-100 text-slate-600"
+                              ? "bg-slate-100 text-slate-600 border border-slate-200"
                               : status === "disetujui"
                               ? "bg-sky-50 text-sky-700 border border-sky-200"
+                              : status === "dibatalkan"
+                              ? "bg-rose-50 text-rose-700 border border-rose-200"
                               : "bg-amber-50 text-amber-700 border border-amber-200"
                           }`}
                         >
@@ -550,22 +565,46 @@ export default function StaffTerminalPage() {
                           type="button"
                           onClick={() => executeCheckin(r.qrCode, "checkout")}
                           disabled={loading}
-                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer"
+                          className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
                         >
-                          Check-Out
+                          <LogOutIcon className="w-3 h-3" />
+                          <span>Check-Out</span>
                         </button>
-                      ) : status === "disetujui" || isPaid ? (
+                      ) : status === "disetujui" ? (
+                        isPaid ? (
+                          <button
+                            type="button"
+                            onClick={() => executeCheckin(r.qrCode, "checkin")}
+                            disabled={loading}
+                            className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shadow-xs shadow-sky-600/20 flex items-center gap-1"
+                          >
+                            <LogInIcon className="w-3 h-3" />
+                            <span>Check-In</span>
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-amber-600 font-semibold px-2 py-1 bg-amber-50 rounded-md border border-amber-200">
+                            Belum Lunas
+                          </span>
+                        )
+                      ) : status === "selesai" ? (
                         <button
                           type="button"
-                          onClick={() => executeCheckin(r.qrCode, "checkin")}
-                          disabled={loading}
-                          className="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-bold rounded-lg transition-colors cursor-pointer shadow-xs shadow-sky-600/20"
+                          disabled
+                          className="px-2.5 py-1.5 bg-slate-100 text-slate-400 text-[10px] font-bold rounded-lg cursor-not-allowed border border-slate-200"
                         >
-                          Check-In
+                          Check-In Off (Selesai)
+                        </button>
+                      ) : status === "dibatalkan" ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="px-2.5 py-1.5 bg-rose-50 text-rose-400 text-[10px] font-bold rounded-lg cursor-not-allowed border border-rose-100"
+                        >
+                          Dibatalkan
                         </button>
                       ) : (
-                        <span className="text-[10px] text-amber-600 font-semibold">
-                          Belum Lunas
+                        <span className="text-[10px] text-amber-700 font-semibold px-2 py-1 bg-amber-50 rounded-md border border-amber-200">
+                          Pending Approval
                         </span>
                       )}
                     </div>

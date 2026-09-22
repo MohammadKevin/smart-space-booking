@@ -120,7 +120,19 @@ export default function OwnerTransactionsPage() {
     return res;
   }, [transactions]);
 
-  const totalLunas = useMemo(
+  const totalNetLunas = useMemo(
+    () =>
+      transactions
+        .filter((t) => t.statusPembayaran === "lunas")
+        .reduce(
+          (acc, t) =>
+            acc + (t.pendapatanOwner ?? (t.jumlah - (t.komisiPlatform ?? 0))),
+          0
+        ),
+    [transactions]
+  );
+
+  const totalGrossLunas = useMemo(
     () =>
       transactions
         .filter((t) => t.statusPembayaran === "lunas")
@@ -260,9 +272,13 @@ export default function OwnerTransactionsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0 flex-wrap self-start sm:self-auto">
-          <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-right">
-            <p className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400">Total Terbayar</p>
-            <p className="text-sm font-bold text-slate-900 font-mono">{formatRupiah(totalLunas)}</p>
+          <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-right">
+            <p className="text-[10px] font-bold font-mono uppercase tracking-wider text-emerald-700">Net Pendapatan</p>
+            <p className="text-sm font-bold text-emerald-700 font-mono">{formatRupiah(totalNetLunas)}</p>
+          </div>
+          <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-right hidden sm:block">
+            <p className="text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400">Total Bruto</p>
+            <p className="text-sm font-bold text-slate-900 font-mono">{formatRupiah(totalGrossLunas)}</p>
           </div>
           <button
             type="button"

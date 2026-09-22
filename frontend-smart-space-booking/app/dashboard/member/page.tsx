@@ -116,7 +116,7 @@ export default function MemberDashboardPage() {
                 if (syncId) {
                   const syncRes = await syncPayment(syncId);
                   const updated = syncRes?.data || syncRes;
-                  if (updated?.statusPembayaran === "lunas" || updated?.status === "disetujui") {
+                  if (updated?.statusPembayaran === "lunas") {
                     return true;
                   }
                 }

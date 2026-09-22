@@ -26,6 +26,12 @@ import {
   CreditCard,
   Building,
   Download,
+  Users,
+  Percent,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 
 export default function OwnerOverviewPage() {
@@ -49,12 +55,16 @@ export default function OwnerOverviewPage() {
       const [sumData, revData, transData, spacesData] = await Promise.all([
         getDashboardSummary().catch(() => ({
           totalRevenue: 0,
+          totalNetRevenue: 0,
+          totalGrossRevenue: 0,
+          totalPlatformCommission: 0,
+          commissionRate: 10,
           totalReservations: 0,
           totalSpaces: 0,
           totalStaffs: 0,
         })),
         getMonthlyRevenue(yearToFetch).catch(() => []),
-        getRecentTransactions(8).catch(() => []),
+        getRecentTransactions(10).catch(() => []),
         getSpaces().catch(() => []),
       ]);
 
@@ -74,7 +84,10 @@ export default function OwnerOverviewPage() {
   }, [fetchAnalytics, selectedYear]);
 
   const coworkingName = user?.spaceOwner?.namaCoworking || "WorkNest Hub";
-  const totalGrossRevenue = summary?.totalRevenue || 0;
+  const totalNetRevenue = summary?.totalNetRevenue ?? summary?.totalRevenue ?? 0;
+  const totalGrossRevenue = summary?.totalGrossRevenue ?? totalNetRevenue;
+  const totalCommission = summary?.totalPlatformCommission ?? Math.max(0, totalGrossRevenue - totalNetRevenue);
+  const commissionRate = summary?.commissionRate ?? 10;
   const totalRoomsCount = spaces.length || summary?.totalSpaces || 0;
 
   const activeBookings = useMemo(() => {
@@ -98,15 +111,15 @@ export default function OwnerOverviewPage() {
 
   const handleExportReport = () => {
     const csvContent = [
-      ["ID Transaksi", "Ruangan", "Pengguna/Member", "Nominal", "Status", "Tanggal"].join(","),
+      ["ID Transaksi", "Ruangan", "Pengguna/Member", "Nominal Bruto", "Status", "Tanggal"].join(","),
       ...recentTransactions.map((t) =>
         [
           `TRX-${t.id}`,
           `"${t.detailReservasi?.space?.namaSpace || "Ruangan"}"`,
-          `"${t.detailReservasi?.space?.owner?.namaCoworking || "Member"}"`,
+          `"${t.member?.namaMember || "Member"}"`,
           t.detailReservasi?.totalHarga || 0,
           t.status,
-          t.tanggalReservasi || "",
+          t.tanggalReservasi ? t.tanggalReservasi.split("T")[0] : "",
         ].join(",")
       ),
     ].join("\n");
@@ -117,7 +130,7 @@ export default function OwnerOverviewPage() {
     link.href = url;
     link.setAttribute(
       "download",
-      `WorkNest-Operations-Report-${new Date().toISOString().split("T")[0]}.csv`
+      `WorkNest-Owner-Report-${new Date().toISOString().split("T")[0]}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -125,11 +138,12 @@ export default function OwnerOverviewPage() {
   };
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-6 sm:space-y-8 pb-16">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-sky-700 mb-1">
-            <span>WORKSPACE OWNER</span>
+            <span>WORKSPACE OWNER DASHBOARD</span>
             <span className="text-slate-300">•</span>
             <span className="text-slate-500 font-sans font-normal">
               {coworkingName}
@@ -139,11 +153,11 @@ export default function OwnerOverviewPage() {
             Ringkasan Operasional Venue
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Pantau metrik pendapatan sewa, tingkat okupansi real-time, dan status langsung ruangan kerja Anda.
+            Pantau metrik pendapatan bersih mitra (setelah dipotong komisi super admin), tingkat okupansi real-time, dan status ruangan kerja.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+        <div className="flex items-center gap-2 sm:gap-2.5 self-start sm:self-auto flex-wrap">
           <button
             type="button"
             onClick={() => fetchAnalytics(selectedYear)}
@@ -180,33 +194,43 @@ export default function OwnerOverviewPage() {
         </div>
       )}
 
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
+        {/* Card 1: Total Pendapatan Bersih */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3 relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              TOTAL PENDAPATAN
+              PENDAPATAN BERSIH MITRA
             </span>
-            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
-              <CreditCard className="w-4 h-4 text-sky-600" />
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+              <CreditCard className="w-4 h-4" />
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold font-mono text-slate-900">
-              {loading ? "..." : formatRupiah(totalGrossRevenue)}
+            <div className="text-2xl font-bold font-mono text-emerald-600 tracking-tight">
+              {loading ? "..." : formatRupiah(totalNetRevenue)}
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Akumulasi bruto seluruh reservasi lunas
-            </p>
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Net (Sudah Dipotong Komisi {commissionRate}%)
+              </span>
+            </div>
+            {totalGrossRevenue > 0 && totalGrossRevenue !== totalNetRevenue && (
+              <p className="text-[10px] text-slate-400 mt-1 font-mono">
+                Bruto: {formatRupiah(totalGrossRevenue)} &bull; Komisi Super Admin: -{formatRupiah(totalCommission)}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
+        {/* Card 2: Okupansi Real-Time */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               OKUPANSI REAL-TIME
             </span>
             <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
-              <DoorOpen className="w-4 h-4 text-sky-600" />
+              <DoorOpen className="w-4 h-4" />
             </div>
           </div>
           <div>
@@ -214,7 +238,7 @@ export default function OwnerOverviewPage() {
               {loading ? "..." : `${occupiedCount} / ${totalRoomsCount}`}{" "}
               <span className="text-xs font-normal text-slate-500 font-sans">Unit</span>
             </div>
-            <div className="flex items-center gap-1.5 mt-1">
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
                 {occupancyPercent}% Terpakai
               </span>
@@ -225,13 +249,14 @@ export default function OwnerOverviewPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
+        {/* Card 3: Total Reservasi */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
               TOTAL RESERVASI MASUK
             </span>
-            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
-              <CalendarCheck className="w-4 h-4 text-sky-600" />
+            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+              <CalendarCheck className="w-4 h-4" />
             </div>
           </div>
           <div>
@@ -239,53 +264,57 @@ export default function OwnerOverviewPage() {
               {loading ? "..." : summary?.totalReservations || 0}
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
-              Pemesanan ruang kerja oleh member
+              Seluruh pemesanan ruang kerja oleh member
             </p>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200/90 rounded-xl p-5 shadow-sm space-y-3">
+        {/* Card 4: Ruangan & Staf */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
-              INVENTARIS RUANGAN
+              INVENTARIS &amp; TIM
             </span>
-            <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
-              <Building2 className="w-4 h-4 text-sky-600" />
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+              <Building2 className="w-4 h-4" />
             </div>
           </div>
           <div>
             <div className="text-2xl font-bold font-mono text-slate-900">
-              {loading ? "..." : totalRoomsCount}
+              {loading ? "..." : totalRoomsCount}{" "}
+              <span className="text-xs font-normal text-slate-500 font-sans">Ruangan</span>
             </div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-100">
-                {summary?.totalStaffs || 0} Staf
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                {summary?.totalStaffs || 0} Staf Frontdesk
               </span>
               <span className="text-[11px] text-slate-500">
-                Aktif terdaftar
+                Aktif bertugas
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
+      {/* Monthly Revenue Chart */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Tren Pendapatan Bulanan ({selectedYear})
-            </h2>
-            <p className="text-xs text-slate-500">
-              Grafik pendapatan kotor dan frekuensi pemesanan ruangan per bulan dari database.
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-600" />
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                Tren Pendapatan Bersih Bulanan ({selectedYear})
+              </h2>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Grafik pendapatan bersih mitra (sudah dipotong komisi platform super admin {commissionRate}%) per bulan.
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-md bg-sky-600" />
-                <span className="text-slate-600">Pendapatan Kotor</span>
-              </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 text-xs text-slate-600">
+              <span className="w-3 h-3 rounded-md bg-emerald-500 shrink-0" />
+              <span>Pendapatan Bersih</span>
             </div>
 
             <select
@@ -303,35 +332,55 @@ export default function OwnerOverviewPage() {
         </div>
 
         {hasRevenueData ? (
-          <div className="space-y-3 pt-2 overflow-x-auto">
-            <div className="grid grid-cols-12 gap-2 h-52 min-w-[520px] items-end border-b border-slate-100 pb-3">
-              {monthlyRevenue.map((item) => {
-                const heightPercent = maxMonthlyRevenue > 0 ? Math.max(8, (item.revenue / maxMonthlyRevenue) * 100) : 8;
+          <div className="space-y-3 pt-2">
+            {/* Horizontal scrollable wrapper for small mobile screens to ensure perfect readability */}
+            <div className="overflow-x-auto pb-2 -mx-2 px-2">
+              <div className="grid grid-cols-12 gap-1.5 sm:gap-2 h-56 min-w-[560px] sm:min-w-0 items-end border-b border-slate-100 pb-3">
+                {monthlyRevenue.map((item) => {
+                  const heightPercent = maxMonthlyRevenue > 0
+                    ? Math.max(8, (item.revenue / maxMonthlyRevenue) * 100)
+                    : 8;
 
-                return (
-                  <div
-                    key={item.monthNumber || item.month}
-                    className="flex flex-col items-center justify-end h-full gap-1 group relative"
-                  >
-                    <div className="absolute -top-12 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1 px-2 rounded-xl shadow-sm z-20 whitespace-nowrap">
-                      <span>{item.month}</span>
-                      <span>Pendapatan: {formatRupiah(item.revenue)}</span>
-                      <span>Booking: {item.totalBookings || 0} Sesi</span>
+                  return (
+                    <div
+                      key={item.monthNumber || item.month}
+                      className="flex flex-col items-center justify-end h-full gap-1 group relative"
+                    >
+                      {/* Tooltip Hover */}
+                      <div className="absolute -top-16 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] font-mono py-1.5 px-2.5 rounded-xl shadow-xl z-30 whitespace-nowrap pointer-events-none animate-in fade-in zoom-in-95">
+                        <span className="font-bold text-sky-300">{item.month}</span>
+                        <span className="font-semibold text-emerald-400">Net: {formatRupiah(item.revenue)}</span>
+                        {item.grossRevenue ? (
+                          <span className="text-slate-300 text-[9px]">Bruto: {formatRupiah(item.grossRevenue)}</span>
+                        ) : null}
+                        <span className="text-slate-400 text-[9px]">Booking: {item.totalBookings || 0} Sesi</span>
+                      </div>
+
+                      <div className="w-full max-w-[32px] flex items-end justify-center h-full">
+                        <div
+                          style={{ height: `${heightPercent}%` }}
+                          className={`w-full rounded-t-lg transition-all duration-300 ${
+                            item.revenue > 0
+                              ? "bg-emerald-500 group-hover:bg-emerald-400 shadow-xs shadow-emerald-500/20"
+                              : "bg-slate-100"
+                          }`}
+                        />
+                      </div>
+
+                      <span className="text-[10px] font-mono text-slate-400 mt-1">
+                        {item.month.slice(0, 3)}
+                      </span>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                    <div className="w-full max-w-[28px] flex items-end justify-center gap-1 h-full">
-                      <div
-                        style={{ height: `${heightPercent}%` }}
-                        className="w-full bg-sky-600 rounded-t-md hover:bg-sky-500 transition-all"
-                      />
-                    </div>
-
-                    <span className="text-[10px] font-mono text-slate-400 mt-1">
-                      {item.month.slice(0, 3)}
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 pt-1 gap-1">
+              <span>* Nilai nominal telah dipotong komisi super admin sebesar {commissionRate}%</span>
+              <span className="font-mono text-slate-600 font-bold">
+                Total Net {selectedYear}: {formatRupiah(monthlyRevenue.reduce((a, b) => a + b.revenue, 0))}
+              </span>
             </div>
           </div>
         ) : (
@@ -341,27 +390,29 @@ export default function OwnerOverviewPage() {
         )}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-5">
+      {/* Room Status Table Section */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">
               Status Langsung Inventaris Ruangan
             </h2>
             <p className="text-xs text-slate-500">
-              Katalog unit ruang kerja, tarif per jam, dan kode akses reservasi aktif
+              Katalog unit ruang kerja, tarif per jam, dan kode akses reservasi aktif venue Anda.
             </p>
           </div>
 
           <Link
             href="/dashboard/owner/spaces"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:text-sky-700 hover:underline"
           >
             <span>Buka Inventaris Lengkap ({spaces.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto rounded-xl">
+        {/* Desktop Table View (Hidden on mobile) */}
+        <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-100">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-400 font-mono text-[10px] uppercase tracking-wider">
               <tr>
@@ -388,8 +439,12 @@ export default function OwnerOverviewPage() {
                     <tr key={sp.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="py-3.5 px-4 font-semibold text-slate-900">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 border border-sky-100">
-                            <Building className="w-4 h-4" />
+                          <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 border border-sky-100 overflow-hidden">
+                            {sp.foto ? (
+                              <img src={sp.foto} alt={sp.namaSpace} className="w-full h-full object-cover" />
+                            ) : (
+                              <Building className="w-4 h-4" />
+                            )}
                           </div>
                           <div>
                             <p className="font-bold text-slate-900">{sp.namaSpace}</p>
@@ -427,7 +482,7 @@ export default function OwnerOverviewPage() {
                       <td className="py-3.5 px-4 text-right">
                         <Link
                           href={`/spaces/${sp.id}`}
-                          className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-sm"
+                          className="px-2.5 py-1 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs"
                         >
                           Detail
                         </Link>
@@ -444,6 +499,85 @@ export default function OwnerOverviewPage() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards View (Visible only on mobile) */}
+        <div className="md:hidden space-y-3">
+          {spaces.length > 0 ? (
+            spaces.slice(0, 6).map((sp) => {
+              const activeRes = activeBookings.find(
+                (b) => b.detailReservasi?.spaceId === sp.id
+              );
+              const isOccupied = !!activeRes;
+              const otpCode = activeRes
+                ? `${activeRes.qrCode.slice(0, 3)}-${activeRes.qrCode.slice(-3)}`
+                : "SIAP-SEWA";
+
+              return (
+                <div
+                  key={sp.id}
+                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2.5 text-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 border border-sky-100 overflow-hidden">
+                        {sp.foto ? (
+                          <img src={sp.foto} alt={sp.namaSpace} className="w-full h-full object-cover" />
+                        ) : (
+                          <Building className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 truncate">{sp.namaSpace}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-mono">
+                          {sp.tipe?.replace(/_/g, " ")} &bull; {sp.kapasitas} Kursi
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      {isOccupied ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold text-[10px] border border-amber-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />
+                          Terisi
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 font-semibold text-[10px] border border-sky-100">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                          Kosong
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs">
+                    <div>
+                      <span className="font-mono font-bold text-slate-900">
+                        {formatRupiah(sp.hargaPerJam)}
+                      </span>
+                      <span className="text-[10px] text-slate-400"> / jam</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-md bg-white text-slate-700 border border-slate-200">
+                        {otpCode}
+                      </span>
+                      <Link
+                        href={`/spaces/${sp.id}`}
+                        className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 font-semibold text-[11px] shadow-2xs"
+                      >
+                        Detail
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="py-10 text-center text-slate-400 text-xs">
+              Belum ada ruangan yang terdaftar di venue ini.
+            </div>
+          )}
         </div>
       </div>
     </div>

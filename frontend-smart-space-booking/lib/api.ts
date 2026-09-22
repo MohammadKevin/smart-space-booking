@@ -348,7 +348,7 @@ export async function verifyQr(dto: VerifyQrDto): Promise<any> {
 export async function processCheckIn(dto: ProcessCheckinDto): Promise<CheckinResponse> {
   const { data } = await api.post<CheckinResponse>("/checkin/process", {
     ...dto,
-    action: dto.action || "checkin",
+    action: dto.action || "auto",
   });
   return data;
 }
@@ -433,9 +433,13 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   const { data } = await api.get<any>("/reports/summary");
   if (data && typeof data === "object") {
     return {
-      totalRevenue: data.totalRevenue || 0,
-      totalSpaces: data.totalSpaces || 0,
-      totalStaffs: data.totalStaffs || 0,
+      totalRevenue: data.totalRevenue ?? data.totalNetRevenue ?? 0,
+      totalNetRevenue: data.totalNetRevenue ?? data.totalRevenue ?? 0,
+      totalGrossRevenue: data.totalGrossRevenue ?? 0,
+      totalPlatformCommission: data.totalPlatformCommission ?? 0,
+      commissionRate: data.commissionRate ?? 10,
+      totalSpaces: data.totalSpaces ?? 0,
+      totalStaffs: data.totalStaffs ?? 0,
       totalReservations:
         data.bookingCounts?.total ??
         data.totalReservations ??
@@ -460,6 +464,8 @@ export async function getMonthlyRevenue(year?: number): Promise<MonthlyRevenueIt
       month: m.monthName || m.month || `Bulan ${m.monthIndex || 1}`,
       monthNumber: m.monthIndex || m.monthNumber || 1,
       revenue: Number(m.revenue) || 0,
+      grossRevenue: Number(m.grossRevenue) || 0,
+      commission: Number(m.commission) || 0,
       totalBookings: Number(m.totalBookings) || 0,
     }));
   }
@@ -468,6 +474,8 @@ export async function getMonthlyRevenue(year?: number): Promise<MonthlyRevenueIt
       month: m.monthName || m.month || `Bulan ${m.monthNumber || m.monthIndex || 1}`,
       monthNumber: m.monthNumber || m.monthIndex || 1,
       revenue: Number(m.revenue) || 0,
+      grossRevenue: Number(m.grossRevenue) || 0,
+      commission: Number(m.commission) || 0,
       totalBookings: Number(m.totalBookings) || 0,
     }));
   }

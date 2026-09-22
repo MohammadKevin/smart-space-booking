@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { Html5Qrcode, Html5QrcodeCameraScanConfig } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import {
   Camera,
   CameraOff,
@@ -12,6 +12,8 @@ import {
   Volume2,
   VolumeX,
   FlipHorizontal,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
 
 interface LiveQrScannerProps {
@@ -37,8 +39,18 @@ export function LiveQrScanner({
 
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const lastScannedTimeRef = useRef<number>(0);
-  const scannerElementId = "interactive-qr-reader";
-  const forceUnmirrorTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastScannedCodeRef = useRef<string | null>(null);
+  const isProcessingRef = useRef<boolean>(isProcessing);
+  const onScanSuccessRef = useRef(onScanSuccess);
+  const scannerElementId = useRef(`interactive-qr-reader-${Math.random().toString(36).substring(2, 7)}`).current;
+
+  useEffect(() => {
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing]);
+
+  useEffect(() => {
+    onScanSuccessRef.current = onScanSuccess;
+  }, [onScanSuccess]);
 
   const playBeep = useCallback(() => {
     if (muted) return;
@@ -53,53 +65,19 @@ export function LiveQrScanner({
       const gain = ctx.createGain();
 
       osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(920, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1840, ctx.currentTime + 0.12);
 
       gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start();
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(ctx.currentTime + 0.12);
     } catch {}
   }, [muted]);
-
-  const enforceOrientation = useCallback((mirror: boolean) => {
-    const container = document.getElementById(scannerElementId);
-    if (!container) return;
-    const video = container.querySelector("video");
-    if (video) {
-      const transformValue = mirror ? "scaleX(-1)" : "scaleX(1)";
-      video.style.setProperty("transform", transformValue, "important");
-      video.style.setProperty("-webkit-transform", transformValue, "important");
-      video.style.setProperty("-moz-transform", transformValue, "important");
-      video.style.setProperty("object-fit", "cover", "important");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isScanning) {
-      enforceOrientation(isMirrored);
-      forceUnmirrorTimerRef.current = setInterval(() => {
-        enforceOrientation(isMirrored);
-      }, 500);
-    } else {
-      if (forceUnmirrorTimerRef.current) {
-        clearInterval(forceUnmirrorTimerRef.current);
-        forceUnmirrorTimerRef.current = null;
-      }
-    }
-
-    return () => {
-      if (forceUnmirrorTimerRef.current) {
-        clearInterval(forceUnmirrorTimerRef.current);
-        forceUnmirrorTimerRef.current = null;
-      }
-    };
-  }, [isScanning, isMirrored, enforceOrientation]);
 
   useEffect(() => {
     Html5Qrcode.getCameras()
@@ -127,65 +105,75 @@ export function LiveQrScanner({
       });
 
     return () => {
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(() => {});
-      }
-      if (forceUnmirrorTimerRef.current) {
-        clearInterval(forceUnmirrorTimerRef.current);
+      if (scannerRef.current) {
+        if (scannerRef.current.isScanning) {
+          scannerRef.current.stop().catch(() => {});
+        }
+        scannerRef.current.clear();
       }
     };
   }, []);
 
-  const handleScan = useCallback(
+  const handleDecodedText = useCallback(
     (decodedText: string) => {
+      if (!decodedText || isProcessingRef.current) {
+        return;
+      }
+
+      const trimmed = decodedText.trim();
       const now = Date.now();
+
+      // Debounce the exact same code for 2.5 seconds to prevent flood
       if (
-        decodedText === lastScannedCode &&
-        now - lastScannedTimeRef.current < 3000
+        trimmed === lastScannedCodeRef.current &&
+        now - lastScannedTimeRef.current < 2500
       ) {
         return;
       }
 
+      lastScannedCodeRef.current = trimmed;
       lastScannedTimeRef.current = now;
-      setLastScannedCode(decodedText);
+      setLastScannedCode(trimmed);
       playBeep();
-      onScanSuccess(decodedText.trim());
+
+      if (onScanSuccessRef.current) {
+        onScanSuccessRef.current(trimmed);
+      }
     },
-    [lastScannedCode, onScanSuccess, playBeep]
+    [playBeep]
   );
 
   const startScanner = async () => {
     setError(null);
     try {
       if (!scannerRef.current) {
-        scannerRef.current = new Html5Qrcode(scannerElementId);
+        scannerRef.current = new Html5Qrcode(scannerElementId, {
+          formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+          verbose: false,
+        });
       }
 
       if (scannerRef.current.isScanning) {
         await scannerRef.current.stop();
       }
 
-      const config: Html5QrcodeCameraScanConfig = {
-        fps: 15,
-        qrbox: isFullscreen ? { width: 280, height: 280 } : { width: 220, height: 220 },
-        aspectRatio: isFullscreen ? undefined : 1.0,
-      };
-
       const cameraId = selectedCameraId || { facingMode: "environment" };
 
       await scannerRef.current.start(
         cameraId,
-        config,
+        {
+          fps: 10,
+          qrbox: isFullscreen ? { width: 280, height: 280 } : { width: 230, height: 230 },
+        },
         (decodedText) => {
-          handleScan(decodedText);
+          handleDecodedText(decodedText);
         },
         () => {}
       );
 
       setIsScanning(true);
-      setTimeout(() => enforceOrientation(isMirrored), 150);
     } catch {
-      setError("Gagal mengakses kamera. Pastikan izin kamera telah diizinkan pada browser.");
+      setError("Gagal mengakses kamera. Pastikan izin kamera telah diizinkan pada browser Anda.");
       setIsScanning(false);
     }
   };
@@ -198,17 +186,11 @@ export function LiveQrScanner({
     } catch {
     } finally {
       setIsScanning(false);
-      if (forceUnmirrorTimerRef.current) {
-        clearInterval(forceUnmirrorTimerRef.current);
-        forceUnmirrorTimerRef.current = null;
-      }
     }
   };
 
   const toggleMirror = () => {
-    const next = !isMirrored;
-    setIsMirrored(next);
-    enforceOrientation(next);
+    setIsMirrored((prev) => !prev);
   };
 
   return (
@@ -219,6 +201,40 @@ export function LiveQrScanner({
           : "bg-white border border-slate-200 text-slate-900 shadow-xs"
       }`}
     >
+      <style jsx global>{`
+        .qr-scanner-wrapper video {
+          object-fit: cover !important;
+          width: 100% !important;
+          height: 100% !important;
+          border-radius: 0.75rem !important;
+        }
+        .qr-scanner-wrapper.is-mirrored video {
+          transform: scaleX(-1) !important;
+          -webkit-transform: scaleX(-1) !important;
+        }
+        .qr-scanner-wrapper.not-mirrored video {
+          transform: scaleX(1) !important;
+          -webkit-transform: scaleX(1) !important;
+        }
+        @keyframes scanBeam {
+          0% {
+            top: 5%;
+            opacity: 0.8;
+          }
+          50% {
+            top: 90%;
+            opacity: 1;
+          }
+          100% {
+            top: 5%;
+            opacity: 0.8;
+          }
+        }
+        .animate-scan-beam {
+          animation: scanBeam 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+      `}</style>
+
       <div
         className={`p-3.5 border-b flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 ${
           isFullscreen
@@ -228,12 +244,20 @@ export function LiveQrScanner({
       >
         <div className="flex items-center gap-2">
           <div
-            className={`w-2 h-2 rounded-full ${
-              isScanning ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+            className={`w-2.5 h-2.5 rounded-full ${
+              isScanning
+                ? isProcessing
+                  ? "bg-amber-500 animate-pulse"
+                  : "bg-emerald-500 animate-pulse"
+                : "bg-slate-400"
             }`}
           />
-          <span className="text-[11px] font-bold uppercase tracking-wider">
-            {isScanning ? "Kamera Aktif" : "Kamera Siaga"}
+          <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
+            {isScanning
+              ? isProcessing
+                ? "Memvalidasi Tiket..."
+                : "Kamera Aktif • Siap Scan"
+              : "Kamera Siaga"}
           </span>
         </div>
 
@@ -268,7 +292,7 @@ export function LiveQrScanner({
               }`}
               title={isMirrored ? "Matikan Efek Cermin (Un-mirror)" : "Balik Kamera (Mirror)"}
             >
-              <FlipHorizontal className={`w-3.5 h-3.5 ${isMirrored ? "text-sky-600" : ""}`} />
+              <FlipHorizontal className={`w-3.5 h-3.5 ${isMirrored ? "text-sky-500" : ""}`} />
             </button>
           )}
 
@@ -280,12 +304,12 @@ export function LiveQrScanner({
                 ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700"
                 : "bg-white hover:bg-slate-100 text-slate-600 border-slate-200"
             }`}
-            title={muted ? "Nyalakan Audio" : "Bisukan Audio"}
+            title={muted ? "Nyalakan Suara" : "Bisukan Suara"}
           >
             {muted ? (
               <VolumeX className="w-3.5 h-3.5 text-rose-500" />
             ) : (
-              <Volume2 className="w-3.5 h-3.5" />
+              <Volume2 className="w-3.5 h-3.5 text-emerald-600" />
             )}
           </button>
 
@@ -339,26 +363,31 @@ export function LiveQrScanner({
         className={`relative flex items-center justify-center overflow-hidden ${
           isFullscreen
             ? "flex-1 w-full bg-slate-950"
-            : "min-h-[290px] bg-slate-100/70 border-y border-slate-100"
+            : "min-h-[290px] bg-slate-900 border-y border-slate-800"
         }`}
       >
-        <div id={scannerElementId} className="w-full max-w-[480px]" />
+        <div
+          id={scannerElementId}
+          className={`qr-scanner-wrapper w-full max-w-[480px] ${
+            isMirrored ? "is-mirrored" : "not-mirrored"
+          }`}
+        />
 
         {!isScanning && (
           <div
-            className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3 ${
+            className={`absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3.5 ${
               isFullscreen ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-700"
             }`}
           >
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-              <Camera className="w-6 h-6 text-sky-600" />
+            <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center shadow-xs">
+              <QrCode className="w-7 h-7 text-sky-600" />
             </div>
             <div className="space-y-1 max-w-xs">
               <h4 className="text-sm font-bold text-slate-900">
-                {isFullscreen ? "Kamera Belum Aktif" : "Scanner Siaga"}
+                {isFullscreen ? "Kamera Belum Aktif" : "Scanner Kamera Siaga"}
               </h4>
               <p className="text-xs text-slate-500">
-                Nyalakan kamera untuk memindai kode QR tiket tamu secara instan.
+                Nyalakan kamera untuk memindai barcode QR reservasi tamu secara langsung.
               </p>
             </div>
             <button
@@ -375,25 +404,32 @@ export function LiveQrScanner({
         {isScanning && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-4">
             <div
-              className={`border-2 border-sky-500 rounded-2xl relative shadow-md ${
+              className={`border-2 border-sky-400/80 rounded-2xl relative shadow-[0_0_20px_rgba(56,189,248,0.25)] ${
                 isFullscreen
                   ? "w-72 h-72 sm:w-80 sm:h-80"
                   : "w-48 h-48 sm:w-52 sm:h-52 max-w-[70vw] max-h-[70vw]"
               }`}
             >
-              <div className="absolute -top-1 -left-1 w-5 h-5 border-t-3 border-l-3 border-sky-600 rounded-tl-md" />
-              <div className="absolute -top-1 -right-1 w-5 h-5 border-t-3 border-r-3 border-sky-600 rounded-tr-md" />
-              <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-3 border-l-3 border-sky-600 rounded-bl-md" />
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-3 border-r-3 border-sky-600 rounded-br-md" />
+              {/* Corner brackets */}
+              <div className="absolute -top-1.5 -left-1.5 w-6 h-6 border-t-3 border-l-3 border-sky-400 rounded-tl-lg" />
+              <div className="absolute -top-1.5 -right-1.5 w-6 h-6 border-t-3 border-r-3 border-sky-400 rounded-tr-lg" />
+              <div className="absolute -bottom-1.5 -left-1.5 w-6 h-6 border-b-3 border-l-3 border-sky-400 rounded-bl-lg" />
+              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 border-b-3 border-r-3 border-sky-400 rounded-br-lg" />
+
+              {/* Scanning light beam */}
+              <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_8px_#38bdf8] animate-scan-beam" />
             </div>
           </div>
         )}
 
         {isProcessing && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex items-center justify-center z-10">
-            <div className="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-3 shadow-lg">
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center z-20 animate-in fade-in">
+            <div className="bg-white border border-slate-200 py-3.5 px-5 rounded-2xl flex items-center gap-3 shadow-2xl">
               <RefreshCw className="w-5 h-5 text-sky-600 animate-spin" />
-              <span className="text-xs font-bold text-slate-800">Memvalidasi Tiket...</span>
+              <div>
+                <p className="text-xs font-bold text-slate-900">Memvalidasi Tiket...</p>
+                <p className="text-[10px] text-slate-500">Memeriksa status reservasi</p>
+              </div>
             </div>
           </div>
         )}
@@ -406,9 +442,9 @@ export function LiveQrScanner({
             : "bg-slate-50/80 border-slate-200 text-slate-500"
         }`}
       >
-        <span>Posisikan barcode QR di dalam bingkai</span>
+        <span>Arahkan kode QR ke dalam bingkai pemindai</span>
         {lastScannedCode && (
-          <span className="font-mono text-sky-600 font-bold text-[10px] truncate max-w-[200px]">
+          <span className="font-mono text-sky-600 font-bold text-[10px] truncate max-w-[220px]">
             Terakhir: {lastScannedCode}
           </span>
         )}
@@ -417,7 +453,14 @@ export function LiveQrScanner({
       {error && (
         <div className="p-3 bg-rose-50 border-t border-rose-200 text-rose-700 text-xs flex items-center gap-2 shrink-0">
           <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-          <span>{error}</span>
+          <span className="flex-1">{error}</span>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-rose-500 hover:text-rose-800 font-bold px-1 cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
       )}
     </div>

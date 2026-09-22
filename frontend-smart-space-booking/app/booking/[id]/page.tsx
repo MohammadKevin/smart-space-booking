@@ -77,6 +77,20 @@ export default function BookingPage({ params }: BookingPageProps) {
   const [spaceError, setSpaceError] = useState<string | null>(null);
 
   const today = useMemo(() => new Date(), []);
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }, []);
+
+  const [currentHour, setCurrentHour] = useState(() => new Date().getHours());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHour(new Date().getHours());
+    }, 20000);
+    return () => clearInterval(timer);
+  }, []);
+
   const initialDateParam = searchParams.get("tanggal");
   const initialStartParam = searchParams.get("jamMulai");
   const initialDurasiParam = searchParams.get("durasi");
@@ -104,19 +118,37 @@ export default function BookingPage({ params }: BookingPageProps) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       }
     }
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return todayStr;
   });
 
+  const isSelectedDateToday = selectedDate === todayStr;
+  const isSelectedDatePast = selectedDate < todayStr;
+
   const [selectedHours, setSelectedHours] = useState<string[]>(() => {
+    const nowH = new Date().getHours();
+    const isToday = !initialDateParam || initialDateParam === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
     if (initialStartParam && initialDurasiParam) {
       const start = initialStartParam;
       const count = parseInt(initialDurasiParam, 10) || 1;
       const idx = STANDARD_HOURS.indexOf(start);
       if (idx !== -1) {
-        return STANDARD_HOURS.slice(idx, idx + count);
+        const startHNum = parseInt(start.split(":")[0], 10);
+        if (!isToday || startHNum > nowH) {
+          return STANDARD_HOURS.slice(idx, idx + count);
+        }
       }
     }
-    return ["09:00", "10:00"];
+
+    const available = STANDARD_HOURS.filter((h) => {
+      const hNum = parseInt(h.split(":")[0], 10);
+      if (isToday && hNum <= nowH) return false;
+      return true;
+    });
+
+    if (available.length >= 2) return [available[0], available[1]];
+    if (available.length === 1) return [available[0]];
+    return [];
   });
 
   const [bookedSlotList, setBookedSlotList] = useState<string[]>([]);
@@ -214,13 +246,30 @@ export default function BookingPage({ params }: BookingPageProps) {
     }
   };
 
+  const isHourPast = (hour: string) => {
+    if (isSelectedDatePast) return true;
+    if (!isSelectedDateToday) return false;
+    const hNum = parseInt(hour.split(":")[0], 10);
+    return hNum <= currentHour;
+  };
+
   const handleSelectDay = (day: number) => {
     const formatted = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    if (formatted < todayStr) return;
     setSelectedDate(formatted);
+    setSelectedHours((prev) =>
+      prev.filter((h) => {
+        if (formatted === todayStr) {
+          const hNum = parseInt(h.split(":")[0], 10);
+          return hNum > currentHour;
+        }
+        return true;
+      })
+    );
   };
 
   const toggleHour = (hour: string) => {
-    if (bookedSlotList.includes(hour)) return;
+    if (bookedSlotList.includes(hour) || isHourPast(hour)) return;
 
     if (selectedHours.includes(hour)) {
       if (selectedHours.length === 1) return;
@@ -574,6 +623,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
                       {STANDARD_HOURS.map((hour) => {
+                        const isPast = isHourPast(hour);
                         const isBooked = bookedSlotList.includes(hour);
                         const isSelected = selectedHours.includes(hour);
                         const endHourNum = parseInt(hour.split(":")[0], 10) + 1;
@@ -583,11 +633,20 @@ export default function BookingPage({ params }: BookingPageProps) {
                           <button
                             key={hour}
                             type="button"
-                            disabled={isBooked}
+                            disabled={isBooked || isPast}
                             onClick={() => toggleHour(hour)}
+                            title={
+                              isPast
+                                ? "Waktu telah berlalu (Lewat jam saat ini)"
+                                : isBooked
+                                ? "Slot jam ini telah dipesan member lain"
+                                : `Pilih slot ${label}`
+                            }
                             className={`py-2 px-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${
                               isSelected
-                                ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/25"
+                                ? "bg-sky-600 text-white font-bold shadow-sm shadow-sky-600/25 ring-2 ring-sky-600/30"
+                                : isPast
+                                ? "bg-slate-100/80 text-slate-400 line-through border border-slate-200 cursor-not-allowed opacity-60"
                                 : isBooked
                                 ? "bg-slate-50 text-slate-300 line-through border border-dashed border-slate-200 cursor-not-allowed"
                                 : "bg-white text-slate-700 border border-slate-200 hover:border-sky-500 hover:bg-slate-50"
@@ -599,6 +658,21 @@ export default function BookingPage({ params }: BookingPageProps) {
                       })}
                     </div>
                   )}
+
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex-wrap gap-2">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded bg-sky-600" /> Dipilih
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded bg-white border border-slate-300" /> Tersedia
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded bg-slate-100 border border-slate-200" /> Lewat Jam (Off)
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded bg-slate-50 border border-dashed border-slate-300" /> Terisi
+                    </span>
+                  </div>
 
                   <div className="mt-3 p-3.5 rounded-xl bg-sky-50/70 border border-sky-100 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-slate-800 font-semibold">
