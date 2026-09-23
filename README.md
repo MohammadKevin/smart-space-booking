@@ -12,12 +12,12 @@
 
 ---
 
-## 📌 Overview
+## Overview
 A centralized platform for browsing, reserving, and managing coworking spaces, private desks, and meeting rooms with automated scheduling and payment verification.
 
 ---
 
-## ✨ Key Features
+## Key Features
 - Real-time room availability calendar and time-slot reservation
 - Interactive venue photo gallery and amenity filters
 - Automated booking confirmation and status notifications
@@ -26,7 +26,7 @@ A centralized platform for browsing, reserving, and managing coworking spaces, p
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Frontend**: React, Tailwind CSS, Axios, FontAwesome
 - **Backend**: NestJS, Prisma ORM, JWT Authentication
 - **Database**: PostgreSQL / MySQL
@@ -34,7 +34,7 @@ A centralized platform for browsing, reserving, and managing coworking spaces, p
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```text
 smart-space-booking/
 ├── backend-smart-space-booking/   # NestJS REST API
@@ -43,7 +43,7 @@ smart-space-booking/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 Make sure you have the required runtimes and tools installed on your machine:
@@ -62,7 +62,7 @@ cd ../frontend-smart-space-booking && npm install && npm start
 
 ---
 
-## 👤 Author
+## Author
 **Mohammad Kevin Arif Rudianto**
 - **GitHub:** [@MohammadKevin](https://github.com/MohammadKevin)
 - **Portfolio:** [portfolio-mohammadkevin.vercel.app](https://portfolio-mohammadkevin.vercel.app)
@@ -71,9 +71,9 @@ cd ../frontend-smart-space-booking && npm install && npm start
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 <div align="center">
-⭐️ If you found this repository useful, please consider giving it a star!
+If you found this repository useful, please consider giving it a star!
 </div>
