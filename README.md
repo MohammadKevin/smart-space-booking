@@ -18,11 +18,11 @@ A centralized platform for browsing, reserving, and managing coworking spaces, p
 ---
 
 ## ✨ Key Features
-- ⚡ **Real-time room availability calendar and time-slot reservation**: Real-time room availability calendar and time-slot reservation
-- ⚡ **Interactive venue photo gallery and amenity filters**: Interactive venue photo gallery and amenity filters
-- ⚡ **Automated booking confirmation and status notifications**: Automated booking confirmation and status notifications
-- ⚡ **Admin portal for managing spaces, pricing tiers, and occupancy rates**: Admin portal for managing spaces, pricing tiers, and occupancy rates
-- ⚡ **Automated CI/CD deployment pipelines via GitHub Actions**: Automated CI/CD deployment pipelines via GitHub Actions
+- Real-time room availability calendar and time-slot reservation
+- Interactive venue photo gallery and amenity filters
+- Automated booking confirmation and status notifications
+- Admin portal for managing spaces, pricing tiers, and occupancy rates
+- Automated CI/CD deployment pipelines via GitHub Actions
 
 ---
 
